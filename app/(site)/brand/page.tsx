@@ -73,18 +73,18 @@ export default function BrandPage() {
           <SiteHeader />
 
           <div className="flex flex-col flex-1 justify-center py-14 lg:py-20 max-w-[880px]">
-            <div className="font-mono text-[14px] tracking-[0.14em] uppercase text-[#0072C9] mb-8">
+            <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-[#0072C9] mb-8">
               NEAR AI · Brand guidelines V 2.0
             </div>
-            <h1 className="font-medium [font-size:var(--font-size-h1)] leading-[0.98] tracking-[-0.03em] text-[#101010] mb-7">
+            <h1 className="font-medium [font-size:var(--font-size-h1)] leading-[1.05] tracking-tight text-[#101010] mb-7">
               The NEAR AI brand,
               <br />
               on one page.
             </h1>
-            <p className="[font-size:var(--font-size-body)] leading-snug text-[#101010] font-medium max-w-[52ch] mb-4 text-balance">
+            <p className="[font-size:var(--font-size-body)] leading-relaxed text-[#101010] font-medium max-w-[52ch] mb-4 text-balance">
               Confidential, verifiable AI infrastructure for a user-owned AI economy, and the marks, color, and type that carry it.
             </p>
-            <p className="text-[14px] leading-relaxed text-black/55 max-w-[66ch] mb-10 text-balance">
+            <p className="[font-size:var(--font-size-body)] leading-relaxed text-black/55 max-w-[66ch] mb-10 text-balance">
               Everything below is the working essential. The complete system (logo construction, layout ratios, the full palette) is one download away.
             </p>
             <div className="flex flex-wrap gap-3.5 items-center mb-10">
@@ -93,7 +93,7 @@ export default function BrandPage() {
             </div>
             <div className="flex flex-wrap gap-6">
               {SECTION_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/45 hover:text-black transition-colors">
+                <a key={link.href} href={link.href} className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/45 hover:text-black transition-colors">
                   {link.label}
                 </a>
               ))}
@@ -102,13 +102,13 @@ export default function BrandPage() {
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-10 lg:px-10">
+      <div className="mx-auto w-full max-w-[1920px] px-5 sm:px-10 lg:px-20">
 
         {/* ===================== LOGOS ===================== */}
         <section id="logos" className="py-20 border-t border-black/10">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-12">
             <div>
-              <div className="font-mono text-[14px] tracking-[0.14em] uppercase text-[#0072C9] mb-3.5">01 / Logo system</div>
+              <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-[#0072C9] mb-3.5">01 / Logo system</div>
               <h2 className="font-medium [font-size:var(--font-size-h2)] tracking-[-0.02em]">Three lockups, one system.</h2>
             </div>
             <p className="[font-size:var(--font-size-body)] text-black/55 max-w-[36ch] leading-snug">
@@ -118,9 +118,9 @@ export default function BrandPage() {
 
           {/* Primary */}
           <div className="flex flex-wrap items-baseline gap-3.5 mb-4">
-            <span className="font-mono text-[14px] tracking-[0.12em] text-[#0072C9]">01 / PRIMARY</span>
+            <span className="font-mono text-[0.875rem] tracking-[0.3em] text-[#0072C9]">01 / PRIMARY</span>
             <h3 className="font-medium [font-size:var(--font-size-body)] tracking-[-0.01em]">Wordmark: &ldquo;NEAR AI&rdquo;</h3>
-            <span className="text-[14px] text-black/40 w-full sm:w-auto sm:ml-auto">Default. Most horizontal placements. Min width 120px.</span>
+            <span className="[font-size:var(--font-size-body)] text-black/40 w-full sm:w-auto sm:ml-auto">Default. Most horizontal placements. Min width 120px.</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-11">
             {PRIMARY_LOGOS.map((logo) => (
@@ -130,7 +130,7 @@ export default function BrandPage() {
                 pngSrc={`/branding/logos/primary/${logo.file}.png`}
                 alt="NEAR AI"
                 previewBg={logo.bg}
-                imgClassName="h-[26px]"
+                imgClassName="h-[22px] sm:h-[26px] lg:h-[30px]"
                 name={logo.label}
                 description={logo.sub}
               />
@@ -139,9 +139,9 @@ export default function BrandPage() {
 
           {/* Secondary */}
           <div className="flex flex-wrap items-baseline gap-3.5 mb-4">
-            <span className="font-mono text-[14px] tracking-[0.12em] text-[#0072C9]">02 / SECONDARY</span>
+            <span className="font-mono text-[0.875rem] tracking-[0.3em] text-[#0072C9]">02 / SECONDARY</span>
             <h3 className="font-medium [font-size:var(--font-size-body)] tracking-[-0.01em]">Lockup: &ldquo;N + AI&rdquo;</h3>
-            <span className="text-[14px] text-black/40 w-full sm:w-auto sm:ml-auto">Tighter horizontal space. Min width 90px.</span>
+            <span className="[font-size:var(--font-size-body)] text-black/40 w-full sm:w-auto sm:ml-auto">Tighter horizontal space. Min width 90px.</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-11">
             {SECONDARY_LOGOS.map((logo) => (
@@ -151,7 +151,7 @@ export default function BrandPage() {
                 pngSrc={`/branding/logos/secondary/${logo.file}.png`}
                 alt="N AI"
                 previewBg={logo.bg}
-                imgClassName="h-[44px]"
+                imgClassName="h-[36px] sm:h-[42px] lg:h-[49px]"
                 name={logo.label}
                 description={logo.sub}
               />
@@ -160,9 +160,9 @@ export default function BrandPage() {
 
           {/* Tertiary */}
           <div className="flex flex-wrap items-baseline gap-3.5 mb-4">
-            <span className="font-mono text-[14px] tracking-[0.12em] text-[#0072C9]">03 / TERTIARY</span>
+            <span className="font-mono text-[0.875rem] tracking-[0.3em] text-[#0072C9]">03 / TERTIARY</span>
             <h3 className="font-medium [font-size:var(--font-size-body)] tracking-[-0.01em]">Tile: icon</h3>
-            <span className="text-[14px] text-black/40 w-full sm:w-auto sm:ml-auto">Self-contained. Any background. Never add a plate. Min 32px.</span>
+            <span className="[font-size:var(--font-size-body)] text-black/40 w-full sm:w-auto sm:ml-auto">Self-contained. Any background. Never add a plate. Min 32px.</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             {TERTIARY_LOGOS.map((logo) => (
@@ -172,9 +172,10 @@ export default function BrandPage() {
                 pngSrc={`/branding/logos/tertiary/${logo.file}.png`}
                 alt="N tile"
                 previewBg={logo.bg}
-                imgClassName="h-[76px] w-[76px]"
+                imgClassName="h-[64px] w-[64px] sm:h-[76px] sm:w-[76px] lg:h-[87px] lg:w-[87px]"
                 name={logo.label}
                 description={logo.sub}
+                nudgeDown={false}
               />
             ))}
           </div>
@@ -182,22 +183,16 @@ export default function BrandPage() {
           {/* Spec strip */}
           <div className="flex flex-wrap gap-9 p-5 lg:p-6 border border-[#CAC8C8] rounded-2xl bg-white">
             <div className="flex flex-col gap-1">
-              <span className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40">Clear space</span>
-              <span className="text-[16px] font-medium">22% of logo height, all sides</span>
+              <span className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40">Clear space</span>
+              <span className="[font-size:var(--font-size-body)] font-medium">22% of logo height, all sides</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40">Min width</span>
-              <span className="text-[16px] font-medium">wordmark 120 · lockup 90 · tile 32px</span>
+              <span className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40">Min width</span>
+              <span className="[font-size:var(--font-size-body)] font-medium">wordmark 120 · lockup 90 · tile 32px</span>
             </div>
             <div className="flex flex-col gap-1.5 ml-auto items-start">
-              <span className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40">All assets</span>
-              <a
-                href={LOGO_KIT_ZIP}
-                download
-                className="inline-flex items-center gap-2 font-mono text-[14px] tracking-[0.06em] uppercase text-white bg-[#0072C9] border border-[#0072C9] rounded-lg px-4 py-2 whitespace-nowrap hover:bg-[#0091FD] hover:border-[#0091FD] transition-colors"
-              >
-                Download all logos <span className="text-[14px]">↓</span>
-              </a>
+              <span className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40">All assets</span>
+              <BrandPillLink href={LOGO_KIT_ZIP} download label="Download all logos" variant="solid" />
             </div>
           </div>
         </section>
@@ -206,7 +201,7 @@ export default function BrandPage() {
         <section id="color" className="py-20 border-t border-black/10">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-11">
             <div>
-              <div className="font-mono text-[14px] tracking-[0.14em] uppercase text-[#0072C9] mb-3.5">02 / Color</div>
+              <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-[#0072C9] mb-3.5">02 / Color</div>
               <h2 className="font-medium [font-size:var(--font-size-h2)] tracking-[-0.02em]">A neutral base. One decisive blue.</h2>
             </div>
             <p className="[font-size:var(--font-size-body)] text-black/55 max-w-[34ch] leading-snug">
@@ -214,28 +209,28 @@ export default function BrandPage() {
             </p>
           </div>
 
-          <div className="font-mono text-[14px] tracking-[0.12em] uppercase text-black/40 mb-3.5">Primary</div>
+          <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-3.5">Primary</div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-9">
             {PRIMARY_COLORS.map((c) => (
               <CopyableSwatch key={c.hex} value={c.hex} label={c.name} hexLabel={c.hex} sublabel={c.note} height="110px" />
             ))}
           </div>
 
-          <div className="font-mono text-[14px] tracking-[0.12em] uppercase text-black/40 mb-3.5">Secondary</div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-9">
+          <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-3.5">Secondary</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-9">
             {SECONDARY_COLORS.map((c) => (
               <CopyableSwatch key={c.hex} value={c.hex} label={c.name} hexLabel={c.hex} height="92px" />
             ))}
           </div>
 
-          <div className="font-mono text-[14px] tracking-[0.12em] uppercase text-black/40 mb-3.5">Greyscale ramp</div>
+          <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-3.5">Greyscale ramp</div>
           <div className="grid grid-cols-2 lg:grid-cols-8 gap-2.5 mb-9">
             {GREYSCALE.map((hex) => (
               <CopyableSwatch key={hex} value={hex} label="" hexLabel={hex} height="64px" />
             ))}
           </div>
 
-          <div className="font-mono text-[14px] tracking-[0.12em] uppercase text-black/40 mb-3.5">
+          <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-3.5">
             Gradients <span className="normal-case tracking-normal">· emphasis only</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -249,7 +244,7 @@ export default function BrandPage() {
         <section id="type" className="py-20 border-t border-black/10">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-11">
             <div>
-              <div className="font-mono text-[14px] tracking-[0.14em] uppercase text-[#0072C9] mb-3.5">03 / Typography</div>
+              <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-[#0072C9] mb-3.5">03 / Typography</div>
               <h2 className="font-medium [font-size:var(--font-size-h2)] tracking-[-0.02em]">One family. Hierarchy by weight.</h2>
             </div>
             <p className="[font-size:var(--font-size-body)] text-black/55 max-w-[34ch] leading-snug">
@@ -258,51 +253,51 @@ export default function BrandPage() {
           </div>
 
           {/* Primary specimen */}
-          <div className="border border-[#CAC8C8] rounded-2xl overflow-hidden bg-white mb-4 grid grid-cols-1 md:grid-cols-[minmax(220px,320px)_1fr]">
+          <div className="border border-[#CAC8C8] rounded-2xl overflow-hidden bg-white mb-4 grid grid-cols-1 md:grid-cols-[minmax(220px,350px)_1fr]">
             <div className="p-9 md:border-r border-black/10 flex flex-col justify-between gap-6">
-              <div className="font-medium text-[96px] sm:text-[150px] leading-[0.9] tracking-[-0.03em]">Aa</div>
+              <div className="font-medium text-[6rem] sm:text-[9.375rem] leading-[0.9] tracking-[-0.03em]">Aa</div>
               <div>
-                <div className="font-medium text-[1.35rem] tracking-[-0.01em]">PP Neue Montreal</div>
-                <div className="text-[14px] text-black/45 mt-1">Primary typeface · all text</div>
+                <div className="font-medium text-[1.5rem] tracking-[-0.01em]">PP Neue Montreal</div>
+                <div className="text-[0.875rem] text-black/45 mt-1">Primary typeface · all text</div>
               </div>
             </div>
             <div className="p-9 flex flex-col gap-6">
               <div>
-                <div className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40 mb-2">Regular · 400 · workhorse</div>
-                <div className="font-normal text-[1.5rem] tracking-[-0.01em]">Confidential, verifiable AI infrastructure.</div>
+                <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-2">Regular · 400 · workhorse</div>
+                <div className="font-normal text-[1.125rem] tracking-[-0.01em]">Confidential, verifiable AI infrastructure.</div>
               </div>
               <div>
-                <div className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40 mb-2">Medium · 500 · headings &amp; emphasis</div>
-                <div className="font-medium text-[1.5rem] tracking-[-0.01em]">A user-owned AI economy.</div>
+                <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-2">Medium · 500 · headings &amp; emphasis</div>
+                <div className="font-medium text-[1.125rem] tracking-[-0.01em]">A user-owned AI economy.</div>
               </div>
               <div>
-                <div className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40 mb-2">Bold · 700 · short headings only</div>
-                <div className="font-bold text-[1.5rem] tracking-[-0.01em]">Nothing leaks out.</div>
+                <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-2">Bold · 700 · short headings only</div>
+                <div className="font-bold text-[1.125rem] tracking-[-0.01em]">Nothing leaks out.</div>
               </div>
             </div>
           </div>
 
           {/* Mono */}
-          <div className="border border-[#CAC8C8] rounded-2xl overflow-hidden bg-white grid grid-cols-1 md:grid-cols-[minmax(220px,320px)_1fr]">
+          <div className="border border-[#CAC8C8] rounded-2xl overflow-hidden bg-white grid grid-cols-1 md:grid-cols-[minmax(220px,350px)_1fr]">
             <div className="p-9 md:border-r border-black/10 flex flex-col justify-between gap-6">
-              <div className="font-mono font-normal text-[96px] sm:text-[150px] leading-[0.9] tracking-[-0.03em]">Aa</div>
+              <div className="font-mono font-normal text-[6rem] sm:text-[9.375rem] leading-[0.9] tracking-[-0.03em]">Aa</div>
               <div>
-                <div className="font-medium text-[1.35rem] tracking-[-0.01em]">PP Neue Montreal Mono</div>
-                <div className="text-[14px] text-black/45 mt-1">Light 300 · Regular 400 · technical text</div>
+                <div className="font-medium text-[1.5rem] tracking-[-0.01em]">PP Neue Montreal Mono</div>
+                <div className="text-[0.875rem] text-black/45 mt-1">Light 300 · Regular 400 · technical text</div>
               </div>
             </div>
             <div className="p-9 flex flex-col gap-6">
               <div>
-                <div className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40 mb-2">Numerals &amp; glyphs</div>
-                <div className="font-mono text-[1.6rem] tracking-[-0.01em]">0123456789 &amp; #01</div>
+                <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-2">Numerals &amp; glyphs</div>
+                <div className="font-mono text-[1.125rem] tracking-[-0.01em]">0123456789 &amp; #01</div>
               </div>
               <div>
-                <div className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40 mb-2">Eyebrows &amp; labels · uppercase</div>
-                <div className="font-mono text-[14px] tracking-[0.14em] uppercase text-black/55">&gt;&gt; Client key pair · attestation · how it works</div>
+                <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-2">Eyebrows &amp; labels · uppercase</div>
+                <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/55">&gt;&gt; Client key pair · attestation · how it works</div>
               </div>
               <div>
-                <div className="font-mono text-[14px] tracking-[0.1em] uppercase text-black/40 mb-2">Regular · 400 · minor secondary text</div>
-                <div className="font-mono font-normal text-[16px] leading-relaxed text-black/55 max-w-[62ch]">
+                <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-black/40 mb-2">Regular · 400 · minor secondary text</div>
+                <div className="font-mono font-normal text-[1.125rem] leading-relaxed text-black/55 max-w-[62ch]">
                   Used for blocks of minor secondary text: captions, metadata, and short technical notes set in regular weight for quiet, legible detail.
                 </div>
               </div>
@@ -312,7 +307,7 @@ export default function BrandPage() {
 
         {/* ===================== ABOUT ===================== */}
         <section id="about" className="py-20 pb-24 border-t border-black/10">
-          <div className="font-mono text-[14px] tracking-[0.14em] uppercase text-[#0072C9] mb-5">04 / About NEAR AI</div>
+          <div className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-[#0072C9] mb-5">04 / About NEAR AI</div>
           <p className="font-medium [font-size:var(--font-size-h2)] leading-[1.12] tracking-[-0.02em] max-w-[880px] text-pretty mb-12">
             Confidential, verifiable AI infrastructure for a <span className="text-[#0072C9]">user-owned AI economy.</span>
           </p>
@@ -329,19 +324,19 @@ export default function BrandPage() {
           </p>
 
           {/* Download CTA */}
-          <div className="mt-16 rounded-[20px] overflow-hidden relative bg-gradient-to-br from-black to-[#2385C7]">
+          <div className="mt-16 rounded-[2rem] overflow-hidden relative bg-gradient-to-br from-black to-[#2385C7]">
             <div className="relative p-10 lg:p-12 flex flex-wrap items-center justify-between gap-8">
               <div>
                 <h3 className="font-medium [font-size:var(--font-size-h3)] tracking-[-0.02em] text-white mb-3">
                   Download the complete logo kit.
                 </h3>
-                <p className="text-[1rem] text-white/70 max-w-[44ch]">
+                <p className="[font-size:var(--font-size-body)] text-white/70 max-w-[44ch]">
                   Every lockup, every color variant, in SVG and PNG — packaged as a single download.
                 </p>
               </div>
               <div className="flex flex-col gap-3.5 items-start">
                 <BrandPillLink href={LOGO_KIT_ZIP} download label="Download logo kit" variant="light" />
-                <span className="font-mono text-[14px] tracking-[0.08em] uppercase text-white/55">SVG + PNG</span>
+                <span className="font-mono text-[0.875rem] tracking-[0.3em] uppercase text-white/55">SVG + PNG</span>
               </div>
             </div>
           </div>

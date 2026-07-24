@@ -29,7 +29,7 @@ export default function BrandPillLink({ label, badge, variant = "light", classNa
         <Plus className="w-4 h-4" />
       </div>
       {label}
-      {badge && <span className="font-mono text-[14px] tracking-[0.06em] opacity-70">{badge}</span>}
+      {badge && <span className="font-mono text-[0.875rem] tracking-[0.06em] opacity-70">{badge}</span>}
     </a>
   );
 }
