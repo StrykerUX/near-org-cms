@@ -37,7 +37,6 @@ const NAV_COLS = [
     hidden: false,
     links: [
       { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "NEAR AI Cloud Terms of Service", href: "/near-ai-cloud-terms-of-service" },
       { label: "NEAR AI Terms of Service", href: "/terms-of-service" },
       { label: "Acceptable Use Policy", href: "/acceptable-use-policy" },
       { label: "Cookie Policy", href: "/cookie-policy" },
