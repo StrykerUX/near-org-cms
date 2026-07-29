@@ -20,9 +20,21 @@ function DialogTrigger({
 }
 
 function DialogPortal({
+  container,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  // Radix portals mount into document.body by default, which escapes the
+  // `.admin-wrapper` div that actually carries the `dark` class — falling
+  // back to light-mode CSS variables. Mount inside it instead when present.
+  const adminWrapper =
+    typeof document !== "undefined" ? document.querySelector<HTMLElement>(".admin-wrapper") : null;
+  return (
+    <DialogPrimitive.Portal
+      data-slot="dialog-portal"
+      container={container ?? adminWrapper ?? undefined}
+      {...props}
+    />
+  )
 }
 
 function DialogClose({

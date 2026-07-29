@@ -10,6 +10,7 @@ import {
   Image,
   FolderDown,
   Megaphone,
+  Link2,
   Tag,
   Users,
   Settings,
@@ -138,6 +139,7 @@ export function AdminSidebar({ children, role, userName }: AdminSidebarProps) {
           {navLink("/admin/media",      "Media Library",     <Image           className={iconSize} />, true, "media")}
           {navLink("/admin/downloads",  "Downloads",         <FolderDown      className={iconSize} />, true, "downloads")}
           {navLink("/admin/banners",    "Banners",           <Megaphone       className={iconSize} />, true, "banners")}
+          {navLink("/admin/linktrees",  "Linktrees",         <Link2           className={iconSize} />, false, "linktrees")}
           {navLink("/admin/categories", "Categories & Tags", <Tag             className={iconSize} />, true, "categories")}
           {role === "ADMIN" && (
             <>

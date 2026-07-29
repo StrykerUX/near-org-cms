@@ -58,7 +58,10 @@ export async function POST(req: Request) {
       Key: key,
       Body: buffer,
       ContentType: config.mimeType,
-      ContentDisposition: contentDispositionHeader(file.name),
+      ContentDisposition: contentDispositionHeader(
+        file.name,
+        config.mimeType.startsWith("image/") ? "inline" : "attachment"
+      ),
       CacheControl: CACHE_CONTROL,
     })
   );

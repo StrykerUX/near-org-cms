@@ -141,6 +141,21 @@
   color: var(--color-muted);
 }
 
+/* Linktree public page — optional glass-card link buttons (tint driven by per-instance CSS vars) */
+.linktree-glass {
+  background: var(--lt-glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--lt-glass-border);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.linktree-glass:hover {
+  background: var(--lt-glass-bg-hover);
+  border-color: var(--lt-glass-accent);
+  box-shadow: 0 8px 24px var(--lt-glass-shadow);
+  transform: translateY(-1px);
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
