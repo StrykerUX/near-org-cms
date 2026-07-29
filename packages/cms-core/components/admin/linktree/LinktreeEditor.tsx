@@ -18,8 +18,19 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus, Trash2, Link2 } from "lucide-react";
-import { LINKTREE_ICONS } from "@cms/lib/linktree-icons";
+import { LINKTREE_ICONS, resolveLinktreeIcon } from "@cms/lib/linktree-icons";
 import LinkUtmQrModal from "./LinkUtmQrModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@cms/components/ui/alert-dialog";
 
 export interface LinktreeLinkState {
   id?: string;
@@ -316,9 +327,25 @@ function SortableSection({
           />
           Active
         </label>
-        <button type="button" onClick={onRemove} className="text-muted-foreground hover:text-destructive transition" title="Delete section">
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button type="button" className="text-muted-foreground hover:text-destructive transition" title="Delete section">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete &ldquo;{section.title || "this section"}&rdquo;?</AlertDialogTitle>
+              <AlertDialogDescription>
+                The section will be removed. Its links won&apos;t be deleted — they&apos;ll move to &ldquo;Ungrouped links&rdquo;.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={onRemove}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       <div className="p-3">{children}</div>
     </div>
@@ -395,6 +422,7 @@ function SortableLinkRow({
     id: link._key,
   });
   const [expanded, setExpanded] = useState(false);
+  const SelectedIcon = resolveLinktreeIcon(link.icon);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -408,19 +436,22 @@ function SortableLinkRow({
         <button type="button" {...attributes} {...listeners} className="text-muted-foreground/50 hover:text-muted-foreground cursor-grab shrink-0">
           <GripVertical className="w-4 h-4" />
         </button>
-        <select
-          value={link.icon ?? ""}
-          onChange={(e) => onUpdate({ icon: e.target.value || null })}
-          className="text-xs border border-border/70 rounded px-1 py-1 bg-muted/30 w-8"
-          title="Icon"
-        >
-          <option value="">—</option>
-          {LINKTREE_ICONS.map((icon) => (
-            <option key={icon.key} value={icon.key}>
-              {icon.label}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <SelectedIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+          <select
+            value={link.icon ?? ""}
+            onChange={(e) => onUpdate({ icon: e.target.value || null })}
+            className="text-xs border border-border/70 rounded px-2 py-1 bg-muted/30 w-36"
+            title="Icon"
+          >
+            <option value="">No icon</option>
+            {LINKTREE_ICONS.map((icon) => (
+              <option key={icon.key} value={icon.key}>
+                {icon.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <input
           type="text"
           value={link.title}
@@ -442,9 +473,23 @@ function SortableLinkRow({
         >
           {expanded ? "Less" : "More"}
         </button>
-        <button type="button" onClick={onRemove} className="text-muted-foreground hover:text-destructive transition shrink-0" title="Remove link">
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button type="button" className="text-muted-foreground hover:text-destructive transition shrink-0" title="Remove link">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete &ldquo;{link.title || "this link"}&rdquo;?</AlertDialogTitle>
+              <AlertDialogDescription>This can&apos;t be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={onRemove}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       {expanded && (
         <div className="px-2 pb-2 pt-1 border-t border-border/50 flex flex-wrap items-center gap-4 text-xs">

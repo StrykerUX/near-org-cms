@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import MediaPickerModal from "@cms/components/admin/MediaPickerModal";
 import LinktreeEditor, { type LinktreeSectionState, type LinktreeLinkState } from "@cms/components/admin/linktree/LinktreeEditor";
 import LinktreePublicView from "@cms/components/linktree/LinktreePublicView";
+import IPhonePreviewFrame from "@cms/components/linktree/IPhonePreviewFrame";
+import LinktreeAnalyticsClient from "@cms/components/admin/linktree/LinktreeAnalyticsClient";
 import { Button } from "@cms/components/ui/button";
 import { Input } from "@cms/components/ui/input";
 import { Label } from "@cms/components/ui/label";
@@ -96,6 +98,77 @@ function ColorPickerField({
   );
 }
 
+function TextStyleToggle({
+  label,
+  bold,
+  italic,
+  onBoldChange,
+  onItalicChange,
+}: {
+  label: string;
+  bold: boolean;
+  italic: boolean;
+  onBoldChange: (v: boolean) => void;
+  onItalicChange: (v: boolean) => void;
+}) {
+  const chipClass = (active: boolean) =>
+    `w-7 h-7 rounded border text-xs transition ${
+      active
+        ? "bg-primary text-primary-foreground border-primary"
+        : "border-border/70 text-muted-foreground hover:text-foreground"
+    }`;
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <div className="flex gap-1.5">
+        <button type="button" onClick={() => onBoldChange(!bold)} className={`${chipClass(bold)} font-bold`} title="Bold">
+          B
+        </button>
+        <button type="button" onClick={() => onItalicChange(!italic)} className={`${chipClass(italic)} italic`} title="Italic">
+          I
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SizeToggle({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: "SM" | "MD" | "LG";
+  onChange: (v: "SM" | "MD" | "LG") => void;
+}) {
+  const sizes: { key: "SM" | "MD" | "LG"; label: string }[] = [
+    { key: "SM", label: "S" },
+    { key: "MD", label: "M" },
+    { key: "LG", label: "B" },
+  ];
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <div className="flex gap-1.5">
+        {sizes.map((size) => (
+          <button
+            key={size.key}
+            type="button"
+            onClick={() => onChange(size.key)}
+            className={`w-7 h-7 rounded border text-xs font-medium transition ${
+              value === size.key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-border/70 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {size.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export interface EditLinktreeInitialData {
   id: string;
   name: string;
@@ -110,7 +183,14 @@ export interface EditLinktreeInitialData {
   buttonTextColor: string;
   overlayColor: string;
   overlayOpacity: number;
+  overlayColor2: string;
+  overlayOpacity2: number;
   glassEffect: boolean;
+  sectionTitleBold: boolean;
+  sectionTitleItalic: boolean;
+  buttonTextBold: boolean;
+  buttonTextItalic: boolean;
+  titleFontSize: "SM" | "MD" | "LG";
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   sections: LinktreeSectionState[];
   ungroupedLinks: LinktreeLinkState[];
@@ -121,7 +201,8 @@ export default function EditLinktreeClient({ initial }: { initial: EditLinktreeI
   const markDirty = () => setIsDirty(true);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "design" | "settings" | "preview">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "design" | "settings">("profile");
+  const [mainTab, setMainTab] = useState<"editor" | "preview" | "analytics">("editor");
 
   const [name, setName] = useState(initial.name);
   const [slug, setSlug] = useState(initial.slug);
@@ -138,7 +219,14 @@ export default function EditLinktreeClient({ initial }: { initial: EditLinktreeI
   const [buttonTextColor, setButtonTextColor] = useState(initial.buttonTextColor);
   const [overlayColor, setOverlayColor] = useState(initial.overlayColor);
   const [overlayOpacity, setOverlayOpacity] = useState(initial.overlayOpacity);
+  const [overlayColor2, setOverlayColor2] = useState(initial.overlayColor2);
+  const [overlayOpacity2, setOverlayOpacity2] = useState(initial.overlayOpacity2);
   const [glassEffect, setGlassEffect] = useState(initial.glassEffect);
+  const [sectionTitleBold, setSectionTitleBold] = useState(initial.sectionTitleBold);
+  const [sectionTitleItalic, setSectionTitleItalic] = useState(initial.sectionTitleItalic);
+  const [buttonTextBold, setButtonTextBold] = useState(initial.buttonTextBold);
+  const [buttonTextItalic, setButtonTextItalic] = useState(initial.buttonTextItalic);
+  const [titleFontSize, setTitleFontSize] = useState<"SM" | "MD" | "LG">(initial.titleFontSize);
 
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED" | "ARCHIVED">(initial.status);
 
@@ -168,7 +256,14 @@ export default function EditLinktreeClient({ initial }: { initial: EditLinktreeI
           buttonTextColor,
           overlayColor,
           overlayOpacity,
+          overlayColor2,
+          overlayOpacity2,
           glassEffect,
+          sectionTitleBold,
+          sectionTitleItalic,
+          buttonTextBold,
+          buttonTextItalic,
+          titleFontSize,
           status: finalStatus,
           sections: serializeSections(sections),
           ungroupedLinks: ungroupedLinks.map((link, i) => serializeLink(link, i)),
@@ -251,51 +346,62 @@ export default function EditLinktreeClient({ initial }: { initial: EditLinktreeI
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto bg-background">
-          <div className="p-6 space-y-6 max-w-2xl mx-auto w-full">
-            <Input
-              value={name}
-              onChange={(e) => { markDirty(); setName(e.target.value); }}
-              placeholder="Linktree name (internal)"
-              className="text-3xl font-bold h-auto border-none px-0 shadow-none focus-visible:ring-0 bg-transparent"
-            />
-            <div className="text-sm text-muted-foreground font-mono">near.ai/{displaySlug || "…"}</div>
-
-            <LinktreeEditor
-              linktreeId={initial.id}
-              sections={sections}
-              ungroupedLinks={ungroupedLinks}
-              onChange={(nextSections, nextUngrouped) => {
-                markDirty();
-                setSections(nextSections);
-                setUngroupedLinks(nextUngrouped);
-              }}
-            />
-          </div>
-        </div>
-
-        <aside className="w-[380px] shrink-0 border-l border-border bg-card flex flex-col sticky top-[53px] h-[calc(100vh-53px)]">
-          <div className="flex border-b border-border shrink-0">
-            {(["profile", "design", "settings", "preview"] as const).map((tab) => (
+        {/* LEFT — Editor / Preview / Analytics */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-background">
+          <div className="flex items-center gap-6 border-b border-border px-6 shrink-0">
+            {(["editor", "preview", "analytics"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wide transition border-b-2 -mb-px ${
-                  activeTab === tab
+                onClick={() => setMainTab(tab)}
+                className={`py-3 text-sm font-medium border-b-2 -mb-px transition ${
+                  mainTab === tab
                     ? "text-foreground border-primary"
                     : "text-muted-foreground border-transparent hover:text-foreground"
                 }`}
               >
-                {tab === "profile" ? "Profile" : tab === "design" ? "Design" : tab === "settings" ? "Settings" : "Preview"}
+                {tab === "editor" ? "Editor" : tab === "preview" ? "Preview" : "Analytics"}
               </button>
             ))}
           </div>
 
-          <div className={`overflow-y-auto flex-1 ${activeTab === "preview" ? "flex flex-col items-center p-6" : "space-y-6 p-6"}`}>
-            {activeTab === "preview" && (
-              <div className="w-[300px] h-[600px] rounded-[2rem] border border-border shadow-xl overflow-hidden shrink-0">
-                <div className="h-full overflow-y-auto">
+          <div className="flex-1 overflow-auto">
+            {mainTab === "editor" && (
+              <div className="p-6 space-y-6 max-w-5xl mx-auto w-full">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => { markDirty(); setName(e.target.value); }}
+                  placeholder="Linktree name (internal)"
+                  className="w-full text-3xl font-bold bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/50"
+                />
+                <div className="flex items-center text-sm font-mono text-muted-foreground">
+                  <span>near.ai/</span>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={(e) => { markDirty(); setSlug(e.target.value.toLowerCase()); }}
+                    placeholder={titleToSlug(name)}
+                    className="flex-1 min-w-0 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/50 focus:underline"
+                  />
+                </div>
+
+                <LinktreeEditor
+                  linktreeId={initial.id}
+                  sections={sections}
+                  ungroupedLinks={ungroupedLinks}
+                  onChange={(nextSections, nextUngrouped) => {
+                    markDirty();
+                    setSections(nextSections);
+                    setUngroupedLinks(nextUngrouped);
+                  }}
+                />
+              </div>
+            )}
+
+            {mainTab === "preview" && (
+              <div className="flex items-center justify-center p-10 min-h-full">
+                <IPhonePreviewFrame>
                   <LinktreePublicView
                     displayName={displayName}
                     bio={bio}
@@ -307,14 +413,49 @@ export default function EditLinktreeClient({ initial }: { initial: EditLinktreeI
                     buttonTextColor={buttonTextColor}
                     overlayColor={overlayColor}
                     overlayOpacity={overlayOpacity}
+                    overlayColor2={overlayColor2}
+                    overlayOpacity2={overlayOpacity2}
                     glassEffect={glassEffect}
+                    sectionTitleBold={sectionTitleBold}
+                    sectionTitleItalic={sectionTitleItalic}
+                    buttonTextBold={buttonTextBold}
+                    buttonTextItalic={buttonTextItalic}
+                    titleFontSize={titleFontSize}
                     sections={sections}
                     ungroupedLinks={ungroupedLinks}
                     preview
                   />
-                </div>
+                </IPhonePreviewFrame>
               </div>
             )}
+
+            {mainTab === "analytics" && (
+              <div className="p-6">
+                <LinktreeAnalyticsClient linktreeId={initial.id} linktreeName={name} embedded />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <aside className="w-[380px] shrink-0 border-l border-border bg-card flex flex-col sticky top-[53px] h-[calc(100vh-53px)]">
+          <div className="flex border-b border-border shrink-0">
+            {(["profile", "design", "settings"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wide transition border-b-2 -mb-px ${
+                  activeTab === tab
+                    ? "text-foreground border-primary"
+                    : "text-muted-foreground border-transparent hover:text-foreground"
+                }`}
+              >
+                {tab === "profile" ? "Profile" : tab === "design" ? "Design" : "Settings"}
+              </button>
+            ))}
+          </div>
+
+          <div className="overflow-y-auto flex-1 p-6 space-y-6">
             {activeTab === "profile" && (
               <>
                 <div className="space-y-2">
@@ -376,12 +517,108 @@ export default function EditLinktreeClient({ initial }: { initial: EditLinktreeI
 
             {activeTab === "design" && (
               <>
+                {/* Background: base color, image, and the overlay gradient rendered on top of it */}
                 <div className="space-y-3">
-                  <Label className="text-xs font-semibold uppercase tracking-wide">Colors</Label>
-                  <ColorPickerField label="Background" value={bgColor} defaultValue="#0A0A0A" onChange={(v) => { setBgColor(v); markDirty(); }} />
-                  <ColorPickerField label="Text" value={textColor} defaultValue="#FFFFFF" onChange={(v) => { setTextColor(v); markDirty(); }} />
+                  <Label className="text-xs font-semibold uppercase tracking-wide">Background</Label>
+                  <ColorPickerField label="Background Color" value={bgColor} defaultValue="#0A0A0A" onChange={(v) => { setBgColor(v); markDirty(); }} />
+                  <div className="space-y-1">
+                    <span className="text-xs text-muted-foreground">Background Image</span>
+                    {bgImage ? (
+                      <div className="relative">
+                        <img src={bgImage} alt="Background" className="w-full h-20 rounded-lg object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => { setBgImage(""); markDirty(); }}
+                          className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white rounded p-0.5 transition"
+                          title="Remove image"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsBgImagePickerOpen(true)}
+                        className="w-full border-2 border-dashed border-border rounded-lg py-3 flex items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-foreground transition text-xs"
+                      >
+                        <ImageIcon size={14} />
+                        Pick background image
+                      </button>
+                    )}
+                    <MediaPickerModal
+                      open={isBgImagePickerOpen}
+                      onClose={() => setIsBgImagePickerOpen(false)}
+                      onSelect={(urlOrUrls) => {
+                        const url = Array.isArray(urlOrUrls) ? urlOrUrls[0] : urlOrUrls;
+                        setBgImage(url);
+                        markDirty();
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2 pt-1">
+                    <span className="text-xs text-muted-foreground">Overlay gradient (rendered on top of the background)</span>
+                    <ColorPickerField label="Overlay Color 1" value={overlayColor} defaultValue="#000000" onChange={(v) => { setOverlayColor(v); markDirty(); }} />
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Overlay Opacity 1</span>
+                        <span className="text-xs font-mono text-muted-foreground">{overlayOpacity}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={overlayOpacity}
+                        onChange={(e) => { setOverlayOpacity(Number(e.target.value)); markDirty(); }}
+                        className="w-full accent-primary"
+                      />
+                    </div>
+                    <ColorPickerField label="Overlay Color 2" value={overlayColor2} defaultValue="#000000" onChange={(v) => { setOverlayColor2(v); markDirty(); }} />
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Overlay Opacity 2</span>
+                        <span className="text-xs font-mono text-muted-foreground">{overlayOpacity2}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={overlayOpacity2}
+                        onChange={(e) => { setOverlayOpacity2(Number(e.target.value)); markDirty(); }}
+                        className="w-full accent-primary"
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">Gradient from Color 1 (top) to Color 2 (bottom)</p>
+                  </div>
+                </div>
+
+                {/* Typography: title size, general text color, section labels */}
+                <div className="space-y-3 border-t border-border pt-6">
+                  <Label className="text-xs font-semibold uppercase tracking-wide">Typography</Label>
+                  <SizeToggle label="Title Size" value={titleFontSize} onChange={(v) => { setTitleFontSize(v); markDirty(); }} />
+                  <ColorPickerField label="Text Color" value={textColor} defaultValue="#FFFFFF" onChange={(v) => { setTextColor(v); markDirty(); }} />
+                  <TextStyleToggle
+                    label="Section Title Style"
+                    bold={sectionTitleBold}
+                    italic={sectionTitleItalic}
+                    onBoldChange={(v) => { setSectionTitleBold(v); markDirty(); }}
+                    onItalicChange={(v) => { setSectionTitleItalic(v); markDirty(); }}
+                  />
+                </div>
+
+                {/* Buttons: fill, text, style, and the optional glass treatment */}
+                <div className="space-y-3 border-t border-border pt-6">
+                  <Label className="text-xs font-semibold uppercase tracking-wide">Buttons</Label>
                   <ColorPickerField label="Button Background" value={buttonBgColor} defaultValue="#FFFFFF" onChange={(v) => { setButtonBgColor(v); markDirty(); }} />
                   <ColorPickerField label="Button Text" value={buttonTextColor} defaultValue="#0A0A0A" onChange={(v) => { setButtonTextColor(v); markDirty(); }} />
+                  <TextStyleToggle
+                    label="Button Text Style"
+                    bold={buttonTextBold}
+                    italic={buttonTextItalic}
+                    onBoldChange={(v) => { setButtonTextBold(v); markDirty(); }}
+                    onItalicChange={(v) => { setButtonTextItalic(v); markDirty(); }}
+                  />
                   <div className="flex items-center justify-between pt-1">
                     <div>
                       <span className="text-xs text-foreground">Glass effect</span>
@@ -389,56 +626,6 @@ export default function EditLinktreeClient({ initial }: { initial: EditLinktreeI
                     </div>
                     <Switch checked={glassEffect} onCheckedChange={(v) => { setGlassEffect(v); markDirty(); }} />
                   </div>
-                  <ColorPickerField label="Overlay" value={overlayColor} defaultValue="#000000" onChange={(v) => { setOverlayColor(v); markDirty(); }} />
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Overlay Opacity</span>
-                      <span className="text-xs font-mono text-muted-foreground">{overlayOpacity}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={overlayOpacity}
-                      onChange={(e) => { setOverlayOpacity(Number(e.target.value)); markDirty(); }}
-                      className="w-full accent-primary"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Background Image</span>
-                  {bgImage ? (
-                    <div className="relative">
-                      <img src={bgImage} alt="Background" className="w-full h-20 rounded-lg object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => { setBgImage(""); markDirty(); }}
-                        className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white rounded p-0.5 transition"
-                        title="Remove image"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setIsBgImagePickerOpen(true)}
-                      className="w-full border-2 border-dashed border-border rounded-lg py-3 flex items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-foreground transition text-xs"
-                    >
-                      <ImageIcon size={14} />
-                      Pick background image
-                    </button>
-                  )}
-                  <MediaPickerModal
-                    open={isBgImagePickerOpen}
-                    onClose={() => setIsBgImagePickerOpen(false)}
-                    onSelect={(urlOrUrls) => {
-                      const url = Array.isArray(urlOrUrls) ? urlOrUrls[0] : urlOrUrls;
-                      setBgImage(url);
-                      markDirty();
-                    }}
-                  />
                 </div>
               </>
             )}

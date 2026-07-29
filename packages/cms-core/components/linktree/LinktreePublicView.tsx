@@ -40,7 +40,14 @@ export interface LinktreePublicViewProps {
   buttonTextColor?: string | null;
   overlayColor?: string | null;
   overlayOpacity?: number | null;
+  overlayColor2?: string | null;
+  overlayOpacity2?: number | null;
   glassEffect?: boolean | null;
+  sectionTitleBold?: boolean | null;
+  sectionTitleItalic?: boolean | null;
+  buttonTextBold?: boolean | null;
+  buttonTextItalic?: boolean | null;
+  titleFontSize?: "SM" | "MD" | "LG" | null;
   sections: LinktreeSectionData[];
   ungroupedLinks: LinktreeLinkData[];
   /** When true, links render as inert previews instead of navigating away (admin live preview). */
@@ -52,6 +59,8 @@ function LinkButton({
   buttonBgColor,
   buttonTextColor,
   glassEffect = false,
+  buttonTextBold = false,
+  buttonTextItalic = false,
   compact = false,
   showLabel = true,
   preview = false,
@@ -60,6 +69,8 @@ function LinkButton({
   buttonBgColor?: string | null;
   buttonTextColor?: string | null;
   glassEffect?: boolean | null;
+  buttonTextBold?: boolean | null;
+  buttonTextItalic?: boolean | null;
   compact?: boolean;
   showLabel?: boolean;
   preview?: boolean;
@@ -100,9 +111,11 @@ function LinkButton({
     </>
   );
 
+  const textStyleClass = `${buttonTextBold ? "font-bold" : "font-normal"} ${buttonTextItalic ? "italic" : ""}`;
+
   const className = compact
     ? `flex items-center justify-center gap-2 rounded-full w-14 h-14 shadow-sm transition ${useGlass ? glassClass : "hover:opacity-90"}`
-    : `group relative flex items-center rounded-xl px-4 py-3.5 w-full font-medium shadow-sm transition ${glassClass}`;
+    : `group relative flex items-center rounded-xl px-5 py-4 w-full ${textStyleClass} shadow-sm transition ${glassClass}`;
 
   if (preview) {
     return (
@@ -130,12 +143,20 @@ function SectionView({
   buttonBgColor,
   buttonTextColor,
   glassEffect,
+  buttonTextBold,
+  buttonTextItalic,
+  sectionTitleBold,
+  sectionTitleItalic,
   preview,
 }: {
   section: LinktreeSectionData;
   buttonBgColor?: string | null;
   buttonTextColor?: string | null;
   glassEffect?: boolean | null;
+  buttonTextBold?: boolean | null;
+  buttonTextItalic?: boolean | null;
+  sectionTitleBold?: boolean | null;
+  sectionTitleItalic?: boolean | null;
   preview?: boolean;
 }) {
   const activeLinks = section.links.filter((l) => l.isActive !== false);
@@ -144,7 +165,9 @@ function SectionView({
   return (
     <div className="w-full space-y-3">
       {section.title && (
-        <h2 className="text-sm font-semibold uppercase tracking-widest opacity-70">
+        <h2
+          className={`text-sm tracking-wide opacity-70 text-center ${sectionTitleBold ?? true ? "font-semibold" : "font-normal"} ${sectionTitleItalic ? "italic" : ""}`}
+        >
           {section.title}
         </h2>
       )}
@@ -157,6 +180,8 @@ function SectionView({
               buttonBgColor={buttonBgColor}
               buttonTextColor={buttonTextColor}
               glassEffect={glassEffect}
+              buttonTextBold={buttonTextBold}
+              buttonTextItalic={buttonTextItalic}
               compact
               showLabel={false}
               preview={preview}
@@ -173,6 +198,8 @@ function SectionView({
               buttonBgColor={buttonBgColor}
               buttonTextColor={buttonTextColor}
               glassEffect={glassEffect}
+              buttonTextBold={buttonTextBold}
+              buttonTextItalic={buttonTextItalic}
               preview={preview}
             />
           ))}
@@ -187,6 +214,8 @@ function SectionView({
               buttonBgColor={buttonBgColor}
               buttonTextColor={buttonTextColor}
               glassEffect={glassEffect}
+              buttonTextBold={buttonTextBold}
+              buttonTextItalic={buttonTextItalic}
               preview={preview}
             />
           ))}
@@ -201,6 +230,8 @@ function SectionView({
               buttonBgColor={buttonBgColor}
               buttonTextColor={buttonTextColor}
               glassEffect={glassEffect}
+              buttonTextBold={buttonTextBold}
+              buttonTextItalic={buttonTextItalic}
               preview={preview}
             />
           ))}
@@ -221,13 +252,26 @@ export default function LinktreePublicView({
   buttonTextColor,
   overlayColor,
   overlayOpacity,
+  overlayColor2,
+  overlayOpacity2,
   glassEffect,
+  sectionTitleBold,
+  sectionTitleItalic,
+  buttonTextBold,
+  buttonTextItalic,
+  titleFontSize,
   sections,
   ungroupedLinks,
   preview = false,
 }: LinktreePublicViewProps) {
   const activeSections = sections.filter((s) => s.isActive !== false);
   const activeUngrouped = ungroupedLinks.filter((l) => l.isActive !== false);
+
+  const titleSizeVar =
+    titleFontSize === "SM" ? "var(--font-size-body)" : titleFontSize === "LG" ? "var(--font-size-h2)" : "var(--font-size-h3)";
+
+  const overlayStart = hexToRgba(overlayColor || "#000000", (overlayOpacity ?? 0) / 100);
+  const overlayEnd = hexToRgba(overlayColor2 || "#000000", (overlayOpacity2 ?? 0) / 100);
 
   return (
     <div
@@ -242,8 +286,7 @@ export default function LinktreePublicView({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundColor: overlayColor || "#000000",
-          opacity: (overlayOpacity ?? 0) / 100,
+          background: `linear-gradient(to bottom, ${overlayStart}, ${overlayEnd})`,
         }}
       />
 
@@ -264,7 +307,7 @@ export default function LinktreePublicView({
             </div>
           )}
           {displayName && (
-            <h1 className="font-semibold" style={{ fontSize: "var(--font-size-h3)" }}>
+            <h1 className="font-semibold" style={{ fontSize: titleSizeVar }}>
               {displayName}
             </h1>
           )}
@@ -282,6 +325,10 @@ export default function LinktreePublicView({
               buttonBgColor={buttonBgColor}
               buttonTextColor={buttonTextColor}
               glassEffect={glassEffect}
+              buttonTextBold={buttonTextBold}
+              buttonTextItalic={buttonTextItalic}
+              sectionTitleBold={sectionTitleBold}
+              sectionTitleItalic={sectionTitleItalic}
               preview={preview}
             />
           )}
@@ -292,6 +339,10 @@ export default function LinktreePublicView({
               buttonBgColor={buttonBgColor}
               buttonTextColor={buttonTextColor}
               glassEffect={glassEffect}
+              buttonTextBold={buttonTextBold}
+              buttonTextItalic={buttonTextItalic}
+              sectionTitleBold={sectionTitleBold}
+              sectionTitleItalic={sectionTitleItalic}
               preview={preview}
             />
           ))}

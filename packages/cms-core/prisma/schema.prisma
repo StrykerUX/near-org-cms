@@ -227,7 +227,14 @@ model Linktree {
   buttonTextColor String?   @default("#0A0A0A")
   overlayColor    String?   @default("#000000")
   overlayOpacity  Int?      @default(0)
+  overlayColor2   String?   @default("#000000")
+  overlayOpacity2 Int?      @default(0)
   glassEffect     Boolean   @default(false)
+  sectionTitleBold   Boolean @default(true)
+  sectionTitleItalic Boolean @default(false)
+  buttonTextBold     Boolean @default(false)
+  buttonTextItalic   Boolean @default(false)
+  titleFontSize   LinktreeTitleSize @default(MD)
   seoTitle        String?
   seoDesc         String?
   ogImage         String?
@@ -321,4 +328,10 @@ enum LinktreeSectionDisplayType {
   ROW
   ICONS
   ICONS_LABEL
+}
+
+enum LinktreeTitleSize {
+  SM
+  MD
+  LG
 }

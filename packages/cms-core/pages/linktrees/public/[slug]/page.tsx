@@ -74,6 +74,13 @@ export default async function LinktreePublicPage({
       overlayColor={linktree.overlayColor}
       overlayOpacity={linktree.overlayOpacity}
       glassEffect={linktree.glassEffect}
+      overlayColor2={linktree.overlayColor2}
+      overlayOpacity2={linktree.overlayOpacity2}
+      titleFontSize={linktree.titleFontSize}
+      sectionTitleBold={linktree.sectionTitleBold}
+      sectionTitleItalic={linktree.sectionTitleItalic}
+      buttonTextBold={linktree.buttonTextBold}
+      buttonTextItalic={linktree.buttonTextItalic}
       sections={linktree.sections.map((section) => ({
         id: section.id,
         title: section.title,

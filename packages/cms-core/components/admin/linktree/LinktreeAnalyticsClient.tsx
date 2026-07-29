@@ -14,12 +14,25 @@ interface AnalyticsData {
   topUtmSources: { source: string; clicks: number }[];
 }
 
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg text-xs">
+      <p className="font-medium text-foreground">{label}</p>
+      <p className="text-primary">clicks: {payload[0].value}</p>
+    </div>
+  );
+}
+
 export default function LinktreeAnalyticsClient({
   linktreeId,
   linktreeName,
+  embedded = false,
 }: {
   linktreeId: string;
   linktreeName: string;
+  /** When true, skips the back-link/title header (used inline as a tab on the edit page itself). */
+  embedded?: boolean;
 }) {
   const [range, setRange] = useState<"7" | "30" | "90">("30");
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -35,14 +48,16 @@ export default function LinktreeAnalyticsClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Link href={`/admin/linktrees/${linktreeId}/edit`} className="text-muted-foreground hover:text-foreground transition">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold">{linktreeName} — Analytics</h1>
+      {!embedded && (
+        <div className="flex items-center gap-3">
+          <Link href={`/admin/linktrees/${linktreeId}/edit`} className="text-muted-foreground hover:text-foreground transition">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">{linktreeName} — Analytics</h1>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex gap-2">
         {(["7", "30", "90"] as const).map((r) => (
@@ -102,7 +117,7 @@ export default function LinktreeAnalyticsClient({
                   <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(d) => d.slice(5)} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip />
+                  <Tooltip content={<ChartTooltip />} cursor={{ stroke: "var(--color-border)" }} />
                   <Area type="monotone" dataKey="clicks" stroke="var(--color-primary)" fill="url(#clicksGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
