@@ -23,6 +23,7 @@ model User {
   posts           Post[]   @relation("PostAuthor")
   lastEditedPosts Post[]   @relation("PostLastEditor")
   banners         Banner[] @relation("BannerAuthor")
+  linktrees       Linktree[] @relation("LinktreeOwner")
 }
 
 model Post {
@@ -210,4 +211,114 @@ enum BannerModalPosition {
 enum BannerDisplayMode {
   OVERLAY
   PUSH
+}
+
+model Linktree {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  displayName     String?
+  bio             String?
+  avatarUrl       String?
+  bgColor         String?   @default("#0A0A0A")
+  bgImage         String?
+  textColor       String?   @default("#FFFFFF")
+  buttonBgColor   String?   @default("#FFFFFF")
+  buttonTextColor String?   @default("#0A0A0A")
+  overlayColor    String?   @default("#000000")
+  overlayOpacity  Int?      @default(0)
+  glassEffect     Boolean   @default(false)
+  seoTitle        String?
+  seoDesc         String?
+  ogImage         String?
+  status          Status    @default(DRAFT)
+  ownerId         String
+  publishedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  owner           User               @relation("LinktreeOwner", fields: [ownerId], references: [id])
+  sections        LinktreeSection[]
+  links           LinktreeLink[]
+}
+
+model LinktreeSection {
+  id          String   @id @default(cuid())
+  linktreeId  String
+  title       String
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  displayType LinktreeSectionDisplayType @default(COLUMN)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  linktree    Linktree @relation(fields: [linktreeId], references: [id], onDelete: Cascade)
+  links       LinktreeLink[]
+
+  @@index([linktreeId])
+}
+
+model LinktreeLink {
+  id          String    @id @default(cuid())
+  linktreeId  String
+  sectionId   String?
+  title       String
+  url         String
+  icon        String?
+  position    Int       @default(0)
+  isActive    Boolean   @default(true)
+  forwardUtm  Boolean   @default(false)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  clickCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  linktree    Linktree         @relation(fields: [linktreeId], references: [id], onDelete: Cascade)
+  section     LinktreeSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  clicks      LinktreeClick[]
+  utmPresets  LinktreeUtmPreset[]
+
+  @@index([linktreeId])
+  @@index([sectionId])
+}
+
+model LinktreeClick {
+  id          String   @id @default(cuid())
+  linkId      String
+  clickedAt   DateTime @default(now())
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  referrer    String?
+  deviceType  String?
+  browser     String?
+  os          String?
+  ipHash      String?
+  isBot       Boolean  @default(false)
+  link        LinktreeLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId, clickedAt])
+}
+
+model LinktreeUtmPreset {
+  id          String   @id @default(cuid())
+  linkId      String
+  label       String
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  link        LinktreeLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+}
+
+enum LinktreeSectionDisplayType {
+  COLUMN
+  ROW
+  ICONS
+  ICONS_LABEL
 }

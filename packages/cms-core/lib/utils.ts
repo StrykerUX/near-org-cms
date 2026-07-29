@@ -22,3 +22,10 @@ export function formatAdminDate(dateString: string): string {
   });
   return `${date} · ${time} UTC`;
 }
+
+export function expandHexColor(color: string): string {
+  if (/^#[0-9a-fA-F]{3}$/.test(color)) {
+    return "#" + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+  }
+  return color;
+}
