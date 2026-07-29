@@ -109,6 +109,7 @@ model Media {
   mimeType  String
   size      Int
   alt       String?
+  slug      String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -29,3 +29,9 @@ export function expandHexColor(color: string): string {
   }
   return color;
 }
+
+const SLUG_PATTERN = /^[a-z0-9-]+$/;
+
+export function isValidSlugFormat(slug: string): boolean {
+  return SLUG_PATTERN.test(slug);
+}

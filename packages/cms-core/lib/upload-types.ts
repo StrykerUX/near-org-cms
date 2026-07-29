@@ -60,10 +60,13 @@ export function resolveFileType(file: File): FileTypeConfig | null {
 
 export const CACHE_CONTROL = "public, max-age=300, must-revalidate";
 
-export function contentDispositionHeader(filename: string): string {
+export function contentDispositionHeader(
+  filename: string,
+  disposition: "inline" | "attachment" = "inline"
+): string {
   const asciiFallback = filename.replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "");
   const encoded = encodeURIComponent(filename);
-  return `inline; filename="${asciiFallback}"; filename*=UTF-8''${encoded}`;
+  return `${disposition}; filename="${asciiFallback}"; filename*=UTF-8''${encoded}`;
 }
 
 const uploadRateLimit = new Map<string, { count: number; resetAt: number }>();

@@ -26,8 +26,15 @@ interface DownloadItem {
   mimeType: string;
   size: number;
   alt: string | null;
+  slug: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+function publicUrl(item: DownloadItem): string {
+  if (!item.slug) return item.url;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  return `${origin}/downloads/${item.slug}`;
 }
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB
@@ -63,6 +70,7 @@ export function DownloadsClient({ canBulkDelete }: { canBulkDelete: boolean }) {
   const [selectedItem, setSelectedItem] = useState<DownloadItem | null>(null);
   const [editFilename, setEditFilename] = useState("");
   const [editAlt, setEditAlt] = useState("");
+  const [editSlug, setEditSlug] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -220,17 +228,30 @@ export function DownloadsClient({ canBulkDelete }: { canBulkDelete: boolean }) {
   async function handleSave() {
     if (!selectedItem) return;
     setIsSaving(true);
-    const res = await fetch(`/api/media/${selectedItem.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: editFilename, alt: editAlt }),
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
-      setSelectedItem(updated);
+    try {
+      const res = await fetch(`/api/media/${selectedItem.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: editFilename, alt: editAlt, slug: editSlug.trim() || null }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+        setSelectedItem(updated);
+        if (updated.r2SyncFailed) {
+          toast.warning("Guardado, pero no se pudo sincronizar el nombre con el almacenamiento. Intenta de nuevo.");
+        } else {
+          toast.success("Guardado");
+        }
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? "No se pudo guardar");
+      }
+    } catch {
+      toast.error("No se pudo guardar");
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   }
 
   async function handleReplace(file: File) {
@@ -257,7 +278,7 @@ export function DownloadsClient({ canBulkDelete }: { canBulkDelete: boolean }) {
   }
 
   async function copyUrl(item: DownloadItem) {
-    await navigator.clipboard.writeText(item.url);
+    await navigator.clipboard.writeText(publicUrl(item));
     setCopiedId(item.id);
     setTimeout(() => setCopiedId(null), 2000);
   }
@@ -266,6 +287,7 @@ export function DownloadsClient({ canBulkDelete }: { canBulkDelete: boolean }) {
     setSelectedItem(item);
     setEditFilename(item.filename);
     setEditAlt(item.alt ?? "");
+    setEditSlug(item.slug ?? "");
     setConfirmDelete(false);
   }
 
@@ -556,6 +578,21 @@ export function DownloadsClient({ canBulkDelete }: { canBulkDelete: boolean }) {
                         className="w-full text-base border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground block mb-1">
+                        Public URL
+                      </label>
+                      <div className="flex items-center gap-1 text-base border border-border rounded-lg px-3 py-2 bg-background focus-within:ring-1 focus-within:ring-primary">
+                        <span className="text-muted-foreground shrink-0">near.ai/downloads/</span>
+                        <input
+                          type="text"
+                          value={editSlug}
+                          onChange={(e) => setEditSlug(e.target.value.toLowerCase())}
+                          placeholder="opcional"
+                          className="flex-1 min-w-0 bg-transparent outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-2 px-5 py-4 border-t border-border">
@@ -568,7 +605,7 @@ export function DownloadsClient({ canBulkDelete }: { canBulkDelete: boolean }) {
                         {copiedId === selectedItem.id ? "Copiado!" : "Copiar URL"}
                       </button>
                       <a
-                        href={selectedItem.url}
+                        href={publicUrl(selectedItem)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-[2] text-sm px-3 py-2 rounded-lg border border-border hover:bg-muted transition text-center"

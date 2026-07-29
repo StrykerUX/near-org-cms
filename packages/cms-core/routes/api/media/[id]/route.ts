@@ -6,6 +6,7 @@ import { auth } from "@cms/lib/auth";
 import { prisma } from "@cms/lib/prisma";
 import { createS3Client } from "@cms/lib/s3";
 import { contentDispositionHeader, CACHE_CONTROL } from "@cms/lib/upload-types";
+import { isValidSlugFormat } from "@cms/lib/utils";
 
 export async function PATCH(
   req: NextRequest,
@@ -17,11 +18,30 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const { filename, alt } = await req.json();
+  const { filename, alt, slug } = await req.json();
 
   const media = await prisma.media.findUnique({ where: { id } });
   if (!media) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  let normalizedSlug: string | null | undefined = undefined;
+  if (slug !== undefined) {
+    normalizedSlug = typeof slug === "string" ? slug.trim().toLowerCase() : null;
+    if (normalizedSlug) {
+      if (!isValidSlugFormat(normalizedSlug)) {
+        return NextResponse.json(
+          { error: "Slug must contain only lowercase letters, numbers, and hyphens" },
+          { status: 400 }
+        );
+      }
+      const clash = await prisma.media.findUnique({ where: { slug: normalizedSlug } });
+      if (clash && clash.id !== id) {
+        return NextResponse.json({ error: "This URL is already taken" }, { status: 400 });
+      }
+    } else {
+      normalizedSlug = null;
+    }
   }
 
   const updated = await prisma.media.update({
@@ -29,9 +49,11 @@ export async function PATCH(
     data: {
       ...(filename !== undefined && { filename }),
       ...(alt !== undefined && { alt }),
+      ...(normalizedSlug !== undefined && { slug: normalizedSlug }),
     },
   });
 
+  let r2SyncFailed = false;
   if (filename !== undefined && filename !== media.filename) {
     const key = media.url.replace(`${process.env.R2_PUBLIC_URL}/`, "");
     const s3 = createS3Client();
@@ -43,16 +65,20 @@ export async function PATCH(
           CopySource: `${process.env.S3_BUCKET}/${encodeURIComponent(key)}`,
           MetadataDirective: "REPLACE",
           ContentType: media.mimeType,
-          ContentDisposition: contentDispositionHeader(filename),
+          ContentDisposition: contentDispositionHeader(
+            filename,
+            media.mimeType.startsWith("image/") ? "inline" : "attachment"
+          ),
           CacheControl: CACHE_CONTROL,
         })
       );
     } catch (e) {
       console.error("Failed to sync renamed filename to R2 object metadata", e);
+      r2SyncFailed = true;
     }
   }
 
-  return NextResponse.json(updated);
+  return NextResponse.json({ ...updated, ...(r2SyncFailed && { r2SyncFailed: true }) });
 }
 
 export async function DELETE(

@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@cms/lib/auth";
 import { prisma } from "@cms/lib/prisma";
-import { isReservedSlug, isValidSlugFormat } from "@cms/lib/linktree-reserved-slugs";
+import { isReservedSlug } from "@cms/lib/linktree-reserved-slugs";
+import { isValidSlugFormat } from "@cms/lib/utils";
 import { z } from "zod";
 
 const linkSchema = z.object({

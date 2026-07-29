@@ -17,6 +17,7 @@ const RESERVED_SLUGS = new Set([
   "near-ai-cloud-terms-of-service",
   "near-ai-data-processing-agreement-for-customers",
   "preview",
+  "downloads",
   "feed.xml",
   "sitemap.xml",
   "robots.txt",
@@ -25,10 +26,4 @@ const RESERVED_SLUGS = new Set([
 
 export function isReservedSlug(slug: string): boolean {
   return RESERVED_SLUGS.has(slug.toLowerCase());
-}
-
-const SLUG_PATTERN = /^[a-z0-9-]+$/;
-
-export function isValidSlugFormat(slug: string): boolean {
-  return SLUG_PATTERN.test(slug);
 }
