@@ -168,6 +168,40 @@ function SizeToggle({
   );
 }
 
+function AvatarShapeToggle({
+  value,
+  onChange,
+}: {
+  value: "CIRCLE" | "LOGO";
+  onChange: (v: "CIRCLE" | "LOGO") => void;
+}) {
+  const options: { key: "CIRCLE" | "LOGO"; label: string }[] = [
+    { key: "CIRCLE", label: "Circle" },
+    { key: "LOGO", label: "Logo" },
+  ];
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-muted-foreground">Avatar Shape</span>
+      <div className="flex gap-1.5">
+        {options.map((opt) => (
+          <button
+            key={opt.key}
+            type="button"
+            onClick={() => onChange(opt.key)}
+            className={`px-2.5 h-7 rounded border text-xs font-medium transition ${
+              value === opt.key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-border/70 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function NewLinktreeClient() {
   const router = useRouter();
   const { isDirty, setIsDirty, requestNavigation } = useNavigationGuard();
@@ -200,6 +234,9 @@ export default function NewLinktreeClient() {
   const [buttonTextBold, setButtonTextBold] = useState(false);
   const [buttonTextItalic, setButtonTextItalic] = useState(false);
   const [titleFontSize, setTitleFontSize] = useState<"SM" | "MD" | "LG">("MD");
+  const [showTitle, setShowTitle] = useState(true);
+  const [avatarSize, setAvatarSize] = useState<"SM" | "MD" | "LG">("SM");
+  const [avatarShape, setAvatarShape] = useState<"CIRCLE" | "LOGO">("CIRCLE");
 
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
 
@@ -241,6 +278,9 @@ export default function NewLinktreeClient() {
           buttonTextBold,
           buttonTextItalic,
           titleFontSize,
+          showTitle,
+          avatarSize,
+          avatarShape,
           status: finalStatus,
           sections: serializeSections(sections),
           ungroupedLinks: ungroupedLinks.map((link, i) => serializeLink(link, i)),
@@ -370,6 +410,9 @@ export default function NewLinktreeClient() {
                     buttonTextBold={buttonTextBold}
                     buttonTextItalic={buttonTextItalic}
                     titleFontSize={titleFontSize}
+                    showTitle={showTitle}
+                    avatarSize={avatarSize}
+                    avatarShape={avatarShape}
                     sections={sections}
                     ungroupedLinks={ungroupedLinks}
                     preview
@@ -442,9 +485,21 @@ export default function NewLinktreeClient() {
                       markDirty();
                     }}
                   />
+                  <SizeToggle label="Avatar Size" value={avatarSize} onChange={(v) => { setAvatarSize(v); markDirty(); }} />
+                  <AvatarShapeToggle value={avatarShape} onChange={(v) => { setAvatarShape(v); markDirty(); }} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-xs font-semibold uppercase tracking-wide">Display Name</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="displayName" className="text-xs font-semibold uppercase tracking-wide">Display Name</Label>
+                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={showTitle}
+                        onChange={(e) => { setShowTitle(e.target.checked); markDirty(); }}
+                      />
+                      Show on page
+                    </label>
+                  </div>
                   <Input
                     id="displayName"
                     value={displayName}

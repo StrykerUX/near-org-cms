@@ -48,6 +48,9 @@ export interface LinktreePublicViewProps {
   buttonTextBold?: boolean | null;
   buttonTextItalic?: boolean | null;
   titleFontSize?: "SM" | "MD" | "LG" | null;
+  showTitle?: boolean | null;
+  avatarSize?: "SM" | "MD" | "LG" | null;
+  avatarShape?: "CIRCLE" | "LOGO" | null;
   sections: LinktreeSectionData[];
   ungroupedLinks: LinktreeLinkData[];
   /** When true, links render as inert previews instead of navigating away (admin live preview). */
@@ -260,6 +263,9 @@ export default function LinktreePublicView({
   buttonTextBold,
   buttonTextItalic,
   titleFontSize,
+  showTitle,
+  avatarSize,
+  avatarShape,
   sections,
   ungroupedLinks,
   preview = false,
@@ -269,6 +275,13 @@ export default function LinktreePublicView({
 
   const titleSizeVar =
     titleFontSize === "SM" ? "var(--font-size-body)" : titleFontSize === "LG" ? "var(--font-size-h2)" : "var(--font-size-h3)";
+
+  const avatarSizeClass =
+    avatarSize === "LG" ? "w-40 h-40" : avatarSize === "MD" ? "w-32 h-32" : "w-24 h-24";
+  const avatarFallbackTextClass =
+    avatarSize === "LG" ? "text-4xl" : avatarSize === "MD" ? "text-3xl" : "text-2xl";
+  const logoHeightClass =
+    avatarSize === "LG" ? "h-20" : avatarSize === "MD" ? "h-14" : "h-10";
 
   const overlayStart = hexToRgba(overlayColor || "#000000", (overlayOpacity ?? 0) / 100);
   const overlayEnd = hexToRgba(overlayColor2 || "#000000", (overlayOpacity2 ?? 0) / 100);
@@ -296,17 +309,27 @@ export default function LinktreePublicView({
       >
         <div className="flex flex-col items-center gap-3 text-center max-w-sm">
           {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={displayName || "Avatar"}
-              className="w-20 h-20 rounded-full object-cover shadow-lg"
-            />
+            avatarShape === "LOGO" ? (
+              <img
+                src={avatarUrl}
+                alt={displayName || "Logo"}
+                className={`${logoHeightClass} w-auto object-contain max-w-full`}
+              />
+            ) : (
+              <img
+                src={avatarUrl}
+                alt={displayName || "Avatar"}
+                className={`${avatarSizeClass} rounded-full object-cover shadow-lg`}
+              />
+            )
           ) : (
-            <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-2xl font-semibold">
-              {displayName?.[0]?.toUpperCase() ?? "?"}
-            </div>
+            avatarShape !== "LOGO" && (
+              <div className={`${avatarSizeClass} rounded-full bg-white/10 flex items-center justify-center ${avatarFallbackTextClass} font-semibold`}>
+                {displayName?.[0]?.toUpperCase() ?? "?"}
+              </div>
+            )
           )}
-          {displayName && (
+          {showTitle !== false && displayName && (
             <h1 className="font-semibold" style={{ fontSize: titleSizeVar }}>
               {displayName}
             </h1>

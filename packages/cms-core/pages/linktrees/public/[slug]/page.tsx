@@ -77,6 +77,9 @@ export default async function LinktreePublicPage({
       overlayColor2={linktree.overlayColor2}
       overlayOpacity2={linktree.overlayOpacity2}
       titleFontSize={linktree.titleFontSize}
+      showTitle={linktree.showTitle}
+      avatarSize={linktree.avatarSize}
+      avatarShape={linktree.avatarShape}
       sectionTitleBold={linktree.sectionTitleBold}
       sectionTitleItalic={linktree.sectionTitleItalic}
       buttonTextBold={linktree.buttonTextBold}

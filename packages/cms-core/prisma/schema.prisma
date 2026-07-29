@@ -236,6 +236,9 @@ model Linktree {
   buttonTextBold     Boolean @default(false)
   buttonTextItalic   Boolean @default(false)
   titleFontSize   LinktreeTitleSize @default(MD)
+  showTitle       Boolean   @default(true)
+  avatarSize      LinktreeTitleSize @default(SM)
+  avatarShape     LinktreeAvatarShape @default(CIRCLE)
   seoTitle        String?
   seoDesc         String?
   ogImage         String?
@@ -335,4 +338,9 @@ enum LinktreeTitleSize {
   SM
   MD
   LG
+}
+
+enum LinktreeAvatarShape {
+  CIRCLE
+  LOGO
 }

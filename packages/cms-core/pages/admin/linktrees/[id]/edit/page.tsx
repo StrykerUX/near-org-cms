@@ -53,6 +53,9 @@ export default async function EditLinktreePage({
     buttonTextBold: linktree.buttonTextBold,
     buttonTextItalic: linktree.buttonTextItalic,
     titleFontSize: linktree.titleFontSize,
+    showTitle: linktree.showTitle,
+    avatarSize: linktree.avatarSize,
+    avatarShape: linktree.avatarShape,
     status: linktree.status,
     sections: linktree.sections.map((section) => ({
       id: section.id,
