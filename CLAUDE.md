@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Context
+
+`near-org-cms` es un fork interno de [`near-ai-web`](https://github.com/nearai/near-ai-web) (repo original, sin relación de remoto con este). Se duplicó el 2026-07-29 conservando el historial completo de git.
+
+**Objetivo del fork:** mantener el núcleo (`packages/cms-core`: auth, Prisma, API routes, lógica de admin) intacto y reemplazar el frontend (`app/(site)`, `components/`) por uno nuevo para un proyecto distinto. No hacer merge/push cruzado con `near-ai-web` — son proyectos separados a partir de aquí.
+
 ## Project Structure
 
 This is a **pnpm workspace** with a standalone Next.js app at the root and a shared CMS package.
