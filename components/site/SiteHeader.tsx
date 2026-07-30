@@ -1,14 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { PlusIcon, XIcon } from "lucide-react";
 import GetInTouchModal from "@/components/site/GetInTouchModal";
 
-const NAV_LINKS = [
-  { href: "/blog", label: "BLOG" },
-  { href: "/company", label: "OUR COMPANY" },
-];
+const NAV_LINKS = [{ href: "/blog", label: "BLOG" }];
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,8 +12,8 @@ export default function SiteHeader() {
   return (
     <header className="relative py-8 text-[0.75rem] lg:text-[0.875rem] uppercase tracking-[0.2em] text-white/80">
       <div className="flex items-center justify-between">
-        <a href="/">
-          <Image src="/near-ai.png" alt="NEAR AI" width={120} height={24} className="w-auto h-5 md:h-6" />
+        <a href="/" className="text-white">
+          Site
         </a>
 
         <div className="flex items-center gap-4 md:gap-8">

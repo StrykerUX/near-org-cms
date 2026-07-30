@@ -34,8 +34,8 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
     // ScrollTrigger.refresh() is intentionally omitted here: it temporarily
     // manipulates window.scrollY to re-measure offsets, which desynchronises
     // Lenis's virtual scroll position and causes scroll to freeze on long pages.
-    // Pages that use ScrollTrigger animations (home, company) mount their own
-    // AnimationsProvider which manages that lifecycle independently.
+    // Pages that use ScrollTrigger animations should mount their own
+    // provider that manages that lifecycle independently.
     let resizeTimer: ReturnType<typeof setTimeout>;
     const ro = new ResizeObserver(() => {
       clearTimeout(resizeTimer);

@@ -37,14 +37,12 @@ export default function GetInTouchModal() {
         onInteractOutside={(e) => e.preventDefault()}
         className="sm:max-w-md bg-white text-gray-900 overflow-hidden p-0 gap-0 rounded-2xl"
       >
-        <DialogTitle className="sr-only">
-          Get In Touch With The NEAR Forward Deployed Team
-        </DialogTitle>
+        <DialogTitle className="sr-only">Get in touch</DialogTitle>
 
-        {/* Header — 4 layers */}
+        {/* Header — 2 layers */}
         <div className="relative overflow-hidden min-h-[156px] flex flex-col justify-between p-5 bg-[#1d2e42] mx-3 mt-3 rounded-lg">
 
-          {/* Layer 1: Blue gradient base */}
+          {/* Layer 1: Gradient base */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#1d2e42] via-[#26405c] to-[#334f6a]" />
 
           {/* Layer 2: Noise with blur */}
@@ -56,16 +54,6 @@ export default function GetInTouchModal() {
               filter: 'blur(0.6px)',
             }}
           />
-
-          {/* Layer 3: Hero image blended over blue */}
-          <img
-            src="/demo-v1/background-1.webp"
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover object-center opacity-40 mix-blend-overlay"
-          />
-
-          {/* Layer 4: Dark gradient for text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/80" />
 
           {/* Progress + close */}
           <div className="relative z-10 flex items-center gap-3">
@@ -88,7 +76,7 @@ export default function GetInTouchModal() {
           {/* Dynamic title */}
           <div className="relative z-10">
             <h2 className="text-white font-bold text-2xl leading-snug text-balance">
-              Get In Touch With The NEAR Forward Deployed Team
+              Get in touch
             </h2>
           </div>
         </div>

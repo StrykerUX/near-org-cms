@@ -1,51 +1,11 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const montreal = localFont({
-  src: [
-    { path: "../public/fonts/pp-neue-montreal/PPNeueMontreal-Book.woff2", weight: "400", style: "normal" },
-    { path: "../public/fonts/pp-neue-montreal/PPNeueMontreal-BookItalic.woff2", weight: "400", style: "italic" },
-    { path: "../public/fonts/pp-neue-montreal/PPNeueMontreal-Medium.woff2", weight: "500", style: "normal" },
-    { path: "../public/fonts/pp-neue-montreal/PPNeueMontreal-Bold.woff2", weight: "700", style: "normal" },
-  ],
-  variable: "--font-montreal",
-  display: "swap",
-});
-
-const montrealMono = localFont({
-  src: [
-    { path: "../public/fonts/pp-neue-montreal-mono/PPNeueMontrealMono-Light.woff2", weight: "300", style: "normal" },
-    { path: "../public/fonts/pp-neue-montreal-mono/PPNeueMontrealMono-Book.woff2", weight: "400", style: "normal" },
-  ],
-  variable: "--font-montreal-mono",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://near.ai"),
-  title: "NEAR AI — Confidential AI Infrastructure",
-  description: "AI agents for the work your team has been afraid to automate. Private by default, verifiable by design.",
-  icons: {
-    icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
-  },
-  manifest: "/site.webmanifest",
-  openGraph: {
-    title: "NEAR AI — Confidential AI Infrastructure",
-    description: "AI agents for the work your team has been afraid to automate. Private by default, verifiable by design.",
-    images: [{ url: "/logo-bg.webp" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "NEAR AI — Confidential AI Infrastructure",
-    description: "AI agents for the work your team has been afraid to automate. Private by default, verifiable by design.",
-    images: ["/logo-bg.webp"],
-  },
+  title: "Draft",
+  description: "Site in progress — design system not yet defined.",
 };
 
 export default function RootLayout({
@@ -54,10 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${montreal.variable} ${montrealMono.variable} ${GeistSans.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${GeistSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster position="bottom-center" />
