@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "sonner";
+import { montreal } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${montreal.variable} ${GeistSans.variable} h-full antialiased`}
+    >
+      <head>
+        <link rel="preconnect" href="https://use.typekit.net" />
+        <link rel="stylesheet" href="https://use.typekit.net/gtm1rhn.css" />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster position="bottom-center" />

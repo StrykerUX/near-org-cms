@@ -10,7 +10,7 @@ export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="relative py-8 text-[0.75rem] lg:text-[0.875rem] uppercase tracking-[0.2em] text-white/80">
+    <header className="relative py-8 text-eyebrow uppercase text-white/80">
       <div className="flex items-center justify-between">
         <a href="/" className="text-white">
           Site

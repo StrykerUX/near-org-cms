@@ -105,13 +105,67 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, Menlo, monospace;
-  --font-serif: Georgia, serif;
+  --font-serif: "kepler-std", ui-serif, Georgia, "Times New Roman", serif;
+  /* Kepler's large-size optical master — used for accent spans inside Display/H1 headings */
+  --font-display: "kepler-std-display", "kepler-std", ui-serif, Georgia, serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* ── type scale — 10 semantic roles, fluid 375px → 1920px ── */
+  --text-display: clamp(3.5rem, 2.4079rem + 4.6596vw, 8rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 500;
+
+  --text-h1: clamp(2.75rem, 2.0825rem + 2.8479vw, 5.5rem);
+  --text-h1--line-height: 1.05;
+  --text-h1--letter-spacing: -0.015em;
+  --text-h1--font-weight: 500;
+
+  --text-h2: clamp(2.125rem, 1.7306rem + 1.6829vw, 3.75rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h2--font-weight: 500;
+
+  --text-h3: clamp(1.625rem, 1.4126rem + 0.9061vw, 2.5rem);
+  --text-h3--line-height: 1.15;
+  --text-h3--letter-spacing: -0.005em;
+  --text-h3--font-weight: 500;
+
+  --text-h4: clamp(1.3125rem, 1.2063rem + 0.4531vw, 1.75rem);
+  --text-h4--line-height: 1.25;
+  --text-h4--letter-spacing: 0em;
+  --text-h4--font-weight: 500;
+
+  --text-body-lg: clamp(1.1875rem, 1.142rem + 0.1942vw, 1.375rem);
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: 0em;
+  --text-body-lg--font-weight: 400;
+
+  --text-body: clamp(1rem, 0.9697rem + 0.1295vw, 1.125rem);
+  --text-body--line-height: 1.6;
+  --text-body--letter-spacing: 0em;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: clamp(0.875rem, 0.8447rem + 0.1295vw, 1rem);
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--letter-spacing: 0.005em;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: clamp(0.8125rem, 0.7973rem + 0.0647vw, 0.875rem);
+  --text-caption--line-height: 1.4;
+  --text-caption--letter-spacing: 0.01em;
+  --text-caption--font-weight: 400;
+
+  /* Uppercase transform is applied via the `uppercase` utility, not baked into this token */
+  --text-eyebrow: clamp(0.8125rem, 0.7973rem + 0.0647vw, 0.875rem);
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.2em;
+  --text-eyebrow--font-weight: 500;
 }
 
 /* Geist font scoped to admin only */
