@@ -143,6 +143,40 @@ JWT strategy, 30-day sessions. Roles: **ADMIN** (full access) · **EDITOR** (own
 - **Page Management** — DB model exists, admin UI is a stub
 - **Notification emails** — Only password reset email exists
 
+## Trabajo de diseño: qué podés tocar
+
+Si estás componiendo secciones o páginas de marketing (no CMS, no datos, no
+auth, no config), esta sección es para vos.
+
+**Onboarding, una sola vez:** `node scripts/setup-designer.mjs` — copia la
+plantilla de permisos a tu propio `.claude/settings.local.json` (gitignorado,
+nunca se sube). Sin este paso no tenés las restricciones activas ni el
+scaffolder funcionando con el hook de protección.
+
+**Tocás exactamente esto, nada más:**
+
+| Carpeta | Qué es |
+|---|---|
+| `components/primitives/` | Bloques atómicos (`Accent`, `Button`, `Eyebrow`, `Container`, …) |
+| `components/sections/` | Secciones de marketing reusables — ver `components/sections/README.md` para el catálogo y el contrato |
+| `components/views/` | La composición de cada página real (qué secciones, en qué orden, con qué copy) |
+| `app/**/page.meta.ts` | Metadata de cada página (title, description, nav, sitemap) |
+| `public/` | Assets estáticos |
+
+**Todo lo demás está bloqueado** (`packages/cms-core`, `lib/`, `app/**/page.tsx`,
+`app/admin`, `app/api`, config, `.env*`, etc.) — por dos capas independientes:
+el `deny` de tu `settings.local.json` y un hook `PreToolUse` que corre antes
+de cada acción. Si algo te aparece bloqueado y creés que de verdad lo
+necesitás, es señal de que el pedido necesita datos de servidor o toca el
+CMS — hablalo con el ingeniero, no lo edites directo.
+
+**Página nueva:** usá la skill `/new-page <slug> "<Título>"` (o
+`node scripts/new-page.mjs <slug> "<Título>"` a mano) — genera el
+`page.tsx`/`page.meta.ts`/View correctos y regenera el manifiesto de rutas
+solo. Nunca crees un `page.tsx` a mano.
+
+**Comandos que sí podés correr:** `pnpm dev`, `pnpm build`, `pnpm gen:routes`.
+
 ## Contexto del proyecto (Regenta/Aura)
 
 Al iniciar una sesión en este repo, ANTES de explorar archivos corre `/aura near-ai-web` —
@@ -151,4 +185,4 @@ Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`
 
 ---
 
-*Last updated: Phase 5 (Standalone near-ai — single app at root + cms-core shared package)*
+*Last updated: Fase 6 — repo seguro por construcción para diseñadores (ver docs/fase0-divergencias-blog.md, docs/github-org-transfer.md)*
