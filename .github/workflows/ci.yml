@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# NO poner `paths:`/`paths-ignore:` a nivel de workflow: un workflow skipped
+# no reporta "success", y un required check skipped deja el PR bloqueado
+# para siempre ("Expected — Waiting for status to be reported"). Cuando el
+# repo se transfiera a una org con checks requeridos (ver Fase 5, pendiente
+# documentado), este comentario sigue aplicando — no lo quites.
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  verify:
+    name: typecheck · lint · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Lee `packageManager: "pnpm@9.15.9"` de package.json — no pasar
+      # `version` para que el lockfile del gestor sea la única fuente.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.0.10
+
+      # Debe ir DESPUÉS de pnpm/action-setup: `cache: pnpm` corre
+      # `pnpm store path`, que necesita pnpm ya en el PATH.
+      - name: Setup Node
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      # postinstall corre `prisma generate` — no necesita DB.
+      - run: pnpm install --frozen-lockfile
+
+      # GATE DURO: frontera de zonas. Verde desde el primer commit — ver
+      # docs de eslint.config.zones.mjs.
+      - name: Lint · fronteras de zona
+        run: pnpm run lint:zones
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      # DATABASE_URL dummy INALCANZABLE a propósito: con sintaxis válida el
+      # fallo real es "connection refused", capturado por los try/catch de
+      # las queries — nunca la DB real. Si en cambio se usara una DB real
+      # SIN R2_PUBLIC_URL configurado, generateStaticParams devolvería
+      # slugs reales y el build fallaría prerenderizando blog/[slug] con
+      # <Image> apuntando a un host no configurado en next.config.ts.
+      - name: Build
+        env:
+          DATABASE_URL: "postgresql://ci:ci@127.0.0.1:5432/ci_never_connects"
+          NEXTAUTH_SECRET: "ci-placeholder-not-a-real-secret"
+          NEXTAUTH_URL: "http://localhost:3000"
+        run: pnpm run build
+
+      # SOFT GATE mientras se limpia el backlog de estilo preexistente
+      # (packages/cms-core tiene hallazgos de antes de esta config). Quitar
+      # `continue-on-error` cuando `pnpm lint` esté en cero.
+      - name: Lint · completo (informativo)
+        continue-on-error: true
+        run: pnpm run lint
+
+  route-manifest:
+    name: manifiesto de rutas
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+      - run: pnpm install --frozen-lockfile
+
+      # Falla si el manifiesto commiteado (lib/routes.generated.ts) no
+      # coincide con lo que generaría el filesystem hoy — incluye la
+      # validación de rutas dinámicas con page.meta.ts (prohibido), metas
+      # huérfanos, y el campo `route` declarado vs. el derivado.
+      - name: Manifiesto de rutas al día
+        run: pnpm run routes:check
