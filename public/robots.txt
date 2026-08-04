@@ -1,5 +1,0 @@
-User-agent: *
-Disallow: /no-index
-
-User-agent: *
-Allow: /
