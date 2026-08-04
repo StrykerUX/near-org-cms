@@ -1,5 +1,7 @@
 import { Play } from "lucide-react";
 import CompanyGrid from "./CompanyGrid";
+import ProductStage from "./ProductStage";
+import CustomerStory from "./CustomerStory";
 import Accent from "./primitives/Accent";
 import Button from "./primitives/Button";
 import Eyebrow from "./primitives/Eyebrow";
@@ -141,6 +143,12 @@ export default function PrototypePage() {
           </div>
         </Container>
       </section>
+
+      {/* 5. Product stage: center fixed, sides transition on scroll */}
+      <ProductStage />
+
+      {/* 6. Customer story + logo strip */}
+      <CustomerStory />
     </main>
   );
 }
