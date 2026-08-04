@@ -1,7 +1,6 @@
-const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Blog", href: "/blog" },
-];
+import { footerNav } from "@/lib/routes";
+
+const NAV_LINKS = footerNav();
 
 export default function SiteFooter() {
   return (

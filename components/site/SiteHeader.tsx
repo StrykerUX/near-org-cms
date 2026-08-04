@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { PlusIcon, XIcon } from "lucide-react";
 import GetInTouchModal from "@/components/site/GetInTouchModal";
+import { headerNav } from "@/lib/routes";
 
-const NAV_LINKS = [{ href: "/blog", label: "BLOG" }];
+const NAV_LINKS = headerNav();
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
