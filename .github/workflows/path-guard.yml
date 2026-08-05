@@ -1,0 +1,35 @@
+name: Path Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read # para leer los eventos de `labeled`
+
+concurrency:
+  group: path-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: zona bloqueada
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 1 # el guard no usa historia de git, solo la API de PR files
+
+      - name: Verificar rutas protegidas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          CORE_OWNER: StrykerUX
+          OVERRIDE_LABEL: core-change-approved
+        run: bash .github/scripts/path-guard.sh

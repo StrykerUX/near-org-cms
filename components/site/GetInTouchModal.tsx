@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from "@near/cms-core/components/ui/dialog";
+} from "@/components/ui/dialog";
 import GetInTouchForm from "@/components/site/GetInTouchForm";
 
 export default function GetInTouchModal() {

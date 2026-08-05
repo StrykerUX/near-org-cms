@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/protect-paths.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Read(/packages/cms-core/**)",
+      "Edit(/packages/cms-core/**)",
+      "Write(/packages/cms-core/**)",
+      "Edit(/proxy.ts)",
+      "Write(/proxy.ts)",
+      "Edit(/app/admin/**)",
+      "Write(/app/admin/**)",
+      "Edit(/app/api/**)",
+      "Write(/app/api/**)",
+      "Edit(/app/**/page.tsx)",
+      "Write(/app/**/page.tsx)",
+      "Edit(/app/**/layout.tsx)",
+      "Write(/app/**/layout.tsx)",
+      "Edit(/app/**/route.ts)",
+      "Write(/app/**/route.ts)",
+      "Edit(/app/sitemap.ts)",
+      "Edit(/app/robots.ts)",
+      "Edit(/app/not-found.tsx)",
+      "Edit(/app/globals.css)",
+      "Edit(/components/ui/**)",
+      "Write(/components/ui/**)",
+      "Edit(/components/site/**)",
+      "Write(/components/site/**)",
+      "Edit(/components/blog/**)",
+      "Write(/components/blog/**)",
+      "Edit(/lib/**)",
+      "Write(/lib/**)",
+      "Edit(/scripts/**)",
+      "Write(/scripts/**)",
+      "Edit(/docs/**)",
+      "Edit(/next.config.ts)",
+      "Edit(/postcss.config.js)",
+      "Edit(/vercel.json)",
+      "Edit(/package.json)",
+      "Edit(/pnpm-lock.yaml)",
+      "Edit(/pnpm-workspace.yaml)",
+      "Edit(/tsconfig.json)",
+      "Edit(/next-env.d.ts)",
+      "Edit(/.npmrc)",
+      "Edit(/.gitignore)",
+      "Edit(/eslint.config.mjs)",
+      "Edit(/eslint.config.zones.mjs)",
+      "Edit(/.github/**)",
+      "Write(/.github/**)",
+      "Edit(/CLAUDE.md)",
+      "Edit(/.claude/**)",
+      "Write(/.claude/**)",
+      "Read(/.env*)",
+      "Edit(/.env*)",
+      "Write(/.env*)",
+      "Bash(cat .env*)",
+      "Bash(cat */.env*)",
+      "Bash(rm -rf packages/cms-core*)",
+      "Bash(rm -rf /packages/cms-core*)"
+    ]
+  }
+}

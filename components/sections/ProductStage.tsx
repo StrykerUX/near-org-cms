@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Accent from "./primitives/Accent";
-import Container from "./primitives/Container";
+import Accent from "@/components/primitives/Accent";
+import Container from "@/components/primitives/Container";
 
 export default function ProductStage() {
   return (

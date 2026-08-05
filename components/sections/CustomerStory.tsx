@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import Accent from "./primitives/Accent";
-import Container from "./primitives/Container";
-import Eyebrow from "./primitives/Eyebrow";
+import Accent from "@/components/primitives/Accent";
+import Container from "@/components/primitives/Container";
+import Eyebrow from "@/components/primitives/Eyebrow";
 
 const LOGOS = [
   { name: "Venice", src: "/logos/venice.png", width: 89, height: 40 },

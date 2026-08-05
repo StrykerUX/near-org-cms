@@ -1,32 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Accent from "@/components/primitives/Accent";
+import Meta from "@/components/primitives/Meta";
 
 export const metadata: Metadata = {
   title: "Typography — Design System",
   description: "The typographic guidelines for the new design system: type scale, pairing rules, hierarchy, and accessibility non-negotiables.",
 };
-
-function Accent({
-  display,
-  children,
-}: {
-  display?: boolean;
-  children: string;
-}) {
-  return (
-    <span
-      className={`${display ? "font-display" : "font-serif"} italic tracking-normal text-[1.18em]`}
-    >
-      {children}
-    </span>
-  );
-}
-
-function Meta({ children }: { children: string }) {
-  return (
-    <p className="font-mono text-caption text-muted-foreground text-pretty">{children}</p>
-  );
-}
 
 const SCALE: {
   role: string;

@@ -1,0 +1,117 @@
+# ===========================================================================
+#  CODEOWNERS — near-org-cms
+# ===========================================================================
+#  ESTADO: inerte hasta transferir el repo a una org con plan Pro/Team/
+#  Enterprise (hoy es privado en una cuenta Free — GitHub no permite
+#  "Require review from Code Owners" ahí). Se documenta y escribe ahora
+#  para que exista desde el primer PR de un diseñador; activar el
+#  requisito de review en Settings → Rules en cuanto se transfiera
+#  (ver README de este directorio o el plan de la Fase 5).
+#
+#  SINTAXIS (gitignore-like, con diferencias reales):
+#    · Los paréntesis de los grupos de ruta de Next van LITERALES:
+#      `/app/(site)/` — escapar con `\(` es un patrón INVÁLIDO.
+#    · No hay `!` (negación) ni `[ ]` (rangos de caracteres).
+#    · PRECEDENCIA: la ÚLTIMA regla que hace match GANA (al revés que
+#      gitignore) — por eso el fallback va primero y la auto-protección
+#      del propio mecanismo va al final.
+#    · `/dir/` con slash final matchea el directorio y todo lo anidado.
+#    · Los owners deben tener acceso WRITE explícito al repo, o el
+#      validador de GitHub reporta "Unknown owner".
+#
+#  MANTENER SINCRONIZADO CON:
+#    · .github/scripts/path-guard.sh   (BLOCKED_ERE)
+#    · eslint.config.zones.mjs         (DESIGNER_ZONE)
+#
+#  Sustituir @DESIGNER_1 / @DESIGNER_2 por los handles reales antes de dar
+#  acceso — deben tener write al repo o el archivo queda inválido.
+# ===========================================================================
+
+
+# ---------------------------------------------------------------------------
+# 1. FALLBACK — todo pertenece al ingeniero salvo que una regla POSTERIOR
+#    diga lo contrario. Política deny-by-default: cualquier archivo nuevo
+#    en una ruta no listada cae automáticamente en el ingeniero.
+# ---------------------------------------------------------------------------
+*                                     @StrykerUX
+
+
+# ---------------------------------------------------------------------------
+# 2. ZONA DISEÑADORES — escritura permitida.
+#    @StrykerUX se incluye a propósito: "cualquier owner alcanza" para el
+#    requisito de review, así los diseñadores pueden aprobarse entre sí
+#    sin bloquear a los demás por la ausencia del ingeniero.
+# ---------------------------------------------------------------------------
+/components/primitives/              @StrykerUX @DESIGNER_1 @DESIGNER_2
+/components/sections/                @StrykerUX @DESIGNER_1 @DESIGNER_2
+/components/views/                   @StrykerUX @DESIGNER_1 @DESIGNER_2
+/public/                             @StrykerUX @DESIGNER_1 @DESIGNER_2
+
+
+# ---------------------------------------------------------------------------
+# 3. NÚCLEO — exclusivo del ingeniero.
+# ---------------------------------------------------------------------------
+/packages/                           @StrykerUX
+/proxy.ts                            @StrykerUX
+
+
+# ---------------------------------------------------------------------------
+# 4. RUTAS DE APLICACIÓN — todo lo que es page.tsx/layout.tsx/route.ts real
+#    (a diferencia de los page.meta.ts de la sección 2) es del ingeniero,
+#    incluidas las islas data-bound dentro de app/(site)/.
+# ---------------------------------------------------------------------------
+/app/admin/                          @StrykerUX
+/app/api/                            @StrykerUX
+/app/(site)/layout.tsx               @StrykerUX
+/app/(site)/blog/                    @StrykerUX
+/app/(site)/page.tsx                 @StrykerUX
+/app/(site)/brand/                   @StrykerUX
+/app/prototype/page.tsx              @StrykerUX
+/app/prototype/components/page.tsx   @StrykerUX
+/app/[slug]/                         @StrykerUX
+/app/preview/                        @StrykerUX
+/app/downloads/                      @StrykerUX
+/app/feed.xml/                       @StrykerUX
+/app/layout.tsx                      @StrykerUX
+/app/not-found.tsx                   @StrykerUX
+/app/globals.css                     @StrykerUX
+/app/sitemap.ts                      @StrykerUX
+/app/robots.ts                       @StrykerUX
+
+
+# ---------------------------------------------------------------------------
+# 5. COMPONENTES COMPARTIDOS / DEL INGENIERO
+# ---------------------------------------------------------------------------
+/components/ui/                      @StrykerUX
+/components/site/                    @StrykerUX
+/components/blog/                    @StrykerUX
+
+
+# ---------------------------------------------------------------------------
+# 6. LÓGICA, SCRIPTS, CONFIG, INFRA
+# ---------------------------------------------------------------------------
+/lib/                                 @StrykerUX
+/scripts/                             @StrykerUX
+/docs/                                @StrykerUX
+/next.config.ts                       @StrykerUX
+/postcss.config.js                    @StrykerUX
+/vercel.json                          @StrykerUX
+/package.json                         @StrykerUX
+/pnpm-lock.yaml                       @StrykerUX
+/pnpm-workspace.yaml                  @StrykerUX
+/tsconfig.json                        @StrykerUX
+/next-env.d.ts                        @StrykerUX
+/.npmrc                               @StrykerUX
+/.gitignore                           @StrykerUX
+/eslint.config.mjs                    @StrykerUX
+/eslint.config.zones.mjs              @StrykerUX
+/.env.example                         @StrykerUX
+
+
+# ---------------------------------------------------------------------------
+# 7. LA CAPA DE ENFORCEMENT SE PROTEGE A SÍ MISMA.
+#    Va AL FINAL: última regla que matchea = máxima precedencia. Sin esto,
+#    un PR podría desarmar el guard y el propio CODEOWNERS de un tiro.
+# ---------------------------------------------------------------------------
+/.github/                             @StrykerUX
+/CLAUDE.md                            @StrykerUX

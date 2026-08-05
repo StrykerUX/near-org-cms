@@ -1,0 +1,65 @@
+import type { ReactNode } from "react";
+import Container from "@/components/primitives/Container";
+
+// Extraído de los 3 heroes oscuros casi idénticos de app/(site)/blog/{page,
+// category/[slug],tag/[tag]}.tsx. Decisiones de variante documentadas en
+// docs/fase0-divergencias-blog.md — no re-derivar aquí.
+const SIZE = {
+  lg: { minH: "min-h-[420px]", pb: "pb-16 lg:pb-24" },
+  md: { minH: "min-h-[360px]", pb: "pb-16 lg:pb-20" },
+} as const;
+
+export type PageHeroProps = {
+  eyebrow: string;
+  title: ReactNode;
+  // Subcopy de la landing del blog (index) — estilo de párrafo, ver
+  // docs/fase0-divergencias-blog.md #3.
+  description?: ReactNode;
+  // Conteo "{total} post(s)" de category/tag. Estilo distinto y más discreto
+  // que `description` — son dos cosas distintas en el original, no una
+  // misma prop reutilizada. Ver docs/fase0-divergencias-blog.md #3.
+  stat?: ReactNode;
+  size?: keyof typeof SIZE;
+  // Slot para el header del sitio. No es una variante de esta sección — es
+  // contenido que la página/vista compone, para no obligar a esta sección a
+  // importar components/site/SiteHeader (fuera del allowlist de imports de
+  // components/sections/**, ver README.md).
+  nav?: ReactNode;
+};
+
+export default function PageHero({
+  eyebrow,
+  title,
+  description,
+  stat,
+  size = "md",
+  nav,
+}: PageHeroProps) {
+  return (
+    <section className={`relative bg-[#101010] ${SIZE[size].minH} flex flex-col`}>
+      <Container width="wide" className="relative z-10 flex flex-col flex-1">
+        {nav}
+        <div className={`flex flex-col flex-1 justify-end ${SIZE[size].pb}`}>
+          <span className="font-mono text-[0.7rem] uppercase tracking-[0.3em] text-white/50 mb-4">
+            {eyebrow}
+          </span>
+          <h1
+            className="text-white font-medium leading-[1.05] tracking-tight"
+            style={{ fontSize: "var(--font-size-h1)" }}
+          >
+            {title}
+          </h1>
+          {description && (
+            <p
+              className="mt-4 text-white/60 font-mono max-w-[520px] leading-relaxed"
+              style={{ fontSize: "var(--font-size-body)" }}
+            >
+              {description}
+            </p>
+          )}
+          {stat && <p className="mt-3 font-mono text-white/50 text-[0.75rem]">{stat}</p>}
+        </div>
+      </Container>
+    </section>
+  );
+}
