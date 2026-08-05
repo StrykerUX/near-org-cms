@@ -177,6 +177,14 @@ Se verifica con `pnpm lint:page-meta` (corre en `prebuild` y en CI).
 `page.tsx`/`page.meta.ts`/View coherentes y regenera el manifiesto en un paso.
 No es obligatorio, pero evita tener que acordarse de los 3 archivos.
 
+**Iteración visual (ajustes de diseño, animación, layout):** durante una
+ronda de ajustes rápidos sobre una sección/vista ya existente (ej. comparando
+contra una captura de referencia), no correr `pnpm build`, `pnpm typecheck`
+ni lint entre cada cambio — solo edita, y dejá que el usuario mire el
+resultado en `pnpm dev`. Corré esas verificaciones recién antes de un commit,
+o si el propio usuario lo pide explícitamente. El feedback loop de este tipo
+de trabajo es visual, no de compilación.
+
 ## Contexto del proyecto (Regenta/Aura)
 
 Al iniciar una sesión en este repo, ANTES de explorar archivos corre `/aura near-ai-web` —
