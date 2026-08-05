@@ -1,18 +1,17 @@
 #!/usr/bin/env node
-// Scaffolder de páginas nuevas. Cierra el círculo de la frontera: denegar la
-// escritura de `app/**/page.tsx` (Fase 6) deja al diseñador sin forma de
-// crear una página si no existe otra vía — este script la crea sin que el
-// diseñador escriba nada dentro de `app/` a mano, y sin depender del
-// ingeniero para cada página nueva.
+// Scaffolder de páginas nuevas. Atajo para no tener que crear a mano los 3
+// archivos que necesita una página nueva ni acordarse de regenerar el
+// manifiesto de rutas.
 //
 // Uso: node scripts/new-page.mjs <slug> "<Título>"
 // Ejemplo: node scripts/new-page.mjs pricing "Pricing"
 //
 // Genera, bajo app/(site)/<slug>/:
-//   - page.tsx        (6 líneas, ingeniero — pero ya escrito, no hace falta tocarlo)
-//   - page.meta.ts     (diseñador — editable después)
+//   - page.tsx         (ya completo — normalmente no hace falta tocarlo,
+//                        salvo que la página necesite datos de servidor)
+//   - page.meta.ts     (editable después: nav, sitemap, descripción)
 // Y bajo components/views/:
-//   - <Slug>View.tsx  (diseñador — acá se compone la página real)
+//   - <Slug>View.tsx  (acá se compone la página real con secciones)
 //
 // Al terminar, regenera el manifiesto de rutas automáticamente.
 

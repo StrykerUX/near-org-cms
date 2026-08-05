@@ -1,7 +1,7 @@
 # `components/sections/`
 
-Librería de secciones de marketing. Es la zona que los diseñadores componen —
-leer esto antes de tocar cualquier archivo aquí.
+Librería de secciones de marketing reusables — leer esto antes de tocar
+cualquier archivo aquí.
 
 ## Contrato
 
@@ -29,22 +29,21 @@ leer esto antes de tocar cualquier archivo aquí.
 
 ## Cómo verificar que no rompiste el contrato
 
-`pnpm lint:zones` (Fase 5) lo hace cumplir por máquina. Hasta que esa fase
-esté lista, revisa a mano contra la lista de arriba.
+No hay chequeo automático — revisá a mano contra la lista de arriba antes de
+dar por terminado un cambio.
 
 ## Inventario
 
-| Sección | Reemplaza | Origen |
+| Sección | Usada por | Origen |
 |---|---|---|
-| `PageHero` | hero oscuro ×3 en `blog/{page,category/[slug],tag/[tag]}.tsx` | `docs/fase0-divergencias-blog.md` #1, #1b, #2, #3 |
-| `PostCard` | `<article>` ×3 | `docs/fase0-divergencias-blog.md` #4, #5, #6 |
-| `PostGrid` | el grid `sm:grid-cols-2 lg:grid-cols-3` ×3 | — |
-| `Pagination` | Previous/Next ×3 | — |
-| `EmptyState` | bloque `✦` ×3 | `docs/fase0-divergencias-blog.md` #7 |
-| `SearchField` | `<form method="GET">` de `blog/page.tsx` | — |
-| `FilterPills` | pills de categoría de `blog/page.tsx` | — |
+| `PageHero` | `BlogIndexView`, `BlogCategoryView`, `BlogTagView` | `docs/fase0-divergencias-blog.md` #1, #1b, #2, #3 |
+| `PostCard` (vía `PostGrid`) | idem | `docs/fase0-divergencias-blog.md` #4, #5, #6 |
+| `PostGrid` | idem | — |
+| `Pagination` | idem | — |
+| `EmptyState` | idem | `docs/fase0-divergencias-blog.md` #7 |
+| `SearchField` | `BlogIndexView` | — |
+| `FilterPills` | `BlogIndexView` | — |
+| `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
 
-Ninguna de estas secciones está todavía conectada a una página real — eso es
-trabajo de la Fase 3 (separar fetching de composición), que decide cómo
-`lib/queries/*` alimenta a `components/views/*`, que a su vez compone estas
-secciones.
+`lib/queries/*` alimenta cada `page.tsx`, que le pasa props planas al `view`
+correspondiente, que compone estas secciones.

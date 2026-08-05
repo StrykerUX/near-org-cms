@@ -1,6 +1,6 @@
 ---
 name: "Nueva página"
-description: "Crea una página de marketing nueva (page.tsx + page.meta.ts + View) sin tocar nada dentro de app/ a mano."
+description: "Crea una página de marketing nueva (page.tsx + page.meta.ts + View) y regenera el manifiesto de rutas en un solo paso."
 inputs:
   - name: slug
     type: string
@@ -15,9 +15,9 @@ invocationType: "user"
 
 # Nueva página
 
-Crea una página de marketing nueva de punta a punta, sin que quien la pida
-tenga que escribir nada dentro de `app/` (zona bloqueada para la zona
-diseñadores — ver `.claude/settings.json` y `components/sections/README.md`).
+Crea una página de marketing nueva de punta a punta: los 3 archivos que
+necesita, coherentes entre sí, y el manifiesto de rutas ya regenerado — ver
+`components/sections/README.md` para el catálogo de secciones disponibles.
 
 ## Qué hacer
 
@@ -39,11 +39,11 @@ diseñadores — ver `.claude/settings.json` y `components/sections/README.md`).
      sitemap, edite `nav`/`sitemap` en el `page.meta.ts` recién creado
      (trae `nav: {header:false, footer:false}` por defecto — hay que
      activarlo a propósito).
-4. **No editar `app/(site)/<slug>/page.tsx` a mano.** Ya está completo y
-   correcto — es la pieza que conecta el meta con la vista. Si algo ahí
-   parece necesitar un cambio, es señal de que el pedido en realidad
-   necesita datos de servidor (fetch, DB) y hay que hablarlo con el
-   ingeniero, no editarlo directamente.
+4. **Normalmente no hace falta editar `app/(site)/<slug>/page.tsx`.** Ya
+   queda completo y correcto — es la pieza que conecta el meta con la vista.
+   Si la página necesita datos de servidor (fetch, DB), ahí sí se edita:
+   agregar el fetch siguiendo el patrón de `lib/queries/*` y pasarlo como
+   prop al `view`.
 
 ## Ejemplo
 

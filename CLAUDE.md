@@ -143,39 +143,39 @@ JWT strategy, 30-day sessions. Roles: **ADMIN** (full access) · **EDITOR** (own
 - **Page Management** — DB model exists, admin UI is a stub
 - **Notification emails** — Only password reset email exists
 
-## Trabajo de diseño: qué podés tocar
+## Frontend de marketing: cómo está organizado
 
-Si estás componiendo secciones o páginas de marketing (no CMS, no datos, no
-auth, no config), esta sección es para vos.
+El frontend público (`app/(site)`, `app/prototype`) sigue una separación en
+capas entre composición y datos:
 
-**Onboarding, una sola vez:** `node scripts/setup-designer.mjs` — copia la
-plantilla de permisos a tu propio `.claude/settings.local.json` (gitignorado,
-nunca se sube). Sin este paso no tenés las restricciones activas ni el
-scaffolder funcionando con el hook de protección.
-
-**Tocás exactamente esto, nada más:**
-
-| Carpeta | Qué es |
+| Capa | Qué va ahí |
 |---|---|
 | `components/primitives/` | Bloques atómicos (`Accent`, `Button`, `Eyebrow`, `Container`, …) |
 | `components/sections/` | Secciones de marketing reusables — ver `components/sections/README.md` para el catálogo y el contrato |
 | `components/views/` | La composición de cada página real (qué secciones, en qué orden, con qué copy) |
 | `app/**/page.meta.ts` | Metadata de cada página (title, description, nav, sitemap) |
-| `public/` | Assets estáticos |
+| `app/**/page.tsx` | Fetch de datos (`lib/queries/*`), `revalidate`, `notFound()` — nada de JSX de layout |
 
-**Todo lo demás está bloqueado** (`packages/cms-core`, `lib/`, `app/**/page.tsx`,
-`app/admin`, `app/api`, config, `.env*`, etc.) — por dos capas independientes:
-el `deny` de tu `settings.local.json` y un hook `PreToolUse` que corre antes
-de cada acción. Si algo te aparece bloqueado y creés que de verdad lo
-necesitás, es señal de que el pedido necesita datos de servidor o toca el
-CMS — hablalo con el ingeniero, no lo edites directo.
+Los `views` reciben props planas y serializables (sin `Date`, sin funciones —
+ver `components/sections/types.ts`), así que se pueden razonar o previsualizar
+sin tocar la base de datos. El fetching vive en `page.tsx`/`lib/queries/*`,
+nunca en un `view` o una `section`.
 
-**Página nueva:** usá la skill `/new-page <slug> "<Título>"` (o
-`node scripts/new-page.mjs <slug> "<Título>"` a mano) — genera el
-`page.tsx`/`page.meta.ts`/View correctos y regenera el manifiesto de rutas
-solo. Nunca crees un `page.tsx` a mano.
+**Manifiesto de rutas:** cada página con `page.meta.ts` entra automáticamente
+al nav (header/footer) y al sitemap. Al crear o editar uno, correr
+`pnpm gen:routes` — `lib/routes.generated.ts` es un cache commiteado, no la
+fuente de verdad (`predev`/`prebuild` lo regeneran solos).
 
-**Comandos que sí podés correr:** `pnpm dev`, `pnpm build`, `pnpm gen:routes`.
+**Única regla que el build hace cumplir:** `page.meta.ts` solo puede
+`import type { PageMeta } from "@/lib/page-meta"` — nada más. `SiteHeader.tsx`
+es `"use client"` y arrastra todo lo que un `page.meta.ts` importe al bundle
+de cliente; un import de servidor ahí revienta con un error de bundle confuso.
+Se verifica con `pnpm lint:page-meta` (corre en `prebuild` y en CI).
+
+**Página nueva:** la skill `/new-page <slug> "<Título>"` (o
+`node scripts/new-page.mjs <slug> "<Título>"` a mano) es un atajo — genera
+`page.tsx`/`page.meta.ts`/View coherentes y regenera el manifiesto en un paso.
+No es obligatorio, pero evita tener que acordarse de los 3 archivos.
 
 ## Contexto del proyecto (Regenta/Aura)
 
@@ -185,4 +185,4 @@ Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`
 
 ---
 
-*Last updated: Fase 6 — repo seguro por construcción para diseñadores (ver docs/fase0-divergencias-blog.md, docs/github-org-transfer.md)*
+*Last updated: refactor de frontend de marketing en capas (ver docs/fase0-divergencias-blog.md)*
