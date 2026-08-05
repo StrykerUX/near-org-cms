@@ -11,7 +11,10 @@ cualquier archivo aquí.
    Toda sección recibe sus datos ya resueltos por props.
 3. **Imports permitidos** (allowlist, no denylist): `react`, `next/link`,
    `next/image`, `lucide-react`, `clsx`, `@/components/primitives/*`,
-   `@/components/sections/*`.
+   `@/components/sections/*`. Secciones animadas también pueden importar
+   `gsap` y `@/components/primitives/motion/*` — precedente: `CompanyGrid.tsx`
+   (marquee), formalizado con el toolkit de `/prototype/homepage`. Una sección
+   animada es `"use client"`; el resto se queda como server component.
 4. **Prohibido importar**: `@near/cms-core/*`, `@cms/*`, `@prisma/client`,
    `next/headers`, `next/navigation`, `next/cache`, `@/lib/*`, `@/app/*`,
    `@/components/site/*` (chrome compartido — se compone desde afuera, ver
@@ -44,6 +47,15 @@ dar por terminado un cambio.
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
+| `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialCards`, `LatestUpdates`, `OutroWordmark` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
 
 `lib/queries/*` alimenta cada `page.tsx`, que le pasa props planas al `view`
 correspondiente, que compone estas secciones.
+
+## Toolkit de animación
+
+`components/primitives/motion/` — hooks compartidos para secciones animadas
+(`useGsapContext`, `useScrollReveal`, `pauseOffscreen`, registro de plugins y
+tokens de motion). Documentado en detalle en cada archivo; ver `HeroBanner.tsx`
+o `FeatureCards.tsx` para dos formas de uso (timeline propia vs. reveal
+genérico por `data-reveal`).

@@ -15,6 +15,16 @@
   --font-size-h3:   clamp(1.25rem, 0.417rem + 1.736vw, 2.5rem);
   --font-size-body: clamp(1rem, 0.764rem + 0.3012vw, 1.125rem);
 
+  /* ── paleta draft del prototipo "homepage" (/prototype/homepage) —
+     estimada de la captura compartida, NO son tokens de marca definitivos.
+     Ver app/(site)/brand/page.tsx, todavía placeholder grayscale. Reemplazar
+     cuando exista un sistema de color real. ── */
+  --near-green: #00ec97;
+  --near-green-dark: #00c97f;
+  --near-teal: #2dd4bf;
+  --cream: #f3f1ea;
+  --stone: #d8d6d0;
+
   /* ── shadcn/ui tokens — neutral grayscale placeholder, no palette defined yet ── */
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0 0 0);
@@ -105,6 +115,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* draft del prototipo "homepage" — ver la nota en :root de arriba */
+  --color-near-green: var(--near-green);
+  --color-near-green-dark: var(--near-green-dark);
+  --color-near-teal: var(--near-teal);
+  --color-cream: var(--cream);
+  --color-stone: var(--stone);
+
   --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, Menlo, monospace;
   --font-serif: "kepler-std", ui-serif, Georgia, "Times New Roman", serif;
@@ -184,6 +202,14 @@
 }
 
 /* ── site animations & utilities (pending redesign) ─────────── */
+
+/* Draft del prototipo "homepage" — heading de QuantumRevealHeading */
+.text-gradient-quantum {
+  background-image: linear-gradient(90deg, #a3b565, var(--near-green), var(--near-teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
 .text-muted {
   color: var(--color-muted);
