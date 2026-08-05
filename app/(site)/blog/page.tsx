@@ -2,20 +2,12 @@ import { Metadata } from "next";
 import SiteHeader from "@/components/site/SiteHeader";
 import BlogIndexView from "@/components/views/BlogIndexView";
 import { getPublishedPosts, getCategoryPills } from "@/lib/queries/posts";
+import { toMetadata } from "@/lib/seo";
+import meta from "./page.meta";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Blog — NEAR AI",
-  description: "Insights on AI, private compute, and the future of the open web.",
-  openGraph: {
-    type: "website",
-    url: "https://near.ai/blog",
-    siteName: "NEAR AI",
-    title: "Blog — NEAR AI",
-    description: "Insights on AI, private compute, and the future of the open web.",
-  },
-};
+export const metadata: Metadata = toMetadata(meta);
 
 export default async function BlogIndex({
   searchParams,
