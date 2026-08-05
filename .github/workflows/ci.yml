@@ -8,9 +8,7 @@ on:
 
 # NO poner `paths:`/`paths-ignore:` a nivel de workflow: un workflow skipped
 # no reporta "success", y un required check skipped deja el PR bloqueado
-# para siempre ("Expected — Waiting for status to be reported"). Cuando el
-# repo se transfiera a una org con checks requeridos (ver Fase 5, pendiente
-# documentado), este comentario sigue aplicando — no lo quites.
+# para siempre ("Expected — Waiting for status to be reported").
 
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
@@ -47,10 +45,11 @@ jobs:
       # postinstall corre `prisma generate` — no necesita DB.
       - run: pnpm install --frozen-lockfile
 
-      # GATE DURO: frontera de zonas. Verde desde el primer commit — ver
-      # docs de eslint.config.zones.mjs.
-      - name: Lint · fronteras de zona
-        run: pnpm run lint:zones
+      # GATE DURO: page.meta.ts solo puede `import type { PageMeta }` —
+      # SiteHeader.tsx es "use client" y arrastra el manifiesto de rutas al
+      # bundle. Ver eslint.config.mjs.
+      - name: Lint · page.meta
+        run: pnpm run lint:page-meta
 
       - name: Typecheck
         run: pnpm run typecheck
