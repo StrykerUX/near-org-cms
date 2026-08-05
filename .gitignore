@@ -41,4 +41,6 @@ Thumbs.db
 
 # Prisma
 # prisma/migrations/ — migrations are version controlled intentionally
-.claude/access.log
+
+# Claude Code — permisos/config personal de cada máquina, no del proyecto
+.claude/settings.local.json
