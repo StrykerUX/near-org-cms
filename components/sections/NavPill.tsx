@@ -13,7 +13,10 @@ const LINKS = [
 
 export default function NavPill() {
   return (
-    <nav className="group/nav flex items-center justify-between rounded-full bg-secondary px-2 py-2 pl-6 text-secondary-foreground">
+    // w-fit + mx-auto: la pill se ajusta a su contenido y se centra dentro
+    // del Container que la envuelve — nunca debe estirarse a todo el ancho
+    // (bug visual encontrado comparando contra la captura de referencia).
+    <nav className="group/nav mx-auto flex w-fit items-center gap-10 rounded-full bg-secondary px-2 py-2 pl-6 text-secondary-foreground">
       <span className="font-sans text-h4 font-medium lowercase">near</span>
 
       <div className="hidden items-center gap-8 md:flex">

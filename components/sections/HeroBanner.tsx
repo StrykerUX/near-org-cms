@@ -58,13 +58,13 @@ export default function HeroBanner({ nav }: HeroBannerProps) {
     <section ref={rootRef} className="flex flex-col bg-cream text-foreground">
       <Container className="pt-6">{nav}</Container>
 
-      <Container className="flex flex-1 flex-col items-center justify-center gap-8 py-24 text-center">
+      <Container className="flex flex-1 flex-col items-center justify-center gap-6 py-14 text-center">
         <h1 data-hero="heading" className="text-display font-medium text-pretty">
           Own your
           <br />
           <Accent display>world.</Accent>
         </h1>
-        <p data-hero="sub" className="max-w-lg text-body-lg text-muted-foreground text-pretty">
+        <p data-hero="sub" className="max-w-xl text-body-lg text-muted-foreground text-pretty">
           Move cross-chain, trade perps, hold RWAs, stay confidential, and
           access all of DeFi from your own wallet.
         </p>
