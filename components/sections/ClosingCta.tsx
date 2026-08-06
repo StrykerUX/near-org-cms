@@ -2,6 +2,7 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import ShineField from "@/components/primitives/ShineField";
 import ZigguratDivider from "@/components/primitives/ZigguratDivider";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 
@@ -31,28 +32,13 @@ export default function ClosingCta() {
             updates straight to your inbox.
           </p>
 
-          {/* Draft sin backend: el submit se cancela a mano. Sin esto el form
-              sin `action` recarga la página. */}
-          <form
-            data-reveal
-            onSubmit={(e) => e.preventDefault()}
-            className="mt-4 flex w-full max-w-sm items-center gap-2 rounded-full bg-white p-1.5 pl-6"
-          >
-            <input
-              type="email"
+          <div data-reveal className="mt-4 flex w-full justify-center">
+            <ShineField
+              label="Email address"
               placeholder="email address"
-              aria-label="Email address"
-              className="min-w-0 flex-1 bg-transparent text-body-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              buttonLabel="sign up"
             />
-            {/* near-green-dark y no near-green: el verde puro con texto blanco
-                queda en ~1.5:1 de contraste. */}
-            <button
-              type="submit"
-              className="shrink-0 rounded-full bg-near-green-dark px-5 py-2 text-body-sm text-white transition-opacity hover:opacity-90"
-            >
-              sign up
-            </button>
-          </form>
+          </div>
         </div>
       </Container>
 

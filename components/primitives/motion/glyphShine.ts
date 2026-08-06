@@ -35,6 +35,15 @@ export type GlyphShine = {
   setVisible: (v: boolean) => void;
   /** Re-mide el cluster, re-rasteriza la máscara y reubica el canvas. */
   remeasure: () => void;
+  /** Reemplaza los glifos mascarados SIN recrear el contexto WebGL.
+   *
+   *  Existe para texto que cambia mientras el efecto está vivo (un campo de
+   *  formulario). Recrear la instancia en cada tecla significaría compilar y
+   *  linkear los shaders y pedir un contexto nuevo por keystroke — y Chrome
+   *  mata contextos pasados los ~16 vivos.
+   *
+   *  Un array vacío es válido: apaga el canvas dejándolo en 0×0. */
+  setChars: (chars: HTMLElement[]) => void;
   destroy: () => void;
 };
 
@@ -73,7 +82,7 @@ function compile(gl: WebGL2RenderingContext, type: number, src: string) {
 export function createGlyphShine(
   canvas: HTMLCanvasElement,
   {
-    chars,
+    chars: initialChars,
     host,
     observe,
     tint = [0.34, 0.97, 0.72],
@@ -86,7 +95,9 @@ export function createGlyphShine(
     padEm = 0.35,
   }: GlyphShineOptions
 ): GlyphShine | null {
-  if (chars.length === 0) return null;
+  // Mutable: `setChars` la reemplaza sin recrear el contexto. Arrancar con un
+  // array vacío es válido (un campo de texto todavía sin valor).
+  let chars = initialChars;
 
   // ── Capability check: el check ES crear el contexto ─────────────────────
   const glOrNull = canvas.getContext("webgl2", {
@@ -349,10 +360,28 @@ export function createGlyphShine(
     }
   }
 
+  /** Apaga el canvas sin tocar el contexto: el efecto queda vivo, listo para
+   *  volver a encenderse con el próximo setChars. */
+  function blank() {
+    bufW = 0;
+    bufH = 0;
+    sig = "";
+    canvas.style.width = "0px";
+    canvas.style.height = "0px";
+  }
+
   function remeasure() {
     // El guard de `dead` es lo que hace inofensivos los callbacks asíncronos
     // tardíos (fonts.ready resolviendo después del desmontaje de StrictMode).
     if (dead) return;
+
+    // Sin glifos no hay nada que mascarar (campo de texto vacío). `blank` y no
+    // un `return` pelado: si antes había texto, el canvas se quedaría mostrando
+    // el último frame rasterizado.
+    if (chars.length === 0) {
+      blank();
+      return;
+    }
 
     // TODAS las lecturas de layout primero, TODOS los writes después.
     const fonts: CharFont[] = chars.map((c) => {
@@ -484,6 +513,17 @@ export function createGlyphShine(
       }
     },
     remeasure,
+    setChars(next: HTMLElement[]) {
+      if (dead) return;
+      chars = next;
+      // Resetear `sig` es obligatorio, no una precaución: el rebuild-guard
+      // compara geometría y fuente, y al editar texto el box puede quedar
+      // IDÉNTICO con contenido distinto (reemplazar una letra por otra del
+      // mismo ancho). Sin esto, remeasure saldría temprano y la máscara
+      // quedaría mostrando el texto anterior.
+      sig = "";
+      remeasure();
+    },
     destroy() {
       clearTimeout(roTimer);
       ro.disconnect();
