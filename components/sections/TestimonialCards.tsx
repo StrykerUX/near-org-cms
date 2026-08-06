@@ -39,7 +39,7 @@ export default function TestimonialCards() {
             >
               <p className="text-body-lg text-pretty">“{q.quote}”</p>
               <footer className="flex flex-col gap-0.5">
-                <span className="text-body-sm font-medium">{q.name}</span>
+                <span className="text-label">{q.name}</span>
                 <span
                   className={`text-caption ${
                     q.variant === "dark"

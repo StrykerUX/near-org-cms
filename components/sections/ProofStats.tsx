@@ -356,7 +356,7 @@ export default function ProofStats() {
                   // Solo el bloque del medio es "real": es el que `go()` mide
                   // y resalta. Las copias son relleno visual.
                   {...(copy === 0 ? { "data-word": "" } : {})}
-                  className="text-display font-medium leading-none whitespace-nowrap opacity-[0.06]"
+                  className="text-display whitespace-nowrap opacity-[0.06]"
                 >
                   {step.word}
                 </span>

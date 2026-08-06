@@ -8,8 +8,19 @@
 @import "../packages/cms-core/styles/admin.css";
 
 :root {
-  /* ── fluid type scale — placeholder, pending design system ── */
   --color-muted: #5A5A5A;
+
+  /* ── DEPRECADA: escala vieja, NO usar en código nuevo ─────────────────────
+     La escala real del DS son los tokens `--text-*` del @theme inline de más
+     abajo, que además traen line-height, letter-spacing y font-weight por
+     nivel. Esta se conserva solo porque todavía la consumen 11 lugares vía
+     `style={{ fontSize: "var(--font-size-*)" }}`: las secciones y páginas de
+     blog (PageHero, PostCard, EmptyState, PostRenderer, SiteFooter,
+     app/(site)/blog/[slug]) y LinktreePublicView del cms-core.
+
+     No es un mapeo 1:1 con la nueva — es más chica en todos los niveles
+     (h1 topa en 4.25rem vs 5.5rem), así que migrar CAMBIA el tamaño de los
+     headings del blog. Por eso se hace aparte y no de arrastre. ── */
   --font-size-h1:   clamp(2rem, 0.5rem + 3.125vw, 4.25rem);
   --font-size-h2:   clamp(1.75rem, 0.583rem + 2.43vw, 3.5rem);
   --font-size-h3:   clamp(1.25rem, 0.417rem + 1.736vw, 2.5rem);
@@ -184,7 +195,120 @@
   --text-eyebrow--line-height: 1.2;
   --text-eyebrow--letter-spacing: 0.2em;
   --text-eyebrow--font-weight: 500;
+
+  /* ── Label ───────────────────────────────────────────────────────────────
+     El rol "texto de botón o link": body-sm pero en weight medio. Existía de
+     hecho en 5 lugares, todos escribiendo `text-body-sm font-medium` — o sea
+     parcheando el weight del token a mano. Hereda tamaño, interlineado y
+     tracking de body-sm por referencia, así que ajustar body-sm los mueve a
+     los dos; lo único propio es el weight. */
+  --text-label: var(--text-body-sm);
+  --text-label--line-height: var(--text-body-sm--line-height);
+  --text-label--letter-spacing: var(--text-body-sm--letter-spacing);
+  --text-label--font-weight: 500;
+
+  /* ── Serif overrides de la escala ────────────────────────────────────────
+     La escala de arriba está calibrada para la sans (Montreal): trae
+     letter-spacing negativo y weight 500. Kepler no quiere ninguno de los dos
+     — una serif de display no lleva tightening ni weight medio a tamaño
+     grande. Estos tres tokens capturan esa regla UNA sola vez y los consumen
+     las `@utility text-*-serif` / `accent-*` de más abajo, en vez de repetirse
+     como `font-normal tracking-normal` en cada heading serif del sitio. */
+  --text-serif--letter-spacing: 0em;
+  --text-serif--font-weight: 400;
+  /* Compensa la x-height de Kepler contra Montreal cuando un span serif va
+     embebido en un heading sans (ver components/primitives/Accent.tsx). */
+  --text-serif--optical-scale: 1.18;
+
+  /* ── Wordmark ────────────────────────────────────────────────────────────
+     Vive fuera de la escala de texto a propósito: es más grande que
+     --text-display (8rem) porque es un elemento gráfico, no un heading.
+     Entra igual al DS para que no quede como un `style` inline suelto. */
+  --text-wordmark: clamp(8rem, 28vw, 22rem);
+  --text-wordmark--line-height: 0.8;
+  --text-wordmark--letter-spacing: -0.03em;
+  --text-wordmark--font-weight: 500;
 }
+
+/* ── Escalas serif ──────────────────────────────────────────────────────────
+   Cada una empaqueta familia + escala + los overrides serif en UNA clase.
+   Reemplazan a `font-serif text-h2 font-normal tracking-normal`, donde 3 de
+   las 4 clases eran parches para deshacer lo que el token de la escala trae.
+
+   Fijan también el `font-size` a propósito. La alternativa —una utilidad de
+   "solo familia/weight/tracking" combinada con `text-h2`— deja a dos
+   utilidades declarando `letter-spacing` y `font-weight`, y cuál gana lo
+   decide el orden en el CSS generado, NO el orden en el atributo class. Una
+   sola clase que declara todo es determinista.
+
+   El font-size sale del MISMO token que la sans: cambiar `--text-h2` mueve al
+   h2 sans y al serif juntos. */
+/* A escala display va el optical master de Kepler, no el master de texto: a
+   ~128px el de texto se ve con trazos gruesos y poco contraste. Las escalas h1
+   y h2 de abajo sí usan el master de texto. */
+@utility text-display-serif {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+@utility text-h1-serif {
+  font-family: var(--font-serif);
+  font-size: var(--text-h1);
+  line-height: var(--text-h1--line-height);
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+@utility text-h2-serif {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* ── Spans de acento ────────────────────────────────────────────────────────
+   Para serif embebida DENTRO de un heading sans. El tamaño es relativo (1em
+   del padre × la escala óptica), así que hereda la escala del heading que lo
+   contiene en vez de fijar una propia. */
+@utility accent-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: calc(1em * var(--text-serif--optical-scale));
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* Kepler's large-size optical master — para acentos dentro de display/h1. */
+@utility accent-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: calc(1em * var(--text-serif--optical-scale));
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* ── Marcador de índice ─────────────────────────────────────────────────────
+   El "01" / "02" en superíndice al lado de un heading. Tamaño RELATIVO (medio
+   em del heading que lo contiene), así que sigue su escala; el weight baja a
+   regular para que el número no compita con el título. */
+@utility index-marker {
+  font-size: 0.5em;
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* Ojo: `text-wordmark` y `text-label` NO necesitan @utility. Al declarar
+   `--text-wordmark` con sus `--line-height/--letter-spacing/--font-weight` en
+   el @theme, Tailwind ya genera la utilidad completa, igual que con text-h1.
+   Un @utility con el mismo nombre crea DOS reglas `.text-wordmark` y gana la
+   última — un conflicto silencioso.
+
+   Las escalas serif sí necesitan @utility, pero por un motivo concreto: los
+   tokens del @theme no pueden aportar `font-family`, y ahí está justamente la
+   mitad del problema que resuelven. */
 
 /* Geist font scoped to admin only */
 .admin-wrapper {
@@ -202,14 +326,6 @@
 }
 
 /* ── site animations & utilities (pending redesign) ─────────── */
-
-/* Draft del prototipo "homepage" — heading de QuantumRevealHeading */
-.text-gradient-quantum {
-  background-image: linear-gradient(90deg, #a3b565, var(--near-green), var(--near-teal));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
 
 .text-muted {
   color: var(--color-muted);

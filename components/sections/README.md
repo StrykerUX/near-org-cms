@@ -29,6 +29,17 @@ cualquier archivo aquí.
    dos componentes, no una sección con 8 booleanos.
 8. `tsconfig.json` tiene `noUnusedLocals`/`noUnusedParameters` en `true` — una
    prop declarada y no usada rompe el build. Es intencional, no un bug.
+9. **Tipografía: solo tokens de la escala.** Prohibido definir a mano tamaño
+   (`text-[18px]`, `style={{fontSize}}`), peso (`font-medium`), interlineado
+   (`leading-*`) o tracking (`tracking-*`). Los tokens `--text-*` de
+   `app/globals.css` ya traen los cuatro por nivel, así que un `font-medium`
+   al lado de un `text-h2` no se ve mal hoy pero anula el token el día que el
+   DS cambie. Si al rol le falta un token, **se agrega al DS** — así nació
+   `--text-label` (botones y links) y así se resolvió la serif, que necesitaba
+   deshacer el tracking negativo y el weight medio de la escala sans en cada
+   heading (`text-h2-serif`, `accent-serif`, `accent-display`). Lo verifica
+   `pnpm lint:typography`, que corre en `prebuild` y en CI. Para una excepción
+   deliberada: `/* ds-exempt: <razón> */` en la línea de arriba.
 
 ## Cómo verificar que no rompiste el contrato
 

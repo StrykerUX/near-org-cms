@@ -52,7 +52,7 @@ export default function LatestUpdates() {
   return (
     <section className="bg-cream text-foreground">
       <Container className="flex flex-col gap-20 py-28 md:gap-24 md:py-36">
-        <h2 className="text-center text-h1 font-medium text-pretty">
+        <h2 className="text-center text-h1 text-pretty">
           The latest from NEAR
         </h2>
 
@@ -64,7 +64,7 @@ export default function LatestUpdates() {
                 tono del botón de la referencia. */}
             <a
               href="#"
-              className="rounded-full bg-near-green-dark px-6 py-2.5 text-caption font-medium uppercase tracking-[0.08em] text-white transition-opacity hover:opacity-90"
+              className="rounded-full bg-near-green-dark px-6 py-2.5 text-eyebrow uppercase text-white transition-opacity hover:opacity-90"
             >
               All posts
             </a>
@@ -90,7 +90,7 @@ export default function LatestUpdates() {
                     — sin ese radio el recorte se ve como un rectángulo pegado
                     encima de la imagen. */}
                 <div className="absolute left-2.5 top-2.5 flex w-[60%] flex-col gap-1 rounded-tl-[1.4rem] rounded-br-[1.4rem] bg-white p-4 pb-5 pr-7">
-                  <h3 className="text-h4 font-medium leading-tight text-pretty">
+                  <h3 className="text-h4 text-pretty">
                     {post.title}
                   </h3>
                   <p className="text-body-sm text-muted-foreground">{post.byline}</p>

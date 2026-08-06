@@ -39,14 +39,17 @@ export default function OutroWordmark() {
   return (
     <section ref={rootRef} className="relative overflow-hidden bg-background pt-24">
       <Container className="flex flex-col items-center gap-4 text-center">
-        <p className="text-h3 font-medium text-pretty">Where money actually moves.</p>
+        <p className="text-h3 text-pretty">Where money actually moves.</p>
       </Container>
 
       <div className="relative mt-12 overflow-hidden" aria-hidden="true">
+        {/* `text-wordmark` es un token del DS, no un tamaño suelto: antes esto
+            era un `style={{ fontSize: clamp(...) }}` inline con su weight e
+            interlineado a mano, o sea el único texto del homepage que ningún
+            cambio del sistema tipográfico podía alcanzar. */}
         <p
           data-parallax="wordmark"
-          className="translate-y-1/3 select-none text-center font-sans font-medium leading-none text-foreground"
-          style={{ fontSize: "clamp(8rem, 28vw, 22rem)" }}
+          className="translate-y-1/3 select-none text-center text-wordmark text-foreground"
         >
           near
         </p>

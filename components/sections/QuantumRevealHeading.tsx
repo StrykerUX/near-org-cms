@@ -176,7 +176,7 @@ export default function QuantumRevealHeading() {
           className="relative isolate mx-auto flex max-w-5xl flex-col items-center overflow-hidden bg-stone px-10 py-12 text-center"
         >
           {LINES.map((line) => (
-            <h2 key={line} data-quantum="line" className="text-h2 font-medium text-pretty">
+            <h2 key={line} data-quantum="line" className="text-h2 text-pretty">
               {line}
             </h2>
           ))}

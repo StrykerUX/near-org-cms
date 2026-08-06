@@ -16,6 +16,19 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
 // invertido: picos en los bordes, dip en el centro.
 const STEPS = [100, 70, 40, 0, 40, 70, 100]; // % de la altura del contenedor
 
+// UNA sola altura para todos los dividers de la página, a propósito: no hay
+// prop para cambiarla. Mientras existía, dos secciones terminaron con
+// escaleras de tamaños distintos y el patrón dejó de leerse como el mismo
+// elemento repetido.
+//
+// El número no es arbitrario. Con 7 columnas, a 1780px de ancho cada una mide
+// ~254px, y los escalones bajan en pasos de 30% de esta altura. A 256px el
+// salto es ~77px contra 254px de columna (1:3.3): se lee como escalera. A la
+// altura anterior (160px) el salto era de 48px (1:5) y parecía una línea
+// ondulada; al doble (384px) se leía bien pero, con cuatro dividers en la
+// página, sumaban ~1536px de puro ornamento vertical.
+const HEIGHT = "h-32 sm:h-48 lg:h-64";
+
 export type ZigguratDividerProps = {
   /** Color del fondo detrás de la escalera (continúa la sección de arriba) */
   from: string;
@@ -101,7 +114,7 @@ export default function ZigguratDivider({
   return (
     <div
       aria-hidden="true"
-      className={`relative h-28 overflow-hidden sm:h-40 ${className}`}
+      className={`relative overflow-hidden ${HEIGHT} ${className}`}
       style={{ backgroundColor: from }}
     >
       <div

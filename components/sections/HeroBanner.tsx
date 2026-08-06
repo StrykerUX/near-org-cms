@@ -64,7 +64,7 @@ export default function HeroBanner({ nav }: HeroBannerProps) {
       <Container className="pt-6">{nav}</Container>
 
       <Container className="flex flex-1 flex-col items-center justify-center gap-6 py-14 text-center">
-        <h1 data-hero="heading" className="text-display font-medium text-pretty">
+        <h1 data-hero="heading" className="text-display text-pretty">
           Own your
           <br />
           <Accent display>world.</Accent>

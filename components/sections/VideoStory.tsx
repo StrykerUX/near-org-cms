@@ -36,7 +36,7 @@ export default function VideoStory() {
 
             <button
               type="button"
-              className="group absolute left-6 top-6 flex items-center gap-2 rounded-full bg-white py-1 pl-1 pr-4 text-body-sm font-medium text-black shadow-lg transition-transform hover:scale-105 sm:left-8 sm:top-8"
+              className="group absolute left-6 top-6 flex items-center gap-2 rounded-full bg-white py-1 pl-1 pr-4 text-label text-black shadow-lg transition-transform hover:scale-105 sm:left-8 sm:top-8"
             >
               <span className="flex size-8 items-center justify-center rounded-full bg-black text-white transition-transform group-hover:scale-110">
                 <Play className="size-3.5" fill="currentColor" />
@@ -45,7 +45,7 @@ export default function VideoStory() {
             </button>
 
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-6 text-white sm:p-10">
-              <h2 className="text-h2 font-medium text-pretty">
+              <h2 className="text-h2 text-pretty">
                 The worlds you build
                 <br />
                 <Accent>should be yours to own.</Accent>

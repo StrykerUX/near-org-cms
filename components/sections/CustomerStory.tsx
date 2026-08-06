@@ -19,7 +19,7 @@ export default function CustomerStory() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="flex flex-col gap-4">
             <Eyebrow>Customer stories</Eyebrow>
-            <h2 className="text-h2 font-medium text-pretty">
+            <h2 className="text-h2 text-pretty">
               NEAR AI makes
               <br />
               <Accent>Venice private.</Accent>
@@ -33,7 +33,7 @@ export default function CustomerStory() {
               confidential shard, so the provider verifies the computation
               without ever reading it.
             </p>
-            <a href="#" className="flex items-center gap-3 text-body-sm font-medium">
+            <a href="#" className="flex items-center gap-3 text-label">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
                 <ArrowRight className="size-4" />
               </span>

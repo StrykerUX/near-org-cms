@@ -139,10 +139,10 @@ export default function StackShowcase() {
             de la card se estira a líneas larguísimas. */}
         <div className="mx-auto flex max-w-[1120px] flex-col gap-20">
           <div className="flex flex-col items-center gap-3 text-center">
-            <h2 className="text-h1 font-medium text-pretty">The NEAR Stack</h2>
+            <h2 className="text-h1 text-pretty">The NEAR Stack</h2>
             {/* max-w chico a propósito: el subtítulo tiene que quebrar en dos
                 líneas, con los glifos repartidos entre ambas. */}
-            <p className="max-w-[22ch] text-h3 font-normal text-white/70 text-balance">
+            <p className="max-w-[22ch] text-h3 text-white/70 text-balance">
               Open infrastructure{" "}
               <span className="inline-block size-[0.78em] translate-y-[0.06em] rounded-full bg-gradient-to-br from-near-teal via-near-green to-near-teal" />{" "}
               powering the{" "}
@@ -159,13 +159,16 @@ export default function StackShowcase() {
               <div data-reveal="eyebrow">
                 <Eyebrow className="text-white/40">The NEAR Stack</Eyebrow>
               </div>
-              {/* Serif en las DOS líneas (la referencia no mezcla sans y
-                  serif acá), con la segunda en italic. Por eso no se usa
-                  <Accent>, que además sube el tamaño a 1.18em. */}
-              <h3
-                data-reveal="heading"
-                className="font-serif text-h2 font-normal leading-[1.06] tracking-normal text-pretty"
-              >
+              {/* Serif en las DOS líneas (la referencia no mezcla sans y serif
+                  acá), con la segunda en italic. Por eso no se usa <Accent>,
+                  que está pensado para un span serif embebido en un heading
+                  sans y escala 1.18em sobre él.
+
+                  `text-h2-serif` trae familia, escala, interlineado, tracking y
+                  weight de una sola vez — antes esto eran cuatro clases, tres
+                  de ellas parcheando a mano lo que el token de la escala sans
+                  traía de más. */}
+              <h3 data-reveal="heading" className="text-h2-serif text-pretty">
                 Sovereignty,
                 <br />
                 <span className="italic">end to end.</span>
@@ -175,10 +178,10 @@ export default function StackShowcase() {
             <IsoGraphic />
 
             <div className="flex flex-col gap-4">
-              <h4 data-reveal="body" className="text-h4 font-medium">
+              <h4 data-reveal="body" className="text-h4">
                 {/* El número va inline como superíndice, no en su propia
                     línea. */}
-                <sup className="mr-1.5 align-super text-[0.5em] font-normal text-white/35">
+                <sup className="mr-1.5 align-super index-marker text-white/35">
                   01
                 </sup>
                 near.com
@@ -187,7 +190,7 @@ export default function StackShowcase() {
                   cortas, y es lo que además fuerza a los pills a dos filas. */}
               <p
                 data-reveal="body"
-                className="max-w-[34ch] text-body-sm leading-relaxed text-white/55 text-pretty"
+                className="max-w-[34ch] text-body-sm text-white/55 text-pretty"
               >
                 The only onchain account you need. Fully confidential swaps,
                 transfers, deposits, and withdrawals. Trade perps, earn yield,
@@ -207,7 +210,7 @@ export default function StackShowcase() {
               </div>
               <a
                 href="#"
-                className="mt-2 flex w-fit items-center gap-2 text-body-sm font-medium hover:text-near-green"
+                className="mt-2 flex w-fit items-center gap-2 text-label hover:text-near-green"
               >
                 Visit near.com
                 <ArrowRight className="size-4" />
@@ -216,8 +219,8 @@ export default function StackShowcase() {
               {/* Los siguientes items del stack, colapsados y tenues. */}
               <div className="mt-20 flex flex-col gap-6">
                 {COLLAPSED.map((item) => (
-                  <h4 key={item.n} className="text-h4 font-medium text-white/25">
-                    <sup className="mr-1.5 align-super text-[0.5em] font-normal">
+                  <h4 key={item.n} className="text-h4 text-white/25">
+                    <sup className="mr-1.5 align-super index-marker">
                       {item.n}
                     </sup>
                     {item.name}

@@ -26,7 +26,9 @@ export default function Button({
   icon,
   className = "",
 }: ButtonProps) {
-  const classes = `inline-flex w-fit items-center gap-2 rounded-full px-5 py-2 text-body-sm font-medium transition-colors ${VARIANT[variant]} ${className}`;
+  // `text-label` y no `text-body-sm font-medium`: el token del DS para el rol
+  // "texto de botón o link" ya trae el weight medio.
+  const classes = `inline-flex w-fit items-center gap-2 rounded-full px-5 py-2 text-label transition-colors ${VARIANT[variant]} ${className}`;
 
   if (href) {
     return (
