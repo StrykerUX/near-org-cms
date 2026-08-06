@@ -58,7 +58,7 @@ dar por terminado un cambio.
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
-| `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `LatestUpdates`, `OutroWordmark` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
+| `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
 
 `ProofStats` es la única sección con **sección pegada**: 5 steps que avanzan
 con el scroll haciendo cross-fade del contenido. Usa `position: sticky` de CSS

@@ -33,7 +33,12 @@
   --near-green: #00ec97;
   --near-green-dark: #00c97f;
   --near-teal: #2dd4bf;
-  --cream: #f3f1ea;
+  /* Un solo off-white para toda la página: el crema cálido de antes (#f3f1ea)
+     y el gris de las secciones con cards se unificaron acá. Sigue siendo un
+     token aparte de --background (blanco puro) y no un alias: las secciones
+     que lo usan llevan cards BLANCAS encima, y sobre blanco puro esas cards
+     desaparecen. */
+  --cream: #F5F4F1;
   --stone: #d8d6d0;
 
   /* ── shadcn/ui tokens — neutral grayscale placeholder, no palette defined yet ── */

@@ -14,7 +14,7 @@ const LOGOS = [
 
 export default function CustomerStory() {
   return (
-    <section className="bg-background text-foreground">
+    <section className="bg-cream text-foreground">
       <Container className="flex flex-col gap-14 py-20">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="flex flex-col gap-4">

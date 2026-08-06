@@ -42,7 +42,7 @@ export default function ClosingCta() {
         </div>
       </Container>
 
-      <ZigguratDivider from="var(--stone)" to="var(--background)" invert />
+      <ZigguratDivider from="var(--stone)" to="var(--cream)" invert />
     </section>
   );
 }

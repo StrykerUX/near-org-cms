@@ -7,8 +7,10 @@ import StackShowcase from "@/components/sections/StackShowcase";
 import FeatureCards from "@/components/sections/FeatureCards";
 import ClosingCta from "@/components/sections/ClosingCta";
 import CustomerStory from "@/components/sections/CustomerStory";
+import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
 import LatestUpdates from "@/components/sections/LatestUpdates";
-import OutroWordmark from "@/components/sections/OutroWordmark";
+import UpdatesList from "@/components/sections/UpdatesList";
+import PrototypeFooter from "@/components/sections/PrototypeFooter";
 
 // Draft de la landing nueva de NEAR — secciones individuales compuestas para
 // revisión visual conjunta en /prototype/homepage. Sin datos reales, sin
@@ -25,8 +27,10 @@ export default function PrototypeHomepageView() {
       <FeatureCards />
       <ClosingCta />
       <CustomerStory />
+      <TestimonialMarquee />
       <LatestUpdates />
-      <OutroWordmark />
+      <UpdatesList />
+      <PrototypeFooter />
     </main>
   );
 }
