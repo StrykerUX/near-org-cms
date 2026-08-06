@@ -6,7 +6,6 @@ import VideoStory from "@/components/sections/VideoStory";
 import StackShowcase from "@/components/sections/StackShowcase";
 import FeatureCards from "@/components/sections/FeatureCards";
 import ClosingCta from "@/components/sections/ClosingCta";
-import TestimonialCards from "@/components/sections/TestimonialCards";
 import CustomerStory from "@/components/sections/CustomerStory";
 import LatestUpdates from "@/components/sections/LatestUpdates";
 import OutroWordmark from "@/components/sections/OutroWordmark";
@@ -25,7 +24,6 @@ export default function PrototypeHomepageView() {
       <StackShowcase />
       <FeatureCards />
       <ClosingCta />
-      <TestimonialCards />
       <CustomerStory />
       <LatestUpdates />
       <OutroWordmark />
