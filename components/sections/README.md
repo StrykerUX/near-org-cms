@@ -79,6 +79,17 @@ tokens de motion). Documentado en detalle en cada archivo; ver `HeroBanner.tsx`
 o `FeatureCards.tsx` para dos formas de uso (timeline propia vs. reveal
 genérico por `data-reveal`).
 
+`components/primitives/motion/bandField.ts` + `shaders/bandField.ts` — el
+material de los covers de `LatestUpdates`: un campo de luz continuo muestreado
+en bandas verticales que lo leen cada una desde otra altura. Cinco piezas y
+ninguna decorativa — sacando cualquiera queda un degradado: focos con falloff
+exponencial (no una rampa), dominio deformado con fbm, bandas de ancho desigual,
+desplazamiento por banda (fijo + oscilante) y grano. Cada foco aporta su propio
+color, porque con una sola rampa sobre una intensidad escalar es imposible tener
+un color en una zona y otro en otra. A diferencia de `glyphShine`, **no tiene
+loop propio**: `render()` lo llama `gsap.ticker`, el mismo rAF que ya mueve
+Lenis, así 3 covers con deriva continua no agregan 3 loops.
+
 `components/primitives/motion/glyphShine.ts` + `shaders/glyphShine.ts` — WebGL2
 crudo (cero dependencias nuevas): renderiza texto a una textura offscreen
 para usarla como máscara alfa, así el brillo queda recortado exactamente a la
