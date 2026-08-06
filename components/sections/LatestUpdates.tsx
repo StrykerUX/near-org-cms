@@ -2,84 +2,112 @@
 
 import { ArrowRight } from "lucide-react";
 import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 
-// Sin datos reales (fuera de alcance de este draft — ver plan): covers en
-// gradiente CSS en vez de imágenes, copy fijo. Si esta sección se conecta al
-// CMS más adelante, migra a PostCard/PostGrid (components/sections/types.ts)
-// en vez de duplicar esta lista.
+// Sin datos reales (fuera de alcance de este draft — ver plan): los covers son
+// gradientes CSS en vez de imágenes, copy fijo. Si esta sección se conecta al
+// CMS más adelante, migra a PostCard/PostGrid (components/sections/types.ts) en
+// vez de duplicar esta lista.
+//
+// El cover imita un mesh gradient con bandas verticales: el
+// `repeating-linear-gradient` de arriba son las bandas (va PRIMERO porque en
+// CSS la primera capa es la de encima), y debajo van dos radiales para las
+// manchas de color más un lineal diagonal de base.
+const BANDS =
+  "repeating-linear-gradient(90deg, rgba(255,255,255,0.16) 0 2.6%, rgba(0,0,0,0.055) 2.6% 5.2%)";
+
 const POSTS = [
   {
     title: "Sharding the world computer",
-    eyebrow: "Latest news",
-    gradient: "radial-gradient(circle at 30% 30%, #00ec97, transparent 60%), radial-gradient(circle at 70% 70%, #2dd4bf, transparent 60%), #101010",
+    byline: "with Alexander Skidanov",
+    cta: "Read the full story",
+    cover: `${BANDS},
+      radial-gradient(130% 100% at 12% 100%, #8fe9b6 0%, transparent 58%),
+      radial-gradient(110% 90% at 92% 6%, #b4bcc0 0%, transparent 62%),
+      linear-gradient(118deg, #79dfa2 0%, #d9e78d 20%, #94dcaa 42%, #b2c4b4 66%, #8e9aa0 100%)`,
   },
   {
-    title: "Dollar Ever",
-    eyebrow: "With Alessandro Bessarion",
-    gradient: "radial-gradient(circle at 40% 60%, #a3b565, transparent 60%), radial-gradient(circle at 70% 20%, #00c97f, transparent 55%), #d8d6d0",
+    title: "Lorem Ipsum Dolar Enet",
+    byline: "with Alexander Skidanov",
+    cta: "View the interview",
+    cover: `${BANDS},
+      radial-gradient(130% 100% at 10% 40%, #74c9f7 0%, transparent 60%),
+      radial-gradient(110% 90% at 95% 90%, #d2d5de 0%, transparent 62%),
+      linear-gradient(118deg, #5fc0f5 0%, #a5dcf9 26%, #86d2f2 46%, #c4cadb 72%, #cdd0da 100%)`,
   },
   {
     title: "Sharding the world computer",
-    eyebrow: "Latest news",
-    gradient: "radial-gradient(circle at 60% 40%, #2dd4bf, transparent 60%), radial-gradient(circle at 20% 80%, #00ec97, transparent 55%), #101010",
+    byline: "with Alexander Skidanov",
+    cta: "Read the full story",
+    cover: `${BANDS},
+      radial-gradient(130% 100% at 18% 92%, #86e5b0 0%, transparent 56%),
+      radial-gradient(110% 90% at 88% 10%, #bcc3c6 0%, transparent 60%),
+      linear-gradient(118deg, #7ee0a6 0%, #dbe790 22%, #8fdaa6 44%, #aec0b2 68%, #8d99a0 100%)`,
   },
-];
-
-const UPDATES = [
-  { title: "Move cross-chain, trade perps, hold RWAs, access all of DeFi.", date: "Aug 03, 2026" },
-  { title: "Move cross-chain, trade perps, hold RWAs, access all of DeFi.", date: "Jul 24, 2026" },
-  { title: "Move cross-chain, trade perps, hold RWAs, access all of DeFi.", date: "Jun 15, 2026" },
 ];
 
 export default function LatestUpdates() {
   const rootRef = useScrollReveal<HTMLDivElement>();
 
   return (
-    <section className="bg-background text-foreground">
-      <Container className="flex flex-col gap-14 py-20">
-        <div className="flex flex-col gap-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-h2 font-medium text-pretty">The latest from NEAR</h2>
-            <span className="rounded-full bg-near-green px-3 py-1 text-caption font-medium text-black">
-              Latest news
-            </span>
+    <section className="bg-cream text-foreground">
+      <Container className="flex flex-col gap-20 py-28 md:gap-24 md:py-36">
+        <h2 className="text-center text-h1 font-medium text-pretty">
+          The latest from NEAR
+        </h2>
+
+        <div className="flex flex-col gap-7">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-body-sm">Latest News</span>
+            {/* near-green-dark y no near-green: el verde puro (#00ec97) con
+                texto blanco queda en ~1.5:1 de contraste. Este es además el
+                tono del botón de la referencia. */}
+            <a
+              href="#"
+              className="rounded-full bg-near-green-dark px-6 py-2.5 text-caption font-medium uppercase tracking-[0.08em] text-white transition-opacity hover:opacity-90"
+            >
+              All posts
+            </a>
           </div>
 
-          <div ref={rootRef} className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div ref={rootRef} className="grid grid-cols-1 gap-7 md:grid-cols-3">
             {POSTS.map((post, i) => (
-              <article key={i} data-reveal className="group flex flex-col gap-3">
+              <article
+                key={i}
+                data-reveal
+                className="group relative aspect-[7/6] overflow-hidden rounded-[1.75rem] bg-white p-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+              >
+                {/* El cover llena la card entera; lo que lo convierte en una
+                    "L" es el bloque blanco de texto que se le monta encima en
+                    la esquina superior izquierda. */}
                 <div
-                  className="aspect-[4/3] w-full rounded-xl transition-transform duration-500 group-hover:scale-[1.02]"
-                  style={{ backgroundImage: post.gradient }}
+                  className="absolute inset-2.5 rounded-[1.4rem] transition-transform duration-500 group-hover:scale-[1.03]"
+                  style={{ backgroundImage: post.cover }}
                 />
-                <span className="text-caption uppercase tracking-[0.15em] text-muted-foreground">
-                  {post.eyebrow}
-                </span>
-                <h3 className="text-h4 font-medium text-pretty">{post.title}</h3>
+
+                {/* Los radios están al revés de lo que parece: `tl` sigue la
+                    curva de la card, y `br` es la esquina que muerde el cover
+                    — sin ese radio el recorte se ve como un rectángulo pegado
+                    encima de la imagen. */}
+                <div className="absolute left-2.5 top-2.5 flex w-[60%] flex-col gap-1 rounded-tl-[1.4rem] rounded-br-[1.4rem] bg-white p-4 pb-5 pr-7">
+                  <h3 className="text-h4 font-medium leading-tight text-pretty">
+                    {post.title}
+                  </h3>
+                  <p className="text-body-sm text-muted-foreground">{post.byline}</p>
+
+                  <a
+                    href="#"
+                    className="mt-10 flex items-center gap-2.5 text-body-sm"
+                  >
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-near-green-dark text-white transition-transform group-hover:translate-x-0.5">
+                      <ArrowRight className="size-3.5" strokeWidth={2} />
+                    </span>
+                    {post.cta}
+                  </a>
+                </div>
               </article>
             ))}
           </div>
-        </div>
-
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between border-b border-border pb-3">
-            <Eyebrow>Latest updates</Eyebrow>
-          </div>
-          {UPDATES.map((update, i) => (
-            <a
-              key={i}
-              href="#"
-              className="group flex items-center justify-between gap-6 border-b border-border py-5 transition-colors hover:border-foreground/30"
-            >
-              <p className="text-body-sm text-pretty">{update.title}</p>
-              <div className="flex shrink-0 items-center gap-4">
-                <span className="text-caption text-muted-foreground">{update.date}</span>
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-              </div>
-            </a>
-          ))}
         </div>
       </Container>
     </section>

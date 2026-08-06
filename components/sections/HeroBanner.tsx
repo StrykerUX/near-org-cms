@@ -55,7 +55,12 @@ export default function HeroBanner({ nav }: HeroBannerProps) {
   }, []);
 
   return (
-    <section ref={rootRef} className="flex flex-col bg-cream text-foreground">
+    // El Container del medio es `flex-1`, así que el contenido se centra en lo
+    // que sobra después del nav y del divider.
+    <section
+      ref={rootRef}
+      className="flex h-[80vh] min-h-[880px] flex-col bg-cream text-foreground"
+    >
       <Container className="pt-6">{nav}</Container>
 
       <Container className="flex flex-1 flex-col items-center justify-center gap-6 py-14 text-center">

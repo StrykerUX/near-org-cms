@@ -3,7 +3,6 @@
 import { Play } from "lucide-react";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import ZigguratDivider from "@/components/primitives/ZigguratDivider";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 
 export default function VideoStory() {
@@ -17,7 +16,10 @@ export default function VideoStory() {
     // despega su sección pegada. Va acá y NO como pb de ProofStats a
     // propósito: agrandar esa sección movería el `end: "bottom bottom"` de su
     // ScrollTrigger y correría los umbrales de sus 5 steps.
-    <section className="bg-background pt-32 pb-10 md:pt-48">
+    // El pb grande reemplaza el aire que aportaba el ZigguratDivider que se
+    // quitó (medía 112-160px): sin él, el corte al negro quedaba pegado a la
+    // card del video.
+    <section className="bg-background pt-32 pb-28 md:pt-48 md:pb-36">
       <Container>
         <div ref={rootRef}>
           <div
@@ -56,8 +58,6 @@ export default function VideoStory() {
           </div>
         </div>
       </Container>
-
-      <ZigguratDivider from="var(--background)" to="#101010" />
     </section>
   );
 }
