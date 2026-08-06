@@ -23,6 +23,12 @@ export type ZigguratDividerProps = {
   to: string;
   /** Escalones creciendo desde arriba en vez de desde abajo */
   flip?: boolean;
+  /** Complementa las alturas (valle ↔ pico): el centro pasa a ser el escalón
+   *  más alto y los bordes los más bajos. Es lo que hace falta para que dos
+   *  dividers que encierran una misma sección se lean como espejo: sin esto
+   *  los dos "bajan hacia el centro" y la banda de color parece inclinada en
+   *  vez de simétrica. */
+  invert?: boolean;
   className?: string;
 };
 
@@ -30,6 +36,7 @@ export default function ZigguratDivider({
   from,
   to,
   flip = false,
+  invert = false,
   className = "",
 }: ZigguratDividerProps) {
   const rowRef = useGsapContext<HTMLDivElement>((_self, scope) => {
@@ -101,12 +108,14 @@ export default function ZigguratDivider({
         ref={rowRef}
         className={`absolute inset-x-0 flex h-full ${flip ? "items-start" : "items-end"}`}
       >
+        {/* Complemento y no `reverse()`: STEPS es palindrómico, así que darlo
+            vuelta no cambiaría nada — lo que invierte la silueta es 100-h. */}
         {STEPS.map((h, i) => (
           <div
             key={i}
             data-reveal
             className="flex-1"
-            style={{ height: `${h}%`, backgroundColor: to }}
+            style={{ height: `${invert ? 100 - h : h}%`, backgroundColor: to }}
           />
         ))}
       </div>

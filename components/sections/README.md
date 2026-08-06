@@ -59,3 +59,18 @@ correspondiente, que compone estas secciones.
 tokens de motion). Documentado en detalle en cada archivo; ver `HeroBanner.tsx`
 o `FeatureCards.tsx` para dos formas de uso (timeline propia vs. reveal
 genérico por `data-reveal`).
+
+`components/primitives/motion/glyphShine.ts` + `shaders/glyphShine.ts` — WebGL2
+crudo (cero dependencias nuevas): renderiza texto a una textura offscreen
+para usarla como máscara alfa, así el brillo queda recortado exactamente a la
+silueta de los glifos (no `background-clip:text`, que no sobrevive un split
+por caracteres). La máscara además hornea el **orden de lectura** de cada
+glifo en el canal G, para que el frente de luz avance letra por letra y no en
+el eje X — si avanzara en X, en un heading que hace wrap iluminaría los
+renglones en paralelo y se desincronizaría del stagger del DOM. Factory
+imperativa (`setFront`/`setPointer`/`destroy`) llamada y destruida
+por el `gsap.matchMedia()` de la sección que la usa (ver
+`QuantumRevealHeading.tsx`), nunca un hook con su propio `useEffect` — evita
+dos ciclos de vida desincronizables ante un cambio de `prefers-reduced-motion`
+en vivo. `components/primitives/motion/pointer.ts` comparte un solo listener
+global de mouse entre todas las instancias que lo necesiten.
