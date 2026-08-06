@@ -5,40 +5,6 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import ZigguratDivider from "@/components/primitives/ZigguratDivider";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
-import { gsap } from "@/components/primitives/motion/gsapClient";
-import { MQ } from "@/components/primitives/motion/motionTokens";
-
-// Sin asset de video real (fuera de alcance de este draft) — el poster es un
-// gradiente CSS con un loop "ken burns" lento en vez de una imagen.
-function KenBurnsPoster() {
-  const posterRef = useGsapContext<HTMLDivElement>((_self, scope) => {
-    const mm = gsap.matchMedia();
-    mm.add(MQ.motion, () => {
-      const tween = gsap.to(scope, {
-        scale: 1.08,
-        duration: 18,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      pauseOffscreen(tween, scope);
-    });
-    return () => mm.revert();
-  }, []);
-
-  return (
-    <div
-      ref={posterRef}
-      className="absolute inset-0 will-change-transform"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 25% 30%, #4a4a4a, transparent 60%), radial-gradient(circle at 75% 70%, #6b6b6b, transparent 55%), #a8a8a8",
-      }}
-    />
-  );
-}
 
 export default function VideoStory() {
   // El ref del reveal va en un wrapper NO visual: gsap.utils.selector(scope)
@@ -47,15 +13,23 @@ export default function VideoStory() {
   const rootRef = useScrollReveal<HTMLDivElement>();
 
   return (
-    <section className="bg-background py-10">
+    // El pt grande es el aire con ProofStats, que termina justo donde se
+    // despega su sección pegada. Va acá y NO como pb de ProofStats a
+    // propósito: agrandar esa sección movería el `end: "bottom bottom"` de su
+    // ScrollTrigger y correría los umbrales de sus 5 steps.
+    <section className="bg-background pt-32 pb-10 md:pt-48">
       <Container>
         <div ref={rootRef}>
           <div
             data-reveal
             className="relative aspect-[16/10] w-full overflow-hidden rounded-[2.5rem] border border-border sm:aspect-[21/10]"
           >
-            <KenBurnsPoster />
+            {/* Sin asset de video real (fuera de alcance de este draft): el
+                interior es un gris sólido, sin gradiente ni animación. */}
+            <div className="absolute inset-0 bg-neutral-400" />
 
+            {/* El degradado sí se queda: es lo que hace legible el texto
+                blanco de abajo sobre el gris. */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
             <button

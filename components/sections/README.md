@@ -49,6 +49,14 @@ dar por terminado un cambio.
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
 | `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialCards`, `LatestUpdates`, `OutroWordmark` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
 
+`ProofStats` es la única sección con **sección pegada**: 5 steps que avanzan
+con el scroll haciendo cross-fade del contenido. Usa `position: sticky` de CSS
+y NO `pin: true` de ScrollTrigger (que solo lee el progreso) — un pin inserta
+un pin-spacer en el documento y eso pelea con Lenis, con el `ResizeObserver`
+de `PrototypeMotionProvider` y con StrictMode. Consecuencia a recordar si
+alguien la edita: **ningún ancestro del elemento pegado puede tener `overflow`
+distinto de `visible`**, o el sticky deja de pegarse sin ningún error.
+
 `lib/queries/*` alimenta cada `page.tsx`, que le pasa props planas al `view`
 correspondiente, que compone estas secciones.
 
