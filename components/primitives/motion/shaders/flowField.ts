@@ -80,7 +80,9 @@ const float AMP   = 0.020;  // cuánto empuja cada paso
 const float TURN  = 12.72;  // radianes de giro máximo (729°)
 const float MIX   = 0.55;   // cuánto del uv deformado se aplica
 const float GRAIN = 0.030;
-const float HOVER_GAIN = 0.9;  // el flujo casi se duplica con el puntero encima
+const float HOVER_GAIN = 0.9;   // el flujo casi se duplica con el puntero encima
+const float BANDS  = 8.0;       // franjas que modulan la aberración
+const float CHROMA = 0.022;     // separación máxima entre canales, en uv
 
 // ── Ruido ──────────────────────────────────────────────────────────────────
 float hash21(vec2 p) {
@@ -180,6 +182,40 @@ vec2 flow(vec2 uv, float t) {
   return mix(uv, clamp(st, 0.0, 1.0), MIX);
 }
 
+/**
+ * Aberración cromática con estructura de franjas.
+ *
+ * Es la firma visual que le faltaba: el fleco de color en los bordes de las
+ * manchas. Sale de separar los canales R y B en direcciones opuestas antes de
+ * evaluar el color, de modo que cada uno lee el campo desde un punto ligeramente
+ * distinto.
+ *
+ * Lo que la hace parecer diseñada y no un defecto es que la separación NO es
+ * uniforme: se modula por franjas horizontales. Sin eso el fleco aparece igual
+ * en toda la superficie y se lee como una lente barata; por franjas, aparece
+ * concentrado en unas zonas y ausente en otras.
+ *
+ * Se evalúa la base tres veces, una por canal. Es asumible porque la base son
+ * dos exponenciales y nada más — lo caro de este shader son las 8 iteraciones de
+ * ruido del flujo, que se hacen UNA sola vez y se comparten entre los tres.
+ */
+vec3 aberrate(vec2 p, float t, float amount) {
+  // La franja va sobre la coordenada YA deformada por el flujo, no sobre vUv:
+  // así las bandas siguen al campo en vez de quedar clavadas en la pantalla,
+  // que es lo que las delataría como un overlay.
+  float band = fract(p.y * BANDS);
+  // Triangular en vez de fract crudo: fract salta de 1 a 0 y ese corte se ve
+  // como una línea dura entre franjas.
+  float seg = 1.0 - abs(band * 2.0 - 1.0);
+
+  vec2 dir = vec2(0.0, 1.0) * amount * seg;
+  return vec3(
+    base(p - dir, t).r,
+    base(p, t).g,
+    base(p + dir, t).b
+  );
+}
+
 void main() {
   // ── Los dos diales de velocidad ──────────────────────────────────────────
   // Dos escalas distintas a propósito: el flujo se reorganiza a un ritmo y los
@@ -195,7 +231,8 @@ void main() {
   float tFlow = uTime * 0.040;
   float tBase = uTime * 0.50;
 
-  vec3 col = base(flow(vUv, tFlow), tBase);
+  vec2 p = flow(vUv, tFlow);
+  vec3 col = aberrate(p, tBase, CHROMA * (1.0 + uHover * 0.6));
 
   // ── Grano ────────────────────────────────────────────────────────────────
   // Sobre gl_FragCoord, o sea a resolución de píxel real y no del UV, así el

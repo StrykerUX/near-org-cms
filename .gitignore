@@ -53,7 +53,3 @@ Thumbs.db
 # assets/fonts/kepler/, que son las que el build necesita.
 public/fonts/kepler-font/
 _fonts/
-
-# Escena exportada de Unicorn Studio para /prototype/flow-compare.
-# Contiene sus shaders, que no van al repo — ver components/views/FlowCompareView.tsx
-public/unicorn-scene*.json

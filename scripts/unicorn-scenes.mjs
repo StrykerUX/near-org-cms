@@ -11,11 +11,13 @@
 //
 //   node scripts/unicorn-scenes.mjs
 //
-// Entrada:  public/unicorn-scene.json      (el export, gitignorado)
-// Salida:   public/unicorn-scene-<x>.json  (idem)
+// Entrada:  public/unicorn-scene.json      (el export)
+// Salida:   public/unicorn-scene-<x>.json
 //
-// Todo eso está gitignorado a propósito: el export contiene los shaders de
-// Unicorn Studio, cuya licencia prohíbe redistribuirlos. Ver docs/unicorn.md.
+// Además reapunta ese `src` del CDN de Unicorn a public/unicorn/, donde las
+// imágenes están self-hosteadas. En producción eso saca una dependencia de
+// runtime contra un tercero del camino de render de la home: si su CDN está
+// lento o caído, el cover se quedaba en el gradiente CSS.
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -29,6 +31,12 @@ const VARIANTS = {
   green: "gradient-1.jpg",
   blue: "gradient-2.jpg",
 };
+
+// Las imágenes viven en public/unicorn/ y no en el CDN de Unicorn. Son assets
+// del proyecto —las subió quien diseñó la escena—, así que servirlas nosotros no
+// es distinto de servir cualquier otra imagen del sitio, y quita un tercero del
+// camino crítico.
+const LOCAL_BASE = "/unicorn/";
 
 if (!existsSync(SOURCE)) {
   console.error(
@@ -46,14 +54,12 @@ if (!imageLayer?.src) {
   process.exit(1);
 }
 
-const base = imageLayer.src.replace(/[^/]+$/, "");
-
 for (const [name, file] of Object.entries(VARIANTS)) {
   // Copia profunda por serialización: el objeto es JSON puro, sin funciones ni
   // referencias cíclicas, y así cada variante sale independiente de las otras.
   const variant = JSON.parse(JSON.stringify(scene));
   const layer = variant.history.find((l) => l.layerType === "image");
-  layer.src = base + file;
+  layer.src = LOCAL_BASE + file;
 
   const out = join(ROOT, "public", `unicorn-scene-${name}.json`);
   writeFileSync(out, JSON.stringify(variant));

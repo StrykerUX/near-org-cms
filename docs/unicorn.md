@@ -4,11 +4,18 @@ Los covers de `components/sections/LatestUpdates.tsx` y el panel derecho de
 `/prototype/flow-compare` los pinta una escena hecha en
 [Unicorn Studio](https://unicorn.studio).
 
-## Lo primero: sin los JSON no se ve
+## Dónde vive la escena
 
-Las escenas viven en `public/unicorn-scene*.json` y están **gitignoradas**. El
-export de Unicorn contiene sus shaders compilados, y su licencia prohíbe
-redistribuirlos:
+```
+public/unicorn-scene.json          ← el export tal cual sale de Unicorn Studio
+public/unicorn-scene-green.json    ← generadas por scripts/unicorn-scenes.mjs
+public/unicorn-scene-blue.json
+public/unicorn/gradient-1.jpg      ← las imágenes, self-hosteadas
+public/unicorn/gradient-2.jpg
+```
+
+**Todo eso está commiteado**, y es una decisión deliberada de quien tiene la
+licencia. El export contiene los shaders compilados de Unicorn con este header:
 
 ```
 Copyright (c) Unicorn Studio. Licensed under the Unicorn Studio Commercial
@@ -16,29 +23,35 @@ License. Unauthorized copying, redistribution, or use in competing products is
 prohibited.
 ```
 
-Consecuencia práctica, y hay que tenerla presente: **en un clon del repo o en un
-deploy esos covers caen al gradiente CSS**, porque los JSON no están. Funciona
-en la máquina de quien tenga el export.
+Este repo es público, así que quedan a la vista. La contrapartida de la decisión
+es que el efecto **funciona en el deploy**: sin los JSON en el repo, Railway
+construye sin ellos y los covers caen al gradiente CSS.
 
-### Cómo hacer que funcione fuera de esta máquina
-
-Publicando el proyecto en Unicorn Studio y usando su embed id en vez del
-archivo. Ahí el SDK trae la escena de sus servidores en runtime y no hace falta
-que nada de ellos esté en el repo:
+La alternativa que no requiere nada de eso es publicar el proyecto en Unicorn
+Studio y usar su embed id en vez del archivo — ahí el SDK trae la escena de sus
+servidores en runtime:
 
 ```tsx
 <UnicornScene projectId="ABC123" … />   // en vez de jsonFilePath
 ```
 
-En `LatestUpdates.tsx` es cambiar el campo `scene` de cada post. Es el único
-camino limpio para producción.
+En `LatestUpdates.tsx` es cambiar el campo `scene` de cada post. A cambio, la
+home pasa a depender de su CDN en cada carga.
+
+### Las imágenes se sirven desde acá, no desde su CDN
+
+`scripts/unicorn-scenes.mjs` reapunta el `src` de la capa `image` a
+`/unicorn/*.jpg`. Son assets del proyecto —los subió quien diseñó la escena—, y
+servirlos nosotros saca un tercero del camino crítico de render de la home. Si
+el CDN de Unicorn está lento o caído, con el `src` original el cover se quedaba
+en el gradiente CSS.
 
 ## Poner las escenas en su lugar
 
 ```bash
 # 1. Exportá la escena desde Unicorn Studio y dejala acá:
 #    public/unicorn-scene.json
-# 2. Generá las variantes de color:
+# 2. Generá las variantes de color y reapuntá las imágenes:
 node scripts/unicorn-scenes.mjs
 ```
 
@@ -52,10 +65,10 @@ afuera.
 Por eso `scripts/unicorn-scenes.mjs` genera una copia por variante cambiando
 únicamente el `src` de esa capa. No toca ni un shader.
 
-Hoy existen dos imágenes en su CDN para este proyecto — `gradient-1.jpg`
-(verde, promedio rgb 141,195,155) y `gradient-2.jpg` (azul, 155,199,230);
-`gradient-3` en adelante da 404. Por eso las cards 1 y 3 comparten el verde,
-igual que compartían paleta cuando el material era procedural.
+Hay dos imágenes para este proyecto — `gradient-1.jpg` (verde, promedio rgb
+141,195,155) y `gradient-2.jpg` (azul, 155,199,230); `gradient-3` en adelante
+daba 404 en su CDN. Por eso las cards 1 y 3 comparten el verde, igual que
+compartían paleta cuando el material era procedural.
 
 ## El SDK
 
