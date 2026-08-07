@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "sonner";
-import { montreal } from "@/lib/fonts";
+import { kepler, keplerDisplay, montreal } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,12 +17,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montreal.variable} ${GeistSans.variable} h-full antialiased`}
+      className={`${montreal.variable} ${kepler.variable} ${keplerDisplay.variable} ${GeistSans.variable} h-full antialiased`}
     >
-      <head>
-        <link rel="preconnect" href="https://use.typekit.net" />
-        <link rel="stylesheet" href="https://use.typekit.net/gtm1rhn.css" />
-      </head>
+      {/* Sin <head> propio: sus dos únicos hijos eran el preconnect y el
+          stylesheet de Typekit, que servía Kepler. Ahora la serif es
+          self-hosteada vía next/font/local (ver lib/fonts.ts), así que no hay
+          ningún tercero en el camino crítico de render. */}
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster position="bottom-center" />

@@ -44,3 +44,12 @@ Thumbs.db
 
 # Claude Code — permisos/config personal de cada máquina, no del proyecto
 .claude/settings.local.json
+
+# Fuentes compradas — ver docs/fonts.md
+# Los OTF de escritorio de Kepler y la conversión completa a woff2 se quedan en
+# la máquina de quien tiene la licencia. Fuera de git por dos motivos: son 50MB
+# de paquete de escritorio, y todo lo que vive en public/ Next lo publica tal
+# cual en una URL adivinable. Al repo entran solo las 4 faces de
+# assets/fonts/kepler/, que son las que el build necesita.
+public/fonts/kepler-font/
+_fonts/

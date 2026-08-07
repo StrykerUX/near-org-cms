@@ -141,9 +141,11 @@
 
   --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, Menlo, monospace;
-  --font-serif: "kepler-std", ui-serif, Georgia, "Times New Roman", serif;
+  /* Kepler self-hosteada vía next/font/local (ver lib/fonts.ts). Las vars
+     --font-kepler* las expone el className del <html> en app/layout.tsx. */
+  --font-serif: var(--font-kepler), ui-serif, Georgia, "Times New Roman", serif;
   /* Kepler's large-size optical master — used for accent spans inside Display/H1 headings */
-  --font-display: "kepler-std-display", "kepler-std", ui-serif, Georgia, serif;
+  --font-display: var(--font-kepler-display), var(--font-kepler), ui-serif, Georgia, serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

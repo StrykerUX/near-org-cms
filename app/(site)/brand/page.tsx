@@ -100,16 +100,16 @@ export default function BrandPage() {
           short phrase inside a headline, always italic, never in body copy.
         </p>
         <pre className="overflow-x-auto rounded-md border border-border bg-muted p-4 text-body-sm">
-          <code className="font-mono">{`<span className="font-serif italic tracking-normal text-[1.18em]">
-  accent
-</span>`}</code>
+          <code className="font-mono">{`<Accent>accent</Accent>          // dentro de H2–H4
+<Accent display>accent</Accent>  // dentro de Display/H1`}</code>
         </pre>
         <ul className="flex flex-col gap-2 text-body text-foreground">
           <li className="text-pretty">
             <span className="font-medium">Do</span> — one accent per
-            headline, 1–4 words. <code className="font-mono text-body-sm">font-display</code>{" "}
-            for Display/H1, <code className="font-mono text-body-sm">font-serif</code>{" "}
-            for H2–H4.
+            headline, 1–4 words. <code className="font-mono text-body-sm">accent-display</code>{" "}
+            for Display/H1, <code className="font-mono text-body-sm">accent-serif</code>{" "}
+            for H2–H4 — both wrapped by <code className="font-mono text-body-sm">Accent</code>,
+            never hand-written.
           </li>
           <li className="text-pretty">
             <span className="font-medium">Don&rsquo;t</span> — more than one
