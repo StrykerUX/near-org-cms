@@ -216,12 +216,17 @@
 
   /* ── Serif overrides de la escala ────────────────────────────────────────
      La escala de arriba está calibrada para la sans (Montreal): trae
-     letter-spacing negativo y weight 500. Kepler no quiere ninguno de los dos
-     — una serif de display no lleva tightening ni weight medio a tamaño
-     grande. Estos tres tokens capturan esa regla UNA sola vez y los consumen
-     las `@utility text-*-serif` / `accent-*` de más abajo, en vez de repetirse
-     como `font-normal tracking-normal` en cada heading serif del sitio. */
-  --text-serif--letter-spacing: 0em;
+     letter-spacing negativo y weight 500, y Kepler no hereda ninguno de los
+     dos. Estos tres tokens capturan esa regla UNA sola vez y los consumen las
+     `@utility text-*-serif` / `accent-*` de más abajo, en vez de repetirse como
+     `font-normal tracking-normal` en cada heading serif del sitio.
+
+     El tracking de la serif es un valor PROPIO y uniforme, no el de la sans: la
+     escala sans lo hace variar con el tamaño (−0.02em en display, −0.015 en h1,
+     −0.01 en h2, 0 en h4) y acá es −0.02em en todas las escalas. O sea que a
+     tamaño h1/h2 la serif queda más apretada que la sans, a propósito — va con
+     los masters condensed que sirve lib/fonts.ts. */
+  --text-serif--letter-spacing: -0.02em;
   --text-serif--font-weight: 400;
   /* Compensa la x-height de Kepler contra Montreal cuando un span serif va
      embebido en un heading sans (ver components/primitives/Accent.tsx). */
@@ -250,9 +255,11 @@
 
    El font-size sale del MISMO token que la sans: cambiar `--text-h2` mueve al
    h2 sans y al serif juntos. */
-/* A escala display va el optical master de Kepler, no el master de texto: a
-   ~128px el de texto se ve con trazos gruesos y poco contraste. Las escalas h1
-   y h2 de abajo sí usan el master de texto. */
+/* A escala display va el master Display de Kepler: a ~128px un master de texto
+   se ve con trazos gruesos y poco contraste. Las escalas h1 y h2 de abajo usan
+   el master Subhead, no el de texto — Kepler no tiene un master de texto
+   condensado, y de todos modos Subhead es el encaje óptico correcto para
+   34–88px. Ver lib/fonts.ts. */
 @utility text-display-serif {
   font-family: var(--font-display);
   font-size: var(--text-display);

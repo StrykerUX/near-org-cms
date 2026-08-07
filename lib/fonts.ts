@@ -48,9 +48,15 @@ export const montreal = localFont({
 // siquiera empezar a bajar. Acá next/font emite el @font-face inline y el
 // <link rel="preload"> solo.
 //
-// Dos familias y no una porque Kepler tiene masters ópticos distintos: el de
-// texto está dibujado para 9–13pt y el Display para 24pt+. Cuál usa cada escala
-// lo decide `--font-serif` / `--font-display` en app/globals.css.
+// Va CONDENSED en todos sus usos. Kepler Std trae condensed solo en Display y
+// Subhead —no existe un master de texto condensado—, así que `--font-kepler`
+// usa Condensed Subhead. No es un parche por falta de opción: alimenta escalas
+// de 34 a 88px, y el master de texto está dibujado para 9–13pt mientras Subhead
+// lo está para ~14–24pt. Es mejor encaje del que había.
+//
+// Dos familias y no una porque los masters ópticos son dibujos distintos, no
+// dos tamaños del mismo. Cuál usa cada escala lo decide `--font-serif` /
+// `--font-display` en app/globals.css.
 //
 // Las itálicas van declaradas de verdad, no sintetizadas: `accent-serif` y
 // `accent-display` son `font-style: italic` y son el uso más visible de Kepler en
@@ -67,12 +73,12 @@ export const montreal = localFont({
 export const kepler = localFont({
   src: [
     {
-      path: "../assets/fonts/kepler/KeplerStd-Regular.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnSubh.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../assets/fonts/kepler/KeplerStd-Italic.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnItSubh.woff2",
       weight: "400",
       style: "italic",
     },
@@ -89,12 +95,12 @@ export const kepler = localFont({
 export const keplerDisplay = localFont({
   src: [
     {
-      path: "../assets/fonts/kepler/KeplerStd-Disp.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnDisp.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../assets/fonts/kepler/KeplerStd-ItDisp.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnItDisp.woff2",
       weight: "400",
       style: "italic",
     },

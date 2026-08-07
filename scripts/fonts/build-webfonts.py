@@ -95,8 +95,18 @@ FEATURES = DEFAULT_ON + POSITIONING + FIGURES
 # ── Perfiles ──────────────────────────────────────────────────────────────────
 
 PROFILES = {
-    # Espeja exactamente lo que servía el kit de Typekit: `kepler-std` y
-    # `kepler-std-display`, 400 normal e itálica. Ni una face más.
+    # Kepler va CONDENSED en todos sus usos, en 400 normal e itálica.
+    #
+    # Los nombres de archivo conservan el sufijo del master a propósito: es lo
+    # que deja ver de un vistazo que `--font-serif` ya no apunta al master de
+    # texto, y por qué no puede hacerlo. Kepler Std trae condensed SOLO en
+    # Display y Subhead — no existe `KeplerStd-Cn` (texto) ni `CnCapt`, y el kit
+    # de Typekit que esto reemplazó tampoco los tenía.
+    #
+    # Que `--font-serif` caiga en Subhead no es un parche por falta de opción,
+    # es un mejor encaje óptico: alimenta text-h1-serif (44–88px), text-h2-serif
+    # (34–60px) y accent-serif (1.18em de un heading), y el master de texto está
+    # dibujado para 9–13pt. Subhead está dibujado para ~14–24pt.
     "kepler": {
         "src": ROOT / "public" / "fonts" / "kepler-font",
         "out": ROOT / "assets" / "fonts" / "kepler",
@@ -104,10 +114,10 @@ PROFILES = {
         "full_family": True,  # el origen son OTF de escritorio: --all tiene sentido
         "unicodes": KEPLER_UNICODES,
         "faces": [
-            ("KeplerStd-Regular", "--font-kepler · 400 normal"),
-            ("KeplerStd-Italic", "--font-kepler · 400 italic"),
-            ("KeplerStd-Disp", "--font-kepler-display · 400 normal"),
-            ("KeplerStd-ItDisp", "--font-kepler-display · 400 italic"),
+            ("KeplerStd-CnSubh", "--font-kepler · 400 normal"),
+            ("KeplerStd-CnItSubh", "--font-kepler · 400 italic"),
+            ("KeplerStd-CnDisp", "--font-kepler-display · 400 normal"),
+            ("KeplerStd-CnItDisp", "--font-kepler-display · 400 italic"),
         ],
         "verify_repo": False,  # solo aparece en headings que escribimos nosotros
     },
