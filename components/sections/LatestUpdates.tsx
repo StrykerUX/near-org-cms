@@ -1,33 +1,35 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import UnicornScene, { type UnicornStudioScene } from "unicornstudio-react/next";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { onViewportToggle } from "@/components/primitives/motion/pauseOffscreen";
-import { gsap } from "@/components/primitives/motion/gsapClient";
-import { MQ } from "@/components/primitives/motion/motionTokens";
-import { createBandField, type BandField } from "@/components/primitives/motion/bandField";
 
 // Sin datos reales (fuera de alcance de este draft): copy fijo. Si esta sección
 // se conecta al CMS más adelante, migra a PostCard/PostGrid
 // (components/sections/types.ts) en vez de duplicar esta lista.
 //
-// `colors` son los 4 stops del material WebGL, en RGB 0..1. `fallback` es el
-// gradiente CSS que se ve si no hay WebGL2 utilizable — el cover ES el contenido
+// `scene` es la escena de Unicorn Studio que pinta el cover. `fallback` es el
+// gradiente CSS que se ve si la escena no carga — el cover ES el contenido
 // visual de la card, no un adorno, así que no puede quedar en blanco.
+//
+// Las escenas se sirven de public/, que está GITIGNORADO: el export de Unicorn
+// contiene sus shaders y su licencia prohíbe redistribuirlos. Consecuencia a
+// tener presente: en un clon del repo o en un deploy, estos covers caen al
+// gradiente CSS. Para que funcionen fuera de esta máquina hay que publicar el
+// proyecto en Unicorn Studio y cambiar `scene` por su embed id — ver
+// docs/unicorn.md.
+//
+// Solo hay dos gradientes en su CDN, y no hay forma de recolorear la escena
+// desde afuera: no expone ninguna variable. Por eso las cards 1 y 3 comparten
+// el verde, igual que compartían paleta antes.
 const POSTS = [
   {
     title: "Sharding the world computer",
     byline: "with Alexander Skidanov",
     cta: "Read the full story",
-    // cyan · verde neón · amarillo · gris cálido
-    colors: [
-      [0.498, 0.878, 0.816],
-      [0.302, 0.91, 0.561],
-      [0.91, 0.91, 0.533],
-      [0.659, 0.659, 0.627],
-    ],
+    scene: "/unicorn-scene-green.json",
     fallback:
       "linear-gradient(118deg, #7fe0d0 0%, #4de88f 30%, #e8e888 60%, #a8a8a0 100%)",
   },
@@ -35,13 +37,7 @@ const POSTS = [
     title: "Lorem Ipsum Dolar Enet",
     byline: "with Alexander Skidanov",
     cta: "View the interview",
-    // la card del medio va en azules
-    colors: [
-      [0.498, 0.816, 0.961],
-      [0.373, 0.722, 0.961],
-      [0.647, 0.863, 0.976],
-      [0.804, 0.816, 0.855],
-    ],
+    scene: "/unicorn-scene-blue.json",
     fallback:
       "linear-gradient(118deg, #7fd0f5 0%, #5fb8f5 30%, #a5dcf9 60%, #cdd0da 100%)",
   },
@@ -49,116 +45,169 @@ const POSTS = [
     title: "Sharding the world computer",
     byline: "with Alexander Skidanov",
     cta: "Read the full story",
-    colors: [
-      [0.525, 0.898, 0.71],
-      [0.278, 0.902, 0.541],
-      [0.859, 0.906, 0.518],
-      [0.616, 0.647, 0.616],
-    ],
+    scene: "/unicorn-scene-green.json",
     fallback:
       "linear-gradient(118deg, #86e5b5 0%, #47e68a 30%, #dbe784 60%, #9da59d 100%)",
   },
 ] as const;
 
-// Desfase en reposo: las bandas casi alineadas. El hover lo abre a 1.
-const REST_SPREAD = 0.18;
+/**
+ * El mouse de la escena, encendido SOLO mientras el puntero está sobre la card.
+ *
+ * El SDK de Unicorn engancha un único `mousemove` en `window`, compartido por
+ * todas las escenas de la página — por eso, sin esto, las tres cards reaccionan
+ * al mouse esté donde esté.
+ *
+ * La palanca es una bandera que el loop de render consulta EN CADA FRAME:
+ *
+ *     if (…interactivity?.mouse?.disabled) { }        // no propaga nada
+ *     else { scene.mouse.pos = scene.mouse.movePos }  // acá es donde llega al shader
+ *
+ * Como se lee por frame, darla vuelta en vivo alcanza y no hay que recrear la
+ * escena. Todo lo demás —el flujo, el blur, las franjas— sigue animando: lo
+ * único que se congela es el aporte del puntero.
+ *
+ * Por qué NO `setProp("flow_field", "trackMouse", 0)`, que era el candidato
+ * obvio: `trackMouse` también lo lee `isAnimating()`, así que tocarlo puede
+ * afectar si la capa se considera animada. Esta bandera es quirúrgica.
+ *
+ * `interactivity` no está en los tipos públicos del wrapper (solo expone
+ * `disableMobile`), de ahí el acceso defensivo: si el SDK cambia de forma, el
+ * mouse deja de responder pero nada revienta.
+ */
+type SceneWithMouse = UnicornStudioScene & {
+  interactivity?: { mouse?: { disabled?: boolean } };
+};
 
-export default function LatestUpdates() {
-  // Dos scopes anidados, cada uno con su ref: el reveal de las cards vive en el
-  // grid y el material WebGL en la sección. Un solo elemento no puede llevar
-  // dos refs, y separarlos evita reimplementar el reveal a mano.
-  const gridRef = useScrollReveal<HTMLDivElement>();
+function gateMouse(scene: SceneWithMouse | null, on: boolean) {
+  const mouse = scene?.interactivity?.mouse;
+  if (mouse) mouse.disabled = !on;
+}
 
-  const sectionRef = useGsapContext<HTMLElement>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
-    const mm = gsap.matchMedia();
+function useMouseOnlyOnHover(hovered: boolean) {
+  const scene = useRef<SceneWithMouse | null>(null);
 
-    mm.add({ motionOk: MQ.motion }, (mctx) => {
-      const { motionOk } = mctx.conditions as { motionOk: boolean };
+  // El hover en una ref además del estado: el callback de abajo se crea una
+  // sola vez y necesita leer el valor ACTUAL, no el que había al montar.
+  //
+  // La ref se escribe DENTRO del efecto y no durante el render: escribirla en el
+  // cuerpo del componente rompe con rendering concurrente, donde React puede
+  // renderizar sin llegar a commitear.
+  const hoveredRef = useRef(hovered);
 
-      const cards = q("[data-card]");
-      const canvases = q("[data-cover]") as HTMLCanvasElement[];
-      const teardown: Array<() => void> = [];
+  useEffect(() => {
+    hoveredRef.current = hovered;
+    gateMouse(scene.current, hovered);
+  }, [hovered]);
 
-      // Un contexto por card: mantiene el hover independiente sin mapear
-      // coordenadas. Son 3, más los 2 que ya tiene la página, muy por debajo
-      // del límite de ~16 de Chrome.
-      const fields = canvases.map((canvas, i) => {
-        const post = POSTS[i];
-        if (!post) return null;
-        return createBandField(canvas, { colors: post.colors, bands: 10 });
-      });
-
-      for (const f of fields) if (f) teardown.push(() => f.destroy());
-
-      const live = fields.filter((f): f is BandField => f !== null);
-      if (live.length === 0) return;
-
-      // Estado de reposo, también el estado final con reduced-motion.
-      for (const f of live) {
-        f.setSpread(REST_SPREAD);
-        f.render();
-      }
-
-      if (!motionOk) {
-        return () => {
-          for (const fn of teardown) fn();
-        };
-      }
-
-      // UN solo loop para las 3 cards: gsap.ticker es el mismo rAF que ya mueve
-      // Lenis y ScrollTrigger en esta página. Tres instancias con deriva propia
-      // habrían sido tres rAF compitiendo.
-      const tick = (time: number) => {
-        for (const f of live) {
-          f.setTime(time);
-          f.render();
-        }
-      };
-      gsap.ticker.add(tick);
-      teardown.push(() => gsap.ticker.remove(tick));
-
-      // Gate de viewport: fuera de pantalla los draws se descartan.
-      onViewportToggle(scope, (v) => {
-        for (const f of live) f.setVisible(v);
-      });
-
-      // Hover por card. NADA se mueve ni escala: lo único que cambia es cuánto
-      // se desfasan las bandas entre sí.
-      cards.forEach((card, i) => {
-        const field = fields[i];
-        if (!field) return;
-
-        const state = { v: REST_SPREAD };
-        const to = (target: number) =>
-          gsap.to(state, {
-            v: target,
-            duration: 0.55,
-            ease: "power2.out",
-            overwrite: true,
-            onUpdate: () => field.setSpread(state.v),
-          });
-
-        const onEnter = () => to(1);
-        const onLeave = () => to(REST_SPREAD);
-        card.addEventListener("pointerenter", onEnter);
-        card.addEventListener("pointerleave", onLeave);
-        teardown.push(() => {
-          card.removeEventListener("pointerenter", onEnter);
-          card.removeEventListener("pointerleave", onLeave);
-        });
-      });
-
-      return () => {
-        for (const fn of teardown) fn();
-      };
-    });
-
-    return () => mm.revert();
+  // Callback ref y no una ref-objeto: la escena llega DESPUÉS del primer render
+  // (el SDK la carga async, y con lazyLoad recién cuando la sección se acerca al
+  // viewport) y sin provocar un render nuevo. Con una ref-objeto el efecto de
+  // arriba no se enteraría hasta el primer hover, y hasta entonces el mouse
+  // quedaría vivo — justo lo que esto viene a evitar. Así se aplica en el
+  // instante en que el SDK la entrega.
+  return useCallback((s: UnicornStudioScene | null) => {
+    scene.current = s as SceneWithMouse | null;
+    gateMouse(scene.current, hoveredRef.current);
   }, []);
+}
+
+function PostCard({ post }: { post: (typeof POSTS)[number] }) {
+  const [hovered, setHovered] = useState(false);
+  const sceneRef = useMouseOnlyOnHover(hovered);
 
   return (
-    <section ref={sectionRef} className="bg-cream text-foreground">
+    <article
+      data-reveal
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+      className="group relative aspect-[7/6] overflow-hidden rounded-[1.75rem] bg-white p-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+    >
+      {/* El cover llena la card entera; lo que lo convierte en una "L" es el
+          bloque blanco de texto que se le monta encima en la esquina superior
+          izquierda.
+
+          Sin `group-hover:scale`: la card no se mueve al hover.
+
+          El gradiente CSS va en el contenedor y la escena encima, así que si la
+          escena no carga —un clon del repo sin el JSON, un navegador sin
+          WebGL2— lo que queda es el gradiente y no un rectángulo gris.
+
+          El `absolute inset-0` de adentro no es decorativo: el runtime de
+          Unicorn mide su contenedor para dimensionar el canvas, y con el canvas
+          en flujo cada medición agranda la caja y la siguiente lee la caja ya
+          crecida. La card se estira sin parar. Sacado del flujo, no puede
+          empujar a su padre. */}
+      <div
+        className="absolute inset-2.5 overflow-hidden rounded-[1.4rem]"
+        style={{ backgroundImage: post.fallback }}
+      >
+        <div className="absolute inset-0" aria-hidden="true">
+          <UnicornScene
+            jsonFilePath={post.scene}
+            width="100%"
+            height="100%"
+            dpi={1.5}
+            scale={1}
+            fps={60}
+            // Cada card monta su propia escena con 5 capas y un blur de 4
+            // pases. lazyLoad evita pagar las tres antes de que la sección esté
+            // siquiera cerca del viewport.
+            lazyLoad
+            placeholderClassName="h-full w-full"
+            sceneRef={sceneRef}
+          />
+        </div>
+      </div>
+
+      {/* Los radios están al revés de lo que parece: `tl` sigue la curva de la
+          card, y `br` es la esquina que muerde el cover — sin ese radio el
+          recorte se ve como un rectángulo pegado encima de la imagen. */}
+      <div className="absolute left-2.5 top-2.5 flex w-[60%] flex-col gap-1 rounded-tl-[1.4rem] rounded-br-[1.4rem] bg-white p-4 pb-5 pr-7">
+        <h3 className="text-h4 text-pretty">{post.title}</h3>
+        <p className="text-body-sm text-muted-foreground">{post.byline}</p>
+
+        {/* El CTA es solo visual: el link real es el que cubre la card entera,
+            más abajo. Anidar un <a> acá dentro de ese otro sería HTML inválido
+            (links anidados). */}
+        <span className="mt-10 flex items-center gap-2.5 text-body-sm">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-near-green-dark text-white transition-transform group-hover:translate-x-0.5">
+            <ArrowRight className="size-3.5" strokeWidth={2} />
+          </span>
+          {post.cta}
+        </span>
+      </div>
+
+      {/* Toda la card es el link. Va como UN solo <a> que la cubre y no como un
+          <a> por elemento: así un lector de pantalla anuncia un destino por
+          card en vez de varios, y el foco de teclado es una sola parada.
+
+          El `::after` de un "stretched link" no servía acá: se posiciona contra
+          el ancestro posicionado más cercano, que es el bloque de texto
+          (absolute), no la card.
+
+          El texto va en sr-only y no en aria-label: sobrevive a los traductores
+          automáticos, que ignoran los aria-label. */}
+      <a
+        href="#"
+        className="absolute inset-0 z-10 rounded-[1.75rem] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-near-green-dark"
+      >
+        <span className="sr-only">
+          {post.title} — {post.cta}
+        </span>
+      </a>
+    </article>
+  );
+}
+
+export default function LatestUpdates() {
+  // El reveal de las cards al entrar en viewport. Es lo único que queda de la
+  // maquinaria de motion propia: el material del cover ahora lo pinta el runtime
+  // de Unicorn Studio, que trae su propio rAF por escena.
+  const gridRef = useScrollReveal<HTMLDivElement>();
+
+  return (
+    <section className="bg-cream text-foreground">
       <Container className="flex flex-col gap-20 py-28 md:gap-24 md:py-36">
         <h2 className="text-center text-h1 text-pretty">The latest from NEAR</h2>
 
@@ -178,66 +227,7 @@ export default function LatestUpdates() {
 
           <div ref={gridRef} className="grid grid-cols-1 gap-7 md:grid-cols-3">
             {POSTS.map((post, i) => (
-              <article
-                key={i}
-                data-card
-                data-reveal
-                className="group relative aspect-[7/6] overflow-hidden rounded-[1.75rem] bg-white p-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
-              >
-                {/* El cover llena la card entera; lo que lo convierte en una
-                    "L" es el bloque blanco de texto que se le monta encima en
-                    la esquina superior izquierda.
-
-                    Sin `group-hover:scale`: la card no se mueve al hover, solo
-                    reacciona el material. El gradiente CSS va en el contenedor
-                    y el canvas encima — si no hay WebGL2 el canvas queda sin
-                    contexto (transparente) y se ve el fallback. */}
-                <div
-                  className="absolute inset-2.5 overflow-hidden rounded-[1.4rem]"
-                  style={{ backgroundImage: post.fallback }}
-                >
-                  <canvas data-cover aria-hidden="true" className="h-full w-full" />
-                </div>
-
-                {/* Los radios están al revés de lo que parece: `tl` sigue la
-                    curva de la card, y `br` es la esquina que muerde el cover
-                    — sin ese radio el recorte se ve como un rectángulo pegado
-                    encima de la imagen. */}
-                <div className="absolute left-2.5 top-2.5 flex w-[60%] flex-col gap-1 rounded-tl-[1.4rem] rounded-br-[1.4rem] bg-white p-4 pb-5 pr-7">
-                  <h3 className="text-h4 text-pretty">{post.title}</h3>
-                  <p className="text-body-sm text-muted-foreground">{post.byline}</p>
-
-                  {/* El CTA es solo visual: el link real es el que cubre la
-                      card entera, más abajo. Anidar un <a> acá dentro de ese
-                      otro sería HTML inválido (links anidados). */}
-                  <span className="mt-10 flex items-center gap-2.5 text-body-sm">
-                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-near-green-dark text-white transition-transform group-hover:translate-x-0.5">
-                      <ArrowRight className="size-3.5" strokeWidth={2} />
-                    </span>
-                    {post.cta}
-                  </span>
-                </div>
-
-                {/* Toda la card es el link. Va como UN solo <a> que la cubre y
-                    no como un <a> por elemento: así un lector de pantalla
-                    anuncia un destino por card en vez de varios, y el foco de
-                    teclado es una sola parada.
-
-                    El `::after` de un "stretched link" no servía acá: se
-                    posiciona contra el ancestro posicionado más cercano, que es
-                    el bloque de texto (absolute), no la card.
-
-                    El texto va en sr-only y no en aria-label: sobrevive a los
-                    traductores automáticos, que ignoran los aria-label. */}
-                <a
-                  href="#"
-                  className="absolute inset-0 z-10 rounded-[1.75rem] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-near-green-dark"
-                >
-                  <span className="sr-only">
-                    {post.title} — {post.cta}
-                  </span>
-                </a>
-              </article>
+              <PostCard key={i} post={post} />
             ))}
           </div>
         </div>

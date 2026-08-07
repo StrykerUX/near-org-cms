@@ -79,16 +79,34 @@ tokens de motion). Documentado en detalle en cada archivo; ver `HeroBanner.tsx`
 o `FeatureCards.tsx` para dos formas de uso (timeline propia vs. reveal
 genérico por `data-reveal`).
 
-`components/primitives/motion/bandField.ts` + `shaders/bandField.ts` — el
-material de los covers de `LatestUpdates`: un campo de luz continuo muestreado
-en bandas verticales que lo leen cada una desde otra altura. Cinco piezas y
-ninguna decorativa — sacando cualquiera queda un degradado: focos con falloff
-exponencial (no una rampa), dominio deformado con fbm, bandas de ancho desigual,
-desplazamiento por banda (fijo + oscilante) y grano. Cada foco aporta su propio
-color, porque con una sola rampa sobre una intensidad escalar es imposible tener
-un color en una zona y otro en otra. A diferencia de `glyphShine`, **no tiene
-loop propio**: `render()` lo llama `gsap.ticker`, el mismo rAF que ya mueve
-Lenis, así 3 covers con deriva continua no agregan 3 loops.
+`components/primitives/motion/flowField.ts` + `shaders/flowField.ts` — el
+material de los covers de `LatestUpdates`: un campo de color suave arrastrado
+por un flujo de ruido. Dos etapas y el orden importa: primero se deforma la
+COORDENADA con un campo vectorial de ruido y recién después se evalúa el color
+en la coordenada ya deformada. Al revés —deformar el color— daría un
+desenfoque, no un flujo; lo que produce las vetas es que puntos vecinos
+terminen leyendo zonas lejanas del campo. Cuatro piezas: base de dos focos con
+falloff exponencial donde **cada foco aporta su propio color** (con una rampa
+única sobre una intensidad escalar es imposible tener un color en una zona y
+otro en otra), ocho iteraciones de empuje (una sola daría un desplazamiento
+suave: es la iteración la que acumula el estirado), ruido gradiente 3D, y grano.
+
+El ruido es 3D y no 2D porque el tiempo entra por la tercera dimensión: así el
+campo evoluciona en vez de trasladarse. Y gradiente en vez de value porque ocho
+iteraciones amplifican los artefactos alineados a ejes del value noise hasta
+volverlos una grilla visible.
+
+**Invariante que hay que respetar si alguien lo edita:** el tiempo no puede
+entrar en ninguna coordenada que se use para muestrear color. La versión
+anterior de este material (bandas) tenía un `+ uTime * 0.012` ahí, y como ese
+término crece sin límite el cover se iba a gris plano a los ~90 segundos — un
+bug que no se ve probando treinta segundos. Hoy el tiempo va solo al eje z del
+ruido y a senos acotados, y `flow()` devuelve un uv clampeado a [0,1].
+
+El puntero traslada el origen del ruido, no la intensidad, y su suscripción a
+`pointer.ts` vive solo mientras hay hover. A diferencia de `glyphShine`, **no
+tiene loop propio**: `render()` lo llama `gsap.ticker`, el mismo rAF que ya
+mueve Lenis, así 3 covers animados no agregan 3 loops.
 
 `components/primitives/motion/glyphShine.ts` + `shaders/glyphShine.ts` — WebGL2
 crudo (cero dependencias nuevas): renderiza texto a una textura offscreen

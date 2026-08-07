@@ -1,5 +1,6 @@
 "use client";
 
+import { buildProgram, getGl2 } from "./glContext";
 import { GLYPH_SHINE_FRAGMENT, GLYPH_SHINE_VERTEX } from "./shaders/glyphShine";
 
 export type GlyphShineOptions = {
@@ -61,14 +62,6 @@ const POINTER_TAU = 0.085;
 // esto el movimiento es sub-píxel y el loop se apaga.
 const POINTER_EPS = 0.0006;
 
-function compile(gl: WebGL2RenderingContext, type: number, src: string) {
-  const shader = gl.createShader(type);
-  if (!shader) return null;
-  gl.shaderSource(shader, src);
-  gl.compileShader(shader);
-  return shader;
-}
-
 /**
  * Monta el glyph-shine sobre un <canvas> ya presente en el DOM, mascarado
  * exactamente a la silueta de `chars` (texto renderizado a una textura
@@ -99,56 +92,19 @@ export function createGlyphShine(
   // array vacío es válido (un campo de texto todavía sin valor).
   let chars = initialChars;
 
-  // ── Capability check: el check ES crear el contexto ─────────────────────
-  const glOrNull = canvas.getContext("webgl2", {
-    alpha: false,
-    antialias: false,
-    depth: false,
-    stencil: false,
-    failIfMajorPerformanceCaveat: true,
-    powerPreference: "low-power",
-  }) as WebGL2RenderingContext | null;
-
+  // El paso por dos variables no es redundante: el narrowing de un `const` que
+  // sale de un `if (!x) return` NO sobrevive dentro de las clausuras que se
+  // declaran más abajo, y este módulo usa `gl` en casi todas. Reasignarlo a un
+  // `const` ya no-nulo sí.
+  const glOrNull = getGl2(canvas);
   if (!glOrNull) {
     if (DEV) console.info("[glyphShine] sin WebGL2 utilizable — el shine no se monta.");
     return null;
   }
   const gl = glOrNull;
 
-  // ── Programa ────────────────────────────────────────────────────────────
-  const vs = compile(gl, gl.VERTEX_SHADER, GLYPH_SHINE_VERTEX);
-  const fs = compile(gl, gl.FRAGMENT_SHADER, GLYPH_SHINE_FRAGMENT);
-  const program = vs && fs ? gl.createProgram() : null;
-
-  const bail = () => {
-    if (vs) gl.deleteShader(vs);
-    if (fs) gl.deleteShader(fs);
-    if (program) gl.deleteProgram(program);
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
-    return null;
-  };
-
-  if (!vs || !fs || !program) return bail();
-
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-
-  if (!(gl.getProgramParameter(program, gl.LINK_STATUS) as boolean)) {
-    if (DEV) {
-      console.error(
-        "[glyphShine] link falló:", gl.getProgramInfoLog(program),
-        "\nvertex:", gl.getShaderInfoLog(vs),
-        "\nfragment:", gl.getShaderInfoLog(fs)
-      );
-    }
-    return bail();
-  }
-
-  gl.detachShader(program, vs);
-  gl.detachShader(program, fs);
-  gl.deleteShader(vs);
-  gl.deleteShader(fs);
+  const program = buildProgram(gl, GLYPH_SHINE_VERTEX, GLYPH_SHINE_FRAGMENT, "glyphShine");
+  if (!program) return null;
 
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
@@ -184,7 +140,18 @@ export function createGlyphShine(
   // antialias del rasterizador de texto se conserva tal cual como gris.
   const mask = document.createElement("canvas");
   const mctxOrNull = mask.getContext("2d", { alpha: false });
-  if (!mctxOrNull) return bail();
+  if (!mctxOrNull) {
+    // Sin canvas 2D no hay máscara, así que no hay efecto. Se sueltan los
+    // objetos GL ya creados, pero NO el contexto: el canvas puede volver a
+    // usarse (ver getGl2 en ./glContext).
+    gl.bindVertexArray(null);
+    gl.deleteVertexArray(vao);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.deleteTexture(tex);
+    gl.useProgram(null);
+    gl.deleteProgram(program);
+    return null;
+  }
   // Nueva const ya no-nula: TS no preserva el narrowing de un `if (!x)
   // return` dentro de closures declaradas más abajo (rasterize/remeasure) —
   // mismo fix que gl en la factory anterior.
@@ -542,16 +509,21 @@ export function createGlyphShine(
       if (dead) return;
       dead = true;
 
+      // Se sueltan los objetos GL de ESTA instancia, pero el contexto queda
+      // vivo y cacheado contra el canvas — ver getGl2 en ./glContext. Perderlo
+      // acá rompía el segundo montaje de StrictMode, que reusa el mismo
+      // <canvas>: sobre un contexto perdido el link falla sin ningún mensaje, y
+      // como acá el reveal por opacidad sigue funcionando, el único síntoma era
+      // que el brillo no aparecía.
       gl.bindVertexArray(null);
       gl.deleteVertexArray(vao);
       gl.bindTexture(gl.TEXTURE_2D, null);
       gl.deleteTexture(tex);
       gl.useProgram(null);
       gl.deleteProgram(program);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
 
-      canvas.width = 1;
-      canvas.height = 1;
+      // El canvas NO se reduce a 1×1: lo haría inservible para el remount, que
+      // lo reusa. Las dimensiones CSS ya se pusieron en 0 arriba.
       mask.width = 1;
       mask.height = 1;
     },

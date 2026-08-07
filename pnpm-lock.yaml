@@ -47,6 +47,9 @@ importers:
       tailwindcss:
         specifier: ^4.0.0
         version: 4.2.2
+      unicornstudio-react:
+        specifier: ^2.2.8
+        version: 2.2.8(next@16.2.3(@babel/core@7.29.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
@@ -5563,6 +5566,17 @@ packages:
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
     engines: {node: '>=18'}
+
+  unicornstudio-react@2.2.8:
+    resolution: {integrity: sha512-XDO4FJUtRlrAJyVDw01qK7+wRWiRwqMfi+moAvYnGxKgnkcXQNpSgilVtJC+dYrOIyKpEOfmwxChaQpYXXwjWg==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      next: '*'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    peerDependenciesMeta:
+      next:
+        optional: true
 
   universalify@2.0.1:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
@@ -11778,6 +11792,13 @@ snapshots:
   undici@7.24.7: {}
 
   unicorn-magic@0.3.0: {}
+
+  unicornstudio-react@2.2.8(next@16.2.3(@babel/core@7.29.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+    dependencies:
+      react: 19.2.5
+      react-dom: 19.2.5(react@19.2.5)
+    optionalDependencies:
+      next: 16.2.3(@babel/core@7.29.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
 
   universalify@2.0.1: {}
 

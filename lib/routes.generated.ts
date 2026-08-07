@@ -8,7 +8,8 @@ import m1 from "@/app/(site)/blog/page.meta";
 import m2 from "@/app/(site)/brand/page.meta";
 import m3 from "@/app/prototype/page.meta";
 import m4 from "@/app/prototype/components/page.meta";
-import m5 from "@/app/prototype/homepage/page.meta";
+import m5 from "@/app/prototype/flow-compare/page.meta";
+import m6 from "@/app/prototype/homepage/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", file: "app/(site)/page.meta.ts" },
@@ -16,5 +17,6 @@ export const ROUTES: RouteEntry[] = [
   { ...m2, route: "/brand", file: "app/(site)/brand/page.meta.ts" },
   { ...m3, route: "/prototype", file: "app/prototype/page.meta.ts" },
   { ...m4, route: "/prototype/components", file: "app/prototype/components/page.meta.ts" },
-  { ...m5, route: "/prototype/homepage", file: "app/prototype/homepage/page.meta.ts" },
+  { ...m5, route: "/prototype/flow-compare", file: "app/prototype/flow-compare/page.meta.ts" },
+  { ...m6, route: "/prototype/homepage", file: "app/prototype/homepage/page.meta.ts" },
 ];
