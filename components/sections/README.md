@@ -59,14 +59,23 @@ dar por terminado un cambio.
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
 | `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
+| `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` y `PrototypeFooter` tal cual. |
 
-`ProofStats` es la única sección con **sección pegada**: 5 steps que avanzan
-con el scroll haciendo cross-fade del contenido. Usa `position: sticky` de CSS
-y NO `pin: true` de ScrollTrigger (que solo lee el progreso) — un pin inserta
-un pin-spacer en el documento y eso pelea con Lenis, con el `ResizeObserver`
-de `PrototypeMotionProvider` y con StrictMode. Consecuencia a recordar si
-alguien la edita: **ningún ancestro del elemento pegado puede tener `overflow`
-distinto de `visible`**, o el sticky deja de pegarse sin ningún error.
+Cuatro secciones usan **sección pegada**: `ProofStats` y, en `home-v2/`,
+`ProofStepper`, `NearStack` y `OwnYourOwn`. Todas con `position: sticky` de CSS
+y un ScrollTrigger que solo LEE el progreso — nunca `pin: true`, que inserta un
+pin-spacer en el documento y pelea con Lenis, con el `ResizeObserver` de
+`PrototypeMotionProvider` y con StrictMode.
+
+Consecuencia a recordar si alguien las edita: **ningún ancestro del elemento
+pegado puede tener `overflow` distinto de `visible`**, o el sticky deja de
+pegarse sin ningún error. (Sí puede tenerlo el elemento pegado en sí: es lo que
+usa `NearStack` para esconder su banda de foundation bajo el fold.)
+
+El patrón es siempre el mismo: un track cuya altura sale de CSS vars, un hijo
+`sticky top-0 h-svh`, y un atributo `data-*` en la raíz que enciende el layout
+superpuesto. El atributo y no un breakpoint a secas: con reduced-motion en
+desktop, el contenido tiene que caer en flujo normal igual.
 
 `lib/queries/*` alimenta cada `page.tsx`, que le pasa props planas al `view`
 correspondiente, que compone estas secciones.

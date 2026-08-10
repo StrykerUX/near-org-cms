@@ -41,6 +41,27 @@
   --cream: #F5F4F1;
   --stone: #d8d6d0;
 
+  /* ── ampliación para /prototype/homepage-v2 ──────────────────────────────
+     Valores transcritos del HTML de referencia (Homepage.dc.html). Mismo
+     estatus que los de arriba: paleta draft, no marca definitiva.
+
+     Los tres verdes conviven a propósito en el diseño y NO son alias: el
+     brillante es el CTA del nav, el oscuro los botones sobre crema, y el
+     accent los círculos de flecha y los dots inline. Unificarlos aplana el
+     contraste de tres jerarquías distintas. ── */
+  --near-green-accent: #00DC8D;
+  /* Negro de sección, no #000: sobre él van cards blancas y strokes de 1px
+     que a negro puro se ven como agujeros. También es el fill de las caras
+     del SVG isométrico de NearStack — el back-face culling solo lee como
+     oclusión sólida si fill y fondo son EXACTAMENTE el mismo valor, por eso
+     ambos salen de este token y no de dos literales. */
+  --ink: #101010;
+  --gray-blue: #87959A;
+  --bar: #D9D9D9;
+  --card-tint: #eae9e6;
+  --ink-deep: #0e4a30;
+  --sweep: #f4ff7a;
+
   /* ── shadcn/ui tokens — neutral grayscale placeholder, no palette defined yet ── */
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0 0 0);
@@ -139,6 +160,15 @@
   --color-cream: var(--cream);
   --color-stone: var(--stone);
 
+  /* draft del prototipo "homepage-v2" */
+  --color-near-green-accent: var(--near-green-accent);
+  --color-ink: var(--ink);
+  --color-gray-blue: var(--gray-blue);
+  --color-bar: var(--bar);
+  --color-card-tint: var(--card-tint);
+  --color-ink-deep: var(--ink-deep);
+  --color-sweep: var(--sweep);
+
   --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, Menlo, monospace;
   /* Kepler self-hosteada vía next/font/local (ver lib/fonts.ts). Las vars
@@ -156,6 +186,23 @@
   --text-display--line-height: 1;
   --text-display--letter-spacing: -0.02em;
   --text-display--font-weight: 500;
+
+  /* Statement — cae ENTRE h1 (5.5rem) y display (8rem). Existe para una sola
+     figura recurrente: la frase corta que ocupa el ancho de la sección sin ser
+     el titular de la página ("Own Your Own"). Con h1 se lee como un subtítulo
+     grande; con display compite con el hero. */
+  --text-statement: clamp(2.8125rem, 2.0693rem + 3.1713vw, 5.875rem);
+  --text-statement--line-height: 1;
+  --text-statement--letter-spacing: -0.02em;
+  --text-statement--font-weight: 500;
+
+  /* Rail — por encima de display, y DECORATIVO: la cinta de palabras que corre
+     al borde del stepper, al 6% de opacidad. No es un nivel de jerarquía; no
+     usarlo para texto que se lea. */
+  --text-rail: clamp(4.375rem, 3.0099rem + 5.8245vw, 10rem);
+  --text-rail--line-height: 1;
+  --text-rail--letter-spacing: -0.02em;
+  --text-rail--font-weight: 500;
 
   --text-h1: clamp(2.75rem, 2.0825rem + 2.8479vw, 5.5rem);
   --text-h1--line-height: 1.05;
