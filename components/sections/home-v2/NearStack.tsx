@@ -206,7 +206,10 @@ export default function NearStack() {
             cerrar los bodies del rail ya no puede cambiar la altura del
             documento, porque la manda el track y no el contenido. */}
         <div className="relative group-data-[scene=on]/stack:sticky group-data-[scene=on]/stack:top-0 group-data-[scene=on]/stack:h-svh group-data-[scene=on]/stack:overflow-hidden">
-          <Container className="flex flex-col gap-6 pb-12 pt-18">
+          {/* `pt-32` iguala el `pb-32` con que cierra OwnYourOwn: el corte entre
+              las dos secciones es a sangre, así que el aire a cada lado tiene
+              que coincidir o la juntura se lee descentrada. */}
+          <Container className="flex flex-col gap-6 pb-12 pt-32">
             <div className="flex flex-col items-center gap-3 text-center">
               <h2 className="text-h1 text-pretty">The NEAR Stack</h2>
               <p className="max-w-[26ch] text-h3 text-white/70 text-balance">
