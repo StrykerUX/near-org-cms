@@ -1,18 +1,26 @@
 # Unicorn Studio
 
 Los covers de `components/sections/LatestUpdates.tsx` y el panel derecho de
-`/prototype/flow-compare` los pinta una escena hecha en
-[Unicorn Studio](https://unicorn.studio).
+`/prototype/flow-compare` los pintan escenas hechas en
+[Unicorn Studio](https://unicorn.studio). Son tres, una por color.
 
-## Dónde vive la escena
+## Dónde viven las escenas
 
 ```
-public/unicorn-scene.json          ← el export tal cual sale de Unicorn Studio
+assets/unicorn/near-gradient-1_scene.json           ← los exports tal cual salen
+assets/unicorn/near-gradient-blue_scene.json          de Unicorn Studio
+assets/unicorn/near-gradient-red-orange_scene.json
+
 public/unicorn-scene-green.json    ← generadas por scripts/unicorn-scenes.mjs
 public/unicorn-scene-blue.json
+public/unicorn-scene-red.json
 public/unicorn/gradient-1.jpg      ← las imágenes, self-hosteadas
 public/unicorn/gradient-2.jpg
+public/unicorn/gradient-3_v2.jpg
 ```
+
+Los exports viven fuera de `public/` porque son la fuente que el script consume,
+no algo que el sitio sirva: lo que se publica es solo lo generado.
 
 **Todo eso está commiteado**, y es una decisión deliberada de quien tiene la
 licencia. El export contiene los shaders compilados de Unicorn con este header:
@@ -49,26 +57,42 @@ en el gradiente CSS.
 ## Poner las escenas en su lugar
 
 ```bash
-# 1. Exportá la escena desde Unicorn Studio y dejala acá:
-#    public/unicorn-scene.json
-# 2. Generá las variantes de color y reapuntá las imágenes:
+# 1. Exportá la escena desde Unicorn Studio y dejala en assets/unicorn/,
+#    con el nombre que espera SCENES en el script.
+# 2. Reapuntá las imágenes y escribí las escenas a public/:
 node scripts/unicorn-scenes.mjs
 ```
 
+El script falla con un mensaje concreto si le falta un export o el JPG que ese
+export referencia; si no, el cover se cae al gradiente CSS sin decir por qué.
+
 ## Por qué hace falta una escena por color
 
-La escena **no expone ninguna variable**: sus únicos uniforms son
+Por dos motivos, y el segundo es el que sorprende.
+
+**La escena no expone ninguna variable.** Sus únicos uniforms son
 `uArtboardResolution` y `uAspectRatio`. Todo el color sale del JPG de la capa
-`image`, que apunta al CDN de Unicorn. No hay forma de recolorearla desde
-afuera.
+`image`. No hay forma de recolorearla desde afuera.
 
-Por eso `scripts/unicorn-scenes.mjs` genera una copia por variante cambiando
-únicamente el `src` de esa capa. No toca ni un shader.
+**Y los tres exports no son la misma escena con distinta imagen.** Cada uno
+trae sus propios shaders compilados:
 
-Hay dos imágenes para este proyecto — `gradient-1.jpg` (verde, promedio rgb
-141,195,155) y `gradient-2.jpg` (azul, 155,199,230); `gradient-3` en adelante
-daba 404 en su CDN. Por eso las cards 1 y 3 comparten el verde, igual que
-compartían paleta cuando el material era procedural.
+| | verde | azul | rojo |
+|---|---|---|---|
+| `spread` del flow field | 0.24 | 0.22 | 0.20 |
+| mezcla final del flow field | 0.50 | 0.55 | 0.55 |
+| aberración cromática en `blinds` | **sí** | no | no |
+
+Esa última fila se ve: el fleco de color en los bordes de las franjas aparece
+solo en la card verde. Por eso el script no deriva variantes de un export base
+—aplanaría los tres ajustes en el del elegido— y se limita a reapuntar el `src`
+de la capa `image` de cada export. No toca ni un shader.
+
+Las tres imágenes del proyecto son `gradient-1.jpg` (verde, promedio rgb
+141,195,155), `gradient-2.jpg` (azul, 155,199,230) y `gradient-3_v2.jpg`
+(rojo/naranja). La tercera durante un tiempo no existió —`gradient-3.jpg` daba
+404 en su CDN— y por eso las cards 1 y 3 compartieron el verde hasta que
+apareció bajo el nombre con sufijo `_v2`.
 
 ## El SDK
 
@@ -76,7 +100,7 @@ Viene dentro de `unicornstudio-react`, un wrapper **de la comunidad** (MIT) que
 empaqueta el runtime propietario de Unicorn. No es oficial; lo aclara su propio
 README.
 
-Es la única vía que funciona con esta escena: el CDN suelto de Unicorn
+Es la única vía que funciona con estas escenas: el CDN suelto de Unicorn
 (`cdn.unicorn.studio/vX/unicornStudio.umd.js`) llega hasta **v1.4.2**, y este
 export es formato **2.2.8**. La versión del paquete de npm coincide exactamente
 con la del JSON.
@@ -89,7 +113,7 @@ con la del JSON.
 | 2 | `image` | El JPG, en cover sobre el artboard. **De acá sale todo el color.** |
 | 3 | `flowField` | 8 iteraciones que empujan el UV según ruido Perlin 3D. Sigue al mouse: su parámetro de radio está en 1.0, lo que anula la componente de distancia y deja al puntero actuando solo como origen del muestreo. |
 | 4 | `blur` | Gaussiano separable de 36 taps, **4 pases** con downsample a 0.25 y 0.5, más debanding con dither PCG en el último. |
-| 5 | `blinds` | Divide en ~8 franjas, rota ~90° y aplica **aberración cromática** en 8 pasos. Es de donde sale el fleco de color en los bordes. |
+| 5 | `blinds` | Divide en ~8 franjas y rota ~90°. En la escena verde además aplica **aberración cromática** en 8 pasos — el fleco de color en los bordes de las franjas. La azul y la roja no la tienen. |
 
 ## El costo
 

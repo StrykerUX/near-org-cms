@@ -133,10 +133,10 @@ function OwnPane({ colors, className }: { colors: FlowFieldColors; className?: s
 // es formato 2.2.8 — la versión del paquete de npm coincide exactamente con la
 // del JSON.
 //
-// La escena se sirve desde public/unicorn-scene.json, que está GITIGNORADO: ese
-// archivo trae los shaders de Unicorn, y su licencia prohíbe redistribuirlos.
-// Quien quiera correr esta comparación tiene que dejar su propio export ahí.
-const SCENE = "/unicorn-scene.json";
+// Es la misma escena que pinta el primer cover de LatestUpdates, y a propósito:
+// esta página compara el material propio contra lo que está de verdad en la
+// home, no contra un export suelto. La genera scripts/unicorn-scenes.mjs.
+const SCENE = "/unicorn-scene-green.json";
 
 function UnicornPane({ className }: { className?: string }) {
   const [status, setStatus] = useState("cargando…");
@@ -160,9 +160,9 @@ function UnicornPane({ className }: { className?: string }) {
       <div className={`overflow-hidden rounded-2xl bg-neutral-200 ${className ?? ""}`}>
         <div className="flex h-full w-full items-center justify-center p-6">
           <p className="text-body-sm text-pretty text-center text-muted-foreground">
-            Falta <code className="font-mono">public/unicorn-scene.json</code>.
-            Exportá la escena desde Unicorn Studio y dejala ahí — está
-            gitignorada a propósito.
+            Falta <code className="font-mono">public/unicorn-scene-green.json</code>.
+            Corré <code className="font-mono">node scripts/unicorn-scenes.mjs</code>{" "}
+            para generarla.
           </p>
         </div>
       </div>

@@ -1,35 +1,35 @@
 #!/usr/bin/env node
-// Genera las variantes de color de la escena de Unicorn Studio.
+// Prepara las escenas de Unicorn Studio que usan los covers de la home.
 //
-// La escena exportada NO expone ninguna variable de color: sus únicos uniforms
-// son la resolución del artboard y el aspect ratio. Todo el color sale del JPG
-// de la capa `image`. Así que la única forma de tener tres covers con paletas
-// distintas es tener una escena por imagen.
+// Hay UN EXPORT POR COLOR, y son escenas distintas de verdad: además de la
+// imagen, cada una trae sus propios shaders compilados (el spread del flow
+// field, la mezcla final, y si la capa `blinds` aplica aberración cromática o
+// no — ver docs/unicorn.md). Por eso este script NO deriva variantes de un
+// export base: eso aplanaría los tres ajustes en el del export elegido.
 //
-// Este script lee el export tal cual sale de Unicorn Studio y escribe una copia
-// por variante, cambiando únicamente el `src` de esa capa. No toca ni un shader.
+// Lo único que hace es reapuntar el `src` de la capa `image`, que en el export
+// sale contra el CDN de Unicorn, a public/unicorn/, donde las imágenes están
+// self-hosteadas. En producción eso saca una dependencia de runtime contra un
+// tercero del camino de render de la home: si su CDN está lento o caído, el
+// cover se quedaba en el gradiente CSS. No toca ni un shader.
 //
 //   node scripts/unicorn-scenes.mjs
 //
-// Entrada:  public/unicorn-scene.json      (el export)
-// Salida:   public/unicorn-scene-<x>.json
-//
-// Además reapunta ese `src` del CDN de Unicorn a public/unicorn/, donde las
-// imágenes están self-hosteadas. En producción eso saca una dependencia de
-// runtime contra un tercero del camino de render de la home: si su CDN está
-// lento o caído, el cover se quedaba en el gradiente CSS.
+// Entrada:  assets/unicorn/<source>_scene.json   (el export tal cual)
+// Salida:   public/unicorn-scene-<name>.json
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, basename } from "node:path";
 
 const ROOT = process.cwd();
-const SOURCE = join(ROOT, "public", "unicorn-scene.json");
+const SOURCE_DIR = join(ROOT, "assets", "unicorn");
+const IMAGE_DIR = join(ROOT, "public", "unicorn");
 
-// Las dos únicas imágenes que existen hoy en el CDN de Unicorn para este
-// proyecto. gradient-3 en adelante devuelve 404.
-const VARIANTS = {
-  green: "gradient-1.jpg",
-  blue: "gradient-2.jpg",
+// nombre de la escena publicada → export del que sale.
+const SCENES = {
+  green: "near-gradient-1",
+  blue: "near-gradient-blue",
+  red: "near-gradient-red-orange",
 };
 
 // Las imágenes viven en public/unicorn/ y no en el CDN de Unicorn. Son assets
@@ -38,30 +38,48 @@ const VARIANTS = {
 // camino crítico.
 const LOCAL_BASE = "/unicorn/";
 
-if (!existsSync(SOURCE)) {
-  console.error(
-    `No existe ${SOURCE}.\n` +
-      "Exportá la escena desde Unicorn Studio y dejala ahí — ver docs/unicorn.md."
-  );
-  process.exit(1);
-}
+let failed = false;
 
-const scene = JSON.parse(readFileSync(SOURCE, "utf8"));
-const imageLayer = scene.history?.find((l) => l.layerType === "image");
+for (const [name, source] of Object.entries(SCENES)) {
+  const from = join(SOURCE_DIR, `${source}_scene.json`);
 
-if (!imageLayer?.src) {
-  console.error("El export no tiene una capa `image` con `src`. ¿Cambió el formato?");
-  process.exit(1);
-}
+  if (!existsSync(from)) {
+    console.error(
+      `✗ ${name}: falta ${from}.\n` +
+        "  Exportá la escena desde Unicorn Studio y dejala ahí — ver docs/unicorn.md."
+    );
+    failed = true;
+    continue;
+  }
 
-for (const [name, file] of Object.entries(VARIANTS)) {
-  // Copia profunda por serialización: el objeto es JSON puro, sin funciones ni
-  // referencias cíclicas, y así cada variante sale independiente de las otras.
-  const variant = JSON.parse(JSON.stringify(scene));
-  const layer = variant.history.find((l) => l.layerType === "image");
+  const scene = JSON.parse(readFileSync(from, "utf8"));
+  const layer = scene.history?.find((l) => l.layerType === "image");
+
+  if (!layer?.src) {
+    console.error(`✗ ${name}: el export no tiene una capa \`image\` con \`src\`. ¿Cambió el formato?`);
+    failed = true;
+    continue;
+  }
+
+  // El reapuntado es por basename y no por una tabla de traducción: la copia
+  // local conserva el nombre que la imagen tiene en el CDN, así que agregar un
+  // color es bajar su JPG y agregar una línea a SCENES.
+  const file = basename(layer.src);
+
+  if (!existsSync(join(IMAGE_DIR, file))) {
+    console.error(
+      `✗ ${name}: falta public/unicorn/${file}. Bajala del CDN:\n` +
+        `  curl -o public/unicorn/${file} ${layer.src}`
+    );
+    failed = true;
+    continue;
+  }
+
   layer.src = LOCAL_BASE + file;
 
   const out = join(ROOT, "public", `unicorn-scene-${name}.json`);
-  writeFileSync(out, JSON.stringify(variant));
-  console.log(`✓ unicorn-scene-${name}.json  ← ${file}`);
+  writeFileSync(out, JSON.stringify(scene));
+  console.log(`✓ unicorn-scene-${name}.json  ← ${source} · ${file}`);
 }
+
+if (failed) process.exit(1);

@@ -14,16 +14,12 @@ import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal"
 // gradiente CSS que se ve si la escena no carga — el cover ES el contenido
 // visual de la card, no un adorno, así que no puede quedar en blanco.
 //
-// Las escenas se sirven de public/, que está GITIGNORADO: el export de Unicorn
-// contiene sus shaders y su licencia prohíbe redistribuirlos. Consecuencia a
-// tener presente: en un clon del repo o en un deploy, estos covers caen al
-// gradiente CSS. Para que funcionen fuera de esta máquina hay que publicar el
-// proyecto en Unicorn Studio y cambiar `scene` por su embed id — ver
-// docs/unicorn.md.
-//
-// Solo hay dos gradientes en su CDN, y no hay forma de recolorear la escena
-// desde afuera: no expone ninguna variable. Por eso las cards 1 y 3 comparten
-// el verde, igual que compartían paleta antes.
+// Hay una escena por color y no una sola parametrizada porque la escena no
+// expone ninguna variable: el color sale del JPG de su capa `image`. Y las tres
+// no son la misma escena con distinta imagen — cada export trae sus propios
+// shaders (spread del flujo, y la aberración cromática de las franjas, que solo
+// tiene la verde). Los genera scripts/unicorn-scenes.mjs a partir de los
+// exports de assets/unicorn/ — ver docs/unicorn.md.
 const POSTS = [
   {
     title: "Sharding the world computer",
@@ -45,9 +41,9 @@ const POSTS = [
     title: "Sharding the world computer",
     byline: "with Alexander Skidanov",
     cta: "Read the full story",
-    scene: "/unicorn-scene-green.json",
+    scene: "/unicorn-scene-red.json",
     fallback:
-      "linear-gradient(118deg, #86e5b5 0%, #47e68a 30%, #dbe784 60%, #9da59d 100%)",
+      "linear-gradient(118deg, #eebb80 0%, #fa9351 30%, #faebdf 60%, #dfd8e6 100%)",
   },
 ] as const;
 
