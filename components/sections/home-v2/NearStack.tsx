@@ -66,6 +66,7 @@ export default function NearStack() {
 
       const track = q("[data-stack-track]")[0];
       const stage = q("[data-stack-stage]")[0];
+      const head = q("[data-stack-head]")[0];
       const foundation = q("[data-stack-foundation]")[0];
       if (!track) return;
 
@@ -111,7 +112,14 @@ export default function NearStack() {
         );
       });
 
-      tl.to(stage, {
+      // Fase final: el bloque sube para dejarle sitio a la banda de foundation.
+      //
+      // Suben el HEADER Y EL STAGE juntos. El original mueve solo el stage, y
+      // eso lo mete por debajo del titular —que está quieto dentro del sticky—
+      // hasta superponer el subtítulo con la primera fila del rail. Moviendo los
+      // dos, la distancia entre ellos no cambia y el conjunto sale por arriba
+      // como una pieza.
+      tl.to([head, stage].filter(Boolean), {
         y: () => -Math.round(window.innerHeight * 0.2),
         duration: 0.16,
         ease: "power1.inOut",
@@ -126,7 +134,7 @@ export default function NearStack() {
         delete host.dataset.scene;
         setSceneOn(false);
         setActive(0);
-        const all = [...q("[data-tier-group]"), stage, foundation].filter(Boolean);
+        const all = [...q("[data-tier-group]"), stage, head, foundation].filter(Boolean);
         gsap.killTweensOf(all);
         gsap.set(all, { clearProps: "opacity,transform" });
       };
@@ -210,7 +218,9 @@ export default function NearStack() {
               las dos secciones es a sangre, así que el aire a cada lado tiene
               que coincidir o la juntura se lee descentrada. */}
           <Container className="flex flex-col gap-6 pb-12 pt-32">
-            <div className="flex flex-col items-center gap-3 text-center">
+            {/* Sube junto con el stage en la fase final — ver el bloque de
+                motion. Si se queda quieto, el stage se le mete debajo. */}
+            <div data-stack-head className="flex flex-col items-center gap-3 text-center">
               <h2 className="text-h1 text-pretty">The NEAR Stack</h2>
               <p className="max-w-[26ch] text-h3 text-white/70 text-balance">
                 Open infrastructure{" "}
