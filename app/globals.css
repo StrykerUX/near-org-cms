@@ -62,6 +62,41 @@
   --ink-deep: #0e4a30;
   --sweep: #f4ff7a;
 
+  /* ── extension for /prototype/quantum-security ───────────────────────────
+     (Comments below are in English by request; the rest of this file is still
+     in Spanish. See docs note in components/sections/quantum/README.md.)
+
+     Same status as the ones above: transcribed from the reference HTML
+     (Quantum Security.dc.html), draft palette, not settled brand.
+
+     `--ink-slate` is NOT an alias of `--ink` (#101010): this page's dark
+     section is a blue-grey, and large-radius WHITE cards sit on top of it. At
+     #101010 the contrast spikes and the cards read as cut-outs.
+
+     `--green-ink` is likewise not an alias of `--near-green-accent` (#00DC8D):
+     the accent is a UI green for dark backgrounds and does not reach 3:1 on
+     white. This is its legible counterpart, used only for green TEXT on
+     light. ── */
+  --ink-slate: #222627;
+  --ink-soft: #323232;
+  --rule: #c9c7c1;
+  --green-ink: #00a86b;
+
+  /* The three stops of the CTA sweep. They live as tokens rather than a literal
+     per use because the same gradient shows up in three places with three
+     syntaxes: the button fill (CSS), the nav CTA (CSS), and the isometric SVG's
+     <linearGradient> (stop-color attributes). */
+  /* The sweep hue darkened for SOLID fills on light grounds. `--sweep` itself is
+     tuned as a translucent shine over black type, and used opaque on the cream
+     page it lands near 1.1:1 and disappears. Same hue, enough value to hold an
+     edge. Kept separate rather than changing `--sweep`, which home-v2 also
+     consumes. */
+  --sweep-solid: #d8e64a;
+
+  --cta-lime: #ecfdb0;
+  --cta-mint: #8bf29c;
+  --cta-deep: #00b96f;
+
   /* ── shadcn/ui tokens — neutral grayscale placeholder, no palette defined yet ── */
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0 0 0);
@@ -169,6 +204,12 @@
   --color-ink-deep: var(--ink-deep);
   --color-sweep: var(--sweep);
 
+  /* draft del prototipo "quantum-security" */
+  --color-ink-slate: var(--ink-slate);
+  --color-ink-soft: var(--ink-soft);
+  --color-rule: var(--rule);
+  --color-green-ink: var(--green-ink);
+
   --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, Menlo, monospace;
   /* Kepler self-hosteada vía next/font/local (ver lib/fonts.ts). Las vars
@@ -261,6 +302,16 @@
   --text-label--letter-spacing: var(--text-body-sm--letter-spacing);
   --text-label--font-weight: 500;
 
+  /* The same role one step up: a section's primary CTA, which in the rebuild
+     sits at body size rather than body-sm. Added for the same reason as
+     `--text-label` — it existed in practice as `text-body font-medium`, i.e.
+     patching the token's weight by hand. Inherits from body by reference; the
+     only thing of its own is the weight. */
+  --text-label-lg: var(--text-body);
+  --text-label-lg--line-height: var(--text-body--line-height);
+  --text-label-lg--letter-spacing: var(--text-body--letter-spacing);
+  --text-label-lg--font-weight: 500;
+
   /* ── Serif overrides de la escala ────────────────────────────────────────
      La escala de arriba está calibrada para la sans (Montreal): trae
      letter-spacing negativo y weight 500, y Kepler no hereda ninguno de los
@@ -323,10 +374,48 @@
   font-weight: var(--text-serif--font-weight);
 }
 
+/* The same face, for a serif run sitting INSIDE a sans display line rather than
+   owning its own heading.
+
+   Kepler's ascent + descent add up to ~1.21em, while the h1 line-height is
+   1.05em. A line box is as tall as the tallest inline box in it, so at display
+   sizes the one line that contains the italic ends up ~14px taller than its
+   neighbours — the gap under it reads as wrong, and it is: only one line in the
+   paragraph is spaced differently.
+
+   `line-height: 0` collapses the run's own inline box to nothing, so the line is
+   measured by the sans strut alone and every line in the heading is spaced
+   identically. It moves no glyph: line-height positions the box, not the
+   letters, which stay on the shared baseline and are never clipped by it.
+
+   Only for an inline run. On a heading that is entirely serif this would
+   collapse the leading between ITS lines — use `text-h1-serif` there. */
+@utility text-h1-serif-inline {
+  font-family: var(--font-serif);
+  font-size: var(--text-h1);
+  line-height: 0;
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
 @utility text-h2-serif {
   font-family: var(--font-serif);
   font-size: var(--text-h2);
   line-height: var(--text-h2--line-height);
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* Serif at body size. Not a heading: it is the italic gloss that accompanies a
+   fact ("Live on mainnet" under "Post-quantum signing"). Added for the same
+   reason as the ones above — without it the usage is written
+   `font-serif italic text-body font-normal tracking-normal`, i.e. three patches
+   over the token. Do NOT use `accent-serif` for this: its size is relative to
+   the parent (1em × 1.18), and here the role has a size of its own. */
+@utility text-body-serif {
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
   letter-spacing: var(--text-serif--letter-spacing);
   font-weight: var(--text-serif--font-weight);
 }
@@ -454,4 +543,218 @@
 a:hover .lucide-plus,
 button:hover .lucide-plus {
   transform: rotate(270deg);
+}
+
+/* ── /prototype/quantum-security: hover micro-interactions ──────────────────
+   CSS and not GSAP on purpose: these are :hover states, not scroll animations.
+   Putting them in the motion toolkit would mean a listener per button and every
+   CTA becoming a client component just to change colour.
+
+   They live here rather than in a Tailwind utility because all three need
+   @keyframes with more than two steps on `background-size`, which Tailwind
+   cannot express. The `q-` prefix keeps them from colliding with other
+   pages. ── */
+
+/* ONE element paints both layers: the gradient over a black plate, each sized
+   by keyframes. Two overlapping rounded boxes would antialias the gradient's
+   edge against the black underneath and leave a dark rim; with a single
+   background box there is only one antialiased edge, against the page. That is
+   also why there is no overflow:hidden — it would clip the fill at the padding
+   box and leave the 1px ring showing. */
+[data-q-cta] {
+  background-color: transparent;
+  background-image:
+    linear-gradient(105deg, var(--cta-lime) 0%, var(--cta-mint) 45%, var(--cta-deep) 100%),
+    linear-gradient(var(--foreground), var(--foreground));
+  background-repeat: no-repeat, no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  background-position: left center, right center;
+  background-size: 0% 100%, 0% 100%;
+  transition: border-color 0.16s ease;
+}
+[data-q-cta]:hover {
+  color: #fff;
+  border-color: transparent;
+  animation: qCtaFill 0.3s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+/* The black plate is anchored right and recedes exactly as fast as the gradient
+   advances, so it is never underneath the gradient's antialiased edge — that
+   overlap is what left a dark stroke around the finished pill. */
+@keyframes qCtaFill {
+  0%, 22% { background-size: 0% 100%, 100% 100%; }
+  100%    { background-size: 100% 100%, 0% 100%; }
+}
+
+/* On dark: white outline and label, and the gradient enters straight in (no
+   black stage). The fill paints UNDER the transparent border, so the stroke
+   dissolves into it rather than leaving a white ring. */
+[data-q-cta][data-q-cta-on-dark] {
+  color: #fff;
+}
+[data-q-cta][data-q-cta-on-dark]:hover {
+  animation-name: qCtaFillOnDark;
+}
+@keyframes qCtaFillOnDark {
+  0%   { background-size: 0% 100%, 0% 100%; }
+  100% { background-size: 100% 100%, 0% 100%; }
+}
+
+/* Hero sheen: the statement ramp travelling continuously through the headline.
+   `background-clip: text` paints the gradient and shows it only inside the
+   glyphs, so the type itself carries the colour.
+
+   The colours are the same lime-yellow-into-teal that wipes through "Every
+   blockchain will have to replace its cryptography" further down the page, so
+   the two moments read as one idea rather than as two unrelated effects. It uses
+   --sweep-solid rather than --sweep: this fill is opaque, and the shine value is
+   tuned for partial opacity over black type.
+
+   Yellow LEADS. The band travels left-to-right, so its leading edge is the stop
+   at the HIGHER percentage — putting teal there sent the pale end in first and
+   the whole thing read as running backwards.
+
+   ── The one number that matters ──
+   `background-size` is 300% and the animation stays inside 0%–100%. With a
+   background three times the element's width, EVERY position in that range
+   still covers the element completely. Push the position outside it — as a
+   130% → −30% sweep does — and part of the element has no background under it;
+   with `color: transparent` those glyphs simply vanish, so the headline wipes
+   itself off mid-cycle instead of returning to ink. The words stay up the whole
+   time; only their colour moves. */
+[data-q-sheen] {
+  background-image: linear-gradient(
+    100deg,
+    var(--foreground) 0%,
+    var(--foreground) 36%,
+    var(--near-teal) 46%,
+    var(--sweep-solid) 54%,
+    var(--foreground) 64%,
+    var(--foreground) 100%
+  );
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: qSheen 11s linear infinite;
+}
+@keyframes qSheen {
+  from { background-position: 100% 0; }
+  to   { background-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Parked on an all-ink stretch, so the headline is simply black — the colour
+     is the moving part, and without movement it has no job. */
+  [data-q-sheen] {
+    animation: none;
+    background-position: 100% 0;
+  }
+}
+
+/* Filled black pill: the black plate is already extended at rest, so the button
+   starts solid black, and the SAME keyframes then slide the gradient across in
+   its place. The label needs no second layer — it goes white → black with a
+   plain colour transition, because black is the legible choice on the ramp.
+   This is the inverse of the white variant below, for light grounds where a
+   hairline outline reads as an empty shape rather than a button. */
+[data-q-cta][data-q-cta-filled] {
+  color: #fff;
+  border-color: transparent;
+  background-size: 0% 100%, 100% 100%;
+  transition: color 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+}
+[data-q-cta][data-q-cta-filled]:hover {
+  color: var(--foreground);
+}
+[data-q-cta][data-q-cta-filled] [data-q-cta-top] {
+  display: none;
+}
+
+/* Filled white pill: solid white with black type at rest, and on hover the
+   gradient wipes in OVER the white rather than over a black plate. The label
+   stays black the whole way — on this ramp (lime → mint → green) black is the
+   legible choice before and after, so it never needs to change.
+   That also means no second text layer: `[data-q-cta-top]` exists to reveal
+   black type over an advancing fill, and here the type is already black. */
+[data-q-cta][data-q-cta-fill-white] {
+  background-color: #fff;
+  border-color: transparent;
+  color: var(--foreground);
+}
+[data-q-cta][data-q-cta-fill-white]:hover {
+  color: var(--foreground);
+  animation-name: qCtaFillOnWhite;
+}
+@keyframes qCtaFillOnWhite {
+  0%   { background-size: 0% 100%, 0% 100%; }
+  100% { background-size: 100% 100%, 0% 100%; }
+}
+[data-q-cta][data-q-cta-fill-white] [data-q-cta-top] {
+  display: none;
+}
+
+/* The label is two stacked layers: the lower one inherits the button's colour,
+   and this one — black — is revealed by clip-path at the same rate the fill
+   rises. That is what makes the text read black OVER the gradient and light
+   outside it. */
+[data-q-cta-top] {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  clip-path: inset(0 100% 0 0);
+}
+[data-q-cta]:hover [data-q-cta-top] {
+  animation: qCtaText 0.3s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes qCtaText {
+  0%, 22% { clip-path: inset(0 100% 0 0); }
+  100%    { clip-path: inset(0 0 0 0); }
+}
+[data-q-cta][data-q-cta-on-dark]:hover [data-q-cta-top] {
+  animation-name: qCtaTextOnDark;
+}
+@keyframes qCtaTextOnDark {
+  0%   { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+
+/* Arrow disc: the inner arrow enters from the left while the outer one exits to
+   the right. Both are absolute at the same centre; the `translate(-50%,-50%)` is
+   the rest state, not a layout centring. */
+[data-q-arrow] svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+[data-q-arrow] [data-q-arrow-in] {
+  transform: translate(-210%, -50%);
+}
+[data-q-arrow-host]:hover [data-q-arrow] [data-q-arrow-out] {
+  animation: qArrowOut 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+[data-q-arrow-host]:hover [data-q-arrow] [data-q-arrow-in] {
+  animation: qArrowIn 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.07s forwards;
+}
+@keyframes qArrowOut { to { transform: translate(110%, -50%); } }
+@keyframes qArrowIn  { to { transform: translate(-50%, -50%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The final colour states are kept (the CTA still fills, just without the
+     sweep) and every displacement is cancelled. */
+  [data-q-cta]:hover,
+  [data-q-cta]:hover [data-q-cta-top],
+  [data-q-arrow-host]:hover [data-q-arrow] svg {
+    animation: none;
+  }
+  [data-q-cta]:hover {
+    background-size: 100% 100%, 0% 100%;
+  }
+  [data-q-cta]:hover [data-q-cta-top] {
+    clip-path: inset(0 0 0 0);
+  }
 }
