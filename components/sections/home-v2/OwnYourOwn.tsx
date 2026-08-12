@@ -163,8 +163,12 @@ export default function OwnYourOwn() {
     <section ref={rootRef} className="relative z-[1] bg-cream text-foreground">
       {/* El `pb` es aire real, no compensación: ahora que el grid termina justo
           debajo de la última card, es lo único que separa la sección del corte
-          con la siguiente (que es negra y entra a sangre). */}
-      <Container className="flex flex-col gap-24 pb-32 pt-32">
+          con la siguiente (que es negra y entra a sangre).
+
+          El gap separa tres hijos: encabezado → grid de cards → título de
+          mobile. El escalón de desktop solo actúa en el primer hueco: el tercer
+          hijo es `lg:hidden`, y un elemento oculto no genera caja ni gap. */}
+      <Container className="flex flex-col gap-24 pb-32 pt-32 lg:gap-36">
         <div className="grid grid-cols-1 gap-24 lg:grid-cols-2">
           <div className="flex flex-col gap-5">
             <Eyebrow>The future of finance is yours</Eyebrow>
@@ -200,9 +204,29 @@ export default function OwnYourOwn() {
 
               El `top` va inline porque `calc()` con var y espacios es ilegible
               como clase arbitraria. En mobile el elemento es estático y `top` no
-              tiene efecto, así que no hace falta condicionarlo. */}
+              tiene efecto, así que no hace falta condicionarlo.
+
+              Los márgenes recortan el tramo pegado por sus dos puntas. Van como
+              margen y no como padding a propósito: el padding agranda el
+              elemento pegado y se llevaría al `h3` con él, moviendo también la
+              posición congelada. El margen mueve el rectángulo en el que el
+              sticky puede vivir —el área de grid del item, encogida por sus
+              propios márgenes— y deja el anclaje intacto.
+
+              `mt` es la entrada: sin él el título nace exactamente a la altura
+              de la card Assets, la única sin `mt` y por lo tanto también pegada
+              al techo del grid, y las dos entran juntas.
+
+              `mb` es la salida: el título se despega cuando su borde inferior
+              alcanza el fondo del grid menos este margen, así que estos 200px
+              son —literalmente— cuánta card queda por debajo cuando el título
+              empieza a subir. Sin él quedaría clavado hasta el último píxel de
+              la última card.
+
+              Ambos en px, como los `mt` de las cards y por lo mismo: `svh`
+              escala con el alto de la ventana y las cards con el ancho. */}
           <div
-            className="z-[1] hidden lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
+            className="z-[1] hidden lg:mt-[150px] lg:mb-[200px] lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
             style={{ top: "calc(50svh - var(--text-statement) / 2)" }}
           >
             <h3 className="whitespace-nowrap text-center text-statement">Own Your Own</h3>
