@@ -19,12 +19,41 @@ const GROUPS = [
 
 const LEGAL = ["Privacy", "Terms of Use", "Cookie Policy"];
 
-// El wordmark es 1440×359 (ratio 4.01:1) y se muestra al 100% del ancho, así
-// que su alto crece con el viewport. Este techo es el alto que tendría a
-// 1920px: 1920 × 359 / 1440. Más allá de ese ancho la imagen sigue creciendo y
-// el contenedor la recorta por abajo, en vez de empujar el footer a un alto
-// desproporcionado.
-const WORDMARK_MAX_H = Math.round((1920 * 359) / 1440); // 479
+// The wordmark is the SVG and not the 1440px PNG that used to be here: it is
+// displayed at 100% of the viewport width, so on anything wider than 1440 CSS
+// px the raster was being upscaled — and on a 2× display it was resolving ~3840
+// device px out of a 1440px source. Vector has no such ceiling.
+//
+// Its intrinsic ratio comes from the SVG's own viewBox (981 × 255 = 3.85:1),
+// which is a slightly tighter crop than the PNG's 4.01:1 — the wordmark now
+// sits marginally taller for a given width.
+//
+// The reference caps the container at 479px and hides the overflow, cutting the
+// letterforms off mid-height. Here the wordmark is shown whole and edge to edge,
+// with its feet on the bottom of the page — a deliberate departure from
+// `Homepage.dc.html` / `Quantum Security.dc.html`.
+//
+// "Feet on the bottom" needs one correction, and it is the only subtle part of
+// this file. The type is optically corrected: the flat stems of the "n" and the
+// "r" stop at y = 404.43 in the SVG's own units, while the round "e" and "a"
+// overshoot below them, down to 410.24, so the eye reads them all as sitting on
+// one line. Aligning the box to the glyphs' true extent therefore leaves a
+// visible sliver of page under the two flat letters. Cropping to the FLAT
+// baseline instead — clipping the round letters' overshoot, which is what the
+// eye already discounts — is what makes the wordmark look seated.
+//
+// Measured off the SVG with getBBox(), not guessed. Re-measure if the asset is
+// ever redrawn.
+const WORDMARK_W = 981; // viewBox width
+const WORDMARK_H = 255; // viewBox height
+const WORDMARK_FLAT_BASELINE = 404.43;
+const WORDMARK_VIEWBOX_BOTTOM = 411;
+
+// Expressed as a percentage of WIDTH on purpose: a percentage margin resolves
+// against the containing block's width, so this one value crops the same
+// proportion at every viewport size without any measurement at runtime.
+const WORDMARK_CROP_PCT =
+  ((WORDMARK_VIEWBOX_BOTTOM - WORDMARK_FLAT_BASELINE) / WORDMARK_W) * 100; // ≈0.67%
 
 export default function PrototypeFooter() {
   return (
@@ -57,21 +86,25 @@ export default function PrototypeFooter() {
         </div>
       </Container>
 
-      {/* `isolate` acota el grupo de blending del texto legal de abajo, y el
-          max-height + overflow-hidden es lo que recorta el wordmark. */}
-      <div
-        className="relative isolate overflow-hidden"
-        style={{ maxHeight: `${WORDMARK_MAX_H}px` }}
-      >
-        {/* Ancho completo y alto automático: la imagen manda el alto hasta que
-            el contenedor topa su máximo y la corta. `priority={false}` a
-            propósito — está al final de la página, no compite con el hero. */}
+      {/* `isolate` bounds the blending group for the legal row below it.
+          `overflow-hidden` is back, but doing the opposite job to the reference's:
+          there it hid half the wordmark, here it trims only the round letters'
+          overshoot. */}
+      <div className="relative isolate overflow-hidden">
+        {/* Full width, automatic height, pulled up by a negative bottom margin so
+            the block ends on the flat baseline instead of on the overshoot. No
+            `priority` on purpose — this is the end of the page, it should not
+            compete with the hero. `unoptimized` because the source is already
+            vector: routing an SVG through the image optimizer gains nothing and
+            Next declines to rasterise it anyway. */}
         <Image
-          src="/prototype/near-wordmark.png"
+          src="/prototype/v2/near-wordmark.svg"
           alt="NEAR"
-          width={1440}
-          height={359}
-          className="h-auto w-full"
+          width={WORDMARK_W}
+          height={WORDMARK_H}
+          unoptimized
+          className="block h-auto w-full"
+          style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
         />
 
         {/* El legal va ENCIMA del wordmark, y ahí hay un problema real: parte

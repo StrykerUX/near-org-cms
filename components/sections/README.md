@@ -60,9 +60,11 @@ dar por terminado un cambio.
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
 | `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
 | `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` y `PrototypeFooter` tal cual. |
+| `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). Reusa `PrototypeFooter` tal cual. |
 
-Cuatro secciones usan **sección pegada**: `ProofStats` y, en `home-v2/`,
-`ProofStepper`, `NearStack` y `OwnYourOwn`. Todas con `position: sticky` de CSS
+Cinco secciones usan **sección pegada**: `ProofStats`; en `home-v2/`,
+`ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`, `ThreatDuel`.
+Todas con `position: sticky` de CSS
 y un ScrollTrigger que solo LEE el progreso — nunca `pin: true`, que inserta un
 pin-spacer en el documento y pelea con Lenis, con el `ResizeObserver` de
 `PrototypeMotionProvider` y con StrictMode.
