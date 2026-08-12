@@ -38,16 +38,38 @@ una vez por entrypoint que lo importa estáticamente: `sections/LatestUpdates.ts
 | `public/prototype/v2/stories/*.png` | 6 imágenes de 0.87–1.24 MB (~6 MB), las 6 montadas a la vez |
 | `public/unicorn-scene-{green,blue,red}.json` | 78 KB, servidos sin `Cache-Control` |
 
-## Coste algorítmico por frame (medido leyendo el código, no perfilado)
+## Coste algorítmico por frame (leído del código; ver la nota de corrección)
 
 | Sitio | Trabajo por frame |
 |---|---|
-| `quantum/quantumLattice.ts:130-153` | doble bucle O(n²) sobre ~208 nodos ≈ 43 000 iteraciones, y `glowOf` se recalcula dentro → **~90 000 `Math.exp()`** |
+| `quantum/quantumLattice.ts:130-153` | doble bucle O(n²) sobre ~208 nodos, **2 378 `Math.exp()`** y **357 `stroke()`** — ver corrección abajo |
 | `home-v2/QuantumBars.tsx:113-149` | ~340 spans de `SplitText`, ~170 tweens animando `color` (propiedad de paint) |
 | `quantum/ThreatSequence.tsx:466-491` | `borderColor` animado en 7 elementos de hasta 112 vw × 112 vw |
 | `quantum/NavPillQuantum.tsx:59-62` | `querySelectorAll` + 1 `getBoundingClientRect()` por sección oscura, por rAF de scroll |
 | `home-v2/NearStack.tsx:186-188` | 2 forced reflows por `mousemove` (`getBoundingClientRect` + `offsetHeight`) |
 | `quantum/wordField.ts:323-347` | 90–210 timelines nuevas por tanda, cada una con 3 tweens de `color` |
+
+### Corrección: el lattice no hacía 90 000 exponenciales
+
+La primera lectura de `quantumLattice` estimó ~90 000 `Math.exp()` por frame
+(43 000 iteraciones del bucle O(n²) × 2). **Es falso**, y conviene dejarlo
+escrito para no repetir el error: el `continue` temprano del bucle interno
+descarta todos los pares menos los 357 reales *antes* de llamar a `liftOf`, así
+que la cuenta verdadera era **2 378**.
+
+Medido con un micro-benchmark de la aritmética (misma geometría, 600 frames):
+
+| | antes | ahora | factor |
+|---|---|---|---|
+| `Math.exp()` / frame | 2 378 | 416 | 6× menos |
+| `stroke()` / frame | 357 | 13 | 27× menos |
+| aritmética / frame | 0.081 ms | 0.012 ms | 6.7× |
+
+La aritmética nunca fue el cuello de botella — 0.081 ms es el 0.5% de un frame
+de 16 ms. **Lo que pesaba eran los 357 `stroke()` por frame**, y ahí está la
+ganancia real. La lección para el resto de las fases: contar instrucciones leyendo
+código sobreestima cuando hay guardas tempranas; los draw calls y el área de
+repintado son los que hay que mirar.
 
 ## Perfil de scroll (a capturar en el navegador)
 

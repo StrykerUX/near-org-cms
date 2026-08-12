@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { gsap } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
 
 // The quantum rebuild's nav pill. It differs from `home-v2/NavPillV2` in the
@@ -30,6 +30,12 @@ const LINKS = [
 // Extra clearance below the pill as it retracts, so no edge stays peeking.
 const HIDE_MARGIN = 12;
 
+// Where the pill's middle sits, as a percentage of viewport height. It is fixed
+// at `top-6` with ~50px of pill, so its centre lands around 5% down. This is what
+// decides which section the ink flip reads: the tone has to change when the pill
+// crosses the boundary, not when the section's own midpoint does.
+const PILL_BAND = 5;
+
 export default function NavPillQuantum() {
   const rootRef = useGsapContext<HTMLDivElement>((_self, scope) => {
     const mm = gsap.matchMedia();
@@ -45,74 +51,95 @@ export default function NavPillQuantum() {
     // `apply()` writes the light values down both branches, so the flip never
     // actually happens. It is restored here, because an attribute with no
     // effect is clearly a bug rather than a decision.
-    let raf = 0;
-    let tone: string | null = null;
+    //
+    // ── Why ScrollTrigger and not a scroll listener ──────────────────────
+    // This used to run `document.querySelectorAll("[data-nav-dark]")` plus one
+    // getBoundingClientRect() per dark section on every animation frame of
+    // scroll, to answer a question ScrollTrigger already tracks: is this band of
+    // the viewport inside that element? One trigger per dark section with an
+    // `onToggle` answers it with zero layout reads per frame, and it comes off
+    // the same ticker Lenis is on.
+    //
+    // The count, not a boolean: two dark sections can overlap the pill's band
+    // during a handover, and a boolean would flip to light in between.
+    //
+    // The triggers are created here and not on mount-order grounds: the dark
+    // sections are siblings of this component, so they exist by the time the
+    // parent provider's coordinated refresh runs.
+    if (nav) {
+      let darkCount = 0;
+      const applyTone = () => {
+        nav.dataset.tone = darkCount > 0 ? "dark" : "light";
+      };
+      applyTone();
 
-    const measure = () => {
-      raf = 0;
-      if (!nav) return;
-      const r = nav.getBoundingClientRect();
-      const mid = r.top + r.height / 2;
-      // The DOM is queried on every measurement rather than once on mount: the
-      // dark sections are siblings of this component, not descendants, so they
-      // may not exist yet when it mounts.
-      const dark = Array.from(document.querySelectorAll("[data-nav-dark]")).some((sec) => {
-        const sr = sec.getBoundingClientRect();
-        return sr.top <= mid && sr.bottom >= mid;
+      document.querySelectorAll<HTMLElement>("[data-nav-dark]").forEach((section) => {
+        ScrollTrigger.create({
+          trigger: section,
+          // The pill sits at the top of the viewport, so the band that matters
+          // is a sliver at `top`. `PILL_BAND` is where its middle falls, as a
+          // fraction of viewport height.
+          start: `top ${PILL_BAND}%`,
+          end: `bottom ${PILL_BAND}%`,
+          onToggle: (self) => {
+            darkCount += self.isActive ? 1 : -1;
+            applyTone();
+          },
+        });
       });
-      const next = dark ? "dark" : "light";
-      if (next === tone) return;
-      tone = next;
-      nav.dataset.tone = next;
-    };
-
-    // A data-attribute is written instead of calling setState: this reacts to
-    // every scroll event, and re-rendering React per event to change two
-    // colours is exactly what the rest of the toolkit avoids.
-    const onScrollTone = () => {
-      if (!raf) raf = requestAnimationFrame(measure);
-    };
-    measure();
-    window.addEventListener("scroll", onScrollTone, { passive: true });
-    window.addEventListener("resize", onScrollTone);
+    }
 
     // ── 1:1 retraction with the gesture ──────────────────────────────────
     mm.add(MQ.motion, () => {
-      // quickSetter and not gsap.to(): this runs on every scroll event, and a
-      // tween per event would mean instantiating hundreds of objects a second
+      // quickSetter and not gsap.to(): this runs on every scroll update, and a
+      // tween per update would mean instantiating hundreds of objects a second
       // to write one property.
       const setY = gsap.quickSetter(scope, "y", "px") as (v: number) => void;
 
-      let last = window.scrollY;
+      // Hoisted out of the handler. Reading `offsetHeight` inside it forced a
+      // layout on every scroll event — and immediately after writing a transform,
+      // which is the read-after-write that makes it a forced synchronous reflow.
+      // The pill's height only changes when the viewport does, so it is measured
+      // on refresh (which ScrollTrigger fires on resize) instead.
+      let hidden = 0;
+      const measureHeight = () => {
+        hidden = -(scope.offsetHeight + HIDE_MARGIN);
+      };
+      measureHeight();
+      ScrollTrigger.addEventListener("refresh", measureHeight);
+
+      let last = 0;
       let offset = 0;
 
-      const onScroll = () => {
-        const y = window.scrollY;
-        const delta = y - last;
-        last = y;
+      // One ScrollTrigger over the whole document rather than a raw scroll
+      // listener: it already batches into the shared ticker (so this write lands
+      // in the same frame slot as every other GSAP write instead of interleaving
+      // with them) and it already knows the scroll position without asking layout.
+      const st = ScrollTrigger.create({
+        start: 0,
+        end: "max",
+        onUpdate: (self) => {
+          const y = self.scroll();
+          const delta = y - last;
+          last = y;
 
-        const hidden = -(scope.offsetHeight + HIDE_MARGIN);
-        offset = Math.min(0, Math.max(hidden, offset - delta));
-        // Always visible at the very top: without this, a negative scroll
-        // bounce on iOS can leave it hidden at the top of the page.
-        if (y <= 2) offset = 0;
+          offset = Math.min(0, Math.max(hidden, offset - delta));
+          // Always visible at the very top: without this, a negative scroll
+          // bounce on iOS can leave it hidden at the top of the page.
+          if (y <= 2) offset = 0;
 
-        setY(offset);
-      };
+          setY(offset);
+        },
+      });
+      last = st.scroll();
 
-      window.addEventListener("scroll", onScroll, { passive: true });
       return () => {
-        window.removeEventListener("scroll", onScroll);
+        ScrollTrigger.removeEventListener("refresh", measureHeight);
         setY(0);
       };
     });
 
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScrollTone);
-      window.removeEventListener("resize", onScrollTone);
-      mm.revert();
-    };
+    return () => mm.revert();
   }, []);
 
   return (

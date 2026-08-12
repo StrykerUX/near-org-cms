@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 import Button from "@/components/primitives/Button";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { gsap } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
 
 const LINKS = [{ label: "For Founders" }, { label: "For Developers" }, { label: "Tech Stack" }];
@@ -18,35 +18,56 @@ export default function NavPillV2() {
     const mm = gsap.matchMedia();
 
     mm.add(MQ.motion, () => {
-      // quickSetter y no gsap.to(): esto corre en cada evento de scroll, y
-      // crear un tween por evento sería instanciar cientos de objetos por
+      // quickSetter y no gsap.to(): esto corre en cada update de scroll, y
+      // crear un tween por update sería instanciar cientos de objetos por
       // segundo para escribir una sola propiedad.
       const setY = gsap.quickSetter(scope, "y", "px") as (v: number) => void;
 
-      let last = window.scrollY;
+      // Hoisteado fuera del handler. Leer `offsetHeight` ahí dentro forzaba un
+      // layout en cada evento de scroll —y justo después de escribir un
+      // transform, que es el read-after-write que lo vuelve un reflow síncrono
+      // forzado— para obtener un valor que solo cambia cuando cambia el
+      // viewport. Se mide en el refresh de ScrollTrigger, que dispara en resize.
+      let hidden = 0;
+      const measureHeight = () => {
+        hidden = -(scope.offsetHeight + HIDE_MARGIN);
+      };
+      measureHeight();
+      ScrollTrigger.addEventListener("refresh", measureHeight);
+
+      let last = 0;
       let offset = 0;
 
       // Tracking 1:1 y no un hide/show con umbral: la pill acompaña el gesto
       // en los dos sentidos, así que un scroll corto hacia arriba la asoma
       // parcialmente en vez de dispararla entera. Es el comportamiento del
       // original y se siente más directo que un toggle.
-      const onScroll = () => {
-        const y = window.scrollY;
-        const delta = y - last;
-        last = y;
+      //
+      // Un ScrollTrigger sobre el documento entero en vez de un listener de
+      // scroll crudo: ya viene batcheado en el ticker compartido —así que esta
+      // escritura cae en la misma ranura del frame que el resto de las de GSAP
+      // en lugar de intercalarse con ellas— y ya sabe la posición de scroll sin
+      // preguntarle al layout. Misma decisión que en `quantum/NavPillQuantum`.
+      const st = ScrollTrigger.create({
+        start: 0,
+        end: "max",
+        onUpdate: (self) => {
+          const y = self.scroll();
+          const delta = y - last;
+          last = y;
 
-        const hidden = -(scope.offsetHeight + HIDE_MARGIN);
-        offset = Math.min(0, Math.max(hidden, offset - delta));
-        // Arriba del todo siempre visible: sin esto, un rebote de scroll
-        // negativo en iOS puede dejarla escondida en el tope de la página.
-        if (y <= 2) offset = 0;
+          offset = Math.min(0, Math.max(hidden, offset - delta));
+          // Arriba del todo siempre visible: sin esto, un rebote de scroll
+          // negativo en iOS puede dejarla escondida en el tope de la página.
+          if (y <= 2) offset = 0;
 
-        setY(offset);
-      };
+          setY(offset);
+        },
+      });
+      last = st.scroll();
 
-      window.addEventListener("scroll", onScroll, { passive: true });
       return () => {
-        window.removeEventListener("scroll", onScroll);
+        ScrollTrigger.removeEventListener("refresh", measureHeight);
         setY(0);
       };
     });

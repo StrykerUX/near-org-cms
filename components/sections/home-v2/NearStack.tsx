@@ -131,7 +131,22 @@ export default function NearStack() {
   // forma de que la sección se lea entera sin JS, en mobile y con reduced-motion.
   const isOpen = (i: number) => !sceneOn || i === active;
 
-  /** Trazo de cada pieza: el verde solo en el segmento de AI bajo el puntero. */
+  /** Trazo de cada pieza: el verde solo en el segmento de AI bajo el puntero.
+   *
+   *  Esto se aplica como `style` inline a cada pieza, así que un cambio de
+   *  `hovered`/`hoveredSeg` re-renderiza el árbol de ~35 grupos × 4-8 paths
+   *  (~200 nodos). Evaluado y NO cambiado a CSS, a propósito:
+   *
+   *  · Ocurre una vez por `pointerenter` de un grupo, no una vez por frame — el
+   *    caso que sí era por frame (la posición del popover) es el que se arregló.
+   *  · Pasarlo a `:hover` puro requiere marcar las piezas con data-attrs y
+   *    reescribir el markup de los 200 nodos, y `tier >= active` no se expresa en
+   *    CSS sin generar una clase por tier.
+   *
+   *  Si el hover llega a sentirse pesado al barrer el puntero por el stack, el
+   *  camino es sacar `hovered`/`hoveredSeg` del estado (a `:hover` + un
+   *  `data-ai-seg`) y dejar solo `active`, que cambia 5 veces por pasada. Antes
+   *  de eso, medirlo. */
   const strokeOf = (tier: number, id: string) => {
     if (hoveredSeg === id) return { color: "var(--near-green-accent)", strokeOpacity: 1 };
     // El núcleo verde nunca se atenúa: es el eje de la escena, no un anillo.
@@ -142,8 +157,35 @@ export default function NearStack() {
     return { color: "#fff", strokeOpacity: bright ? 0.85 : 0.3 };
   };
 
+  const popBox = useRef({ left: 0, top: 0, pageTop: 0, width: 0, height: 0, popH: 0 });
+
+  const measurePopBox = () => {
+    const host = sceneRef.current;
+    if (!host) return;
+    const r = host.getBoundingClientRect();
+    popBox.current = {
+      left: r.left,
+      top: r.top,
+      // La escena no es fixed: su `top` de viewport se mueve con el scroll. Se
+      // guarda la posición de PÁGINA y el `top` se deriva restando `scrollY`, que
+      // es un valor cacheado por el navegador y no una lectura de layout.
+      pageTop: r.top + window.scrollY,
+      width: r.width,
+      height: r.height,
+      // El popover ya está montado cuando esto corre en `pointerenter`? No: su
+      // contenido depende de `popKey`, que se setea en el mismo handler. Se lee
+      // el alto que tenga ahora y se corrige en el primer movimiento — que es
+      // exactamente lo que hacía antes, solo que una vez en lugar de siempre.
+      popH: popRef.current?.offsetHeight ?? 0,
+    };
+  };
+
   const onPieceEnter = (tier: number, id: string) => {
     if (active >= 0 && tier > active) return; // todavía no voló
+    // Se miden acá las dos cosas que `onPieceMove` necesita, una sola vez por
+    // entrada del puntero en vez de una vez por movimiento. Ver el comentario de
+    // `onPieceMove`.
+    measurePopBox();
     setHovered(tier);
     if (AI_SEGMENT_IDS.includes(id)) {
       setHoveredSeg(id);
@@ -163,13 +205,29 @@ export default function NearStack() {
   // La posición del popover se escribe IMPERATIVAMENTE. Un setState por
   // mousemove serían ~60 renders por segundo del árbol entero — es el error
   // clásico al portar esto. El contenido sí es estado; la posición no.
+  //
+  // Pero escribir imperativamente no alcanzaba: el handler LEÍA
+  // `host.getBoundingClientRect()` y `pop.offsetHeight` en cada evento, o sea dos
+  // reflows forzados por cada píxel que se mueve el puntero sobre cualquiera de
+  // los ~35 grupos del SVG. Ninguno de los dos valores cambia mientras el puntero
+  // se mueve: el de la escena solo con scroll o resize, y el alto del popover
+  // solo cuando cambia su contenido. Ahora se miden en `pointerenter` —una vez
+  // por hover en vez de una por píxel— y el handler solo hace aritmética y una
+  // escritura. Un resize a mitad de un hover deja el encuadre desfasado hasta la
+  // siguiente entrada del puntero, que es un caso que no vale la pena cubrir.
   const onPieceMove = (e: React.MouseEvent) => {
     const pop = popRef.current;
-    const host = sceneRef.current;
-    if (!pop || !host) return;
-    const r = host.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - r.left + 18, r.width - POP_W - 12));
-    const y = Math.max(0, Math.min(e.clientY - r.top + 18, r.height - pop.offsetHeight - 12));
+    if (!pop) return;
+    const box = popBox.current;
+    if (box.width === 0) return; // sin medición previa no hay dónde encuadrar
+
+    // El alto del popover se completa en el primer movimiento tras el enter: en
+    // el `pointerenter` su contenido todavía no está renderizado.
+    if (box.popH === 0) box.popH = pop.offsetHeight;
+
+    const top = box.pageTop - window.scrollY;
+    const x = Math.max(0, Math.min(e.clientX - box.left + 18, box.width - POP_W - 12));
+    const y = Math.max(0, Math.min(e.clientY - top + 18, box.height - box.popH - 12));
     // translate3d y no left/top: compone en la GPU en vez de disparar layout.
     pop.style.transform = `translate3d(${x}px, ${y}px, 0)`;
   };
