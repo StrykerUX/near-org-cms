@@ -121,7 +121,11 @@ export default function PrototypeLandingView() {
             {FEATURES.map((feature) => (
               <div
                 key={feature.title}
-                className="grid grid-cols-[15rem_1fr_auto] items-center gap-6 border-t-2 border-dotted border-border py-8 last:border-b-2"
+                // Las tres columnas solo desde lg: la primera es fija en 15rem
+                // y con el círculo y el gap piden ~328px, más de lo que deja
+                // Container en un teléfono. Sin el escalón, la fila desbordaba
+                // y arrastraba a toda la página a scrollear en horizontal.
+                className="grid grid-cols-1 items-center gap-6 border-t-2 border-dotted border-border py-8 last:border-b-2 lg:grid-cols-[15rem_1fr_auto]"
               >
                 <h3 className="text-h4 font-medium text-foreground text-pretty">
                   {feature.title}

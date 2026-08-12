@@ -37,8 +37,15 @@ import { MQ, EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/mot
 // recorrido de las cards sin necesitar una pista de altura declarada.
 
 // Velocidad de cada card RELATIVA a la página. >1 se adelanta, <1 se retrasa.
-// Son las del original.
-const SPEEDS = [0.9, 1.5, 1.56, 1.6] as const;
+// Lo que importa es la distancia a 1, no el valor: una card en 1 iría clavada
+// al scroll y no se desviaría nada.
+//
+// Estas están acercadas respecto a las del original ([0.9, 1.5, 1.56, 1.6]).
+// Ahí la primera se separaba 54px de su sitio y la última 324 — seis veces más,
+// y la primera se leía como si no participara. Ahora el rango va de 119 a 270px
+// (a 900px de alto de ventana): la relación baja a 2,3× y ninguna queda ni
+// estática ni disparada.
+const SPEEDS = [0.78, 1.38, 1.44, 1.5] as const;
 
 // Amplitud del desvío, en svh. Es cuánto se separa de su posición de layout la
 // card más rápida en el punto medio del recorrido.
@@ -127,13 +134,36 @@ export default function OwnYourOwn() {
       // queda atrás. Es la única lectura del entorno, y no toca el DOM.
       const drift = (i: number) => (1 - SPEEDS[i]) * window.innerHeight * (DRIFT_VH / 100);
 
-      // Ida y vuelta sobre el recorrido del grid. `sine.out` + `sine.in`
-      // encadenados dan una curva sin pico en el punto de retorno: la card
-      // acelera al acercarse al título y se reintegra al alejarse.
+      // Ida y vuelta sobre el recorrido del grid.
+      //
+      // ── El start ────────────────────────────────────────────────────────
+      // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
+      // lo que había, la coreografía no empezaba hasta que el grid tocaba el
+      // techo de la ventana: quedaban ~850px de scroll con las cards ya en
+      // pantalla y completamente quietas, y al cruzar ese umbral el desvío
+      // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
+      //
+      // El end, en cambio, NO puede ser `bottom top`, que sería el simétrico
+      // natural: el desvío tiene que valer cero cuando se ve el fondo del grid,
+      // y con `bottom top` la última card seguiría ~105px por encima de su sitio
+      // en ese momento. Como los transforms no afectan al layout, ahí reaparece
+      // el hueco contra "The NEAR Stack" — el mismo que ya se arregló una vez.
+      // `bottom bottom` hace que el retorno a cero caiga exactamente ahí.
+      //
+      // De paso el recorrido pasa de ~1300px de scroll a ~2200px, y como el
+      // desvío es el mismo repartido en más distancia, la velocidad máxima cae
+      // a la mitad. Buena parte de la fluidez sale de eso.
+      //
+      // ── Las curvas ──────────────────────────────────────────────────────
+      // `sine.in` en la ida y `sine.out` en la vuelta, en ese orden. Es lo que
+      // pone la velocidad en cero en los dos bordes y el máximo en el medio del
+      // recorrido, donde las cards cruzan el título. Al revés —que era lo que
+      // había— el perfil es 0 → MAX → 0 → MAX → 0: arranca y corta en seco, y
+      // encima se frena justo en el cruce, que es lo que hay que mirar.
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: stage,
-          start: "top top",
+          start: "top bottom",
           end: "bottom bottom",
           scrub: true,
           invalidateOnRefresh: true,
@@ -141,8 +171,8 @@ export default function OwnYourOwn() {
         },
       });
 
-      tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.out", duration: 1 })
-        .to(cards, { y: 0, ease: "sine.in", duration: 1 });
+      tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.in", duration: 1 })
+        .to(cards, { y: 0, ease: "sine.out", duration: 1 });
 
       return () => {
         gsap.killTweensOf(cards);
@@ -163,8 +193,12 @@ export default function OwnYourOwn() {
     <section ref={rootRef} className="relative z-[1] bg-cream text-foreground">
       {/* El `pb` es aire real, no compensación: ahora que el grid termina justo
           debajo de la última card, es lo único que separa la sección del corte
-          con la siguiente (que es negra y entra a sangre). */}
-      <Container className="flex flex-col gap-24 pb-32 pt-32">
+          con la siguiente (que es negra y entra a sangre).
+
+          El gap separa tres hijos: encabezado → grid de cards → título de
+          mobile. El escalón de desktop solo actúa en el primer hueco: el tercer
+          hijo es `lg:hidden`, y un elemento oculto no genera caja ni gap. */}
+      <Container className="flex flex-col gap-24 pb-32 pt-32 lg:gap-36">
         <div className="grid grid-cols-1 gap-24 lg:grid-cols-2">
           <div className="flex flex-col gap-5">
             <Eyebrow>The future of finance is yours</Eyebrow>
@@ -200,9 +234,29 @@ export default function OwnYourOwn() {
 
               El `top` va inline porque `calc()` con var y espacios es ilegible
               como clase arbitraria. En mobile el elemento es estático y `top` no
-              tiene efecto, así que no hace falta condicionarlo. */}
+              tiene efecto, así que no hace falta condicionarlo.
+
+              Los márgenes recortan el tramo pegado por sus dos puntas. Van como
+              margen y no como padding a propósito: el padding agranda el
+              elemento pegado y se llevaría al `h3` con él, moviendo también la
+              posición congelada. El margen mueve el rectángulo en el que el
+              sticky puede vivir —el área de grid del item, encogida por sus
+              propios márgenes— y deja el anclaje intacto.
+
+              `mt` es la entrada: sin él el título nace exactamente a la altura
+              de la card Assets, la única sin `mt` y por lo tanto también pegada
+              al techo del grid, y las dos entran juntas.
+
+              `mb` es la salida: el título se despega cuando su borde inferior
+              alcanza el fondo del grid menos este margen, así que estos 200px
+              son —literalmente— cuánta card queda por debajo cuando el título
+              empieza a subir. Sin él quedaría clavado hasta el último píxel de
+              la última card.
+
+              Ambos en px, como los `mt` de las cards y por lo mismo: `svh`
+              escala con el alto de la ventana y las cards con el ancho. */}
           <div
-            className="z-[1] hidden lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
+            className="z-[1] hidden lg:mt-[150px] lg:mb-[200px] lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
             style={{ top: "calc(50svh - var(--text-statement) / 2)" }}
           >
             <h3 className="whitespace-nowrap text-center text-statement">Own Your Own</h3>

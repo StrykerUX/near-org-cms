@@ -261,7 +261,15 @@ export default function ProofStats() {
       // de visible se vuelve el contenedor de scroll del sticky de abajo, y el
       // sticky deja de pegarse al viewport — silenciosamente. El recorte de
       // las palabras lo hace el propio [data-rail], que no es ancestro.
-      className="group/proof relative bg-background text-foreground data-[stepper=on]:h-[calc(var(--steps)*var(--step-vh))]"
+      //
+      // `overflow-x-clip` es la excepción, y por eso está: `clip` recorta pero
+      // NO crea un contenedor de scroll, así que el sticky sigue anclado al
+      // viewport. Es lo único que puede recortar acá. Lo que recorta es el
+      // `-right-4` del carril, que asoma 16px más allá del borde derecho y
+      // extendía el ancho scrolleable de la página entera. Va solo en X:
+      // `clip` admite el otro eje en `visible` —`hidden` no, fuerza `auto`—, y
+      // recortar en Y cortaría el propio sticky.
+      className="group/proof relative overflow-x-clip bg-background text-foreground data-[stepper=on]:h-[calc(var(--steps)*var(--step-vh))]"
     >
       {/* Solo se pega cuando el stepper está realmente corriendo. `relative`
           siempre: es el ancestro del carril, que va fuera de Container. */}
