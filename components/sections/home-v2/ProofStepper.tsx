@@ -146,6 +146,13 @@ export default function ProofStepper() {
       start: "top top",
       end: "bottom bottom",
       markers: DEBUG_MARKERS,
+      // `will-change` solo mientras el recorrido está activo. Fijo en el
+      // className, el carril —tres copias de cinco palabras en tipografía
+      // display— quedaba promovido a su propia capa de compositing durante toda
+      // la sesión, incluso con la sección a varias pantallas de distancia.
+      onToggle: (st) => {
+        list.style.willChange = st.isActive ? "transform" : "auto";
+      },
       // `st` y no `self`: el nombre del contexto de motion ya está tomado en este
       // scope, y sombrearlo acá dejaría `self.go` apuntando al ScrollTrigger.
       onUpdate: (st) => {
@@ -160,6 +167,7 @@ export default function ProofStepper() {
       const all = [...panels, ...words, list, ...(cursor ? [cursor] : [])];
       gsap.killTweensOf(all);
       gsap.set(all, { clearProps: "opacity,visibility,transform" });
+      list.style.willChange = "auto";
     };
   });
 
@@ -239,7 +247,9 @@ export default function ProofStepper() {
               es el bloque entero el que se corre en X. */}
           <div
             data-list
-            className="absolute left-0 top-0 flex flex-col items-start gap-2 will-change-transform"
+            // Sin `will-change` fijo: lo pone y lo quita el onToggle del
+            // ScrollTrigger del recorrido.
+            className="absolute left-0 top-0 flex flex-col items-start gap-2"
           >
             {RAIL_COPIES.map((copy) =>
               STEPS.map((step) => (

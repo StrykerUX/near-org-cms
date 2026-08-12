@@ -159,6 +159,14 @@ export default function OwnYourOwn() {
         scrub: true,
         invalidateOnRefresh: true,
         markers: DEBUG_MARKERS,
+        // `will-change` solo durante el recorrido. Estas cards llevan además
+        // `backdrop-blur`, que ya fuerza su propia capa: fijo en el className,
+        // eran cuatro capas con filtro vivas durante toda la sesión para una
+        // animación que ocupa dos pantallas de scroll.
+        onToggle: (st) => {
+          const value = st.isActive ? "transform" : "auto";
+          for (const card of cards) card.style.willChange = value;
+        },
       },
     });
 
@@ -168,6 +176,7 @@ export default function OwnYourOwn() {
     return () => {
       gsap.killTweensOf(cards);
       gsap.set(cards, { clearProps: "transform" });
+      for (const card of cards) card.style.willChange = "auto";
     };
   });
 
@@ -256,7 +265,7 @@ export default function OwnYourOwn() {
               data-own-card
               // z-[2]: las cards cruzan el título por delante, como en la
               // referencia.
-              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] will-change-transform ${card.tint} ${card.place}`}
+              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${card.tint} ${card.place}`}
             >
               <Image
                 src={card.src}

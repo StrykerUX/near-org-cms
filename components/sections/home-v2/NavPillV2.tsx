@@ -81,6 +81,10 @@ export default function NavPillV2() {
     // haya debajo (el hero ocupa esa misma franja).
     <div
       ref={rootRef}
+      // `will-change` acá SÍ va permanente, al contrario que en el resto de la
+      // página: la pill se transforma en cada update de scroll, o sea que está
+      // animándose prácticamente siempre. Hacerlo condicional la promovería y
+      // despromovería sin parar, que es peor que dejar la capa reservada.
       className="pointer-events-none fixed inset-x-0 top-0 z-50 will-change-transform"
     >
       <Container className="pt-6">

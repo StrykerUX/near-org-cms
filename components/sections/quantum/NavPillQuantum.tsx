@@ -149,6 +149,10 @@ export default function NavPillQuantum() {
     // listens for the pointer).
     <div
       ref={rootRef}
+      // `will-change` here IS permanent, unlike everywhere else on the page: the
+      // pill transforms on every scroll update, so it is animating essentially all
+      // the time. Toggling it would promote and demote the layer continuously,
+      // which is worse than keeping it reserved.
       className="pointer-events-none fixed inset-x-0 top-0 z-50 will-change-transform"
     >
       <Container className="pt-6">

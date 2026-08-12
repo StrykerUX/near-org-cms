@@ -58,7 +58,10 @@ export default function ProofMarquee() {
           manual scrolling: otherwise the pairs past the viewport edge would be
           unreachable. Same call as TestimonialMarquee. */}
       <div className="overflow-hidden motion-reduce:overflow-x-auto">
-        <div data-marquee className="flex w-max will-change-transform">
+        {/* No `will-change` here: `pauseOffscreen` adds it on entering the viewport
+            and drops it on leaving. Fixed in the class, the band would stay
+            promoted to its own layer for the whole session. */}
+        <div data-marquee className="flex w-max">
           {items.map((p, i) => {
             const isClone = i >= PROOFS.length;
             return (

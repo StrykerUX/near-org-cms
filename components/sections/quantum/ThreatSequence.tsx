@@ -214,6 +214,30 @@ const SWEEP_MASK = `radial-gradient(circle closest-side at center, transparent 0
 ).toFixed(2)}%, #000 ${((R_IN / R_OUT) * 100).toFixed(2)}% 100%)`;
 
 // ── Ring wave ────────────────────────────────────────────────────────────────
+// These animate `borderColor`, which is a paint property, on elements up to
+// 112vw square. That looks like the most expensive thing in the section and it
+// was flagged as such — but the reasoning behind the flag was wrong and it is
+// worth writing down rather than acting on it.
+//
+// A ring is a `border: 1px` circle: everything inside it is transparent. What
+// gets rasterised is the STROKE, whose cost scales with the perimeter (~5300px on
+// a 1693px circle), not with the 2.8 million pixels of its bounding box.
+//
+// The alternative — two pre-coloured layers with `opacity` animated instead of
+// the colour — is exactly equivalent, not approximately: with the bright layer at
+// alpha 0.46237, source-over composition gives 0.07 + 0.43a for every value of
+// `a`, which is the same straight line as interpolating 0.07 → 0.5. (Verified
+// numerically; the ease curves carry over unchanged.)
+//
+// It was NOT done, for two reasons: `opacity` only becomes cheaper than a paint
+// property if the element is promoted to its own compositing layer, and promoting
+// seven 1693px-square layers costs on the order of 80MB of GPU memory to avoid
+// repainting seven 1px strokes. Without promotion, animating opacity repaints the
+// same area that animating the border colour does — so the change would add seven
+// DOM nodes and buy nothing.
+//
+// If a profile ever shows this passage costing real paint time, the equivalence
+// above is the recipe. Measure first.
 const RING_DIM = "rgba(255,255,255,0.07)";
 const RING_BRIGHT = "rgba(255,255,255,0.5)";
 // Roughly how many rings are lit at once — the single number that decides
@@ -292,6 +316,16 @@ export default function ThreatSequence() {
           // takes px or a percentage of the trigger, not viewport units.
           start: () => `top top-=${(BEAT3_SVH / 100) * window.innerHeight}`,
           end: "bottom top",
+          // `will-change` only while the band is actually turning. It used to be
+          // a permanent class in the JSX, which meant this element — 68vw square,
+          // a 10-stop conic gradient, two conic masks and a radial mask — was
+          // promoted to its own compositing layer for the whole session,
+          // including the first two beats when it does not move at all and the
+          // rest of the page when the section is nowhere near the viewport. A
+          // promoted layer costs GPU memory whether or not anything animates.
+          onToggle: (self) => {
+            sweep.style.willChange = self.isActive ? "transform" : "auto";
+          },
           scrub: 0.3,
           invalidateOnRefresh: true,
         },
@@ -536,7 +570,10 @@ export default function ThreatSequence() {
                 JS runs. */}
             <div
               data-sweep
-              className="absolute will-change-transform"
+              // No `will-change` here: the effect adds it via the band's
+              // ScrollTrigger while it is turning and removes it after. See the
+              // onToggle in the motion block.
+              className="absolute"
               style={{
                 width: `${R_OUT * 2}vw`,
                 height: `${R_OUT * 2}vw`,

@@ -221,6 +221,12 @@ export default function ProofStats() {
       start: "top top",
       end: "bottom bottom",
       markers: DEBUG_MARKERS,
+      // `will-change` solo mientras el recorrido está activo. Fijo en el
+      // className, el carril —tres copias de cinco títulos en tipografía
+      // display— quedaba promovido a su propia capa durante toda la sesión.
+      onToggle: (st) => {
+        list.style.willChange = st.isActive ? "transform" : "auto";
+      },
       // `st` y no `self`: el nombre del contexto de motion ya está tomado en
       // este scope, y sombrearlo dejaría `self.go` apuntando al ScrollTrigger.
       onUpdate: (st) => {
@@ -239,6 +245,7 @@ export default function ProofStats() {
       const all = [...panels, ...words, list, ...(cursor ? [cursor] : [])];
       gsap.killTweensOf(all);
       gsap.set(all, { clearProps: "opacity,visibility,transform" });
+      list.style.willChange = "auto";
     };
   });
 
@@ -346,7 +353,9 @@ export default function ProofStats() {
           {/* `right-0` + `items-end`: los títulos terminan pegados al borde. */}
           <div
             data-list
-            className="absolute right-0 top-0 flex flex-col items-end gap-2 will-change-transform"
+            // Sin `will-change` fijo: lo pone y lo quita el onToggle del
+            // ScrollTrigger del recorrido.
+            className="absolute right-0 top-0 flex flex-col items-end gap-2"
           >
             {RAIL_COPIES.map((copy) =>
               STEPS.map((step) => (

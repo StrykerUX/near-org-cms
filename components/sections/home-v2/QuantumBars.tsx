@@ -25,6 +25,13 @@ const COLUMNS: ({ offset: number; height: number } | null)[] = [
 
 const u = (n: number) => `calc(var(--u) * ${n})`;
 
+// Desfase entre carácter y carácter del barrido, en unidades de la timeline. Es
+// lo que decide el ANCHO del frente de luz: más chico, el brillo cruza como una
+// línea fina; más grande, media frase se ilumina a la vez. Lo comparten la capa
+// base y la de brillo — si se separan, el brillo deja de coincidir con la letra
+// que enciende.
+const CHAR_STEP = 0.03;
+
 export default function QuantumBars() {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
@@ -134,19 +141,37 @@ export default function QuantumBars() {
           opacity: 1,
           duration: 0.16,
           ease: "none",
-          stagger: { each: 0.03 },
+          stagger: { each: CHAR_STEP },
         }, 0);
 
-        shine.chars.forEach((char, i) => {
-          sweep.to(char, {
-            keyframes: [
-              { opacity: 1, duration: 0.12, ease: "none" },
-              { color: "var(--near-teal)", opacity: 0.85, duration: 0.2, ease: "none" },
-              { color: "var(--near-teal)", opacity: 0.5, duration: 0.22, ease: "none" },
-              { color: "var(--near-teal)", opacity: 0, duration: 0.4, ease: "none" },
-            ],
-          }, i * 0.03);
-        });
+        // UN tween con keyframes + stagger, no uno por carácter.
+        //
+        // Esto era un `forEach` que creaba un tween por char con su posición
+        // absoluta en `i * CHAR_STEP`: ~170 objetos de tween que GSAP tenía que
+        // actualizar en cada frame del scrub, para un efecto que es el mismo para
+        // todos los chars salvo el desfase. `keyframes` y `stagger` se combinan
+        // —cada target recorre la secuencia con su propio retardo—, así que
+        // `stagger: { each: CHAR_STEP }` en la posición 0 da exactamente las
+        // mismas posiciones que la aritmética a mano. Cero diferencia visual.
+        //
+        // El `color` va solo en el segundo keyframe: en los otros dos era el mismo
+        // valor repetido, o sea trabajo por frame para reescribir lo ya escrito.
+        //
+        // Y sigue siendo `var(--near-teal)` a propósito, aunque el resto del
+        // toolkit use literales: GSAP no resuelve custom properties, así que no
+        // interpola desde el color heredado — le asigna la cadena y el navegador
+        // la resuelve. El resultado es un CORTE a teal al empezar este keyframe,
+        // que es el efecto que tiene hoy. Con un literal GSAP interpolaría el
+        // color durante 0.2s, que se ve distinto.
+        sweep.to(shine.chars, {
+          keyframes: [
+            { opacity: 1, duration: 0.12, ease: "none" },
+            { color: "var(--near-teal)", opacity: 0.85, duration: 0.2, ease: "none" },
+            { opacity: 0.5, duration: 0.22, ease: "none" },
+            { opacity: 0, duration: 0.4, ease: "none" },
+          ],
+          stagger: { each: CHAR_STEP },
+        }, 0);
       }
 
       // ── Sin parallax, a propósito ─────────────────────────────────────────
