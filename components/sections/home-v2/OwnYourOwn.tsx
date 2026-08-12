@@ -4,9 +4,9 @@ import Image from "next/image";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
-import { MQ, EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 
 // ── "Own Your Own": el título se queda quieto y las cards lo atraviesan ──────
 //
@@ -96,92 +96,80 @@ const CARDS = [
 ] as const;
 
 export default function OwnYourOwn() {
-  const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
-    const mm = gsap.matchMedia();
+  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
+    const cards = q("[data-own-card]");
+    const stage = q("[data-own-stage]")[0];
+    if (cards.length !== SPEEDS.length || !stage) return;
 
-    mm.add({ motionOk: MQ.motion, isDesktop: MQ.desktop }, (mctx) => {
-      const { motionOk, isDesktop } = mctx.conditions as {
-        motionOk: boolean;
-        isDesktop: boolean;
-      };
+    // Con reduced-motion no se anima nada: el JSX ya renderiza el estado
+    // legible, y sin transforms las cards quedan exactamente donde el layout
+    // las puso.
+    if (!motionOk) return;
 
-      const cards = q("[data-own-card]");
-      const stage = q("[data-own-stage]")[0];
-      if (cards.length !== SPEEDS.length || !stage) return;
-
-      // Con reduced-motion no se anima nada: el JSX ya renderiza el estado
-      // legible, y sin transforms las cards quedan exactamente donde el layout
-      // las puso.
-      if (!motionOk) return;
-
-      // En mobile las cards se apilan en una columna y no hay ancho para que
-      // crucen el título, así que el desvío no comunica nada. Reveal genérico.
-      if (!isDesktop) {
-        gsap.from(cards, {
-          autoAlpha: 0,
-          y: REVEAL.y,
-          stagger: REVEAL.stagger,
-          duration: REVEAL.duration,
-          ease: EASE_OUT,
-          scrollTrigger: { trigger: stage, start: REVEAL.start, once: true, markers: DEBUG_MARKERS },
-        });
-        return;
-      }
-
-      // Desvío máximo de cada card. El signo sale de su velocidad: las que van
-      // por encima de 1 se adelantan (y negativo) y la que va por debajo se
-      // queda atrás. Es la única lectura del entorno, y no toca el DOM.
-      const drift = (i: number) => (1 - SPEEDS[i]) * window.innerHeight * (DRIFT_VH / 100);
-
-      // Ida y vuelta sobre el recorrido del grid.
-      //
-      // ── El start ────────────────────────────────────────────────────────
-      // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
-      // lo que había, la coreografía no empezaba hasta que el grid tocaba el
-      // techo de la ventana: quedaban ~850px de scroll con las cards ya en
-      // pantalla y completamente quietas, y al cruzar ese umbral el desvío
-      // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
-      //
-      // El end, en cambio, NO puede ser `bottom top`, que sería el simétrico
-      // natural: el desvío tiene que valer cero cuando se ve el fondo del grid,
-      // y con `bottom top` la última card seguiría ~105px por encima de su sitio
-      // en ese momento. Como los transforms no afectan al layout, ahí reaparece
-      // el hueco contra "The NEAR Stack" — el mismo que ya se arregló una vez.
-      // `bottom bottom` hace que el retorno a cero caiga exactamente ahí.
-      //
-      // De paso el recorrido pasa de ~1300px de scroll a ~2200px, y como el
-      // desvío es el mismo repartido en más distancia, la velocidad máxima cae
-      // a la mitad. Buena parte de la fluidez sale de eso.
-      //
-      // ── Las curvas ──────────────────────────────────────────────────────
-      // `sine.in` en la ida y `sine.out` en la vuelta, en ese orden. Es lo que
-      // pone la velocidad en cero en los dos bordes y el máximo en el medio del
-      // recorrido, donde las cards cruzan el título. Al revés —que era lo que
-      // había— el perfil es 0 → MAX → 0 → MAX → 0: arranca y corta en seco, y
-      // encima se frena justo en el cruce, que es lo que hay que mirar.
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: stage,
-          start: "top bottom",
-          end: "bottom bottom",
-          scrub: true,
-          invalidateOnRefresh: true,
-          markers: DEBUG_MARKERS,
-        },
+    // En mobile las cards se apilan en una columna y no hay ancho para que
+    // crucen el título, así que el desvío no comunica nada. Reveal genérico.
+    if (!isDesktop) {
+      gsap.from(cards, {
+        autoAlpha: 0,
+        y: REVEAL.y,
+        stagger: REVEAL.stagger,
+        duration: REVEAL.duration,
+        ease: EASE_OUT,
+        scrollTrigger: { trigger: stage, start: REVEAL.start, once: true, markers: DEBUG_MARKERS },
       });
+      return;
+    }
 
-      tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.in", duration: 1 })
-        .to(cards, { y: 0, ease: "sine.out", duration: 1 });
+    // Desvío máximo de cada card. El signo sale de su velocidad: las que van
+    // por encima de 1 se adelantan (y negativo) y la que va por debajo se
+    // queda atrás. Es la única lectura del entorno, y no toca el DOM.
+    const drift = (i: number) => (1 - SPEEDS[i]) * window.innerHeight * (DRIFT_VH / 100);
 
-      return () => {
-        gsap.killTweensOf(cards);
-        gsap.set(cards, { clearProps: "transform" });
-      };
+    // Ida y vuelta sobre el recorrido del grid.
+    //
+    // ── El start ────────────────────────────────────────────────────────
+    // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
+    // lo que había, la coreografía no empezaba hasta que el grid tocaba el
+    // techo de la ventana: quedaban ~850px de scroll con las cards ya en
+    // pantalla y completamente quietas, y al cruzar ese umbral el desvío
+    // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
+    //
+    // El end, en cambio, NO puede ser `bottom top`, que sería el simétrico
+    // natural: el desvío tiene que valer cero cuando se ve el fondo del grid,
+    // y con `bottom top` la última card seguiría ~105px por encima de su sitio
+    // en ese momento. Como los transforms no afectan al layout, ahí reaparece
+    // el hueco contra "The NEAR Stack" — el mismo que ya se arregló una vez.
+    // `bottom bottom` hace que el retorno a cero caiga exactamente ahí.
+    //
+    // De paso el recorrido pasa de ~1300px de scroll a ~2200px, y como el
+    // desvío es el mismo repartido en más distancia, la velocidad máxima cae
+    // a la mitad. Buena parte de la fluidez sale de eso.
+    //
+    // ── Las curvas ──────────────────────────────────────────────────────
+    // `sine.in` en la ida y `sine.out` en la vuelta, en ese orden. Es lo que
+    // pone la velocidad en cero en los dos bordes y el máximo en el medio del
+    // recorrido, donde las cards cruzan el título. Al revés —que era lo que
+    // había— el perfil es 0 → MAX → 0 → MAX → 0: arranca y corta en seco, y
+    // encima se frena justo en el cruce, que es lo que hay que mirar.
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: stage,
+        start: "top bottom",
+        end: "bottom bottom",
+        scrub: true,
+        invalidateOnRefresh: true,
+        markers: DEBUG_MARKERS,
+      },
     });
 
-    return () => mm.revert();
-  }, []);
+    tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.in", duration: 1 })
+      .to(cards, { y: 0, ease: "sine.out", duration: 1 });
+
+    return () => {
+      gsap.killTweensOf(cards);
+      gsap.set(cards, { clearProps: "transform" });
+    };
+  });
 
   return (
     // z-[1]: esta sección pasa POR ENCIMA de las barras de QuantumBars, que

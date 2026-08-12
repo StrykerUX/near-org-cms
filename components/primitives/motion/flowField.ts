@@ -1,6 +1,7 @@
 "use client";
 
 import { buildProgram, getGl2 } from "./glContext";
+import { deviceRatio } from "./dpr";
 import { FLOW_FIELD_FRAGMENT, FLOW_FIELD_VERTEX } from "./shaders/flowField";
 
 /** Los 4 stops del campo, en RGB 0..1, de saturado a neutro.
@@ -117,7 +118,7 @@ export function createFlowField(
 
   function resize() {
     if (dead) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+    const dpr = deviceRatio(maxDpr);
     const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
     const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
     if (w === bufW && h === bufH) return;

@@ -3,10 +3,11 @@
 import { ArrowUp } from "lucide-react";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
+import { enableScene } from "@/components/primitives/motion/stickyScene";
 import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
-import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 
 // Stepper de 5 pruebas. Misma mecánica que components/sections/ProofStats.tsx
 // —sticky de CSS y un ScrollTrigger de SOLO LECTURA, nunca `pin: true`; el
@@ -71,107 +72,96 @@ const ANCHOR_WORD = "Confidential";
 const RAIL_COPIES = [-1, 0, 1];
 
 export default function ProofStepper() {
-  const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
-    const mm = gsap.matchMedia();
+  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop, self }) => {
+    const arrow = q("[data-arrow]")[0];
+    if (motionOk && arrow) {
+      pauseOffscreen(
+        gsap.to(arrow, { y: -6, duration: 1.4, repeat: -1, yoyo: true, ease: "sine.inOut" }),
+        scope
+      );
+    }
 
-    mm.add({ motionOk: MQ.motion, isDesktop: MQ.desktop }, (mctx) => {
-      const { motionOk, isDesktop } = mctx.conditions as {
-        motionOk: boolean;
-        isDesktop: boolean;
-      };
+    if (!motionOk || !isDesktop) return;
 
-      const arrow = q("[data-arrow]")[0];
-      if (motionOk && arrow) {
-        pauseOffscreen(
-          gsap.to(arrow, { y: -6, duration: 1.4, repeat: -1, yoyo: true, ease: "sine.inOut" }),
-          scope
-        );
-      }
+    const panels = q("[data-panel]");
+    const words = q("[data-word]");
+    const list = q("[data-list]")[0];
+    const rail = q("[data-rail]")[0];
+    const cursor = q("[data-cursor]")[0];
+    if (panels.length === 0 || words.length !== panels.length || !list || !rail) return;
 
-      if (!motionOk || !isDesktop) return;
+    const N = panels.length;
+    const stepperOff = enableScene(scope, "stepper");
 
-      const panels = q("[data-panel]");
-      const words = q("[data-word]");
-      const list = q("[data-list]")[0];
-      const rail = q("[data-rail]")[0];
-      const cursor = q("[data-cursor]")[0];
-      if (panels.length === 0 || words.length !== panels.length || !list || !rail) return;
+    let active = -1;
 
-      const N = panels.length;
-      const host = scope as HTMLElement;
-      host.dataset.stepper = "on";
-
-      let active = -1;
-
-      // Desplazamiento horizontal del bloque entero: la palabra ancla termina
-      // justo dentro del borde derecho del viewport. Se recalcula en cada
-      // refreshInit porque depende de innerWidth y del ancho real del glifo
-      // (que cambia cuando montreal, display:swap, termina de cargar).
-      mctx.add("placeRail", () => {
-        const anchor = words.find((w) => w.textContent?.trim() === ANCHOR_WORD) ?? words[0];
-        const railLeft = rail.getBoundingClientRect().left;
-        const x = Math.max(0, window.innerWidth - railLeft - anchor.offsetWidth);
-        gsap.set(list, { x });
-        // El cursor se recuesta a la izquierda del bloque, a poco menos de un
-        // ancho de sí mismo. Su tamaño está en `em` del display fluido, así que
-        // se LEE en vez de hardcodearse.
-        if (cursor) gsap.set(cursor, { x: Math.max(0, x - 1.16 * cursor.offsetWidth) });
-      });
-
-      mctx.add("go", (i: number) => {
-        const prev = active;
-        active = i;
-
-        // Se conducen TODOS los paneles en cada paso, no solo el entrante y el
-        // saliente: un salto de scroll grande puede pasar de 0 a 3 y dejar los
-        // intermedios a medio fade.
-        panels.forEach((p, j) => {
-          gsap.killTweensOf(p);
-          if (j === i) gsap.to(p, { autoAlpha: 1, duration: 0.4, ease: "power1.out" });
-          else if (j === prev) gsap.to(p, { autoAlpha: 0, duration: 0.2, ease: "power1.out" });
-          else gsap.set(p, { autoAlpha: 0 });
-        });
-
-        const w = words[i];
-        const y = rail.clientHeight / 2 - (w.offsetTop + w.offsetHeight / 2);
-        // El primer posicionamiento es instantáneo: el bloque real arranca
-        // debajo de un set entero de relleno, y animar hasta ahí sería un
-        // desplazamiento de cientos de píxeles visible al cargar.
-        if (prev < 0) gsap.set(list, { y });
-        else gsap.to(list, { y, duration: 0.6, ease: "power3.out", overwrite: "auto" });
-
-        gsap.to(words, { opacity: DIM_WORD, duration: 0.4, overwrite: "auto" });
-        gsap.to(w, { opacity: 1, duration: 0.4, overwrite: "auto" });
-      });
-
-      mctx.placeRail();
-      mctx.go(0);
-
-      ScrollTrigger.addEventListener("refreshInit", mctx.placeRail);
-
-      ScrollTrigger.create({
-        trigger: scope,
-        start: "top top",
-        end: "bottom bottom",
-        markers: DEBUG_MARKERS,
-        onUpdate: (self) => {
-          const i = Math.min(N - 1, Math.floor(self.progress * N));
-          if (i !== active) mctx.go(i);
-        },
-      });
-
-      return () => {
-        ScrollTrigger.removeEventListener("refreshInit", mctx.placeRail);
-        delete host.dataset.stepper;
-        const all = [...panels, ...words, list, ...(cursor ? [cursor] : [])];
-        gsap.killTweensOf(all);
-        gsap.set(all, { clearProps: "opacity,visibility,transform" });
-      };
+    // Desplazamiento horizontal del bloque entero: la palabra ancla termina
+    // justo dentro del borde derecho del viewport. Se recalcula en cada
+    // refreshInit porque depende de innerWidth y del ancho real del glifo
+    // (que cambia cuando montreal, display:swap, termina de cargar).
+    self.add("placeRail", () => {
+      const anchor = words.find((w) => w.textContent?.trim() === ANCHOR_WORD) ?? words[0];
+      const railLeft = rail.getBoundingClientRect().left;
+      const x = Math.max(0, window.innerWidth - railLeft - anchor.offsetWidth);
+      gsap.set(list, { x });
+      // El cursor se recuesta a la izquierda del bloque, a poco menos de un
+      // ancho de sí mismo. Su tamaño está en `em` del display fluido, así que
+      // se LEE en vez de hardcodearse.
+      if (cursor) gsap.set(cursor, { x: Math.max(0, x - 1.16 * cursor.offsetWidth) });
     });
 
-    return () => mm.revert();
-  }, []);
+    self.add("go", (i: number) => {
+      const prev = active;
+      active = i;
+
+      // Se conducen TODOS los paneles en cada paso, no solo el entrante y el
+      // saliente: un salto de scroll grande puede pasar de 0 a 3 y dejar los
+      // intermedios a medio fade.
+      panels.forEach((p, j) => {
+        gsap.killTweensOf(p);
+        if (j === i) gsap.to(p, { autoAlpha: 1, duration: 0.4, ease: "power1.out" });
+        else if (j === prev) gsap.to(p, { autoAlpha: 0, duration: 0.2, ease: "power1.out" });
+        else gsap.set(p, { autoAlpha: 0 });
+      });
+
+      const w = words[i];
+      const y = rail.clientHeight / 2 - (w.offsetTop + w.offsetHeight / 2);
+      // El primer posicionamiento es instantáneo: el bloque real arranca
+      // debajo de un set entero de relleno, y animar hasta ahí sería un
+      // desplazamiento de cientos de píxeles visible al cargar.
+      if (prev < 0) gsap.set(list, { y });
+      else gsap.to(list, { y, duration: 0.6, ease: "power3.out", overwrite: "auto" });
+
+      gsap.to(words, { opacity: DIM_WORD, duration: 0.4, overwrite: "auto" });
+      gsap.to(w, { opacity: 1, duration: 0.4, overwrite: "auto" });
+    });
+
+    self.placeRail();
+    self.go(0);
+
+    ScrollTrigger.addEventListener("refreshInit", self.placeRail);
+
+    ScrollTrigger.create({
+      trigger: scope,
+      start: "top top",
+      end: "bottom bottom",
+      markers: DEBUG_MARKERS,
+      // `st` y no `self`: el nombre del contexto de motion ya está tomado en este
+      // scope, y sombrearlo acá dejaría `self.go` apuntando al ScrollTrigger.
+      onUpdate: (st) => {
+        const i = Math.min(N - 1, Math.floor(st.progress * N));
+        if (i !== active) self.go(i);
+      },
+    });
+
+    return () => {
+      ScrollTrigger.removeEventListener("refreshInit", self.placeRail);
+      stepperOff();
+      const all = [...panels, ...words, list, ...(cursor ? [cursor] : [])];
+      gsap.killTweensOf(all);
+      gsap.set(all, { clearProps: "opacity,visibility,transform" });
+    };
+  });
 
   return (
     // Nada de overflow-hidden acá: un ancestro con overflow distinto de visible
@@ -184,9 +174,12 @@ export default function ProofStepper() {
     // scrolleable de la página entera. Va solo en X: `clip` admite el otro eje
     // en `visible` —`hidden` no, fuerza `auto`—, y recortar en Y cortaría el
     // propio sticky.
+    //
+    // `data-stepper` NO se declara acá: lo escribe `enableScene` desde el efecto y
+    // nadie más lo toca. Declarándolo también en el JSX, cualquier re-render lo
+    // devolvería a "off" y desarmaría el sticky sin dar ningún error.
     <section
       ref={rootRef}
-      data-stepper="off"
       style={{ "--steps": STEPS.length, "--step-vh": STEP_VH } as React.CSSProperties}
       className="group/proof relative overflow-x-clip bg-background text-foreground data-[stepper=on]:h-[calc(var(--steps)*var(--step-vh)+100svh)]"
     >

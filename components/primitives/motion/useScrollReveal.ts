@@ -1,12 +1,12 @@
 "use client";
 
 import { gsap } from "./gsapClient";
-import { useGsapContext } from "./useGsapContext";
-import { MQ, EASE_OUT, REVEAL, DEBUG_MARKERS } from "./motionTokens";
+import { useMotionScope, type MotionScope } from "./useMotionScope";
+import { EASE_OUT, REVEAL, DEBUG_MARKERS } from "./motionTokens";
 
 type BuildArgs = {
   tl: gsap.core.Timeline;
-  q: (selector: string) => HTMLElement[];
+  q: MotionScope<HTMLElement>["q"];
   isDesktop: boolean;
 };
 
@@ -45,36 +45,24 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(
     build,
   } = opts;
 
-  return useGsapContext<T>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
-    const mm = gsap.matchMedia();
+  return useMotionScope<T>(({ q, scope, motionOk, isDesktop }) => {
+    if (!motionOk) {
+      // reduce: estado final directo, sin trigger. Revertible por matchMedia.
+      gsap.set(q(targets), { clearProps: "all", autoAlpha: 1 });
+      return;
+    }
 
-    mm.add({ motionOk: MQ.motion, isDesktop: MQ.desktop }, (mctx) => {
-      const { motionOk, isDesktop } = mctx.conditions as {
-        motionOk: boolean;
-        isDesktop: boolean;
-      };
-
-      if (!motionOk) {
-        // reduce: estado final directo, sin trigger. Revertible por matchMedia.
-        gsap.set(q(targets), { clearProps: "all", autoAlpha: 1 });
-        return;
-      }
-
-      const tl = gsap.timeline({
-        defaults: { ease: EASE_OUT, duration },
-        scrollTrigger: {
-          trigger: scope,
-          start,
-          once: true,
-          markers: DEBUG_MARKERS,
-        },
-      });
-
-      if (build) build({ tl, q, isDesktop });
-      else tl.from(q(targets), { autoAlpha: 0, y, stagger });
+    const tl = gsap.timeline({
+      defaults: { ease: EASE_OUT, duration },
+      scrollTrigger: {
+        trigger: scope,
+        start,
+        once: true,
+        markers: DEBUG_MARKERS,
+      },
     });
 
-    return () => mm.revert();
-  }, []);
+    if (build) build({ tl, q, isDesktop });
+    else tl.from(q(targets), { autoAlpha: 0, y, stagger });
+  });
 }

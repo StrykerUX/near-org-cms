@@ -4,9 +4,8 @@
 //
 // This is the loop that `components/sections/home-v2/HeroVideo.tsx` grew inline
 // for the homepage rebuild, lifted out so a second scroll-scrubbed video does
-// not become a second copy of it. HeroVideo still has its own inline version;
-// migrating it here is a follow-up, deliberately not bundled with the page that
-// prompted the extraction.
+// not become a second copy of it. Both consumers are on this version now —
+// HeroVideo and `quantum/FieldBreak`.
 //
 // Not a hook: the section that uses it creates and destroys it from its own
 // `gsap.matchMedia()`, so there is one lifecycle to reason about instead of two

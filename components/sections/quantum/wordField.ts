@@ -1,4 +1,5 @@
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
+import { createSeededRandom } from "@/components/primitives/motion/seededRandom";
 import { NEAR_MARK_PATH } from "@/components/sections/quantum/NearMark";
 
 // The word field that fills the foot of the "Mathematics" section: rows of
@@ -139,11 +140,7 @@ export function createWordField(
     // Fixed seed: the field has to look the same on every load, and identical
     // before and after a rebuild. With Math.random() a resize would reshuffle
     // every word and the "drawing" they form would change under the reader.
-    let seed = 4297;
-    const rnd = () => {
-      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-      return seed / 0x7fffffff;
-    };
+    const rnd = createSeededRandom();
 
     // One centred block, rather than rows laid straight into the host. This is
     // what keeps the pattern under the middle of the section at every width.

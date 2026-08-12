@@ -2,10 +2,12 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
+import { enableScene, trackTimeline } from "@/components/primitives/motion/stickyScene";
+import { staggerChars } from "@/components/primitives/motion/staggerChars";
+import { CTA_RAMP, CTA_RAMP_HEAD } from "@/components/primitives/motion/motionColors";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
-import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 
 // §3 + §4 of the copy deck, as ONE pinned composition.
@@ -231,20 +233,12 @@ const RISE_SHARE = 0.36;
 // colour. The bright end lands on the full stop, which is where the phrase ends
 // and where the eye stops; the animation resolves there rather than running the
 // whole line up to lime.
-const RAMP = ["#00b96f", "#8bf29c", "#ecfdb0"];
-const RAMP_HEAD = RAMP[RAMP.length - 1];
-
-function rampAt(t: number): string {
-  const seg = Math.min(1, Math.max(0, t)) * (RAMP.length - 1);
-  const i = Math.min(RAMP.length - 2, Math.floor(seg));
-  const f = seg - i;
-  const channel = (offset: number) =>
-    Math.round(
-      parseInt(RAMP[i].slice(1 + offset, 3 + offset), 16) * (1 - f) +
-        parseInt(RAMP[i + 1].slice(1 + offset, 3 + offset), 16) * f
-    );
-  return `rgb(${channel(0)},${channel(2)},${channel(4)})`;
-}
+//
+// The ramp itself lives in `primitives/motion/motionColors` — it is the page's
+// CTA gradient and two other scenes animate through it. Sampling a point in it is
+// `gsap.utils.interpolate(CTA_RAMP, t)`; there used to be a hand-written hex
+// mixer here doing exactly that with parseInt and string slices.
+const RAMP_SAMPLE = gsap.utils.interpolate([...CTA_RAMP]);
 
 type Beat = {
   key: string;
@@ -267,260 +261,232 @@ const BEATS: Beat[] = [
 ];
 
 export default function ThreatSequence() {
-  const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
-    const mm = gsap.matchMedia();
+  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
+    // ── the band ──────────────────────────────────────────────────────────
+    // Its own ScrollTrigger, starting where BEAT THREE starts rather than
+    // where the section pins. For the first two beats it simply sits parked
+    // in the blind spot with no tween running, which is why it needs no
+    // opacity gate: there is nothing to hide.
+    const sweep = q("[data-sweep]")[0];
+    if (sweep && motionOk) {
+      // A proxy object carries linear scroll progress and the angle is derived
+      // from it, because the profile — constant plus a decaying burst — is not
+      // expressible as a GSAP ease. quickSetter rather than a tween per frame.
+      const setRotation = gsap.quickSetter(sweep, "rotation", "deg") as (
+        v: number
+      ) => void;
+      const progress = { p: 0 };
+      gsap.set(sweep, { rotation: SWEEP_PARK });
 
-    mm.add({ motionOk: MQ.motion, isDesktop: MQ.desktop }, (mctx) => {
-      const { motionOk, isDesktop } = mctx.conditions as {
-        motionOk: boolean;
-        isDesktop: boolean;
-      };
-
-      // ── the band ────────────────────────────────────────────────────────
-      // Its own ScrollTrigger, starting where BEAT THREE starts rather than
-      // where the section pins. For the first two beats it simply sits parked
-      // in the blind spot with no tween running, which is why it needs no
-      // opacity gate: there is nothing to hide.
-      const sweep = q("[data-sweep]")[0];
-      if (sweep && motionOk) {
-        // A proxy object carries linear scroll progress and the angle is derived
-        // from it, because the profile — constant plus a decaying burst — is not
-        // expressible as a GSAP ease. quickSetter rather than a tween per frame.
-        const setRotation = gsap.quickSetter(sweep, "rotation", "deg") as (
-          v: number
-        ) => void;
-        const progress = { p: 0 };
-        gsap.set(sweep, { rotation: SWEEP_PARK });
-
-        gsap.to(progress, {
-          p: 1,
-          ease: "none",
-          onUpdate: () => {
-            const x = Math.min(1, progress.p / SWEEP_LEAD_FRAC);
-            const lead = SWEEP_LEAD * (1 - Math.pow(1 - x, 3));
-            setRotation(SWEEP_PARK + SWEEP_TURN * progress.p + lead);
-          },
-          scrollTrigger: {
-            trigger: scope,
-            // svh has to be resolved by hand — ScrollTrigger's offset syntax
-            // takes px or a percentage of the trigger, not viewport units.
-            start: () => `top top-=${(BEAT3_SVH / 100) * window.innerHeight}`,
-            end: "bottom top",
-            scrub: 0.3,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
-
-      // Without motion, or on a viewport too short to hold the composition, the
-      // three beats fall into normal flow and stack. Every word is still on the
-      // page; only the pinning is lost.
-      if (!motionOk || !isDesktop) return;
-
-      const host = scope as HTMLElement;
-      host.dataset.seq = "on";
-
-      const panels = q("[data-beat]");
-      const tail = q("[data-tail]")[0];
-      if (panels.length !== BEATS.length || !tail) return;
-
-      const tl = gsap.timeline({
+      gsap.to(progress, {
+        p: 1,
+        ease: "none",
+        onUpdate: () => {
+          const x = Math.min(1, progress.p / SWEEP_LEAD_FRAC);
+          const lead = SWEEP_LEAD * (1 - Math.pow(1 - x, 3));
+          setRotation(SWEEP_PARK + SWEEP_TURN * progress.p + lead);
+        },
         scrollTrigger: {
           trigger: scope,
-          start: "top top",
-          end: "bottom bottom",
+          // svh has to be resolved by hand — ScrollTrigger's offset syntax
+          // takes px or a percentage of the trigger, not viewport units.
+          start: () => `top top-=${(BEAT3_SVH / 100) * window.innerHeight}`,
+          end: "bottom top",
           scrub: 0.3,
           invalidateOnRefresh: true,
-          markers: DEBUG_MARKERS,
         },
       });
+    }
 
-      // ── each beat: lines rise, subtext follows, panel clears ────────────
-      // `autoSplit: false` on purpose. These splits feed a shared scrubbed
-      // timeline, and re-splitting on resize would leave that timeline holding
-      // references to elements that no longer exist.
-      const splits: SplitText[] = [];
-      gsap.set(panels.slice(1), { autoAlpha: 0 });
+    // Without motion, or on a viewport too short to hold the composition, the
+    // three beats fall into normal flow and stack. Every word is still on the
+    // page; only the pinning is lost.
+    if (!motionOk || !isDesktop) return;
 
-      panels.forEach((panel, i) => {
-        const headline = panel.querySelector<HTMLElement>("[data-headline]");
-        const sub = panel.querySelector<HTMLElement>("[data-sub]");
-        if (!headline) return;
+    const panels = q("[data-beat]");
+    const tail = q("[data-tail]")[0];
+    if (panels.length !== BEATS.length || !tail) return;
 
-        const split = SplitText.create(headline, {
-          type: "lines",
-          mask: "lines",
-          autoSplit: false,
-          aria: "auto",
-        });
-        allowDescenders(split.lines);
-        splits.push(split);
+    const sceneOff = enableScene(scope, "seq");
+    const tl = trackTimeline(scope, { scrub: 0.3 });
 
-        // The panel is revealed instantly and the lines do the entrance. Fading
-        // the panel in as well would double the transition and blunt it.
-        if (i > 0) tl.set(panel, { autoAlpha: 1 }, BEAT_START[i]);
+    // ── each beat: lines rise, subtext follows, panel clears ────────────
+    // `autoSplit: false` on purpose. These splits feed a shared scrubbed
+    // timeline, and re-splitting on resize would leave that timeline holding
+    // references to elements that no longer exist.
+    const splits: SplitText[] = [];
+    gsap.set(panels.slice(1), { autoAlpha: 0 });
 
-        tl.fromTo(
-          split.lines,
-          { yPercent: 115 },
-          {
-            yPercent: 0,
-            duration: LINE_DUR,
-            stagger: LINE_STAGGER,
-            ease: "power3.out",
-          },
-          BEAT_START[i]
-        );
+    panels.forEach((panel, i) => {
+      const headline = panel.querySelector<HTMLElement>("[data-headline]");
+      const sub = panel.querySelector<HTMLElement>("[data-sub]");
+      if (!headline) return;
 
-        if (sub) {
-          tl.fromTo(
-            sub,
-            { autoAlpha: 0 },
-            { autoAlpha: 1, duration: SUB_DUR, ease: "none" },
-            BEAT_START[i] + SUB_OFFSET
-          );
-        }
-
-        // Every beat but the last clears itself before the next one starts.
-        if (i < panels.length - 1) {
-          tl.to(
-            panel,
-            { autoAlpha: 0, duration: OUT_DUR, ease: "none" },
-            BEAT_END[i] - OUT_DUR
-          );
-        }
+      const split = SplitText.create(headline, {
+        type: "lines",
+        mask: "lines",
+        autoSplit: false,
+        aria: "auto",
       });
+      allowDescenders(split.lines);
+      splits.push(split);
 
-      // ── the answer arrives, inside beat three ───────────────────────────
-      const tailSplit = SplitText.create(tail, {
-        type: "chars",
-        smartWrap: true,
-        aria: "none",
-      });
-      gsap.set(tailSplit.chars, { autoAlpha: 0 });
+      // The panel is revealed instantly and the lines do the entrance. Fading
+      // the panel in as well would double the transition and blunt it.
+      if (i > 0) tl.set(panel, { autoAlpha: 1 }, BEAT_START[i]);
 
-      const last = Math.max(1, tailSplit.chars.length - 1);
-      const inStep = WRITE_SPAN / last;
-      tailSplit.chars.forEach((c, i) => {
-        tl.to(
-          c,
-          {
-            keyframes: [
-              // Arrives at the bright end of the ramp…
-              { autoAlpha: 1, color: RAMP_HEAD, duration: 0.05, ease: "none" },
-              // …then settles to its own position in it. The final letter's
-              // position IS the bright end, so it does not settle at all — which
-              // is what leaves the brightest point on the full stop.
-              { color: rampAt(i / last), duration: 0.1, ease: "none" },
-            ],
-          },
-          WRITE_AT + i * inStep
-        );
-      });
-
-      // ── easing out of the lock ──────────────────────────────────────────
-      // A sticky element releases instantly: one frame it is held, the next it
-      // travels at full scroll speed, and the jolt is the most conspicuous thing
-      // in the section. Lifting the stuck child slightly over the last stretch
-      // means it is ALREADY moving when the release happens, so the two speeds
-      // meet instead of colliding. `power2.in` starts it near zero and builds.
-      //
-      // It lifts the CONTENT, not the whole stuck child. Moving the child moves
-      // the ring field with it and uncovers a strip of bare section background
-      // along the bottom edge — a hard horizontal seam right where the reader is
-      // looking. The field stays put; only the type and links ease away.
-      //
-      // Function-based value + `invalidateOnRefresh` on the timeline's trigger:
-      // GSAP does not parse `svh`, and the distance has to survive a resize.
-      // Selected structurally rather than by a data attribute: `Container` takes
-      // only `as`, `width`, `children` and `className`, so an attribute passed to
-      // it is silently dropped and this would never animate. The stuck wrapper
-      // has exactly two children — the aria-hidden ring field and the content —
-      // so "the child that is not the background" identifies it unambiguously.
-      const stuck = scope.querySelector<HTMLElement>(
-        "[data-seq] > div > div:not([aria-hidden])"
+      tl.fromTo(
+        split.lines,
+        { yPercent: 115 },
+        {
+          yPercent: 0,
+          duration: LINE_DUR,
+          stagger: LINE_STAGGER,
+          ease: "power3.out",
+        },
+        BEAT_START[i]
       );
-      if (stuck) {
+
+      if (sub) {
         tl.fromTo(
-          stuck,
-          { y: 0 },
-          {
-            y: () => -window.innerHeight * 0.055,
-            ease: "power2.in",
-            duration: 0.14,
-          },
-          TIMELINE_END - 0.14
+          sub,
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: SUB_DUR, ease: "none" },
+          BEAT_START[i] + SUB_OFFSET
         );
       }
 
-      // Holds the timeline open to beat three's full span. Without it the
-      // timeline would end on the last letter and every unit would stretch.
-      tl.to({}, { duration: 0.01 }, TIMELINE_END);
-
-      // ── the ring wave ───────────────────────────────────────────────────
-      // Scroll-driven, not a loop: the pulse is the reader's own progress
-      // through the beat made visible, so it has to be on the scrub.
-      const rings = q("[data-ring]");
-      if (rings.length > 1) {
-        gsap.set(rings, { borderColor: RING_DIM });
-
-        const wave = (start: number, span: number, outward: boolean) => {
-          // The last ring has to finish inside the beat, so the span covers
-          // (n − 1) steps plus one whole pulse.
-          const step = span / (RINGS_LIT + rings.length - 1);
-          const pulse = step * RINGS_LIT;
-          rings.forEach((ring, i) => {
-            // `rings` is ordered innermost → outermost, so ascending index
-            // radiates out and descending closes in.
-            const order = outward ? i : rings.length - 1 - i;
-            tl.to(
-              ring,
-              {
-                keyframes: [
-                  {
-                    borderColor: RING_BRIGHT,
-                    duration: pulse * RISE_SHARE,
-                    ease: "power2.out",
-                  },
-                  {
-                    borderColor: RING_DIM,
-                    duration: pulse * (1 - RISE_SHARE),
-                    ease: "power1.in",
-                  },
-                ],
-              },
-              start + order * step
-            );
-          });
-        };
-
-        // Spans derived from the cuts, with clearance either side, so retiming a
-        // beat re-fits its wave instead of leaving it running past the handover.
-        wave(0.02, CUT[0] - 0.04, true); // beat one — radiating out
-        wave(CUT[0] + 0.04, CUT[1] - CUT[0] - 0.05, false); // beat two — closing in
+      // Every beat but the last clears itself before the next one starts.
+      if (i < panels.length - 1) {
+        tl.to(
+          panel,
+          { autoAlpha: 0, duration: OUT_DUR, ease: "none" },
+          BEAT_END[i] - OUT_DUR
+        );
       }
-
-      return () => {
-        delete host.dataset.seq;
-        splits.forEach((s) => s.revert());
-        tailSplit.revert();
-        gsap.set(panels, { clearProps: "opacity,visibility" });
-        if (stuck) gsap.set(stuck, { clearProps: "transform" });
-        gsap.set(q("[data-ring]"), { clearProps: "borderColor" });
-      };
     });
 
-    return () => mm.revert();
-  }, []);
+    // ── the answer arrives, inside beat three ───────────────────────────
+    const tailSplit = SplitText.create(tail, {
+      type: "chars",
+      smartWrap: true,
+      aria: "none",
+    });
+    gsap.set(tailSplit.chars, { autoAlpha: 0 });
+
+    staggerChars(tl, tailSplit.chars, { at: WRITE_AT, span: WRITE_SPAN }, (_i, t) => ({
+      keyframes: [
+        // Arrives at the bright end of the ramp…
+        { autoAlpha: 1, color: CTA_RAMP_HEAD, duration: 0.05, ease: "none" },
+        // …then settles to its own position in it. The final letter's position IS
+        // the bright end, so it does not settle at all — which is what leaves the
+        // brightest point on the full stop.
+        { color: RAMP_SAMPLE(t), duration: 0.1, ease: "none" },
+      ],
+    }));
+
+    // ── easing out of the lock ──────────────────────────────────────────
+    // A sticky element releases instantly: one frame it is held, the next it
+    // travels at full scroll speed, and the jolt is the most conspicuous thing
+    // in the section. Lifting the stuck child slightly over the last stretch
+    // means it is ALREADY moving when the release happens, so the two speeds
+    // meet instead of colliding. `power2.in` starts it near zero and builds.
+    //
+    // It lifts the CONTENT, not the whole stuck child. Moving the child moves
+    // the ring field with it and uncovers a strip of bare section background
+    // along the bottom edge — a hard horizontal seam right where the reader is
+    // looking. The field stays put; only the type and links ease away.
+    //
+    // Function-based value + `invalidateOnRefresh` on the timeline's trigger:
+    // GSAP does not parse `svh`, and the distance has to survive a resize.
+    //
+    // This used to be selected structurally — `[data-seq] > div > div:not([aria-hidden])`
+    // — because `Container` accepts only `as`, `width`, `children` and `className`
+    // and silently drops any other prop, so a data attribute passed to it never
+    // reached the DOM. That selector depended on `Container` rendering a `div` AND
+    // on the stuck wrapper having exactly two children: reordering the background
+    // layer or wrapping the content one level deeper would have stopped this
+    // animating, with no error. The wrapper now carries the attribute itself.
+    const stuck = q("[data-seq-content]")[0];
+    if (stuck) {
+      tl.fromTo(
+        stuck,
+        { y: 0 },
+        {
+          y: () => -window.innerHeight * 0.055,
+          ease: "power2.in",
+          duration: 0.14,
+        },
+        TIMELINE_END - 0.14
+      );
+    }
+
+    // Holds the timeline open to beat three's full span. Without it the
+    // timeline would end on the last letter and every unit would stretch.
+    tl.to({}, { duration: 0.01 }, TIMELINE_END);
+
+    // ── the ring wave ───────────────────────────────────────────────────
+    // Scroll-driven, not a loop: the pulse is the reader's own progress
+    // through the beat made visible, so it has to be on the scrub.
+    const rings = q("[data-ring]");
+    if (rings.length > 1) {
+      gsap.set(rings, { borderColor: RING_DIM });
+
+      const wave = (start: number, span: number, outward: boolean) => {
+        // The last ring has to finish inside the beat, so the span covers
+        // (n − 1) steps plus one whole pulse.
+        const step = span / (RINGS_LIT + rings.length - 1);
+        const pulse = step * RINGS_LIT;
+        rings.forEach((ring, i) => {
+          // `rings` is ordered innermost → outermost, so ascending index
+          // radiates out and descending closes in.
+          const order = outward ? i : rings.length - 1 - i;
+          tl.to(
+            ring,
+            {
+              keyframes: [
+                {
+                  borderColor: RING_BRIGHT,
+                  duration: pulse * RISE_SHARE,
+                  ease: "power2.out",
+                },
+                {
+                  borderColor: RING_DIM,
+                  duration: pulse * (1 - RISE_SHARE),
+                  ease: "power1.in",
+                },
+              ],
+            },
+            start + order * step
+          );
+        });
+      };
+
+      // Spans derived from the cuts, with clearance either side, so retiming a
+      // beat re-fits its wave instead of leaving it running past the handover.
+      wave(0.02, CUT[0] - 0.04, true); // beat one — radiating out
+      wave(CUT[0] + 0.04, CUT[1] - CUT[0] - 0.05, false); // beat two — closing in
+    }
+
+    return () => {
+      sceneOff();
+      splits.forEach((s) => s.revert());
+      tailSplit.revert();
+      gsap.set(panels, { clearProps: "opacity,visibility" });
+      if (stuck) gsap.set(stuck, { clearProps: "transform" });
+      gsap.set(rings, { clearProps: "borderColor" });
+    };
+  });
 
   return (
     // No overflow-hidden on the track: an ancestor with overflow other than
     // visible becomes the sticky child's scroll container and it stops sticking.
+    // `data-seq` is NOT declared here on purpose: `enableScene` writes it from the
+    // effect and nothing else touches it. Declared in the JSX as well, any future
+    // re-render would reset it to "off" and silently undo the sticky layout.
     <section
       ref={rootRef}
       data-nav-dark
-      data-seq="off"
       style={{ "--travel": TRAVEL } as React.CSSProperties}
       className="group/seq relative bg-ink-slate text-white data-[seq=on]:h-[calc(100svh+var(--travel))]"
     >
@@ -619,7 +585,10 @@ export default function ThreatSequence() {
             directly under it. 15svh clears the pill plus its own top offset and
             leaves the gap reading as deliberate rather than as a near-miss.
             The foot keeps the smaller value: nothing overlaps it there. */}
-        <Container className="relative flex flex-col py-20 group-data-[seq=on]/seq:h-full group-data-[seq=on]/seq:pb-[7svh] group-data-[seq=on]/seq:pt-[15svh]">
+        <Container
+          data-seq-content
+          className="relative flex flex-col py-20 group-data-[seq=on]/seq:h-full group-data-[seq=on]/seq:pb-[7svh] group-data-[seq=on]/seq:pt-[15svh]"
+        >
           <div className="grid min-h-0 flex-1 lg:max-w-[62%]">
             {BEATS.map((beat, i) => (
               <div

@@ -84,11 +84,32 @@ correspondiente, que compone estas secciones.
 
 ## Toolkit de animación
 
-`components/primitives/motion/` — hooks compartidos para secciones animadas
-(`useGsapContext`, `useScrollReveal`, `pauseOffscreen`, registro de plugins y
-tokens de motion). Documentado en detalle en cada archivo; ver `HeroBanner.tsx`
-o `FeatureCards.tsx` para dos formas de uso (timeline propia vs. reveal
-genérico por `data-reveal`).
+`components/primitives/motion/` — lo compartido por las secciones animadas.
+Documentado en detalle en cada archivo; ver `HeroBanner.tsx` o `FeatureCards.tsx`
+para dos formas de uso (timeline propia vs. reveal genérico por `data-reveal`).
+
+**Por dónde empezar, según lo que hace la sección:**
+
+| Necesidad | Qué usar |
+|---|---|
+| Fade + slide al entrar en viewport | `useScrollReveal()` — una línea, sin escribir un tween |
+| Escena que anima en desktop y cae a flujo normal en móvil | `useMotionScope()` — te da `q`, `scope`, `motionOk`, `isDesktop` y el contexto |
+| Solo depende de `prefers-reduced-motion` | `gsap.matchMedia()` con `MQ.motion` directo, **no** `useMotionScope` (declarar `isDesktop` hace que cruzar 1024px reconstruya la escena) |
+| Sección pegada con recorrido propio | `enableScene()` + `trackTimeline()` de `stickyScene` |
+| Escribir texto letra a letra | `staggerChars()` |
+| Un `<video>` conducido por scroll | `createVideoScrub()` |
+| Un canvas | `deviceRatio()` para el buffer, `onViewportToggle()` de `pauseOffscreen` para no dibujar fuera de vista, y colgarse de `gsap.ticker` — **nunca** un `requestAnimationFrame` propio |
+| Desorden que tiene que sobrevivir un rebuild | `createSeededRandom()` |
+| Un color que va a animarse | Literal, nunca `var(--token)` — GSAP interpola colores, no declaraciones. Si lo animan dos escenas, va a `motionColors.ts` |
+
+`useGsapContext` es la capa de abajo de todo eso (un `gsap.context()` con su
+`revert()`, sobre `useGSAP` de `@gsap/react`). Una sección normal no debería
+necesitar llamarlo directo.
+
+**La regla del atributo de escena:** el interruptor `data-*` que enciende un
+layout sticky lo escribe SOLO el efecto, vía `enableScene`. No se declara en el
+JSX. Si está en los dos lados, el primer re-render lo devuelve a `"off"` y el
+sticky se desarma sin dar ningún error — tres secciones lo tenían así.
 
 `components/primitives/motion/flowField.ts` + `shaders/flowField.ts` — el
 material de los covers de `LatestUpdates`: un campo de color suave arrastrado

@@ -3,9 +3,9 @@
 import { useRef, useState } from "react";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
+import { enableScene, trackTimeline } from "@/components/primitives/motion/stickyScene";
 import { gsap } from "@/components/primitives/motion/gsapClient";
-import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { LAYERS, VIEW_BOX, AI_SEGMENT_IDS } from "./nearStackGeometry";
 import { TIERS, POPOVERS, FOUNDATION } from "./nearStackContent";
 
@@ -39,109 +39,93 @@ export default function NearStack() {
   const popRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
 
-  const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => Element[];
-    const mm = gsap.matchMedia();
+  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
+    // Las dos ramas estáticas ya están renderizadas por el JSX y no necesitan
+    // código: sin `sceneOn` no hay track ni sticky, la escena se ve en su
+    // estado final (que es el `buildScene(true)` del original) y los cuatro
+    // bodies quedan abiertos. En mobile además la escena se oculta por CSS.
+    if (!motionOk || !isDesktop) return;
 
-    mm.add({ motionOk: MQ.motion, isDesktop: MQ.desktop }, (mctx) => {
-      const { motionOk, isDesktop } = mctx.conditions as {
-        motionOk: boolean;
-        isDesktop: boolean;
-      };
+    const track = q("[data-stack-track]")[0];
+    const stage = q("[data-stack-stage]")[0];
+    const head = q("[data-stack-head]")[0];
+    const foundation = q("[data-stack-foundation]")[0];
+    if (!track) return;
 
-      // Las dos ramas estáticas ya están renderizadas por el JSX y no necesitan
-      // código: sin `sceneOn` no hay track ni sticky, la escena se ve en su
-      // estado final (que es el `buildScene(true)` del original) y los cuatro
-      // bodies quedan abiertos. En mobile además la escena se oculta por CSS.
-      if (!motionOk || !isDesktop) return;
+    // El interruptor del layout se escribe en el dataset (ver `enableScene`) y NO
+    // se declara en el JSX: así React nunca lo pisa al re-renderizar por un cambio
+    // de `active`, y sobre todo se aplica de forma SÍNCRONA — el trackTimeline de
+    // abajo mide el track con su altura real en vez de con la del contenido.
+    // `sceneOn` es el mismo hecho, pero para lo que sí depende de React.
+    //
+    // Va DESPUÉS del guard: si el markup no trae el track, encenderlo dejaría la
+    // sección con la altura del recorrido y sin nada que la anime.
+    const sceneOff = enableScene(scope, "scene");
+    setSceneOn(true);
 
-      // El interruptor del layout se escribe en el dataset y NO se declara en el
-      // JSX: así React nunca lo pisa al re-renderizar por un cambio de `active`,
-      // y sobre todo se aplica de forma SÍNCRONA — los ScrollTriggers de abajo
-      // miden el track con su altura real en vez de con la del contenido.
-      // `sceneOn` es el mismo hecho, pero para lo que sí depende de React.
-      const host = scope as HTMLElement;
-      host.dataset.scene = "on";
-      setSceneOn(true);
+    // El estado inicial se aplica acá y NO por CSS: preesconder en la hoja de
+    // estilos significa que un fallo del bundle deja la escena invisible para
+    // siempre. Mismo criterio que el `.from()` de useScrollReveal.
+    gsap.set(q("[data-tier-group]"), { opacity: 0, y: -110 });
+    gsap.set(foundation, { yPercent: 140 });
 
-      const track = q("[data-stack-track]")[0];
-      const stage = q("[data-stack-stage]")[0];
-      const head = q("[data-stack-head]")[0];
-      const foundation = q("[data-stack-foundation]")[0];
-      if (!track) return;
-
-      // El estado inicial se aplica acá y NO por CSS: preesconder en la hoja de
-      // estilos significa que un fallo del bundle deja la escena invisible para
-      // siempre. Mismo criterio que el `.from()` de useScrollReveal.
-      gsap.set(q("[data-tier-group]"), { opacity: 0, y: -110 });
-      gsap.set(foundation, { yPercent: 140 });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: track,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: true,
-          invalidateOnRefresh: true,
-          markers: DEBUG_MARKERS,
-          onUpdate: (self) => {
-            const i = Math.floor(self.progress * PHASES);
-            // Pasada la última fase: se cierra el rail entero (-1) y la banda
-            // de foundation toma la escena.
-            setActive(i > TIERS.length - 1 ? -1 : i);
-          },
+    const tl = trackTimeline(track, {
+      scrollTrigger: {
+        onUpdate: (self) => {
+          const i = Math.floor(self.progress * PHASES);
+          // Pasada la última fase: se cierra el rail entero (-1) y la banda
+          // de foundation toma la escena.
+          setActive(i > TIERS.length - 1 ? -1 : i);
         },
-      });
-
-      // Cada anillo aterriza justo cuando su item del rail se abre. `y` va en
-      // unidades del viewBox, no en px: en SVG, GSAP escribe el atributo
-      // transform, que vive en el sistema de coordenadas del propio SVG.
-      TIERS.forEach((_, i) => {
-        const at = Math.max(0, i * 0.2 - 0.08);
-        tl.fromTo(
-          q(`[data-tier-group="${i}"]`),
-          { opacity: 0, y: -110 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: Math.max(0.07, i * 0.2 + 0.015 - at),
-            ease: "power1.out",
-            immediateRender: false,
-          },
-          at
-        );
-      });
-
-      // Fase final: el bloque sube para dejarle sitio a la banda de foundation.
-      //
-      // Suben el HEADER Y EL STAGE juntos. El original mueve solo el stage, y
-      // eso lo mete por debajo del titular —que está quieto dentro del sticky—
-      // hasta superponer el subtítulo con la primera fila del rail. Moviendo los
-      // dos, la distancia entre ellos no cambia y el conjunto sale por arriba
-      // como una pieza.
-      tl.to([head, stage].filter(Boolean), {
-        y: () => -Math.round(window.innerHeight * 0.2),
-        duration: 0.16,
-        ease: "power1.inOut",
-      }, 0.8);
-      tl.to(foundation, { yPercent: 0, duration: 0.16, ease: "power1.out" }, 0.81);
-
-      // Estira el timeline a duración 1 para que su tiempo sea literalmente el
-      // progress del scroll. Sin esto, las fases se comprimen contra el final.
-      tl.to({}, { duration: 1 }, 0);
-
-      return () => {
-        delete host.dataset.scene;
-        setSceneOn(false);
-        setActive(0);
-        const all = [...q("[data-tier-group]"), stage, head, foundation].filter(Boolean);
-        gsap.killTweensOf(all);
-        gsap.set(all, { clearProps: "opacity,transform" });
-      };
+      },
     });
 
-    return () => mm.revert();
-  }, []);
+    // Cada anillo aterriza justo cuando su item del rail se abre. `y` va en
+    // unidades del viewBox, no en px: en SVG, GSAP escribe el atributo
+    // transform, que vive en el sistema de coordenadas del propio SVG.
+    TIERS.forEach((_, i) => {
+      const at = Math.max(0, i * 0.2 - 0.08);
+      tl.fromTo(
+        q(`[data-tier-group="${i}"]`),
+        { opacity: 0, y: -110 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: Math.max(0.07, i * 0.2 + 0.015 - at),
+          ease: "power1.out",
+          immediateRender: false,
+        },
+        at
+      );
+    });
+
+    // Fase final: el bloque sube para dejarle sitio a la banda de foundation.
+    //
+    // Suben el HEADER Y EL STAGE juntos. El original mueve solo el stage, y
+    // eso lo mete por debajo del titular —que está quieto dentro del sticky—
+    // hasta superponer el subtítulo con la primera fila del rail. Moviendo los
+    // dos, la distancia entre ellos no cambia y el conjunto sale por arriba
+    // como una pieza.
+    tl.to([head, stage].filter(Boolean), {
+      y: () => -Math.round(window.innerHeight * 0.2),
+      duration: 0.16,
+      ease: "power1.inOut",
+    }, 0.8);
+    tl.to(foundation, { yPercent: 0, duration: 0.16, ease: "power1.out" }, 0.81);
+
+    // Estira el timeline a duración 1 para que su tiempo sea literalmente el
+    // progress del scroll. Sin esto, las fases se comprimen contra el final.
+    tl.to({}, { duration: 1 }, 0);
+
+    return () => {
+      sceneOff();
+      setSceneOn(false);
+      setActive(0);
+      const all = [...q("[data-tier-group]"), stage, head, foundation].filter(Boolean);
+      gsap.killTweensOf(all);
+      gsap.set(all, { clearProps: "opacity,transform" });
+    };
+  });
 
   // Sin el recorrido de scroll, los cuatro bodies quedan abiertos: es la única
   // forma de que la sección se lea entera sin JS, en mobile y con reduced-motion.

@@ -1,4 +1,6 @@
 import { gsap } from "@/components/primitives/motion/gsapClient";
+import { createSeededRandom } from "@/components/primitives/motion/seededRandom";
+import { deviceRatio } from "@/components/primitives/motion/dpr";
 
 // The hero's node field: eight rows of points in a hexagonal weave along the
 // bottom of the section, joined by segments, with a light front sweeping across
@@ -58,18 +60,15 @@ export function createQuantumLattice(
   let py = -9999;
   let visible = true;
 
-  // A deterministic seed of our own rather than Math.random(): the at-rest
-  // drift has to differ per node, but two consecutive builds (a resize) should
-  // not reseed the whole field and produce a visible jump.
-  let seed = 4297;
-  const rnd = () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return seed / 0x7fffffff;
-  };
-
   function build() {
+    // A deterministic seed of our own rather than Math.random(): the at-rest
+    // drift has to differ per node, but two consecutive builds (a resize) should
+    // not reseed the whole field and produce a visible jump. Created fresh here
+    // so every build replays the SAME sequence — see `motion/seededRandom`.
+    const rnd = createSeededRandom();
+
     const r = host.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = deviceRatio();
     w = Math.max(1, Math.round(r.width));
     h = Math.max(1, Math.round(r.height));
     canvas.width = w * dpr;
@@ -84,7 +83,6 @@ export function createQuantumLattice(
     stepX = Math.max(56, w / 24);
     stepY = stepX * 0.42;
 
-    seed = 4297;
     nodes = [];
     const rows = 8;
     const y0 = h - rows * stepY - 8;

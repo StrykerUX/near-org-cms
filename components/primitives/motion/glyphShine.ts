@@ -1,6 +1,7 @@
 "use client";
 
 import { buildProgram, getGl2 } from "./glContext";
+import { deviceRatio } from "./dpr";
 import { GLYPH_SHINE_FRAGMENT, GLYPH_SHINE_VERTEX } from "./shaders/glyphShine";
 
 export type GlyphShineOptions = {
@@ -377,7 +378,7 @@ export function createGlyphShine(
     // define cuánto se sale un ascendente del bounding box de los chars.
     const fontPx = Math.max(...fonts.map((f) => f.px));
     const pad = padEm * fontPx;
-    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+    const dpr = deviceRatio(maxDpr);
 
     // SNAP A PÍXEL DE DISPOSITIVO del offset relativo al host. Si el canvas
     // cae en una posición fraccional, el compositor RESAMPLEA su bitmap: la
