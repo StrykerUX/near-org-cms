@@ -63,7 +63,7 @@ dar por terminado un cambio.
 | `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). Reusa `PrototypeFooter` tal cual. |
 
 Cinco secciones usan **sección pegada**: `ProofStats`; en `home-v2/`,
-`ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`, `ThreatDuel`.
+`ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`, `ThreatSequence`.
 Todas con `position: sticky` de CSS
 y un ScrollTrigger que solo LEE el progreso — nunca `pin: true`, que inserta un
 pin-spacer en el documento y pelea con Lenis, con el `ResizeObserver` de

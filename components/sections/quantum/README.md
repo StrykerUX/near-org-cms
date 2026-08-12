@@ -28,9 +28,13 @@ ported first (`ThreatDuel`), and **that treatment has since been replaced.**
 
 What runs now is **`ThreatSequence`**: one pinned viewport holding both deck
 sections as three beats — the mechanism, the attack, the answer. The frame never
-moves; only the core changes. The reasoning, the treatments it beat and the
-iteration before it are all on `/prototype/quantum-threat-concepts` while that
-route survives.
+moves; only the core changes.
+
+The treatments it beat (`ThreatDuel`, `ThreatLede`, `RotationStatement`,
+`concepts/`) and the `/prototype/quantum-threat-concepts` route that compared
+them were deleted once the decision was final — they were ~820 lines of live code
+no real page rendered, holding duplicate copy. What is worth keeping from them is
+the reasoning below, not the code; `git log` has the rest.
 
 Three things in it are load-bearing and easy to break:
 
@@ -70,11 +74,8 @@ This section also introduced the `solid` tone on `CtaPill`: a filled white pill
 with black type that takes the gradient on hover. Its resting and hover fills are
 declared together in `[data-q-cta-fill-white]` — they have to be, to animate.
 
-`ThreatLede` and `RotationStatement` are the previous iteration. They are unused
-by any real page and survive only so the concepts route can show what changed.
-
-Why it was replaced — worth keeping, because these are the traps to avoid if
-anyone rebuilds this passage:
+Why the paired-rows treatment was replaced — worth keeping, because these are the
+traps to avoid if anyone rebuilds this passage:
 
 - The merge cost **both** of the deck's headlines. §3's "The quantum threat to
   blockchains" and §4's "A key rotation, not a migration" are the two strongest
@@ -85,9 +86,6 @@ anyone rebuilds this passage:
 - The green hinge between the pairs reads as *becomes*. The content is a
   comparison, not a transformation — `secp256k1 4fA9…c21B` never becomes
   `alice.near`.
-
-`ThreatDuel.tsx` is still in the folder, unused by any real page, because the
-concepts route still renders it for comparison. It goes when that route goes.
 
 The expanding-stack variant (`data-stack-root`: four numbered rows opening one at
 a time, each with its own animated isometric SVG, driven by `initStack` +
@@ -115,14 +113,14 @@ dark sections. Three real differences is a different component.
 
 ## Decisions taken against the original
 
-### `pin: true` → `position: sticky` (`ThreatDuel`)
+### `pin: true` → `position: sticky` (`ThreatSequence`)
 
 The original pins the threat scene for `innerHeight * 1.8`. This repo forbids the
 pin: the pin-spacer fights Lenis, feeds back into `PrototypeMotionProvider`'s
 `ResizeObserver`, and leaves ghost spacers under StrictMode. The full reasoning
 lives in `../ProofStats.tsx`.
 
-Here the travel is **declared** in CSS (`--travel: 180svh`) and the track height
+Here the travel is **declared** in CSS (`--travel: 196svh`) and the track height
 derives from it, so nothing needs measuring. The read-only ScrollTrigger runs
 `top top → bottom bottom` over the track.
 
@@ -130,9 +128,9 @@ Consequence to remember: **no ancestor of the stuck element may have `overflow`
 other than `visible`**, or the sticky silently stops sticking. The
 `overflow-hidden` lives on the stuck child, which is allowed to have it.
 
-The vertical padding is dropped (`group-data-[duel=on]/duel:py-0`) once the
-sticky layout is on. With it, the child is exactly one viewport tall, the content
-does not fit, and the section header gets clipped off the top.
+The vertical padding is dropped once the sticky layout is on. With it, the child
+is exactly one viewport tall, the content does not fit, and the section header
+gets clipped off the top.
 
 ### The nav ink flip: restored, not ported
 

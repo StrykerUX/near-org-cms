@@ -12,7 +12,6 @@ import m5 from "@/app/prototype/flow-compare/page.meta";
 import m6 from "@/app/prototype/homepage/page.meta";
 import m7 from "@/app/prototype/homepage-v2/page.meta";
 import m8 from "@/app/prototype/quantum-security/page.meta";
-import m9 from "@/app/prototype/quantum-threat-concepts/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", file: "app/(site)/page.meta.ts" },
@@ -24,5 +23,4 @@ export const ROUTES: RouteEntry[] = [
   { ...m6, route: "/prototype/homepage", file: "app/prototype/homepage/page.meta.ts" },
   { ...m7, route: "/prototype/homepage-v2", file: "app/prototype/homepage-v2/page.meta.ts" },
   { ...m8, route: "/prototype/quantum-security", file: "app/prototype/quantum-security/page.meta.ts" },
-  { ...m9, route: "/prototype/quantum-threat-concepts", file: "app/prototype/quantum-threat-concepts/page.meta.ts" },
 ];
