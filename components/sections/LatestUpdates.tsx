@@ -28,29 +28,95 @@ const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
   ssr: false,
 });
 
-// A cuántos viewports de distancia se montan las escenas.
+// ── Cuándo se montan las escenas ─────────────────────────────────────────────
 //
-// Tres, y no uno, porque inicializar estas escenas tarda del orden de SEGUNDOS y
-// eso no depende de la red: medido en localhost, donde el chunk se sirve al
-// instante, las dos primeras cards tardaban ~5s en aparecer. El tiempo se va en el
-// lazy-load del propio SDK, que:
+// Montar el componente es lo que ARRANCA todo el trabajo caro, y eso no es obvio:
+// el `lazyLoad` del SDK no espera a que la sección se acerque para empezar. Al
+// registrar una escena hace `!lazyLoad || isInView ? initializePlanes() : Mt(m)`,
+// y ese `Mt` es un prewarm que se encola en el acto. Los 100px de margen del SDK
+// solo gobiernan el paso a "en vista", no el arranque.
 //
-//  · inicializa las escenas DE UNA EN UNA (su cola `Rt` es serie, no paralelo), y
-//    acá hay tres, cada una con 5 capas y un blur de 4 pases;
-//  · planifica cada paso con `requestIdleCallback({timeout: 500})`, así que suma
-//    hasta medio segundo de espera por escena;
-//  · y POSPONE la cola mientras detecta scroll, reintentando cada 80ms — y con
-//    Lenis el scroll sigue emitiendo un rato después de soltar la rueda.
+// Y el trabajo es del orden de SEGUNDOS, sin que la red tenga nada que ver: medido
+// en localhost, donde el chunk se sirve al instante, las dos primeras cards
+// tardaban ~5s en pintar. Se va en la cola del SDK, que inicializa las escenas DE
+// UNA EN UNA (tres acá, cada una con 5 capas y un blur de 4 pases), planifica cada
+// paso con `requestIdleCallback({timeout: 500})`, y POSPONE la cola mientras
+// detecta scroll reintentando cada 80ms — y con Lenis el scroll sigue emitiendo un
+// rato después de soltar la rueda.
 //
-// O sea que el peor momento posible para montarlas es justo cuando el lector viene
-// scrolleando hacia ellas, que es exactamente lo que hacía un margen de un
-// viewport. Con tres, esos segundos transcurren mientras todavía está mirando las
-// secciones anteriores.
+// De ahí las dos vías de abajo, en orden de preferencia:
 //
-// Este número NO es un margen de red: si algún día el cuello de botella pasa a ser
-// la descarga del chunk (producción, conexión lenta), lo que hace falta es separar
-// la descarga del montaje, no seguir subiéndolo.
+//  1. `useIdlePreload` — tras `window.load` y con el hilo libre. Es la buena: el
+//     lector todavía está en el hero, así que esos segundos no los ve nadie.
+//  2. El gate por scroll (`SCENE_LEAD`) — red de seguridad para cuando (1) no
+//     corre: conexión limitada, o un navegador sin `requestIdleCallback`.
+//
+// Las dos escriben el mismo `ready`, y encender un booleano que ya está encendido
+// no re-renderiza nada, así que no hace falta coordinarlas.
+
+/** Viewports de anticipación del gate por scroll, cuando es el que decide. */
 const SCENE_LEAD = 3;
+
+/**
+ * Tope de espera del idle callback. Sin él, en una pestaña que nunca queda ociosa
+ * la precarga no ocurriría y todo caería en el gate por scroll.
+ */
+const IDLE_TIMEOUT = 2000;
+
+/** La parte de la Network Information API que se usa acá. No está en lib.dom. */
+type Connection = { saveData?: boolean; effectiveType?: string };
+
+/**
+ * `true` si el visitante pidió ahorrar datos o su conexión es mala. En ese caso NO
+ * se precarga: 877KB de SDK para un cover decorativo no es un intercambio que
+ * corresponda hacer en nombre de alguien con datos contados. Queda el gate por
+ * scroll, que solo los descarga si de verdad baja hasta la sección.
+ *
+ * La API es solo de Chromium; donde no existe, se precarga (que es el default
+ * razonable: no hay señal de que la red sea un problema).
+ */
+function prefersLessData(): boolean {
+  const conn = (navigator as Navigator & { connection?: Connection }).connection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  return conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.effectiveType === "3g";
+}
+
+/**
+ * Llama a `onReady` cuando la página terminó de cargar lo necesario para verse Y el
+ * hilo principal está libre.
+ *
+ * Las dos condiciones importan y son distintas: `load` dice que no queda nada
+ * crítico compitiendo por la RED (el LCP ya pasó, por definición, antes de `load`),
+ * y el idle callback dice que no queda nada compitiendo por la CPU — que es lo que
+ * protege al INP del parse de 877KB de JavaScript.
+ *
+ * Consecuencia buscada para SEO: los dos Core Web Vitals que son señal de ranking
+ * quedan fuera del camino de esto por construcción. Y como Googlebot normalmente no
+ * llega a ejecutar un idle callback, tampoco gasta presupuesto de rastreo en un SDK
+ * que solo pinta un canvas decorativo — el HTML indexable (títulos, bylines, links)
+ * sale del servidor y no depende de nada de esto.
+ */
+function useIdlePreload(onReady: () => void) {
+  useEffect(() => {
+    if (prefersLessData()) return;
+    if (typeof window.requestIdleCallback !== "function") return;
+
+    let handle = 0;
+    const schedule = () => {
+      handle = window.requestIdleCallback(onReady, { timeout: IDLE_TIMEOUT });
+    };
+
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+
+    return () => {
+      if (handle) window.cancelIdleCallback(handle);
+      window.removeEventListener("load", schedule);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
 
 // Sin datos reales (fuera de alcance de este draft): copy fijo. Si esta sección
 // se conecta al CMS más adelante, migra a PostCard/PostGrid
@@ -251,20 +317,20 @@ export default function LatestUpdates() {
   // de Unicorn Studio, que trae su propio rAF por escena.
   const gridRef = useScrollReveal<HTMLDivElement>();
 
-  // Gate de descarga del SDK. Se enciende una sola vez, cuando la sección entra
-  // en el rango del trigger, y no se vuelve a apagar: desmontar las escenas al
-  // salir de vista significaría volver a inicializarlas al volver, que es más
-  // caro que dejarlas corriendo (y el runtime de Unicorn ya pausa las suyas).
+  // Se enciende una sola vez y no se vuelve a apagar: desmontar las escenas al
+  // salir de vista significaría volver a inicializarlas al volver, que es más caro
+  // que dejarlas corriendo (y el runtime de Unicorn ya pausa las suyas). Las dos
+  // vías que lo encienden están explicadas arriba, junto a SCENE_LEAD.
   const [ready, setReady] = useState(false);
+  const mount = useCallback(() => setReady(true), []);
+
+  // Vía preferida: en cuanto la página cargó lo crítico y el hilo está libre.
+  useIdlePreload(mount);
+
+  // Red de seguridad: si la de arriba no corrió (conexión limitada, o un navegador
+  // sin requestIdleCallback), el scroll las monta igual antes de llegar.
   const gateRef = useGsapContext<HTMLDivElement>((_self, scope) => {
-    if (ready) return;
-    onViewportToggle(
-      scope,
-      (visible) => {
-        if (visible) setReady(true);
-      },
-      SCENE_LEAD
-    );
+    onViewportToggle(scope, (visible) => visible && mount(), SCENE_LEAD);
   }, []);
 
   return (
