@@ -2,18 +2,37 @@ import Image from "next/image";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 
+// Transcribed from the Footer tab of "near.org - sitemap" (Google Doc).
+//
+// Same four categories as the header, but WITHOUT the per-link descriptions —
+// the doc lists those only under Navigation. Resources and About keep their
+// sub-group labels (Build / Learn / Connect, Fundamentals / Ecosystem), which
+// is why a column here is a list of SECTIONS rather than a flat list of links.
 const GROUPS = [
   {
+    title: "Products",
+    sections: [{ label: "", links: ["near.com", "Intents", "NEAR AI"] }],
+  },
+  {
+    title: "Stack",
+    sections: [
+      { label: "", links: ["Protocol", "Chain Abstraction", "Quantum Security"] },
+    ],
+  },
+  {
+    title: "Resources",
+    sections: [
+      { label: "Build", links: ["Docs", "Solutions"] },
+      { label: "Learn", links: ["Research", "Blog", "Analytics"] },
+      { label: "Connect", links: ["Brand", "Contact", "Careers"] },
+    ],
+  },
+  {
     title: "About",
-    links: ["Founders Hub", "Developers Hub", "NEAR Roadmap & History", "Blog"],
-  },
-  {
-    title: "Tech Stack",
-    links: ["Blockchain", "Chain Abstraction", "Intents", "AI"],
-  },
-  {
-    title: "Social",
-    links: ["X", "YouTube", "GitHub", "Reddit", "Telegram", "Discord"],
+    sections: [
+      { label: "Fundamentals", links: ["History", "Roadmap", "Economics"] },
+      { label: "Ecosystem", links: ["NEAR Foundation", "Community", "Governance"] },
+    ],
   },
 ];
 
@@ -65,22 +84,36 @@ export default function PrototypeFooter() {
           <Accent>actually moves.</Accent>
         </p>
 
-        <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-3 lg:gap-x-16">
+        <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-4 lg:gap-x-16">
           {GROUPS.map((group) => (
             <nav key={group.title} aria-label={group.title}>
               <h2 className="text-label">{group.title}</h2>
-              <ul className="mt-3 flex flex-col gap-1.5">
-                {group.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-body-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {link}
-                    </a>
-                  </li>
+              {/* A column is a list of SECTIONS. Products and Stack have one
+                  unlabelled section, so they render as a plain list; Resources
+                  and About have several, and each gets its sub-heading. */}
+              <div className="mt-3 flex flex-col gap-5">
+                {group.sections.map((section, i) => (
+                  <div key={section.label || i} className="flex flex-col gap-1.5">
+                    {section.label && (
+                      <p className="text-caption uppercase text-gray-intermediate">
+                        {section.label}
+                      </p>
+                    )}
+                    <ul className="flex flex-col gap-1.5">
+                      {section.links.map((link) => (
+                        <li key={link}>
+                          <a
+                            href="#"
+                            className="text-body-sm text-muted-foreground transition-colors hover:text-foreground"
+                          >
+                            {link}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </nav>
           ))}
         </div>
