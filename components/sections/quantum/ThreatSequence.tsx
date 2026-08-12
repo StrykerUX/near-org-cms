@@ -104,6 +104,14 @@ const OUT_DUR = 0.06;
 const WRITE_AT = CUT[1] + 0.14;
 const WRITE_SPAN = 0.15;
 
+// The soft release out of the lock: how much of the timeline it takes and how far
+// the content lifts, as a fraction of the viewport. Small on purpose — the point is
+// only that the content is ALREADY moving when the sticky lets go, so the two
+// speeds meet instead of colliding. Enough to see and not enough to read as a
+// separate animation.
+const RELEASE_SPAN = 0.14;
+const RELEASE_LIFT = 0.055;
+
 // ── Ring geometry ────────────────────────────────────────────────────────────
 // In vw so the field scales with the window. The centre sits beyond the right
 // edge, so only the left caps of each ring are in frame — the field reads as
@@ -425,11 +433,11 @@ export default function ThreatSequence() {
         stuck,
         { y: 0 },
         {
-          y: () => -window.innerHeight * 0.055,
+          y: () => -window.innerHeight * RELEASE_LIFT,
           ease: "power2.in",
-          duration: 0.14,
+          duration: RELEASE_SPAN,
         },
-        TIMELINE_END - 0.14
+        TIMELINE_END - RELEASE_SPAN
       );
     }
 

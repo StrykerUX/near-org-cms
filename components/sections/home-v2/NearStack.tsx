@@ -119,6 +119,12 @@ export default function NearStack() {
 
     return () => {
       sceneOff();
+      // Los dos setState son necesarios y NO son un `setState` sobre un
+      // componente desmontado: este cleanup corre en dos situaciones, y en la
+      // segunda el componente sigue vivo. Si el lector cruza los 1024px o cambia
+      // `prefers-reduced-motion`, matchMedia revierte esta rama y `sceneOn` tiene
+      // que volver a false para que `isOpen()` abra los cuatro bodies y la sección
+      // se lea en flujo normal. En el desmontaje real son no-ops que React ignora.
       setSceneOn(false);
       setActive(0);
       const all = [...q("[data-tier-group]"), stage, head, foundation].filter(Boolean);
@@ -400,7 +406,7 @@ export default function NearStack() {
                         El overflow-hidden va en el hijo interno para que el
                         margen superior del <p> quede DENTRO de la caja que se
                         recorta. */}
-                    <div className="grid transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/tier:grid-rows-[1fr] grid-rows-[0fr]">
+                    <div className="grid transition-[grid-template-rows] duration-500 ease-out motion-reduce:transition-none group-data-[open=true]/tier:grid-rows-[1fr] grid-rows-[0fr]">
                       <div className="overflow-hidden">
                         <p className="mt-3.5 max-w-[38ch] text-body-sm text-white/55 text-pretty">
                           {tier.body}

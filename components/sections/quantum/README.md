@@ -57,10 +57,15 @@ Three things in it are load-bearing and easy to break:
   screen. A narrow sector spends most of every revolution off-stage and the
   section reads as having no colour in it. The maths is written out above
   `SWEEP_ARC`.
-- **The rotation is on its own clock, not the scrub.** Tying it to scroll
-  progress freezes it whenever the reader stops, which reads as the page having
-  died. `pauseOffscreen` parks it out of view and resumes at the same angle.
-- **The ring wave IS on the scrub**, unlike the rotation — it is the reader's
+- **The rotation is ON the scrub** — and this is a decision that was reversed, so
+  the trade-off is worth stating. Tying it to scroll progress means it freezes
+  whenever the reader stops, which can read as the page having died; the argument
+  for doing it anyway is that the band arriving IS the third beat, and on its own
+  clock it can arrive before the reader gets there or long after. The angle
+  profile (constant speed plus a decaying burst, `SWEEP_LEAD`) exists to keep it
+  from ever sitting at zero velocity while it travels. `pauseOffscreen` is NOT
+  used here, unlike what this file said until now.
+- **The ring wave is on the scrub too** — it is the reader's
   progress through the beat made visible, so it has to track the scroll. It runs
   outward through beat one and inward through beat two. `RINGS_LIT` is the only
   knob: it sets how many rings are lit at once, and therefore whether this reads
@@ -206,9 +211,14 @@ fill.
 
 **Invariant if anyone edits `MathStatement`:** the field host's inline
 `font-size: 13px` / `line-height: 20px` / `letter-spacing: 0.12em` are geometry,
-not styling. `wordField.ts` computes its row and column counts from `LINE_H = 20`
-and `CHAR_W = 8.6`. Changing one side without the other leaves the weave short or
-overrun, and nothing errors.
+not styling — they decide how dense the weave is.
+
+They no longer have to be kept in sync with constants, though: `wordField.ts`
+MEASURES the real character advance and line height off the host (see `measure()`)
+instead of assuming them. `8.6` and `20` survive only as fallbacks for the case
+where the probe returns zero. This paragraph used to describe an invariant that
+had already been fixed in the code — worth noting as the failure mode of a README
+that documents mechanism.
 
 ## `videoScrub.ts` lives in the toolkit, not here
 

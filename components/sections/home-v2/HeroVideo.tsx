@@ -189,8 +189,16 @@ export default function HeroVideo() {
         gsap.set(rest, { autoAlpha: 0, y: 16 });
 
         let split: SplitText | null = null;
+        // `fonts.ready` es una promesa, y el cleanup de abajo puede correr antes
+        // de que resuelva: en dev pasa en cada mount por StrictMode, y en
+        // producción con cualquier navegación rápida. Sin este flag, `run()` hacía
+        // SplitText sobre un nodo ya revertido y creaba una timeline fuera del
+        // gsap.context que ya se cerró — o sea tweens que nadie va a limpiar,
+        // escribiendo sobre un DOM desconectado.
+        let cancelled = false;
 
         const run = () => {
+          if (cancelled) return;
           // Nada de `autoSplit` ni de `onSplit`.
           //
           // `autoSplit` re-partiría el titular al cambiar los anchos,
@@ -248,6 +256,7 @@ export default function HeroVideo() {
         else run();
 
         cleanups.push(() => {
+          cancelled = true;
           split?.revert();
           delete heading.dataset.intro;
         });

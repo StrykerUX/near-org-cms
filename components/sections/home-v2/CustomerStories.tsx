@@ -34,7 +34,7 @@ export default function CustomerStories() {
                   data-active={i === active}
                   // invisible (no solo opacity-0) para que los títulos ocultos
                   // no queden focuseables ni los lea un lector de pantalla.
-                  className="invisible flex translate-y-2.5 flex-col gap-6 opacity-0 transition-[opacity,transform] duration-[450ms] ease-out [grid-area:1/1] data-[active=true]:visible data-[active=true]:translate-y-0 data-[active=true]:opacity-100"
+                  className="invisible flex translate-y-2.5 flex-col gap-6 opacity-0 transition-[opacity,transform] duration-[450ms] ease-out [grid-area:1/1] motion-reduce:transition-none data-[active=true]:visible data-[active=true]:translate-y-0 data-[active=true]:opacity-100"
                 >
                   <h3 className="text-h3 text-pretty">{story.title}</h3>
                   <a
@@ -43,7 +43,7 @@ export default function CustomerStories() {
                     rel="noopener"
                     className="group/cta flex w-fit items-center gap-3 text-label"
                   >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-near-green-accent text-black transition-transform duration-200 group-hover/cta:translate-x-0.5">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-near-green-accent text-black transition-transform duration-200 motion-reduce:transition-none group-hover/cta:translate-x-0.5">
                       <ArrowRight className="size-4" />
                     </span>
                     Read the full story
