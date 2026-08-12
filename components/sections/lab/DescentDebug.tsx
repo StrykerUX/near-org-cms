@@ -14,13 +14,32 @@ import { gsap } from "@/components/primitives/motion/gsapClient";
 // Con el ciclo de "cambiar código → recargar → cazar el defecto → describirlo",
 // cada iteración costaba minutos y dos veces se dio por bueno algo que estaba roto.
 //
-// La medición que importa es `gap`: la distancia en píxeles entre el fondo de la
-// imagen del hero y el borde superior del bloque gris. **Tiene que valer 0 (o
-// negativo, que es solape) en todo el recorrido.** En cuanto se pone positivo hay
-// franja, y el panel lo dice en el momento exacto, con el número.
+// `gap` es la distancia en píxeles entre el fondo de la imagen del hero y el borde
+// superior del bloque gris. **Tiene que valer 0 (o negativo, que es solape) en todo el
+// recorrido.** En cuanto se pone positivo hay franja crema, y el panel lo dice en el
+// momento exacto, con el número.
 //
-// El resto de los campos son para entender POR QUÉ: si el gap se abre, `core` dice
-// si es porque la tapa no creció, y `hold` si es porque el hero se fue de más.
+// El resto de los campos son para entender POR QUÉ: si el gap se abre, `core` dice si
+// es porque la tapa no creció, y `hold` si es porque el hero se fue de más.
+//
+// ── El error del panel, y por qué se agregaron `flat` y `stair` ──────────────
+// Durante siete approaches el panel midió `gap` y solo `gap`. Ese número describe el
+// bug ANTERIOR —la franja crema en la costura— y estaba en verde en todos ellos. El
+// defecto que en realidad se perseguía es otro: que lo primero que se ve al scrollear
+// sea una barra gris plana en vez de una escalera. `gap` no dice nada de eso, así que
+// cada variante pasaba el gate mientras fallaba el objetivo, y el verde se leía como
+// progreso.
+//
+// Las dos medidas que sí lo describen:
+//
+//   · `flat`  — alto en px de la zona de ANCHO COMPLETO (donde las siete columnas son
+//               grises). Es la barra. Cuanto más chica, mejor.
+//   · `stair` — alto en px de la zona con RELIEVE (entre el borde de la columna
+//               exterior y el de la central). Es la escalera.
+//
+// El criterio es la RELACIÓN entre las dos: mientras `stair > flat` lo que se ve se lee
+// como una escalera; cuando `flat` gana, se lee como una barra. El panel se pone en
+// alarma en ese caso, no en el de `gap`.
 
 export type DescentReadout = {
   /** Progreso del recorrido del hero, 0..1. */
@@ -36,6 +55,10 @@ export type DescentReadout = {
    * 0 o negativo = bien. Positivo = franja visible.
    */
   gap: number;
+  /** Alto en px de la zona de ancho completo visible: la barra. Cuanto menos, mejor. */
+  flat: number;
+  /** Alto en px de la zona con relieve visible: la escalera. Tiene que ganarle a `flat`. */
+  stair: number;
 };
 
 /**
@@ -53,6 +76,8 @@ export function useDescentReadout(enabled: boolean): DescentReadout {
     core: 0,
     step: 0,
     gap: 0,
+    flat: 0,
+    stair: 0,
   });
   const last = useRef("");
 
@@ -78,6 +103,18 @@ export function useDescentReadout(enabled: boolean): DescentReadout {
       const artBox = art.getBoundingClientRect();
       const coreBox = core.getBoundingClientRect();
 
+      // Cuánto de un rect cae dentro del viewport. Lo que importa es lo que se VE, no
+      // el alto del elemento: el bloque gris mide más de una pantalla desde temprano.
+      const vh = window.innerHeight;
+      const onScreen = (r: DOMRect) => Math.max(0, Math.min(vh, r.bottom) - Math.max(0, r.top));
+
+      // `flat` y `stair` los publica el componente cuando puede calcularlos mejor que
+      // el DOM. En el approach del tallado el recorte NO aparece en ningún rect —el
+      // elemento sigue midiendo lo mismo, solo se pinta menos— así que medirlo desde
+      // acá daría números falsos. Cuando no hay valores publicados se cae a los rects,
+      // que es lo correcto para producción y para los approaches que escalan piezas.
+      const published = hero.dataset;
+
       const next: DescentReadout = {
         p: Number(hero.dataset.labProgress ?? 0),
         hold: Number(hero.dataset.labHold ?? 0),
@@ -90,12 +127,26 @@ export function useDescentReadout(enabled: boolean): DescentReadout {
         // transformado; `artBox.bottom`, el fondo de la imagen. Si el gris empieza
         // por debajo de donde termina la imagen, entre los dos se ve la página.
         gap: Math.round(coreBox.top - artBox.bottom),
+        // El bloque uniforme abarca las siete columnas: lo que se ve de él ES la zona
+        // de ancho completo.
+        flat:
+          published.labFlat !== undefined
+            ? Number(published.labFlat)
+            : Math.round(onScreen(coreBox)),
+        // El escalón exterior es el más alto de la escalera, así que su parte visible
+        // es el relieve de la figura.
+        stair:
+          published.labStair !== undefined
+            ? Number(published.labStair)
+            : step
+              ? Math.round(onScreen(step.getBoundingClientRect()))
+              : 0,
       };
 
       // Solo se re-renderiza cuando cambia algo visible: sin esto el panel dispara
       // un render por frame y falsea la medición de rendimiento que uno viene a
       // hacer acá.
-      const key = `${next.p.toFixed(3)}|${next.hold.toFixed(0)}|${next.core.toFixed(2)}|${next.step.toFixed(2)}|${next.gap}`;
+      const key = `${next.p.toFixed(3)}|${next.hold.toFixed(0)}|${next.core.toFixed(2)}|${next.step.toFixed(2)}|${next.gap}|${next.flat}|${next.stair}`;
       if (key === last.current) return;
       last.current = key;
       setReadout(next);
@@ -117,7 +168,10 @@ export default function DescentDebug({
   curve: string;
   readout: DescentReadout;
 }) {
-  const bad = readout.gap > 0;
+  const franja = readout.gap > 0;
+  // La comparación solo dice algo cuando ya hay gris en pantalla: antes del primer
+  // scroll las dos medidas valen 0 y su relación no significa nada.
+  const barra = readout.flat > 0 && readout.flat >= readout.stair;
 
   return (
     <div
@@ -142,11 +196,26 @@ export default function DescentDebug({
       <Row label="step" value={readout.step.toFixed(2)} />
       {/* El estado de alarma del HUD tiene que saltar a la vista sin leerlo. */}
       {/* ds-exempt: HUD de laboratorio */}
-      <div className={bad ? "mt-1 rounded bg-red-500 px-1.5 py-0.5 font-bold" : "mt-1"}>
-        <Row label="gap" value={`${readout.gap}px${bad ? "  ← FRANJA" : ""}`} />
+      <div className={franja ? "mt-1 rounded bg-red-500 px-1.5 py-0.5 font-bold" : "mt-1"}>
+        <Row label="gap" value={`${readout.gap}px${franja ? "  ← FRANJA" : ""}`} />
+      </div>
+      {/* La medida que importa para ESTE defecto: escalera contra barra. */}
+      {/* ds-exempt: HUD de laboratorio */}
+      <div className={barra ? "mt-1 rounded bg-red-500 px-1.5 py-0.5 font-bold" : "mt-1"}>
+        <Row label="stair" value={`${readout.stair}px`} />
+        <Row
+          label="flat"
+          value={`${readout.flat}px${barra ? "  ← BARRA" : `  (×${ratio(readout)})`}`}
+        />
       </div>
     </div>
   );
+}
+
+/** Cuántas veces le gana la escalera a la barra. Es el número que hay que vigilar. */
+function ratio(readout: DescentReadout) {
+  if (readout.flat <= 0) return "∞";
+  return (readout.stair / readout.flat).toFixed(1);
 }
 
 function Row({ label, value }: { label: string; value: string }) {

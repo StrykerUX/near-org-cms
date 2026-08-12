@@ -17,10 +17,12 @@ import m10 from "@/app/prototype/descent/f/page.meta";
 import m11 from "@/app/prototype/descent/g/page.meta";
 import m12 from "@/app/prototype/descent/lab/page.meta";
 import m13 from "@/app/prototype/descent/real/page.meta";
-import m14 from "@/app/prototype/flow-compare/page.meta";
-import m15 from "@/app/prototype/homepage/page.meta";
-import m16 from "@/app/prototype/homepage-v2/page.meta";
-import m17 from "@/app/prototype/quantum-security/page.meta";
+import m14 from "@/app/prototype/descent/talla/page.meta";
+import m15 from "@/app/prototype/descent/zocalo/page.meta";
+import m16 from "@/app/prototype/flow-compare/page.meta";
+import m17 from "@/app/prototype/homepage/page.meta";
+import m18 from "@/app/prototype/homepage-v2/page.meta";
+import m19 from "@/app/prototype/quantum-security/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", file: "app/(site)/page.meta.ts" },
@@ -37,8 +39,10 @@ export const ROUTES: RouteEntry[] = [
   { ...m11, route: "/prototype/descent/g", file: "app/prototype/descent/g/page.meta.ts" },
   { ...m12, route: "/prototype/descent/lab", file: "app/prototype/descent/lab/page.meta.ts" },
   { ...m13, route: "/prototype/descent/real", file: "app/prototype/descent/real/page.meta.ts" },
-  { ...m14, route: "/prototype/flow-compare", file: "app/prototype/flow-compare/page.meta.ts" },
-  { ...m15, route: "/prototype/homepage", file: "app/prototype/homepage/page.meta.ts" },
-  { ...m16, route: "/prototype/homepage-v2", file: "app/prototype/homepage-v2/page.meta.ts" },
-  { ...m17, route: "/prototype/quantum-security", file: "app/prototype/quantum-security/page.meta.ts" },
+  { ...m14, route: "/prototype/descent/talla", file: "app/prototype/descent/talla/page.meta.ts" },
+  { ...m15, route: "/prototype/descent/zocalo", file: "app/prototype/descent/zocalo/page.meta.ts" },
+  { ...m16, route: "/prototype/flow-compare", file: "app/prototype/flow-compare/page.meta.ts" },
+  { ...m17, route: "/prototype/homepage", file: "app/prototype/homepage/page.meta.ts" },
+  { ...m18, route: "/prototype/homepage-v2", file: "app/prototype/homepage-v2/page.meta.ts" },
+  { ...m19, route: "/prototype/quantum-security", file: "app/prototype/quantum-security/page.meta.ts" },
 ];
