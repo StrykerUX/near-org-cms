@@ -82,6 +82,17 @@
   --rule: #c9c7c1;
   --green-ink: #00a86b;
 
+  /* The "alternatives" column of the comparison table, and any other copy that
+     has to read as SUBORDINATE without dropping out of legibility.
+     Came back from the Figma file (NEARORG_CLAUDE_QUANTUM), where it replaced
+     `--gray-blue` in that column. The reason is contrast: on `--cream`,
+     `--gray-blue` lands at 2.81:1, which is not a legibility level for a
+     paragraph — it is a level for decoration. This sits at 4.34:1.
+     Note it still does not clear the 4.5:1 AA floor for normal-size text; it is
+     a large improvement, not a pass. Do not reach for `--gray-blue` for body
+     copy on light grounds — that is what this token exists to replace. */
+  --gray-intermediate: #6c7477;
+
   /* The three stops of the CTA sweep. They live as tokens rather than a literal
      per use because the same gradient shows up in three places with three
      syntaxes: the button fill (CSS), the nav CTA (CSS), and the isometric SVG's
@@ -209,6 +220,7 @@
   --color-ink-soft: var(--ink-soft);
   --color-rule: var(--rule);
   --color-green-ink: var(--green-ink);
+  --color-gray-intermediate: var(--gray-intermediate);
 
   --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, Menlo, monospace;
@@ -694,6 +706,97 @@ button:hover .lucide-plus {
   display: none;
 }
 
+/* ── The nav CTA: gradient from the start, and it TRAVELS on hover ──────────
+   Every other variant wipes a gradient IN from zero width — the button is one
+   colour until you touch it. This one is already the gradient at rest, so the
+   hover has nothing to reveal; what it does instead is move.
+
+   The mechanism is background-POSITION over an oversized image, not
+   background-size. The image is 200% of the button and runs
+   deep -> lime -> deep, so each half of it is a complete ramp:
+
+     position 100%  shows the right half:  lime .. deep   (lime on the LEFT)
+     position 0%    shows the left half:   deep .. lime   (lime on the RIGHT)
+
+   So the rest state is lime-left, and hover animates 100% -> 0%. That
+   direction is deliberate and easy to get backwards: DECREASING the position
+   slides the image rightward across the button, which is the direction the
+   light is meant to travel. Going 0% -> 100% would land the same end colours
+   while visibly moving the wrong way.
+
+   The mirrored third stop is what makes the reversal possible at all — with a
+   plain lime->deep ramp there is no second half to travel into, and the band
+   would simply slide off. */
+[data-q-cta][data-q-cta-sweep] {
+  color: var(--foreground);
+  border-color: transparent;
+  background-color: transparent;
+  background-image: linear-gradient(
+    105deg,
+    var(--cta-deep) 0%,
+    var(--cta-mint) 25%,
+    var(--cta-lime) 50%,
+    var(--cta-mint) 75%,
+    var(--cta-deep) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  background-position: 100% center;
+  /* Half the previous 0.55s, and a much gentler curve. The old
+     cubic-bezier(0.65, 0, 0.35, 1) is a STRONG in-out: it loiters at both ends
+     and sprints through the middle, which at this distance read as sluggish
+     rather than considered. (0.33, 0, 0.67, 1) is near-linear through the
+     middle with just enough ease at each end to stop the start and stop
+     landing hard — the light travels at a constant rate and settles. */
+  transition: background-position 0.28s cubic-bezier(0.33, 0, 0.67, 1);
+}
+[data-q-cta][data-q-cta-sweep]:hover {
+  color: var(--foreground);
+  background-position: 0% center;
+  /* The shared `qCtaFill` animation would fight the transition by driving
+     background-size. This variant has no wipe stage at all. */
+  animation: none;
+}
+[data-q-cta][data-q-cta-sweep] [data-q-cta-top] {
+  display: none;
+}
+
+/* ── Nav corner geometry, one source of truth ───────────────────────────────
+   The bar, every dropdown panel and the Get started button all derive their
+   radius from `--q-nav-radius`, so changing it here moves all three together.
+   They were three literals before, which is exactly the arrangement that
+   drifts: the bar gets retuned, the panels quietly do not follow, and the
+   mismatch is only visible with a menu open.
+
+   The button is INSET from the bar by `--q-nav-pad`, so its radius is the
+   bar's minus that inset — the concentric rule. Matching the two radii
+   outright would look wrong: at the same value the inner corner reads
+   *rounder* than the outer one, because its arc sits on a shorter edge. */
+[data-q-nav] {
+  --q-nav-radius: 20px;
+  --q-nav-pad: 12px;
+  --q-nav-bg: #0a0a0a;
+  --q-nav-bg-over-dark: #16191a;
+}
+
+/* The bar and every dropdown panel are ONE surface treatment — same colour,
+   same transparency, same blur — so they read as parts of the same object
+   rather than two dark rectangles that happen to be near each other. Anything
+   that wants that surface takes `data-q-surface`; nothing re-declares it. */
+[data-q-surface] {
+  background-color: var(--q-nav-bg);
+  /* No backdrop-filter: the surface is opaque, so a blur would cost a
+     compositing layer and change nothing. If transparency ever comes back, the
+     blur must come back WITH the `top`-based retract in NavPillQuantum — a
+     transform on the nav root makes it a backdrop root and silently kills it. */
+}
+/* The bar lightens while it crosses a dark section. Declared here rather than
+   as a utility on the element: this rule sits outside Tailwind's layers and
+   would otherwise win over the variant and silently kill the inversion. */
+[data-q-surface][data-tone="dark"] {
+  background-color: var(--q-nav-bg-over-dark);
+}
+
 /* The label is two stacked layers: the lower one inherits the button's colour,
    and this one — black — is revealed by clip-path at the same rate the fill
    rises. That is what makes the text read black OVER the gradient and light
@@ -756,5 +859,15 @@ button:hover .lucide-plus {
   }
   [data-q-cta]:hover [data-q-cta-top] {
     clip-path: inset(0 0 0 0);
+  }
+  /* The sweep variant is a single oversized image, so the two-layer
+     `background-size` above would collapse it to 100% and destroy the travel
+     room. It keeps its own size and simply jumps to the end position. */
+  [data-q-cta][data-q-cta-sweep] {
+    transition: none;
+  }
+  [data-q-cta][data-q-cta-sweep]:hover {
+    background-size: 200% 100%;
+    background-position: 0% center;
   }
 }

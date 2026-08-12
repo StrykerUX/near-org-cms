@@ -75,7 +75,7 @@ export default function Comparison() {
 
         <div className="flex flex-col">
           <div className="grid gap-8 pb-5 lg:grid-cols-2 lg:gap-16">
-            <Eyebrow className="text-gray-blue">Alternatives</Eyebrow>
+            <Eyebrow className="text-gray-intermediate">Alternatives</Eyebrow>
             <p className="flex items-center gap-2.5 text-eyebrow uppercase">
               <NearMark className="size-[17px] shrink-0" />
               On NEAR
@@ -90,7 +90,9 @@ export default function Comparison() {
                 i === ROWS.length - 1 ? "border-b" : ""
               }`}
             >
-              <p className="max-w-[44ch] text-body text-gray-blue text-pretty">{row.them}</p>
+              <p className="max-w-[44ch] text-body text-gray-intermediate text-pretty">
+                {row.them}
+              </p>
               {/* text-label-lg and not `text-body font-medium`: the DS token for
                   "body copy carrying emphasis" already brings the weight. */}
               <p className="max-w-[44ch] text-label-lg text-pretty">{row.us}</p>
