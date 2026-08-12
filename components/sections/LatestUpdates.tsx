@@ -28,6 +28,30 @@ const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
   ssr: false,
 });
 
+// A cuántos viewports de distancia se montan las escenas.
+//
+// Tres, y no uno, porque inicializar estas escenas tarda del orden de SEGUNDOS y
+// eso no depende de la red: medido en localhost, donde el chunk se sirve al
+// instante, las dos primeras cards tardaban ~5s en aparecer. El tiempo se va en el
+// lazy-load del propio SDK, que:
+//
+//  · inicializa las escenas DE UNA EN UNA (su cola `Rt` es serie, no paralelo), y
+//    acá hay tres, cada una con 5 capas y un blur de 4 pases;
+//  · planifica cada paso con `requestIdleCallback({timeout: 500})`, así que suma
+//    hasta medio segundo de espera por escena;
+//  · y POSPONE la cola mientras detecta scroll, reintentando cada 80ms — y con
+//    Lenis el scroll sigue emitiendo un rato después de soltar la rueda.
+//
+// O sea que el peor momento posible para montarlas es justo cuando el lector viene
+// scrolleando hacia ellas, que es exactamente lo que hacía un margen de un
+// viewport. Con tres, esos segundos transcurren mientras todavía está mirando las
+// secciones anteriores.
+//
+// Este número NO es un margen de red: si algún día el cuello de botella pasa a ser
+// la descarga del chunk (producción, conexión lenta), lo que hace falta es separar
+// la descarga del montaje, no seguir subiéndolo.
+const SCENE_LEAD = 3;
+
 // Sin datos reales (fuera de alcance de este draft): copy fijo. Si esta sección
 // se conecta al CMS más adelante, migra a PostCard/PostGrid
 // (components/sections/types.ts) en vez de duplicar esta lista.
@@ -234,15 +258,12 @@ export default function LatestUpdates() {
   const [ready, setReady] = useState(false);
   const gateRef = useGsapContext<HTMLDivElement>((_self, scope) => {
     if (ready) return;
-    // Un viewport de anticipación: tiempo para que el chunk baje y las tres
-    // escenas se inicialicen antes de que la sección se vea. Mismo criterio que
-    // el build diferido del word field.
     onViewportToggle(
       scope,
       (visible) => {
         if (visible) setReady(true);
       },
-      1
+      SCENE_LEAD
     );
   }, []);
 
