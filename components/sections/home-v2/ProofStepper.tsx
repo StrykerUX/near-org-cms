@@ -176,11 +176,19 @@ export default function ProofStepper() {
   return (
     // Nada de overflow-hidden acá: un ancestro con overflow distinto de visible
     // se vuelve el contenedor de scroll del sticky y este deja de pegarse.
+    //
+    // `overflow-x-clip` es la excepción, y por eso está: `clip` recorta pero NO
+    // crea un contenedor de scroll, así que el sticky sigue anclado al viewport.
+    // Es lo único que puede recortar acá. Lo que recorta es el `-right-4` del
+    // carril, que asoma 16px más allá del borde derecho y extendía el ancho
+    // scrolleable de la página entera. Va solo en X: `clip` admite el otro eje
+    // en `visible` —`hidden` no, fuerza `auto`—, y recortar en Y cortaría el
+    // propio sticky.
     <section
       ref={rootRef}
       data-stepper="off"
       style={{ "--steps": STEPS.length, "--step-vh": STEP_VH } as React.CSSProperties}
-      className="group/proof relative bg-background text-foreground data-[stepper=on]:h-[calc(var(--steps)*var(--step-vh)+100svh)]"
+      className="group/proof relative overflow-x-clip bg-background text-foreground data-[stepper=on]:h-[calc(var(--steps)*var(--step-vh)+100svh)]"
     >
       <div className="relative group-data-[stepper=on]/proof:sticky group-data-[stepper=on]/proof:top-0 group-data-[stepper=on]/proof:flex group-data-[stepper=on]/proof:h-svh group-data-[stepper=on]/proof:items-center">
         <Container className="grid grid-cols-1 items-center gap-12 py-24 lg:py-0">
