@@ -4,23 +4,9 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import CtaPill from "@/components/sections/quantum/CtaPill";
+import { LIVE_TODAY_POINTS as POINTS, EXTERNAL_LINKS } from "@/components/sections/quantum/quantumContent";
 
 // "Post-quantum signing, live on mainnet": what exists today, in three points.
-
-const POINTS = [
-  {
-    title: "Signature agility",
-    body: "The protocol already supported EdDSA and ECDSA. A post-quantum scheme extends a model built for multiple signature types.",
-  },
-  {
-    title: "Account-level by default",
-    body: "Quantum-safe keys secure the account itself, not a separate vault users opt into.",
-  },
-  {
-    title: "Live in production",
-    body: "Post-quantum signing runs on mainnet, not on testnet or in a research demo.",
-  },
-] as const;
 
 // Seconds between one card starting and the next. Long enough that the eye
 // finishes each before the following one moves — the point of the sequence is
@@ -71,7 +57,7 @@ export default function LiveToday() {
               quantum-safe keys through the NEAR CLI.
             </p>
             <CtaPill
-              href="https://docs.near.org/tools/cli#ml-dsa-65-post-quantum-2"
+              href={EXTERNAL_LINKS.rotateKeysCli}
               tone="filled"
               external
             >

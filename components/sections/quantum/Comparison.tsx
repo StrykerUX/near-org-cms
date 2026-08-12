@@ -7,28 +7,10 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import NearMark from "@/components/sections/quantum/NearMark";
+import { COMPARISON_ROWS as ROWS } from "@/components/sections/quantum/quantumContent";
 
 // "How is NEAR different from other quantum-safe chains?" — four claims, each
 // paired against what NEAR actually does.
-
-const ROWS = [
-  {
-    them: "A quantum-safe vault or account users opt into, separate from the default wallet",
-    us: "Quantum-safe keys secure the account itself, by default",
-  },
-  {
-    them: "Protection for historical chain state or cross-chain proofs, not account balances",
-    us: "Post-quantum signing protects the balance in the account",
-  },
-  {
-    them: "Native quantum-safe accounts mapped years out, full migration targeting end of decade",
-    us: "Post-quantum signing live on mainnet today",
-  },
-  {
-    them: "A chain-wide migration to move to a new signature scheme",
-    us: "A single key rotation, because accounts are decoupled from cryptography",
-  },
-] as const;
 
 export default function Comparison() {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {

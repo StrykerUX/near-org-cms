@@ -6,6 +6,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import { createVideoScrub } from "@/components/primitives/motion/videoScrub";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { HERO_UNIT } from "@/components/sections/home-v2/heroGeometry";
 
 // ── Geometría: la unidad `--u` ───────────────────────────────────────────────
 // El encastre entre el hero y QuantumBars sale de una sola unidad: el ancho de
@@ -28,9 +29,6 @@ import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 // —que a scroll 0 están en `scaleY: 0`— y se ve el crema de la página. El
 // original arrastra ese mismo bug; acá el hero llena el viewport y el problema
 // desaparece en origen en vez de parchearse con un `max()`.
-//
-// `--u` se declara en las dos secciones con el mismo valor. Ver QuantumBars.tsx.
-export const HERO_UNIT = "calc(100vw / 7)";
 
 // ── Ajustes del scrub ────────────────────────────────────────────────────────
 //

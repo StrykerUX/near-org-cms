@@ -7,6 +7,10 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import CtaPill from "@/components/sections/quantum/CtaPill";
+import {
+  ROADMAP_STAGES as STAGES,
+  type RoadmapStage,
+} from "@/components/sections/quantum/quantumContent";
 
 // NEAR's post-quantum roadmap: four stages threaded on a spine that draws
 // itself as you scroll, with only the stage crossing the middle of the frame at
@@ -20,46 +24,13 @@ const DOTS = {
   progress: "[background:conic-gradient(var(--near-green-accent)_0_50%,#dcdad4_50%_100%)]",
   research: "border-2 border-green-ink bg-cream",
   horizon: "border-2 border-[#b3b1ab] bg-cream",
-} as const;
+} satisfies Record<RoadmapStage["dot"], string>;
 
-type Stage = {
-  when: string;
-  whenAccent: string;
-  dot: keyof typeof DOTS;
-  title: string;
-  body: string;
-};
-
-const STAGES: Stage[] = [
-  {
-    when: "Live",
-    whenAccent: "now",
-    dot: "live",
-    title: "Post-quantum signing",
-    body: "FIPS-204 / ML-DSA at the account and protocol level. Rotate through the NEAR CLI.",
-  },
-  {
-    when: "In",
-    whenAccent: "progress",
-    dot: "progress",
-    title: "Wallets and cross-chain",
-    body: "Post-quantum support across software and hardware wallets. Quantum-safe Chain Signatures for cross-chain users on NEAR Intents.",
-  },
-  {
-    when: "In",
-    whenAccent: "research",
-    dot: "research",
-    title: "Ownership proofs",
-    body: "Zero-knowledge seed-phrase ownership proofs as a quantum contingency.",
-  },
-  {
-    when: "On the",
-    whenAccent: "horizon",
-    dot: "horizon",
-    title: "Deep protocol layers",
-    body: "Post-quantum consensus, validators, and epoch sync, the deeper protocol layers that complete the migration.",
-  },
-];
+// `satisfies` y no `as const` a secas: el tipo de `dot` vive ahora en
+// quantumContent (tiene que ser un union de literales para que el contenido sea
+// serializable), así que esto es lo que mantiene los dos lados atados — si alguien
+// agrega una etapa con un `dot` nuevo y se olvida de la clase, el build falla acá
+// en vez de renderizar un punto sin estilo.
 
 // How faint an inactive stage sits. Low enough to read as a ghost, high enough
 // that the text is still legible if someone stops mid-scroll.

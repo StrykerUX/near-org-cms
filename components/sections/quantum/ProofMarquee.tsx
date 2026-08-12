@@ -4,6 +4,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
+import { MARQUEE_PROOFS as PROOFS } from "@/components/sections/quantum/quantumContent";
 
 // The proof ribbon between the hero and the rest: six fact-plus-gloss pairs
 // running between two dashed rules.
@@ -13,15 +14,6 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
 // differences: this one does NOT slow on hover — they are one-line facts, not
 // quotes anyone needs to finish reading — and the set is loose text rather than
 // cards.
-
-const PROOFS = [
-  { fact: "Post-quantum signing", gloss: "Live on mainnet" },
-  { fact: "FIPS-204 (ML-DSA)", gloss: "NIST-approved scheme" },
-  { fact: "One transaction", gloss: "To rotate to quantum-safe keys" },
-  { fact: "Account-level", gloss: "Default path, not an opt-in tool" },
-  { fact: "5+ years", gloss: "100% mainnet uptime" },
-  { fact: "Since 2019", gloss: "Account model designed for quantum safety" },
-] as const;
 
 // One set is ~6 × 340px ≈ 2040px, so this works out to ~51px/s. It is the
 // default value of the original's `tickerSeconds` control.

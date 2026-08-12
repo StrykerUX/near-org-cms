@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import { FAQS } from "@/components/sections/quantum/quantumContent";
 
 // Quantum security FAQ. One panel open at a time.
 //
@@ -14,29 +15,6 @@ import Container from "@/components/primitives/Container";
 // wrapping) and gets it wrong in between, while the grid version has no
 // measurement to get wrong. It also means no JS at all beyond the toggle, so
 // this component needs no motion context.
-
-const FAQS = [
-  {
-    q: "Is NEAR quantum-safe?",
-    a: "Yes. NEAR supports post-quantum signing with FIPS-204 (ML-DSA), a NIST-approved signature scheme, live on mainnet. Any NEAR account holder can rotate to quantum-safe keys in a single transaction.",
-  },
-  {
-    q: "What is post-quantum cryptography?",
-    a: "Post-quantum cryptography, also called quantum-safe or quantum-resistant cryptography, refers to signature and encryption schemes designed to stay secure against both classical and quantum computers. NEAR uses FIPS-204 (ML-DSA), a lattice-based scheme approved by NIST.",
-  },
-  {
-    q: "How does NEAR protect against the quantum threat?",
-    a: "NEAR accounts are decoupled from cryptography and controlled through rotatable access keys. Adding a post-quantum signature scheme is a key rotation rather than a chain-wide migration, so account holders upgrade to quantum-safe keys with one transaction while keeping the same account.",
-  },
-  {
-    q: "What is the quantum threat to cryptocurrency?",
-    a: "A powerful enough quantum computer running Shor’s algorithm could derive a private key from an exposed public key and take the assets it controls. Addresses whose public keys are already visible onchain are the most exposed. Galaxy Digital estimates as much as $470 billion of Bitcoin sits in such addresses.",
-  },
-  {
-    q: "When will quantum computers threaten blockchains?",
-    a: "Estimates vary, but industry and research timelines increasingly cluster around the end of the decade, and Google’s 2026 research lowered the resources thought necessary. Because exposed keys can be harvested now and attacked later, security teams recommend migrating before a working attack exists.",
-  },
-];
 
 export default function QuantumFaq() {
   const [open, setOpen] = useState<number | null>(null);

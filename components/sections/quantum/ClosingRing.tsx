@@ -7,6 +7,7 @@ import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import CtaPill from "@/components/sections/quantum/CtaPill";
+import { EXTERNAL_LINKS } from "@/components/sections/quantum/quantumContent";
 
 // Closing call to action: the copy sits inside an orbit that assembles once on
 // entry and then keeps turning slowly.
@@ -136,14 +137,14 @@ export default function ClosingRing() {
               className="mt-1.5 flex flex-wrap items-center justify-center gap-4"
             >
               <CtaPill
-                href="https://docs.near.org/tools/cli#ml-dsa-65-post-quantum-2"
+                href={EXTERNAL_LINKS.rotateKeysCli}
                 tone="filled"
                 external
               >
                 Rotate your keys
               </CtaPill>
               <CtaPill
-                href="https://near.org/blog/making-near-protocol-post-quantum-safe"
+                href={EXTERNAL_LINKS.announcement}
                 tone="quiet"
                 external
               >

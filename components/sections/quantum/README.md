@@ -8,7 +8,8 @@ The general contract in [`../README.md`](../README.md) applies. This file only
 documents what is specific to this port.
 
 **The words on this page are not owned here.** Their source of truth is the copy
-deck, transcribed at [`docs/quantum-security-brief.md`](../../../docs/quantum-security-brief.md)
+deck, transcribed at [`docs/quantum-security-brief.md`](../../../docs/quantum-security-brief.md). Where that copy lands in code is
+`quantumContent.ts`
 — including which section maps to which component, where the build departs from
 the deck and why, and one contradiction inside the deck that is still open.
 Change copy there first.

@@ -1,6 +1,7 @@
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { createSeededRandom } from "@/components/primitives/motion/seededRandom";
 import { NEAR_MARK_PATH } from "@/components/sections/quantum/NearMark";
+import { FIELD_WORDS as WORDS } from "@/components/sections/quantum/quantumContent";
 
 // The word field that fills the foot of the "Mathematics" section: rows of
 // crypto vocabulary in monospace, with the letters that land on the silhouette
@@ -34,23 +35,6 @@ import { NEAR_MARK_PATH } from "@/components/sections/quantum/NearMark";
 //
 // Imperative factory, created and destroyed by the section's `gsap.matchMedia()`
 // — same contract as `quantumLattice.ts` and `glyphShine`.
-
-const WORDS = [
-  "quantum-safe", "ML-DSA-65", "FIPS-204", "rotate the key", "alice.near", "same account",
-  "one transaction", "post-quantum", "lattice", "access key", "no migration",
-  "live on mainnet", "the key is an attachment", "the account stays", "NEAR",
-  "signed, not seen", "Ed25519", "secp256k1", "add_key", "delete_key", "full access key",
-  "function call key", "nonce", "signature", "public key", "private key", "key pair",
-  "seed phrase", "account model", "named account", "implicit account", "sub-account",
-  "key rotation", "cryptographic agility", "hybrid signatures", "Shor’s algorithm",
-  "Grover", "qubit", "superposition", "entanglement", "decoherence",
-  "quantum Fourier transform", "discrete log", "elliptic curve", "period finding",
-  "harvest now, decrypt later", "module lattice", "short vector", "learning with errors",
-  "Dilithium", "hash-based", "SPHINCS+", "NIST", "forward secrecy", "no new address",
-  "Nightshade", "sharding", "chain abstraction", "intents", "chain signatures",
-  "mainnet 2.13", "validator", "finality", "receipts", "storage staking",
-  "cross-contract call", "access key list", "state", "gas", "RPC", "self-custody",
-];
 
 // How much wider and taller than the host the weave is built. The surplus hangs
 // off both sides, so the field still covers the host after a moderate resize and

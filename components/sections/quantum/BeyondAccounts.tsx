@@ -5,27 +5,10 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
+import { BEYOND_ACCOUNTS_CARDS as CARDS } from "@/components/sections/quantum/quantumContent";
 
 // "Wallets, cross-chain, and research" — the three surfaces beyond the account
 // itself, as image cards.
-
-const CARDS = [
-  {
-    src: "/prototype/quantum/iso-22.png",
-    title: "Wallets",
-    body: "NEAR is working with software and hardware wallet builders, such as Ledger, on post-quantum support.",
-  },
-  {
-    src: "/prototype/quantum/iso-07.png",
-    title: "Cross-chain",
-    body: "The NEAR Intents team is developing quantum-safe Chain Signatures, so users from any chain can hold assets in a quantum-safe environment even if their origin chain is slow to upgrade.",
-  },
-  {
-    src: "/prototype/quantum/iso-16.png",
-    title: "Ownership research",
-    body: "A zero-knowledge approach lets a user prove they know the seed phrase behind an asset, a contingency for verifying rightful ownership if classical keys break.",
-  },
-] as const;
 
 export default function BeyondAccounts() {
   // The ref goes on the grid, not the section: useScrollReveal uses its own

@@ -6,52 +6,7 @@ import { ArrowRight } from "lucide-react";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-
-const STORIES = [
-  {
-    company: "Abound",
-    logo: { src: "/logos/abound.png", width: 111, height: 24 },
-    image: "/prototype/v2/stories/abound.png",
-    title: "Abound Is Bringing Agentic Payments to Cross-Border Finance With NEAR AI",
-    href: "https://near.ai/blog/near-ai-and-the-times-of-india-groups-abound-are-bringing-agentic-payments-to-cross-border-finance",
-  },
-  {
-    company: "Venice",
-    logo: { src: "/logos/venice.png", width: 89, height: 40 },
-    image: "/prototype/v2/stories/venice.png",
-    title: "Venice Is Now Verifiably Private With NEAR AI",
-    href: "https://near.ai/blog/venice-is-now-verifiably-private-with-near-ai",
-  },
-  {
-    company: "Brave",
-    logo: { src: "/logos/brave.png", width: 86, height: 24 },
-    image: "/prototype/v2/stories/brave.png",
-    title: "A New Frontier for Brave AI Privacy With NEAR AI",
-    href: "https://brave.com/blog/browser-ai-tee/",
-  },
-  {
-    company: "ZODL",
-    logo: { src: "/logos/zodl.png", width: 133, height: 27 },
-    image: "/prototype/v2/stories/zodl.png",
-    title: "Privacy-first Zcash Wallet ZODL Uses NEAR Intents to Give Users Cross-Chain Access",
-    href: "https://intents.near.org/case-studies",
-  },
-  {
-    company: "Ledger",
-    logo: { src: "/logos/ledger.png", width: 117, height: 39 },
-    image: "/prototype/v2/stories/ledger.png",
-    title: "Ledger Wallet Integrates NEAR Intents to Power Seamless Cross-Chain Swaps",
-    href: "https://www.ledger.com/blog-near-intents-joins-ledger-wallet-via-swapkit",
-  },
-  {
-    // Único sin logotipo en el set original: se escribe con el nombre.
-    company: "Gov. of Bermuda",
-    logo: null,
-    image: "/prototype/v2/stories/bermuda.png",
-    title: "Government of Bermuda and NEAR AI Partner to Deploy AI-Powered Public Services",
-    href: "https://near.ai/blog/government-of-bermuda-and-near-ai-partner-to-deploy-ai-powered-public-services",
-  },
-] as const;
+import { CUSTOMER_STORIES as STORIES } from "@/components/sections/home-v2/homeV2Content";
 
 export default function CustomerStories() {
   const [active, setActive] = useState(0);

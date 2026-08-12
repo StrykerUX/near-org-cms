@@ -82,6 +82,23 @@ desktop, el contenido tiene que caer en flujo normal igual.
 `lib/queries/*` alimenta cada `page.tsx`, que le pasa props planas al `view`
 correspondiente, que compone estas secciones.
 
+## Dónde vive la copy
+
+`quantum/quantumContent.ts` y `home-v2/homeV2Content.ts` — los textos, listas y
+URLs de esas dos páginas, fuera de los componentes. Módulos puros: strings y
+arrays de objetos, sin JSX, sin `Date`, sin funciones. Mismo contrato que
+`types.ts`, así que el día que vengan de la base de datos la forma no cambia.
+
+El precedente es `home-v2/nearStackContent.ts`, que ya lo hacía así.
+
+**Qué NO va ahí:**
+
+| | Dónde va | Por qué |
+|---|---|---|
+| Geometría y timing (radios, umbrales de scroll, rampas de color) | Con la animación que los lee | Es mecanismo, no contenido |
+| Clases de layout (en qué celda del grid cae una card) | En el componente | Es composición. Ver `CARD_LAYOUT` en `OwnYourOwn` |
+| Los **titulares** | Todavía en el JSX | Llevan `<Accent>` y `<br />`, así que pasarlos a datos exige elegir un esquema para "texto con un tramo acentuado" — y esa es una decisión del modelo de contenido, no de un refactor. `ROADMAP_STAGES` (`when` + `whenAccent`) muestra la forma que funcionaría |
+
 ## Toolkit de animación
 
 `components/primitives/motion/` — lo compartido por las secciones animadas.

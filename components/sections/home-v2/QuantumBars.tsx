@@ -4,10 +4,8 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
-import { HERO_UNIT } from "./HeroVideo";
-
-const STATEMENT =
-  "NEAR is open infrastructure powering the agent economy. Quantum-resistant and confidential by design, NEAR empowers you to trade anything anywhere and own your intelligence.";
+import { HERO_UNIT } from "@/components/sections/home-v2/heroGeometry";
+import { BARS_STATEMENT as STATEMENT } from "@/components/sections/home-v2/homeV2Content";
 
 // Los escalones de cada columna, en múltiplos de `--u`. `offset` es dónde
 // empieza el escalón desde el borde y `height` cuánto mide; los dos suman

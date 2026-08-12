@@ -8,6 +8,7 @@ import { enableScene } from "@/components/primitives/motion/stickyScene";
 import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { PROOF_STEPS as STEPS } from "@/components/sections/home-v2/homeV2Content";
 
 // Stepper de 5 pruebas. Misma mecánica que components/sections/ProofStats.tsx
 // —sticky de CSS y un ScrollTrigger de SOLO LECTURA, nunca `pin: true`; el
@@ -20,44 +21,6 @@ import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 //  2. El recorrido es mucho más corto: 7svh por paso contra 65svh. Las cinco
 //     pruebas pasan casi al vuelo, a propósito.
 //  3. El cursor lleva el gradiente lima→verde en vez del verde plano.
-const STEPS = [
-  {
-    word: "1+ Million",
-    eyebrow: "Built on Scale",
-    value: "1M+",
-    label: "daily wallets",
-    body: "Real people moving real value every day — not bots inflating a chart.",
-  },
-  {
-    word: "$20B+",
-    eyebrow: "Built on Volume",
-    value: "$20B",
-    label: "settled",
-    body: "Cross-chain volume cleared on-chain, with finality in under a second.",
-  },
-  {
-    word: "100%",
-    eyebrow: "Built on Proof",
-    value: "100%",
-    label: "uptime",
-    body: "Move cross-chain, trade perps, hold RWAs, stay confidential, and access all of DeFi from your own wallet.",
-  },
-  {
-    word: "Quantum",
-    eyebrow: "Built on Math",
-    value: "0",
-    label: "quantum exposure",
-    body: "Post-quantum signatures from day one, so nothing you sign today expires tomorrow.",
-  },
-  {
-    word: "Confidential",
-    eyebrow: "Built on Privacy",
-    value: "TEE",
-    label: "on every node",
-    body: "Confidential compute by default: your data stays yours, even from the validators.",
-  },
-] as const;
-
 const STEP_VH = "7svh";
 const DIM_WORD = 0.06;
 

@@ -6,6 +6,7 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
+import { NAV_LINKS as LINKS } from "@/components/sections/quantum/quantumContent";
 
 // The quantum rebuild's nav pill. It differs from `home-v2/NavPillV2` in the
 // three ways that matter — frosted light background instead of solid black,
@@ -20,13 +21,6 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
 // Order is deliberate and not alphabetical: Developers first because it is the
 // most-used, About last because it is the least. Every one of them is a
 // dropdown, hence the chevron on each.
-const LINKS = [
-  { label: "Developers" },
-  { label: "Stack" },
-  { label: "Founders" },
-  { label: "About" },
-];
-
 // Extra clearance below the pill as it retracts, so no edge stays peeking.
 const HIDE_MARGIN = 12;
 

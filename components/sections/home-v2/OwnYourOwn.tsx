@@ -7,6 +7,7 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-v2/homeV2Content";
 
 // ── "Own Your Own": el título se queda quieto y las cards lo atraviesan ──────
 //
@@ -57,39 +58,29 @@ const SPEEDS = [0.78, 1.38, 1.44, 1.5] as const;
 // que había antes contra "The NEAR Stack".
 const DRIFT_VH = 60;
 
-const CARDS = [
+// Posición de cada card en el grid y su tinte, en el MISMO orden que
+// `OWN_YOUR_OWN_CARDS`. Se queda acá y no en el módulo de contenido porque es
+// composición: en qué celda cae cada card y cuánto se separa de la anterior.
+//
+// Clases literales y no template strings: Tailwind v4 no detecta clases
+// construidas dinámicamente. Mismo criterio que el mapa WIDTH de Container.
+//
+// El margen superior es la separación con la card anterior, y es lo único que hay
+// que tocar para reespaciarlas. Los valores salen del original.
+const CARD_LAYOUT = [
   {
-    src: "/prototype/feature-assets.png",
-    title: "Assets",
-    body: "You Can Now Pay for AI Usage by Staking NEAR",
-    // Clases literales y no template strings: Tailwind v4 no detecta clases
-    // construidas dinámicamente. Mismo criterio que el mapa WIDTH de Container.
-    //
-    // El margen superior es la separación con la card anterior, y es lo único
-    // que hay que tocar para reespaciarlas. Los valores salen del original.
-    place:
-      "lg:col-start-3 lg:col-span-3 lg:row-start-1 lg:-ml-[100px] lg:mr-[100px]",
+    place: "lg:col-start-3 lg:col-span-3 lg:row-start-1 lg:-ml-[100px] lg:mr-[100px]",
     tint: "bg-white/50",
   },
   {
-    src: "/prototype/feature-intelligence.png",
-    title: "Intelligence",
-    body: "Who Owns the Rails AI Runs On",
     place: "lg:col-start-9 lg:col-span-3 lg:row-start-2 lg:mt-[140px]",
     tint: "bg-card-tint/50",
   },
   {
-    src: "/prototype/feature-alpha.png",
-    title: "Alpha",
-    body: "Adding a New Execution Model to its Engine",
     place: "lg:col-start-3 lg:col-span-3 lg:row-start-3 lg:mt-[152px]",
     tint: "bg-white/50",
   },
   {
-    // Reusa el arte de Intelligence: el mismo glifo de IA, otro titular.
-    src: "/prototype/feature-intelligence.png",
-    title: "Agents",
-    body: "Always-On Agents Running Inside Encrypted Enclaves",
     place: "lg:col-start-9 lg:col-span-3 lg:row-start-4 lg:mt-[150px]",
     tint: "bg-card-tint/50",
   },
@@ -259,13 +250,15 @@ export default function OwnYourOwn() {
             <h3 className="whitespace-nowrap text-center text-statement">Own Your Own</h3>
           </div>
 
-          {CARDS.map((card) => (
+          {CARDS.map((card, i) => (
             <article
               key={card.title}
               data-own-card
               // z-[2]: las cards cruzan el título por delante, como en la
-              // referencia.
-              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${card.tint} ${card.place}`}
+              // referencia. El resto sale de CARD_LAYOUT, emparejado por índice
+              // con el contenido — el `cards.length !== SPEEDS.length` del efecto
+              // ya falla si los tres arrays se desincronizan.
+              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
             >
               {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
                   `width`, Next genera el srcset pero el navegador asume que ocupa

@@ -7,8 +7,7 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
-
-const LINKS = [{ label: "For Founders" }, { label: "For Developers" }, { label: "Tech Stack" }];
+import { NAV_LINKS as LINKS } from "@/components/sections/home-v2/homeV2Content";
 
 // Aire extra bajo la pill al retraerse, para que no quede un borde asomando.
 const HIDE_MARGIN = 12;

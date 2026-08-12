@@ -9,6 +9,7 @@ import { CTA_RAMP, CTA_RAMP_HEAD } from "@/components/primitives/motion/motionCo
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
 import CtaPill from "@/components/sections/quantum/CtaPill";
+import { SEQUENCE_HEAD as HEAD, SEQUENCE_TAIL as TAIL, SEQUENCE_BEATS as BEATS, EXTERNAL_LINKS } from "@/components/sections/quantum/quantumContent";
 
 // §3 + §4 of the copy deck, as ONE pinned composition.
 //
@@ -61,9 +62,6 @@ import CtaPill from "@/components/sections/quantum/CtaPill";
 // is §4, and beat 2 is assembled from §3, §9 and the fourth and fifth answers of
 // the §10 FAQ. Nothing here is sourced from outside the deck — see the README
 // before adding anything that is.
-
-const HEAD = "Defending against quantum attack means";
-const TAIL = "rotating one key.";
 
 // Pinned travel. Beats one and two were tightened by 20% — they set up a problem
 // the reader already half-knows. Beat three's dwell AFTER the answer finishes
@@ -263,26 +261,6 @@ const RISE_SHARE = 0.36;
 // `gsap.utils.interpolate(CTA_RAMP, t)`; there used to be a hand-written hex
 // mixer here doing exactly that with parseInt and string slices.
 const RAMP_SAMPLE = gsap.utils.interpolate([...CTA_RAMP]);
-
-type Beat = {
-  key: string;
-  body: string;
-};
-
-const BEATS: Beat[] = [
-  {
-    key: "mechanism",
-    body: "Most blockchains derive account ownership from elliptic-curve cryptography. The moment an address signs, the key it was derived from is visible onchain.",
-  },
-  {
-    key: "attack",
-    body: "A quantum computer running Shor’s algorithm could derive a private key from an exposed public key and take the assets it controls. Those keys can be harvested now and attacked later, so the deadline is already behind us.",
-  },
-  {
-    key: "answer",
-    body: "NEAR accounts are decoupled from cryptography, so an account holder rotates to quantum-safe keys in a single transaction and keeps the same account.",
-  },
-];
 
 export default function ThreatSequence() {
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
@@ -689,7 +667,7 @@ export default function ThreatSequence() {
               a second, competing anchor directly under the graphic. */}
           <div className="mt-10 flex flex-wrap items-center justify-start gap-4">
               <CtaPill
-                href="https://near.org/blog/making-near-protocol-post-quantum-safe"
+                href={EXTERNAL_LINKS.announcement}
                 size="sm"
                 tone="solid"
                 external
@@ -697,7 +675,7 @@ export default function ThreatSequence() {
                 How NEAR is preparing for the quantum era
               </CtaPill>
               <CtaPill
-                href="https://docs.near.org/protocol/accounts-contracts/account-model"
+                href={EXTERNAL_LINKS.accountModel}
                 size="sm"
                 tone="solid"
                 external
