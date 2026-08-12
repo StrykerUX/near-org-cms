@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { Toaster } from "sonner";
-import { kepler, keplerDisplay, montreal } from "@/lib/fonts";
+import { geistSans, kepler, keplerDisplay, montreal } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,16 +15,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montreal.variable} ${kepler.variable} ${keplerDisplay.variable} ${GeistSans.variable} h-full antialiased`}
+      className={`${montreal.variable} ${kepler.variable} ${keplerDisplay.variable} ${geistSans.variable} h-full antialiased`}
     >
       {/* Sin <head> propio: sus dos únicos hijos eran el preconnect y el
           stylesheet de Typekit, que servía Kepler. Ahora la serif es
           self-hosteada vía next/font/local (ver lib/fonts.ts), así que no hay
           ningún tercero en el camino crítico de render. */}
-      <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster position="bottom-center" />
-      </body>
+      {/* El <Toaster> de sonner vivía acá y se hidrataba en TODA página del
+          sitio para servir un único `toast()` del formulario de contacto, que
+          solo existe en app/(site). Ahora está en el layout de esa sección;
+          /admin ya montaba el suyo. */}
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

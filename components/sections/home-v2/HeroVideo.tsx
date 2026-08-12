@@ -274,14 +274,33 @@ export default function HeroVideo() {
       // escalones de QuantumBars.
       className="relative flex flex-col bg-cream text-foreground"
     >
-      {/* Sin `autoPlay`: es una textura conducida por el scroll. `preload=auto`
-          sí, porque hay que poder hacer seek desde el primer scroll. */}
+      {/* Sin `autoPlay`: es una textura conducida por el scroll.
+
+          `preload="metadata"` y no `auto`: el asset son 12.7MB y con `auto` el
+          navegador los baja ENTEROS antes de que el lector haya scrolleado un
+          píxel, compitiendo con las fuentes y el resto del hero por ancho de
+          banda. Con `metadata` baja la cabecera —suficiente para saber duración y
+          dimensiones, que es lo que el scrub necesita para armarse— y el resto lo
+          pide por rangos HTTP a medida que hace seek. Next sirve public/ con Range
+          en dev y en producción, y `videoScrub` ya nunca pide más allá de lo
+          descargado (su `bufferedUntil`), así que el peor caso es que los primeros
+          seeks se queden en el último frame disponible en vez de bloquear el
+          decoder.
+
+          El `poster` es el primer frame del propio clip, extraído con ffmpeg
+          (59KB). Dos cosas se arreglan con él: el hero ya no arranca vacío
+          esperando que el video decodifique —el poster ES lo que se va a ver, así
+          que el reemplazo es invisible—, y sobre todo el caso
+          `prefers-reduced-motion`, donde el bloque de scrub no corre, `onMeta`
+          nunca se ejecuta, nunca se pide un primer frame y el hero se quedaba en
+          NEGRO. */}
       <video
         data-hero-bg
         src="/prototype/v2/hero-descent.mp4"
+        poster="/prototype/v2/hero-descent-poster.jpg"
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         aria-hidden="true"
         className="pointer-events-none absolute left-0 top-0 z-0 w-full object-cover object-bottom"
         // El video llena el hero, y punto. Como el hero mide 100svh y el bloque

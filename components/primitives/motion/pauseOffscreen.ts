@@ -9,16 +9,31 @@ import { ScrollTrigger } from "./gsapClient";
  * Debe llamarse DENTRO de un gsap.context() para que el ScrollTrigger que
  * crea se revierta con el resto del scope.
  */
-export function onViewportToggle(trigger: Element, cb: (visible: boolean) => void) {
+export function onViewportToggle(
+  trigger: Element,
+  cb: (visible: boolean) => void,
+  /**
+   * Margen de anticipación, en viewports. 0 = avisa cuando la sección toca el
+   * borde (el default, y lo correcto para pausar un loop). Un valor mayor avisa
+   * ANTES, que es lo que hace falta cuando la reacción tarda: descargar un chunk,
+   * inicializar un contexto WebGL, construir una escena. Con 1 el aviso llega a
+   * un viewport de distancia.
+   */
+  lead = 0
+) {
+  const startPct = 100 + lead * 100;
+  const endPct = -lead * 100;
+
   // Estado inicial calculado a mano: ScrollTrigger no invoca onToggle al
   // crearse, y leer self.isActive antes del primer refresh no es confiable.
   const r = trigger.getBoundingClientRect();
-  cb(r.bottom > 0 && r.top < (window.innerHeight || 0));
+  const vh = window.innerHeight || 0;
+  cb(r.bottom > -lead * vh && r.top < vh + lead * vh);
 
   return ScrollTrigger.create({
     trigger,
-    start: "top bottom",
-    end: "bottom top",
+    start: `top ${startPct}%`,
+    end: `bottom ${endPct}%`,
     onToggle: (self) => cb(self.isActive),
   });
 }

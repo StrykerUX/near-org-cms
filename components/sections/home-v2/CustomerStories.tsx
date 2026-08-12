@@ -98,18 +98,45 @@ export default function CustomerStories() {
             </div>
           </div>
 
+          {/* Las seis imágenes viven en el DOM porque el crossfade las necesita
+              todas ahí, pero solo la ACTIVA y sus vecinas se descargan.
+
+              Los originales son PNG de 0.87 a 1.24MB — unos 6MB en total. Con las
+              seis pedidas a la vez, el navegador abría seis descargas y seis
+              decodificaciones en paralelo cuando la sección se acercaba, para
+              mostrar una. `loading="lazy"` no alcanzaba por sí solo: las seis están
+              en el mismo contenedor, así que entran al viewport juntas.
+
+              El criterio es la activa (`eager`, porque se va a ver ya) más la
+              anterior y la siguiente. Las otras tres van con `display: none`, que
+              es lo que impide la descarga: un `loading="lazy"` cuyo elemento no
+              entra al viewport no se pide. Al navegar de a un tab, la que entra ya
+              estaba descargada por ser vecina, así que el crossfade nunca espera
+              red. La vecindad es circular porque los logos permiten saltar del
+              último al primero. */}
           <div className="relative aspect-[8/5] w-full overflow-hidden rounded-md border border-border bg-muted">
-            {STORIES.map((story, i) => (
-              <Image
-                key={story.company}
-                src={story.image}
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                data-active={i === active}
-                className="object-cover opacity-0 transition-opacity duration-500 data-[active=true]:opacity-100"
-              />
-            ))}
+            {STORIES.map((story, i) => {
+              const distance = Math.min(
+                Math.abs(i - active),
+                // Circular: desde el último, el siguiente es el primero.
+                STORIES.length - Math.abs(i - active)
+              );
+              const wanted = distance <= 1;
+              return (
+                <Image
+                  key={story.company}
+                  src={story.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  loading={i === active ? "eager" : "lazy"}
+                  data-active={i === active}
+                  className={`object-cover opacity-0 transition-opacity duration-500 data-[active=true]:opacity-100 ${
+                    wanted ? "" : "hidden"
+                  }`}
+                />
+              );
+            })}
           </div>
         </div>
 

@@ -267,11 +267,17 @@ export default function OwnYourOwn() {
               // referencia.
               className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${card.tint} ${card.place}`}
             >
+              {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
+                  `width`, Next genera el srcset pero el navegador asume que ocupa
+                  el 100% del viewport y baja la variante más grande. La card vive
+                  en `lg:col-span-3` de un grid de 12, o sea ~24vw en desktop y
+                  ancho completo apilada en móvil. */}
               <Image
                 src={card.src}
                 alt=""
                 width={290}
                 height={267}
+                sizes="(min-width: 1024px) 24vw, 100vw"
                 className="block h-auto w-full rounded-[1.15rem]"
               />
               <div className="flex flex-col gap-3 px-3 py-7">

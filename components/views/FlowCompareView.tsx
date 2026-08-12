@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import UnicornScene from "unicornstudio-react/next";
+import dynamic from "next/dynamic";
 import Container from "@/components/primitives/Container";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { subscribePointer } from "@/components/primitives/motion/pointer";
 import { createFlowField, type FlowFieldColors } from "@/components/primitives/motion/flowField";
+
+// El SDK de Unicorn (912KB) en su propio chunk y no en el bundle de esta ruta.
+// Acá NO se gatea por visibilidad como en `sections/LatestUpdates`: el sentido de
+// esta página es ver las dos implementaciones lado a lado, así que la de Unicorn
+// tiene que estar desde el primer paint. Lo que se gana es que el chunk deje de
+// duplicarse por entrypoint.
+const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
+  ssr: false,
+});
 
 // Sandbox de comparación: el campo de flujo de este repo contra el mismo efecto
 // servido por el SDK de Unicorn Studio, al lado.

@@ -1,10 +1,32 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { ArrowRight } from "lucide-react";
-import UnicornScene, { type UnicornStudioScene } from "unicornstudio-react/next";
+import type { UnicornStudioScene } from "unicornstudio-react/next";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
+import { onViewportToggle } from "@/components/primitives/motion/pauseOffscreen";
+import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+
+// ── El SDK de Unicorn entra en su propio chunk, y solo si se llega a usar ─────
+//
+// `unicornstudio-react/next` embute el runtime completo de Unicorn Studio: 912KB
+// en disco. Con el import estático, ese peso entraba en el bundle de cliente de
+// TODA página que renderizara esta sección — y como también lo importa
+// `views/FlowCompareView`, el build terminaba con TRES chunks idénticos de 879KB,
+// uno por entrypoint.
+//
+// `next/dynamic` con `ssr: false` lo saca a un chunk aparte que se pide cuando el
+// componente se monta. Y el componente no se monta hasta que la sección se acerca
+// al viewport (ver `nearViewport` más abajo), así que en una visita que no llega
+// a scrollear hasta acá, no se descarga nunca.
+//
+// El `lazyLoad` del propio wrapper NO cubría esto: difiere la INICIALIZACIÓN de la
+// escena, no la descarga del SDK que la inicializa.
+const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
+  ssr: false,
+});
 
 // Sin datos reales (fuera de alcance de este draft): copy fijo. Si esta sección
 // se conecta al CMS más adelante, migra a PostCard/PostGrid
@@ -108,7 +130,7 @@ function useMouseOnlyOnHover(hovered: boolean) {
   }, []);
 }
 
-function PostCard({ post }: { post: (typeof POSTS)[number] }) {
+function PostCard({ post, ready }: { post: (typeof POSTS)[number]; ready: boolean }) {
   const [hovered, setHovered] = useState(false);
   const sceneRef = useMouseOnlyOnHover(hovered);
 
@@ -138,8 +160,11 @@ function PostCard({ post }: { post: (typeof POSTS)[number] }) {
         className="absolute inset-2.5 overflow-hidden rounded-[1.4rem]"
         style={{ backgroundImage: post.fallback }}
       >
+        {/* Hasta que `ready` no se enciende, lo que se ve es el gradiente de
+            `fallback` del contenedor de arriba — que es el mismo fallback que ya
+            cubría el caso "la escena no carga". */}
         <div className="absolute inset-0" aria-hidden="true">
-          <UnicornScene
+          {ready && <UnicornScene
             jsonFilePath={post.scene}
             width="100%"
             height="100%"
@@ -152,7 +177,7 @@ function PostCard({ post }: { post: (typeof POSTS)[number] }) {
             lazyLoad
             placeholderClassName="h-full w-full"
             sceneRef={sceneRef}
-          />
+          />}
         </div>
       </div>
 
@@ -202,8 +227,27 @@ export default function LatestUpdates() {
   // de Unicorn Studio, que trae su propio rAF por escena.
   const gridRef = useScrollReveal<HTMLDivElement>();
 
+  // Gate de descarga del SDK. Se enciende una sola vez, cuando la sección entra
+  // en el rango del trigger, y no se vuelve a apagar: desmontar las escenas al
+  // salir de vista significaría volver a inicializarlas al volver, que es más
+  // caro que dejarlas corriendo (y el runtime de Unicorn ya pausa las suyas).
+  const [ready, setReady] = useState(false);
+  const gateRef = useGsapContext<HTMLDivElement>((_self, scope) => {
+    if (ready) return;
+    // Un viewport de anticipación: tiempo para que el chunk baje y las tres
+    // escenas se inicialicen antes de que la sección se vea. Mismo criterio que
+    // el build diferido del word field.
+    onViewportToggle(
+      scope,
+      (visible) => {
+        if (visible) setReady(true);
+      },
+      1
+    );
+  }, []);
+
   return (
-    <section className="bg-cream text-foreground">
+    <section ref={gateRef} className="bg-cream text-foreground">
       <Container className="flex flex-col gap-20 py-28 md:gap-24 md:py-36">
         <h2 className="text-center text-h1 text-pretty">The latest from NEAR</h2>
 
@@ -223,7 +267,7 @@ export default function LatestUpdates() {
 
           <div ref={gridRef} className="grid grid-cols-1 gap-7 md:grid-cols-3">
             {POSTS.map((post, i) => (
-              <PostCard key={i} post={post} />
+              <PostCard key={i} post={post} ready={ready} />
             ))}
           </div>
         </div>

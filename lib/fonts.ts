@@ -1,5 +1,28 @@
 import localFont from "next/font/local";
 
+// ── Geist, la sans del ADMIN ─────────────────────────────────────────────────
+// Se declara acá y no se importa de `geist/font/sans` por una sola razón:
+// `preload: false`.
+//
+// El paquete `geist` exporta la fuente ya instanciada, sin opciones, así que su
+// loader emite `<link rel="preload" as="font">` en TODA página que tenga la
+// variable en el árbol — y la variable vive en el `<html>` del layout raíz. O sea
+// que cada página de marketing y cada post del blog precargaban 69KB de una
+// fuente que solo usa `.admin-wrapper` (ver app/globals.css). Declarándola con
+// next/font/local apuntando al mismo .woff2 del paquete, el `@font-face` sigue
+// disponible para /admin y el preload desaparece del camino crítico público.
+//
+// El precio es la ruta a node_modules, que es frágil si `geist` reorganiza su
+// dist. Si el build falla acá, es eso: comprobar
+// `node_modules/geist/dist/fonts/geist-sans/`.
+export const geistSans = localFont({
+  src: "../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+  variable: "--font-geist-sans",
+  display: "swap",
+  preload: false,
+  weight: "100 900",
+});
+
 // ── PP Neue Montreal, la sans del sistema ────────────────────────────────────
 // Los 4 archivos son subsets generados por scripts/fonts/build-webfonts.py, no
 // los del vendor: 195KB contra 324KB. Se descartan cirílico y griego, 204
@@ -70,6 +93,18 @@ export const montreal = localFont({
 // de compilación con su propio parser, que exige literales explícitos ("Font
 // loader values must be explicitly written literals") y revienta el build si ve
 // una referencia a una variable.
+// `preload: false` acá y NO en `keplerDisplay`, y la diferencia importa:
+//
+// El master Display es el que pinta `<Accent display>`, que está en el titular del
+// hero de las dos páginas del rebuild — o sea dentro del LCP. Precargarlo es
+// exactamente para lo que existe el preload.
+//
+// El master Subhead, en cambio, no aparece hasta la segunda sección
+// (`text-body-serif` en ProofMarquee) y de ahí hacia abajo. Precargarlo son 77KB
+// compitiendo por ancho de banda con el hero, para texto que el lector todavía no
+// ve. Sin preload, el navegador lo pide al descubrir el texto que lo usa; el
+// `display: "swap"` + `adjustFontFallback` de abajo es lo que evita que ese cambio
+// se vea como un salto de layout.
 export const kepler = localFont({
   src: [
     {
@@ -85,6 +120,7 @@ export const kepler = localFont({
   ],
   variable: "--font-kepler",
   display: "swap",
+  preload: false,
   fallback: ["ui-serif", "Georgia", "Times New Roman", "serif"],
   // Métricas del fallback ajustadas a la serif, no a Arial (el default de
   // next/font/local): con display:"swap" es lo que evita que el texto salte de
