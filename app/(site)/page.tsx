@@ -21,12 +21,31 @@ function kindOf(route: string) {
   return "Site";
 }
 
-const PAGES = ROUTES.filter((r) => r.route !== "/").map((r) => ({
-  href: r.route,
-  label: (r.nav !== false && r.nav?.label) || r.title,
-  description: r.description,
-  kind: kindOf(r.route),
-}));
+// Las tres páginas que son el trabajo en curso. Van primero y con más peso
+// visual; el resto es referencia. Es una lista a mano a propósito: "cuál
+// importa ahora" es una decisión editorial que cambia sola con el proyecto, y
+// no se puede derivar de la ruta ni del `page.meta.ts`.
+const FEATURED = [
+  "/prototype/homepage-v2",
+  "/prototype/protocol",
+  "/prototype/quantum-security",
+];
+
+const PAGES = ROUTES.filter((r) => r.route !== "/")
+  .map((r) => ({
+    href: r.route,
+    label: (r.nav !== false && r.nav?.label) || r.title,
+    description: r.description,
+    kind: kindOf(r.route),
+    featured: FEATURED.includes(r.route),
+  }))
+  .sort((a, b) => {
+    const rank = (href: string) => {
+      const i = FEATURED.indexOf(href);
+      return i === -1 ? FEATURED.length : i;
+    };
+    return rank(a.href) - rank(b.href);
+  });
 
 export default function HomePage() {
   return <HomeView pages={PAGES} />;
