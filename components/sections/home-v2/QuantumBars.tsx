@@ -72,6 +72,16 @@ const CHAR_STEP = 0.03;
 // ahí está el borde superior.
 const EXIT = { ...CASCADE, drop: 0 } as const;
 
+/**
+ * Aire mínimo entre el statement y el borde del gris, en unidades de `--u`.
+ *
+ * Solo se nota cuando el texto ya no entra centrado y queda apoyado contra un borde: sin
+ * este colchón la última línea toca exactamente el filo del gris y se lee como que se
+ * está cayendo de la sección. Con la franja holgada los topes no muerden y el centrado
+ * deja mucho más aire que esto, así que el número no compite con el centrado.
+ */
+const TEXT_MARGIN = 0.25;
+
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 export default function QuantumBars() {
@@ -279,9 +289,10 @@ export default function QuantumBars() {
         // Medido sobre el recorrido completo, contra la versión con rampa que había
         // antes: el pico de velocidad del texto baja de 3.5× a 1.4× la del scroll y el
         // peor salto entre píxeles contiguos de 1.914× a 0.251×.
+        const margin = TEXT_MARGIN * unitPx;
         let target = (seenTop + seenBottom) / 2 - stageH / 2;
-        target = bandTop + softFloor(target - bandTop, kSoft);
-        const lowest = bandBottom - stageH;
+        target = bandTop + margin + softFloor(target - bandTop - margin, kSoft);
+        const lowest = bandBottom - stageH - margin;
         target = lowest - softFloor(lowest - target, kSoft);
 
         setStageY(target - (trackTopDoc - scroll));
