@@ -166,6 +166,10 @@ export default function QuantumBars() {
         trackTopDoc = trackBox.top + window.scrollY;
         trackBottomDoc = trackTopDoc + trackBox.height;
         stageH = stage.offsetHeight;
+        // Lo que el CSS necesita para centrar el texto en su `top` sin conocer su alto.
+        // Va acá y no en un efecto aparte porque es la misma medida que ya se toma para
+        // el guard, y las dos tienen que salir del mismo layout.
+        scope.style.setProperty("--stage-half", `${stageH / 2}px`);
 
         natural = panels.map((panel) => panel.offsetHeight);
       };
@@ -214,18 +218,19 @@ export default function QuantumBars() {
         // `getBoundingClientRect` por frame, que sería un reflow forzado en el hot path.
         //
         //   · antes de pegarse va en su sitio de flujo, bajando con la página;
-        //   · pegado, su borde superior se queda en media pantalla;
+        //   · pegado, su borde superior se queda en la línea de aparcado;
         //   · al final lo empuja el fondo del track, que sí baja con la página.
         //
-        // El `-translate-y-1/2` del JSX no entra en esta cuenta —el navegador resuelve el
-        // sticky sobre la caja sin transformar— pero sí en dónde se PINTA, así que el
-        // fondo visible del texto queda media caja por debajo de su borde superior.
+        // La línea de aparcado es la misma que el `top` del CSS, y tiene que seguir
+        // siéndolo: si las dos se separan, el guard protege una posición donde el texto
+        // no está.
+        const parkY = 0.5 * viewportH - stageH / 2;
         const trackTopY = trackTopDoc - scroll;
         const stageTopY = Math.min(
-          Math.max(trackTopY, 0.5 * viewportH),
+          Math.max(trackTopY, parkY),
           trackBottomDoc - scroll - stageH
         );
-        const textFloor = stageTopY + stageH / 2;
+        const textFloor = stageTopY + stageH;
 
         for (let i = 0; i < panels.length; i++) {
           const ring = ringOf(i);
@@ -465,15 +470,24 @@ export default function QuantumBars() {
         </div>
       </div>
 
-      {/* El `paddingTop` son los 100svh del margen negativo y nada más: la colocación del
-          statement la resuelve el sticky de abajo, no el padding.
+      {/* Los 100svh del `paddingTop` compensan el margen negativo; el `u·0.5` de más es lo
+          que mantiene al statement POR DEBAJO de la juntura.
+
+          No es decorativo: sin ese aire el track arranca exactamente en la juntura, y como
+          el texto se pinta media caja por encima de su borde superior, terminaba
+          dibujándose ENCIMA del hero antes de que el gris llegara a taparlo. Mientras el
+          texto esté por debajo de la juntura siempre tiene gris detrás, porque los paneles
+          cubren de la juntura para abajo desde el primer frame.
 
           El de abajo es `u·1.5` y es la pista de despegue del retiro. No baja de ahí por
           composición, no por límite técnico: el guard de `apply` protege al texto solo,
           así que este número se puede mover mirando la página. */}
       <Container
         className="relative"
-        style={{ paddingTop: "100svh", paddingBottom: "calc(var(--u) * 1.5)" }}
+        style={{
+          paddingTop: "calc(100svh + var(--u) * 0.5)",
+          paddingBottom: "calc(var(--u) * 1.5)",
+        }}
       >
         {/* ── El track del statement ────────────────────────────────────────────
             El texto se queda QUIETO y centrado mientras el gris pasa por detrás, en vez
@@ -506,14 +520,21 @@ export default function QuantumBars() {
               la misma celda de grid: mismo string, mismo ancho, mismos quiebres
               de línea — es lo que garantiza que el brillo caiga sobre el glifo.
 
-              `top-[50svh]` deja el BORDE SUPERIOR a media pantalla y el
-              `-translate-y-1/2` lo sube media caja, así que lo que queda centrado es el
-              bloque de texto sin que nadie tenga que saber cuánto mide. El transform no
-              afecta al cálculo del sticky —el navegador lo resuelve sobre la caja sin
-              transformar— pero sí a lo que se pinta, que es lo que se quiere. */}
+              El centrado sale del `top`, no de un transform. La primera versión usaba
+              `top: 50svh` con `-translate-y-1/2`, y eso tiene un problema que no se ve
+              hasta que pasa: el transform mueve lo que se PINTA pero no la caja, así que
+              el texto aparecía media caja más arriba de donde el layout lo había puesto
+              —encima del hero— mientras el sticky seguía razonando sobre la caja.
+              Restando la media altura en el propio `top`, lo pintado y lo calculado son
+              la misma cosa.
+
+              `--stage-half` la escribe `measure` con la mitad del alto real del texto. El
+              fallback en 0 es para el caso sin JS: el texto queda colgando del medio en
+              vez de centrado, que se ve peor pero nunca se sale de su sitio. */}
           <div
             data-quantum="stage"
-            className="sticky top-[50svh] -translate-y-1/2 isolate mx-auto grid max-w-[64rem] px-10 text-center"
+            style={{ top: "calc(50svh - var(--stage-half, 0px))" }}
+            className="sticky isolate mx-auto grid max-w-[64rem] px-10 text-center"
           >
             <h2 data-quantum="line" className="text-h2 text-pretty [grid-area:1/1]">
               {STATEMENT}
