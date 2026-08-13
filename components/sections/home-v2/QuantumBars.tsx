@@ -488,13 +488,20 @@ export default function QuantumBars() {
 
             El alto del track es lo que dura la pausa: el texto se pega cuando su caja
             llega a media pantalla y se suelta cuando el fondo del track la alcanza, o
-            sea `alto del track − alto del texto`. Con `100svh` eso da ~930px a
-            2080×1329, que es casi exactamente el tramo en que el gris llena la pantalla.
+            sea `alto del track − alto del texto`. Con `50svh` eso da ~270px a 2080×1329.
+            Y ese número es el dial de TODA la sección, porque cada píxel de pausa cuesta
+            un píxel de alto: con `100svh` la pausa era de 930px y la sección medía
+            3100px, casi el doble de lo que mide con la pausa corta.
+
+            `min-height` y no `height`: en una ventana baja el texto puede medir más que
+            50svh, y con altura fija se saldría del track y el sticky quedaría inerte. Con
+            el mínimo, el track crece hasta el texto, la pausa se reduce a cero y el
+            statement simplemente desfila — que es la degradación correcta.
 
             OJO si alguien mueve esto: ningún ancestro puede tener `overflow` distinto de
             `visible` o el sticky deja de pegarse sin ningún error. Las barras tienen su
             `overflow-hidden`, pero son un HERMANO de este Container, no un ancestro. */}
-        <div data-quantum="track" style={{ height: "100svh" }}>
+        <div data-quantum="track" style={{ minHeight: "50svh" }}>
           {/* `isolate` acota el apilado de las dos capas de texto. Las dos ocupan
               la misma celda de grid: mismo string, mismo ancho, mismos quiebres
               de línea — es lo que garantiza que el brillo caiga sobre el glifo.
