@@ -53,6 +53,22 @@ import { BARS_STATEMENT as STATEMENT } from "@/components/sections/home-v2/homeV
 // que enciende.
 const CHAR_STEP = 0.03;
 
+// ── El retiro del borde inferior ─────────────────────────────────────────────
+//
+// Mismas perillas que la entrada salvo una: `drop = 0` hace que los cuatro anillos
+// arranquen en la MISMA línea —el fondo de la sección— en vez de escalonados. Eso es lo
+// que permite que la escalera se abra hacia afuera al salir, con los laterales primero,
+// que es el espejo exacto de lo que pasa arriba.
+//
+// Con la escalera de partida sí escalonada (que es lo que pone el layout) el orden se
+// invierte y no hay forma de arreglarlo con velocidades: el anillo central arranca 1.5·u
+// más arriba que el exterior —446px a 2080 de ancho— y los dos terminan en el mismo tope,
+// así que el exterior a lo sumo lo empata. Para adelantarlo tendría que pasar de largo, y
+// ahí está el borde superior.
+const EXIT = { ...CASCADE, drop: 0 } as const;
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
 export default function QuantumBars() {
   const bottomOffsets = stairOffsets(STAIR_SPAN);
 
@@ -65,12 +81,22 @@ export default function QuantumBars() {
       const stage = q("[data-quantum='stage']")[0];
       if (panels.length !== STAIR_COLUMNS || !stage) return;
 
-      // ── 1. Los paneles suben en cascada ───────────────────────────────────
+      // ── 1. Los paneles suben en cascada, y al salir se retiran igual ──────
       //
-      // `transformOrigin: bottom` es lo que hace que `scaleY` mueva SOLO el borde
-      // superior. El inferior se queda donde lo puso el layout, que es la escalera
-      // espejada de abajo — la parte del marco que nadie anima.
-      gsap.set(panels, { transformOrigin: "bottom", scaleY: 0 });
+      // Los DOS bordes se animan, así que hacen falta dos grados de libertad. Con
+      // `transformOrigin: top`, `y` coloca el borde superior y `scaleY` fija la distancia
+      // hasta el inferior. Las dos van al compositor y GSAP las compone en una sola
+      // matriz: son 14 escrituras por frame en vez de 7, sin tocar layout ni paint.
+      //
+      // La alternativa era `clip-path`, y está descartada por lo mismo que descartó al
+      // approach del tallado: no va al compositor, paga repintado por frame.
+      //
+      // `scaleY` puede pasar de 1 y no pasa nada: escalar un rectángulo de color plano no
+      // lo distorsiona. Hace falta que pueda, porque la caja de layout de cada panel
+      // termina en su peldaño (`bottom: u(offset)`) y el borde inferior arranca MÁS ABAJO
+      // que eso, en una línea recta al fondo de la sección.
+      gsap.set(panels, { transformOrigin: "top", y: 0, scaleY: 0 });
+      const setY = panels.map((panel) => gsap.quickSetter(panel, "y", "px") as (v: number) => void);
       const setScale = panels.map(
         (panel) => gsap.quickSetter(panel, "scaleY") as (v: number) => void
       );
@@ -82,55 +108,87 @@ export default function QuantumBars() {
       let unitPx = window.innerWidth / STAIR_COLUMNS;
       let viewportH = window.innerHeight;
       let seamDoc = 0;
-      let span = 1;
-      let seamY0 = 0;
-      /** Alto natural de cada panel, y cuánto de él cae por DEBAJO de la juntura. */
+      let sectionTopDoc = 0;
+      let sectionBottomDoc = 0;
+      /** Recorrido de la ENTRADA: dónde arranca y cuánto scroll dura. */
+      let inStart = 0;
+      let inSpan = 1;
+      /** Recorrido de la SALIDA, el retiro del borde inferior. */
+      let outStart = 0;
+      let outSpan = 1;
+      /** Alto natural de cada panel. Difiere por columna: su caja termina en su peldaño. */
       let natural: number[] = [];
-      let below: number[] = [];
 
-      const measure = (start: number, end: number) => {
+      const measure = () => {
         unitPx = window.innerWidth / STAIR_COLUMNS;
         viewportH = window.innerHeight;
         // La juntura está a `-marginTop` del top de la sección: el margen es exactamente
         // `-(100svh + 2px)`, así que de ahí sale el alto del hero sin buscarlo en el DOM.
         const seamOffset = -parseFloat(getComputedStyle(scope).marginTop || "0");
-        const sectionTopDoc = scope.getBoundingClientRect().top + window.scrollY;
+        const box = scope.getBoundingClientRect();
+        sectionTopDoc = box.top + window.scrollY;
+        sectionBottomDoc = sectionTopDoc + box.height;
         seamDoc = sectionTopDoc + seamOffset;
-        // El reloj deriva el recorrido de cada anillo de estas dos medidas en vez de
-        // llevarlo en constantes, y por eso sus velocidades significan lo mismo en
-        // cualquier pantalla. Salen del ScrollTrigger, no de un cálculo paralelo: si
-        // alguien cambia el `end` de abajo, el reloj se entera solo.
-        span = Math.max(1, end - start);
-        seamY0 = seamDoc - start;
+
+        // ENTRADA. Arranca con el top de la sección en el top del viewport, y dura el
+        // alto del hero menos media escalera: cuando la mitad de la figura salió por el
+        // techo, el recorrido terminó.
+        inStart = sectionTopDoc;
+        inSpan = Math.max(1, seamOffset - (unitPx * SCROLL_DEPTH) / 2);
+
+        // SALIDA. Los dos extremos son hitos reales, no números calibrados, y de ahí sale
+        // la garantía que importa: el statement NUNCA se queda sin marco gris por debajo.
+        //
+        //   · arranca cuando el fondo del statement cruza el top del viewport, o sea
+        //     cuando el texto ya salió de pantalla;
+        //   · termina con el fondo de la sección a un cuarto de viewport del techo, para
+        //     que el gesto se complete a la vista y no fuera de cuadro.
+        //
+        // Sin ese anclaje habría que limitar cuánto sube el borde, y el margen es
+        // ridículo: la columna central solo tiene `u·0.5` antes de morder el texto.
+        const stageBottomDoc = stage.getBoundingClientRect().bottom + window.scrollY;
+        outStart = stageBottomDoc;
+        outSpan = Math.max(1, sectionBottomDoc - 0.25 * viewportH - outStart);
+
         natural = panels.map((panel) => panel.offsetHeight);
-        below = natural.map((h) => h - seamOffset);
       };
 
-      const apply = (p: number, scroll: number) => {
-        const seamY = seamDoc - scroll;
-        const edges = cascadeEdges({
-          eased: p,
-          seamY,
-          seamY0,
-          span,
+      const apply = (scroll: number) => {
+        const sectionTopY = sectionTopDoc - scroll;
+
+        // El borde SUPERIOR: sube desde la juntura y tapa el hero.
+        const top = cascadeEdges({
+          eased: clamp01((scroll - inStart) / inSpan),
+          seamY: seamDoc - scroll,
+          seamY0: seamDoc - inStart,
+          span: inSpan,
           viewportH,
           unitPx,
           ...CASCADE,
         });
 
+        // El borde INFERIOR: quieto en el fondo de la sección hasta que arranca la salida,
+        // y ahí sube con la misma cascada. Antes de `outStart` el progreso es 0 y los
+        // cuatro anillos devuelven el fondo — o sea una línea recta, que es como se ve
+        // mientras la sección está en pantalla.
+        const bottom = cascadeEdges({
+          eased: clamp01((scroll - outStart) / outSpan),
+          seamY: sectionBottomDoc - scroll,
+          seamY0: sectionBottomDoc - outStart,
+          span: outSpan,
+          viewportH,
+          unitPx,
+          ...EXIT,
+        });
+
         for (let i = 0; i < panels.length; i++) {
           const ring = ringOf(i);
-          // El borde superior del panel tiene que caer en `edges[ring]`. Su borde
-          // inferior está fijo a `below[i]` píxeles por debajo de la juntura, así que el
-          // alto visible es la distancia entre los dos.
-          //
-          // El piso es una red por si alguien sube `CASCADE.drop`: con drop > 0 los
-          // anillos arrancan por debajo de la juntura y el panel podría dejar sin marco a
-          // la primera línea del statement, que entra a `u·0.5`. Con el `drop = 0` de hoy
-          // nunca se activa.
-          const floor = below[i] - 0.5 * unitPx;
-          const height = Math.max(floor, below[i] + (seamY - edges[ring]));
-          setScale[i](Math.max(0, height / natural[i]));
+          const t = top[ring];
+          // Los dos bordes no pueden cruzarse. Pasa al final del recorrido, cuando el de
+          // abajo alcanza al de arriba: a partir de ahí el panel mide 0, no negativo.
+          const b = bottom[ring] > t ? bottom[ring] : t;
+          setY[i](t - sectionTopY);
+          setScale[i]((b - t) / natural[i]);
         }
       };
 
@@ -141,26 +199,27 @@ export default function QuantumBars() {
         // función de anclaje acá porque su sección empezaba u·1.5 antes del final del
         // hero y su top ya estaba sobre el fold al cargar.
         start: "top top",
-        // El alto del hero menos media escalera: cuando la mitad de la figura salió por
-        // el techo, el recorrido terminó.
+        // UN solo trigger que cubre la entrada Y la salida, y `apply` deriva de `scroll`
+        // el progreso de cada tramo por su cuenta. Con dos triggers, el que estuviera
+        // fuera de rango dejaría de actualizar y su borde se quedaría clavado en el
+        // último valor escrito; así los dos bordes se recalculan en cada frame desde una
+        // sola fuente.
         end: () => {
-          const seamOffset = -parseFloat(getComputedStyle(scope).marginTop || "0");
-          return `+=${Math.max(
-            1,
-            seamOffset - ((window.innerWidth / STAIR_COLUMNS) * SCROLL_DEPTH) / 2
-          )}`;
+          const box = scope.getBoundingClientRect();
+          const bottomDoc = box.top + window.scrollY + box.height;
+          return `+=${Math.max(1, bottomDoc - 0.25 * window.innerHeight - (box.top + window.scrollY))}`;
         },
         scrub: true,
         invalidateOnRefresh: true,
         markers: DEBUG_MARKERS,
         onRefresh: (self) => {
-          measure(self.start, self.end);
-          apply(self.progress, self.scroll());
+          measure();
+          apply(self.scroll());
         },
-        onUpdate: (self) => apply(self.progress, self.scroll()),
+        onUpdate: (self) => apply(self.scroll()),
       });
-      measure(st.start, st.end);
-      apply(st.progress, st.scroll());
+      measure();
+      apply(st.scroll());
 
       // ── 2. Barrido luminoso sobre el párrafo ──────────────────────────────
       //
@@ -283,10 +342,14 @@ export default function QuantumBars() {
         // Cuánto sube el borde de esta columna por encima de la juntura en la figura
         // formada: `STAIR_SPAN·(3−anillo)/3` unidades, que es la escalera de siempre.
         const above = ((STAIR_SPAN * (3 - ringOf(i))) / 3) * unitPx;
-        const height = natural - seamOffset + above;
+        const top = seamOffset - above;
+        // El borde inferior se queda en su peldaño del layout, o sea `scaleY` cubre lo
+        // que va del borde superior al fondo de la caja. Sin salida que animar, la figura
+        // de reposo es la de siempre: escalera arriba, escalera espejada abajo.
         gsap.set(panel, {
-          transformOrigin: "bottom",
-          scaleY: Math.max(0, Math.min(1, height / natural)),
+          transformOrigin: "top",
+          y: top,
+          scaleY: Math.max(0, (natural - top) / natural),
         });
       });
     });
