@@ -258,31 +258,33 @@ export default function QuantumBars() {
         const kSoft = CASCADE.soft * unitPx;
         const seenTop = softFloor(bandTop, kSoft);
         const seenBottom = viewportH - softFloor(viewportH - bandBottom, kSoft);
-        const centered = (seenTop + seenBottom) / 2 - stageH / 2;
+        // El destino es el centro de lo que se VE, pero acotado al gris REAL —el sin
+        // recortar—, que es lo que garantiza que el texto nunca quede sobre crema.
+        //
+        // Los dos topes no son simétricos por capricho: el gris real se extiende fuera de
+        // pantalla por un lado distinto en cada mitad del recorrido. Al entrar sigue hacia
+        // abajo (la sección es más alta que el fold), y al salir sigue hacia arriba (ya
+        // tapó el hero). Acotando contra el gris real y no contra el visible, cuando el
+        // texto no entra en la parte visible se desborda SOLO hacia el lado que está
+        // fuera de cuadro, y ahí también hay gris.
+        //
+        // Acotar contra el visible es lo que rompía: al final del recorrido el texto
+        // quedaba pegado al borde superior y su última línea caía sobre el crema.
+        //
+        // Los dos van amortiguados por lo mismo que los recortes de arriba: un tope duro
+        // es un cambio de velocidad, y el texto lo acusa. `softFloor` devuelve el valor
+        // exacto en cuanto se aleja `kSoft` del tope, así que el centrado sigue siendo
+        // exacto salvo en la franja angosta donde el texto apenas entra.
+        //
+        // Medido sobre el recorrido completo, contra la versión con rampa que había
+        // antes: el pico de velocidad del texto baja de 3.5× a 1.4× la del scroll y el
+        // peor salto entre píxeles contiguos de 1.914× a 0.251×.
+        let target = (seenTop + seenBottom) / 2 - stageH / 2;
+        target = bandTop + softFloor(target - bandTop, kSoft);
+        const lowest = bandBottom - stageH;
+        target = lowest - softFloor(lowest - target, kSoft);
 
-        // Centrar solo tiene sentido si la franja da para contener el texto. Cuando el
-        // gris recién asoma por el fondo de la pantalla, su centro está abajo de todo y
-        // el texto —más alto que la franja— se saldría por los dos lados, apareciendo
-        // sobre el hero antes de tiempo. El suelo lo impide: el borde superior del texto
-        // no puede quedar por encima del borde superior del gris.
-        //
-        // El suelo muerde EXACTAMENTE cuando la franja es más baja que el texto, y en ese
-        // punto `centered` vale `seenTop`, así que las dos ramas se encuentran sin salto y
-        // no hace falta ninguna rampa entre ellas. Eso importa: la versión con rampa
-        // pagaba el centrado —hasta 189px de desvío cuando la franja era mediana— y
-        // encima disparaba el pico de velocidad, porque el peso de la mezcla cambiaba
-        // rápido justo cuando el destino estaba lejos.
-        //
-        // Va amortiguado por lo mismo que los recortes de arriba: el codo entre "pegado al
-        // borde" y "centrado" es un cambio de velocidad, y se nota. `softFloor` devuelve
-        // el valor exacto en cuanto se aleja `kSoft` del suelo, así que el centrado sigue
-        // siendo exacto salvo en la franja angosta donde el texto apenas entra.
-        //
-        // Medido sobre el recorrido completo, contra la versión con rampa: el pico de
-        // velocidad del texto baja de 3.5× a 1.4× la del scroll, el peor salto entre
-        // píxeles contiguos de 1.914× a 0.251×, y el desvío del centrado perfecto de
-        // 189px a 18px.
-        setStageY(seenTop + softFloor(centered - seenTop, kSoft) - (trackTopDoc - scroll));
+        setStageY(target - (trackTopDoc - scroll));
       };
 
       const st = ScrollTrigger.create({
