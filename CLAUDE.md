@@ -77,7 +77,12 @@ DATABASE_URL=           NEXTAUTH_URL=           AUTH_SECRET=
 S3_ENDPOINT=            S3_REGION=auto          S3_BUCKET=
 S3_ACCESS_KEY_ID=       S3_SECRET_ACCESS_KEY=   R2_PUBLIC_URL=
 RESEND_API_KEY=
+SITEPING_API_KEY=       REVIEW_ACCESS_SECRET=
 ```
+
+Las dos últimas son de los comentarios de revisión (ver `docs/siteping.md`).
+**En producción el arranque falla si falta `SITEPING_API_KEY`** — SitePing se
+niega a exponer PATCH/DELETE sin autenticar.
 
 
 ## Important Patterns
@@ -137,6 +142,13 @@ export { GET, POST } from "@near/cms-core/routes/api/posts/route";
 ## Auth & Roles
 
 JWT strategy, 30-day sessions. Roles: **ADMIN** (full access) · **EDITOR** (own posts + all reads) · **VIEWER** (own posts read-only).
+
+**Comentarios de revisión** — el equipo comenta sobre el sitio con anotaciones
+ancladas al DOM, vía un link de `/admin/feedback`. Montado sobre SitePing
+autohospedado. El endpoint público está cerrado por cookie firmada y la API key
+nunca llega al navegador: **antes de tocar `app/api/siteping/`,
+`app/api/admin/siteping/` o `lib/review-access.ts`, leer `docs/siteping.md`** —
+las tres piezas se sostienen entre sí.
 
 ## Incomplete Features
 

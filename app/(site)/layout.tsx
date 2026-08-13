@@ -2,6 +2,7 @@ import { Toaster } from "sonner";
 import BannerHost from "@near/cms-core/components/site/BannerHost";
 import LenisProvider from "@/components/site/providers/LenisProvider";
 import SiteFooter from "@/components/site/SiteFooter";
+import ReviewWidget from "@/components/site/ReviewWidget";
 import { getActiveBanners } from "@/lib/queries/banners";
 
 export const revalidate = 60;
@@ -20,6 +21,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           raíz se hidrataba también en /admin —que monta su propio Toaster— y en
           las rutas de /prototype, que no lo usan. */}
       <Toaster position="bottom-center" />
+      {/* Se auto-descarta salvo que haya cookie de revisión — ver ReviewWidget. */}
+      <ReviewWidget />
     </LenisProvider>
   );
 }
