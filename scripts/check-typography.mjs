@@ -57,7 +57,6 @@ const LEGACY = new Set([
   "components/sections/PageHero.tsx",
   "components/sections/PostCard.tsx",
   "components/sections/EmptyState.tsx",
-  "components/views/HomeView.tsx",
   // /prototype y /prototype/components (la landing anterior al homepage)
   "components/sections/CompanyGrid.tsx",
   "components/sections/ProductStage.tsx",
