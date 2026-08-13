@@ -9,9 +9,9 @@ import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { PROOF_STEPS as STEPS } from "@/components/sections/home-v2/homeV2Content";
 
-// Stepper de 5 pruebas. Misma mecánica que components/sections/ProofStats.tsx
-// —sticky de CSS y un ScrollTrigger de SOLO LECTURA, nunca `pin: true`; el
-// porqué está documentado ahí— con tres diferencias de diseño del rebuild:
+// Stepper de 5 pruebas. Sticky de CSS y un ScrollTrigger de SOLO LECTURA, nunca
+// `pin: true`; el porqué está en components/sections/README.md. Tres
+// diferencias de diseño respecto del rebuild:
 //
 //  1. El carril alinea a la IZQUIERDA (todas las palabras arrancan en la misma
 //     X) en vez de a la derecha, y arranca en una fracción FIJA del viewport:
@@ -30,8 +30,7 @@ const DIM_WORD = 0.06;
 const RAIL_START = 0.78;
 
 // Tres copias del set (relleno · reales · relleno) para que nunca se vea un
-// extremo del carril. Solo el bloque del medio lleva `data-word`. Ver el
-// comentario largo de ProofStats.tsx.
+// extremo del carril. Solo el bloque del medio lleva `data-word`.
 const RAIL_COPIES = [-1, 0, 1];
 
 export default function ProofStepper() {

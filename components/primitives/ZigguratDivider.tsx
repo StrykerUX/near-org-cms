@@ -5,8 +5,8 @@ import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
 
-// Divisor decorativo de "escalera" entre secciones — draft del prototipo
-// "homepage" (/prototype/homepage), estimado de la captura compartida.
+// Divisor decorativo de "escalera" entre secciones — nació con el draft de
+// homepage, estimado de la captura compartida.
 // Alturas por columna via `style` inline, nunca clases Tailwind dinámicas
 // (mismo criterio que Container.tsx). Colores también via `style`: son
 // valores runtime arbitrarios (tokens del tema o hex directo), no hay forma

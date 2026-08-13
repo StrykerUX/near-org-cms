@@ -19,6 +19,13 @@ una vez por entrypoint que lo importa estáticamente: `sections/LatestUpdates.ts
 (consumido por `PrototypeHomepageView` y `HomepageV2View`) y
 `views/FlowCompareView.tsx`.
 
+> **Nota posterior al baseline.** Dos de esos tres entrypoints ya no existen:
+> `PrototypeHomepageView` y `FlowCompareView` se borraron al podar las páginas
+> de concepto, así que hoy el SDK lo importa un solo entrypoint
+> (`HomepageV2View`). La medición de arriba queda tal cual — es el registro de
+> `4fbd24d`, no el estado actual —, pero cualquier comparación contra ella tiene
+> que descontar esa diferencia antes de atribuirle la mejora al refactor.
+
 ## Fuentes
 
 **9 `<link rel="preload" as="font">` = 427 KB en TODA página**, idéntico en

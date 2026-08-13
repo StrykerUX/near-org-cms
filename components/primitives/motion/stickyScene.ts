@@ -49,7 +49,7 @@ export function enableScene(host: HTMLElement, name: string): () => void {
  * - **Nunca `pin: true`.** El pin-spacer que inserta pelea con Lenis, realimenta
  *   el `ResizeObserver` de `PrototypeMotionProvider` y deja spacers fantasma bajo
  *   StrictMode. El recorrido se declara en CSS y acá solo se LEE. El razonamiento
- *   largo está en `components/sections/ProofStats.tsx`.
+ *   largo está en `components/sections/README.md`.
  * - `invalidateOnRefresh` es obligatorio si algún valor del track se calcula con
  *   una función (`() => window.innerHeight * 0.055`): sin él, GSAP cachea el
  *   resultado del primer cálculo y la escena queda medida contra el viewport que

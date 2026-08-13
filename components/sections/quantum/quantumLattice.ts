@@ -15,7 +15,7 @@ import { deviceRatio } from "@/components/primitives/motion/dpr";
 //
 // It opens no requestAnimationFrame of its own for the animated case: it hooks
 // into `gsap.ticker`, the same rAF that already drives Lenis and the page's
-// ScrollTriggers (same call as `primitives/motion/flowField.ts`).
+// ScrollTriggers (same call as `primitives/motion/glyphShine.ts`).
 //
 // ── How the frame is spent ───────────────────────────────────────────────────
 // Measured on a 1512×520 field (208 nodes, 357 segments), comparing the previous

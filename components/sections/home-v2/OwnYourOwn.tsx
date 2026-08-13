@@ -32,7 +32,7 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-v2/homeV
 // navegador solo. Mover una card es cambiar su `margin-top` acá abajo.
 //
 // ── Por qué sticky y no `pin: true` ────────────────────────────────────────
-// Regla del repo; el razonamiento largo está en components/sections/ProofStats.tsx.
+// Regla del repo; el razonamiento largo está en components/sections/README.md.
 // El título es un item del grid que abarca TODAS las filas (`grid-row: 1/-1`) y
 // se pega dentro de esa celda, así que se queda centrado durante todo el
 // recorrido de las cards sin necesitar una pista de altura declarada.

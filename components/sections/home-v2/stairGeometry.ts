@@ -9,9 +9,10 @@
 // Salió del laboratorio de `/prototype/descent`, que existió para resolver un defecto
 // concreto: que lo primero que se veía al scrollear era una barra gris plana en vez de
 // una escalera. Doce rutas y dos generaciones de approaches después, lo que ganó está
-// acá. El catálogo de lo que se probó y por qué falló sigue en
-// `components/sections/lab/README.md`, que es el sitio para mirar antes de proponer un
-// cambio de ritmo — lo más probable es que ya se haya intentado.
+// acá. El laboratorio ya se retiró: el catálogo de lo que se probó y por qué falló está
+// en el historial de git (`components/sections/lab/README.md`, hasta el commit que podó
+// las páginas de concepto). Vale la pena mirarlo antes de proponer un cambio de ritmo —
+// lo más probable es que ya se haya intentado.
 //
 // ── Los dos hallazgos que hay que conocer antes de tocar esto ────────────────
 //

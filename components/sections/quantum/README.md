@@ -124,7 +124,7 @@ dark sections. Three real differences is a different component.
 The original pins the threat scene for `innerHeight * 1.8`. This repo forbids the
 pin: the pin-spacer fights Lenis, feeds back into `PrototypeMotionProvider`'s
 `ResizeObserver`, and leaves ghost spacers under StrictMode. The full reasoning
-lives in `../ProofStats.tsx`.
+lives in [`../README.md`](../README.md).
 
 Here the travel is **declared** in CSS (`--travel: 196svh`) and the track height
 derives from it, so nothing needs measuring. The read-only ScrollTrigger runs

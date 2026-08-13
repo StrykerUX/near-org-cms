@@ -15,7 +15,7 @@ export type ShineFieldProps = {
   name?: string;
 };
 
-// Campo de email con el mismo glyph-shine que QuantumRevealHeading: un brillo
+// Campo de email con glyph-shine: un brillo
 // WebGL2 recortado a la silueta exacta de los glifos.
 //
 // ── Por qué hay un overlay de texto ────────────────────────────────────────

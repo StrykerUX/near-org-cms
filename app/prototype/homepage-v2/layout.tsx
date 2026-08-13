@@ -1,6 +1,6 @@
 import PrototypeMotionProvider from "@/components/site/providers/PrototypeMotionProvider";
 
-// Mismo criterio que app/prototype/homepage/layout.tsx: el provider va acá y no
+// Mismo criterio que app/prototype/quantum-security/layout.tsx: el provider va acá y no
 // en app/prototype/, para que /prototype y /prototype/components —rutas
 // hermanas, no hijas— sigan sin Lenis ni ScrollTrigger.refresh().
 //

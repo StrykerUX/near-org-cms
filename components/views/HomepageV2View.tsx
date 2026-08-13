@@ -7,7 +7,7 @@ import ProofStepper from "@/components/sections/home-v2/ProofStepper";
 import BelongsNewsletter from "@/components/sections/home-v2/BelongsNewsletter";
 import CustomerStories from "@/components/sections/home-v2/CustomerStories";
 
-// Cuatro secciones se COMPARTEN con /prototype/homepage en vez de duplicarse:
+// Cuatro secciones se toman del catálogo compartido en vez de duplicarse:
 // el rebuild las dejó exactamente iguales, así que una copia en home-v2/ sería
 // dos archivos idénticos divergiendo en silencio. Si alguna diverge, se copia a
 // home-v2/ EN ESE MOMENTO — ver components/sections/home-v2/README.md.

@@ -25,8 +25,8 @@ const GRADIENT_BY_ROLE = {
 } as const;
 
 export default function NearStack() {
-  // `active` es estado de React y no una variable del closure (como sí lo es en
-  // ProofStats): acá lo consumen cuatro cosas del JSX —el body abierto, el color
+  // `active` es estado de React y no una variable del closure: acá lo consumen
+  // cuatro cosas del JSX —el body abierto, el color
   // del label, el gate del hover y el estado de cada pieza del SVG—, y
   // mantenerlo imperativo obligaría a duplicar toda esa lógica en tweens.
   // Cambia 5 veces por pasada de scroll, así que el costo es irrelevante.
