@@ -178,8 +178,14 @@ export default function OwnYourOwn() {
   });
 
   return (
-    // z-[1]: esta sección pasa POR ENCIMA de las barras de QuantumBars, que
-    // vienen antes en el documento y montan sobre el hero.
+    // z-[1]: por DEBAJO de las barras de QuantumBars, que son `z-[2]` y vienen antes en
+    // el documento. Acá decía lo contrario —"pasa POR ENCIMA"— y es al revés: si algo de
+    // las barras invade este territorio, las barras ganan.
+    //
+    // Hoy no se nota porque el `overflow-hidden` de QuantumBars las acota a su propia
+    // caja y las dos secciones no se solapan (son hermanas en flujo normal, sin margen
+    // negativo entre ellas). Pero el borde inferior del gris ahora se anima, así que
+    // cualquiera que toque esa zona necesita el orden correcto para razonar.
     //
     // Nada de overflow-hidden en ningún ancestro: convertiría a este elemento en
     // el contenedor de scroll del título sticky y dejaría de pegarse, en
