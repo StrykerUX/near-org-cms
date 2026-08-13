@@ -41,6 +41,12 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-v2/homeV
 // Lo que importa es la distancia a 1, no el valor: una card en 1 iría clavada
 // al scroll y no se desviaría nada.
 //
+// Esa convención —pedir la velocidad en múltiplos de la del scroll y no en px— es la
+// que después se formalizó en `primitives/motion/velocityRamp.ts`, y esta sección es
+// el precedente que cita. No usa el helper y no hace falta que lo use: acá el perfil
+// es un `sine.in`/`sine.out` de ida y vuelta que ya se ve bien, y `hermiteRamp` sirve
+// para el caso distinto de varios elementos que tienen que alcanzarse entre sí.
+//
 // Estas están acercadas respecto a las del original ([0.9, 1.5, 1.56, 1.6]).
 // Ahí la primera se separaba 54px de su sitio y la última 324 — seis veces más,
 // y la primera se leía como si no participara. Ahora el rango va de 119 a 270px
