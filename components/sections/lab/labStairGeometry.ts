@@ -4,6 +4,12 @@
 // que el resto de `sections/lab/`. Lo que se lleve a producción cuando gane un
 // approach es el mecanismo, no este archivo.
 //
+// Lo que sí salió ya de acá son las dos piezas que NO son geometría del descenso:
+// `softFloor` y `hermiteRamp` viven en `components/primitives/motion/`, porque son
+// matemática de animación que otras escenas del sitio también necesitaban —tres la
+// habían reinventado por su cuenta— y no tenían dónde buscarla. Lo que queda en este
+// archivo es lo específico: siete columnas, cuatro anillos y una juntura.
+//
 // ── El hallazgo que motiva este módulo ───────────────────────────────────────
 // `QuantumBars` dibuja cada columna con TRES piezas: el escalón de arriba
 // (`top: u·offset`, alto `u·height`), el bloque uniforme (`u·1.5` a `bottom u·1.5`)
@@ -21,6 +27,9 @@
 // (`stairOffsets`) y muevan el problema a otro lado: C retima el crecimiento para
 // que la silueta sea proporcional en todo instante, B deja la reja quieta y anima el
 // recorte de la imagen.
+
+import { hermiteRamp } from "@/components/primitives/motion/velocityRamp";
+import { softFloor } from "@/components/primitives/motion/softFloor";
 
 export const STAIR_COLUMNS = 7;
 
@@ -417,26 +426,6 @@ export const CASCADE = {
   settle: 0.25,
 } as const;
 
-/**
- * Piso amortiguado: `max(x, 0)` con los últimos `k` píxeles redondeados.
- *
- * Es C¹ en los dos empalmes —en `x = k` vale `k` con derivada 1, en `x = −k` vale 0 con
- * derivada 0— así que la VELOCIDAD del borde llega a cero de forma continua. Esa
- * continuidad es todo el efecto: un `Math.max` tiene un salto de velocidad en el codo y
- * eso es exactamente lo que se lee como frenazo.
- *
- * Es una parábola y no un softplus a propósito: llega a cero EXACTO en vez de acercarse
- * asintóticamente (que dejaría un borde de gris medio píxel abierto para siempre), no
- * tiene `exp` que pueda desbordar, y cuesta dos comparaciones y una multiplicación.
- */
-export function softFloor(x: number, k: number): number {
-  if (k <= 0) return x > 0 ? x : 0;
-  if (x >= k) return x;
-  if (x <= -k) return 0;
-  const t = x + k;
-  return (t * t) / (4 * k);
-}
-
 export type CascadeInput = {
   /** Progreso pasado por `?ease=`, en [0,1]. Es el reloj de los ANILLOS. */
   eased: number;
@@ -523,9 +512,6 @@ export function cascadeEdges(input: CascadeInput): number[] {
 
   const k = Math.max(0, soft) * unitPx;
   const floorY = line * viewportH;
-  const rest = Math.max(0, Math.min(1, settle));
-  // El techo de la pendiente inicial que hace imposible que `g'` se vuelva negativa.
-  const maxSlope = 3 - 2 * rest;
   const last = STAIR_RINGS - 1;
 
   const edges: number[] = new Array(STAIR_RINGS);
@@ -541,13 +527,14 @@ export function cascadeEdges(input: CascadeInput): number[] {
     // que ya lo arrastra el scroll.
     const budget = Math.max(1, seamY0 - span * landAt + startPx + k - floorY);
     const v = fast + ((slow - fast) * ring) / last;
-    const m0 = Math.min(maxSlope, Math.max(0, (span * (v - 1) * win) / budget));
+    // De "entrar a `v` veces la velocidad del scroll" a la pendiente que pide
+    // `hermiteRamp`. La conversión vive acá y no en el helper porque depende del
+    // recorrido concreto de este anillo; ver la nota de `velocityRamp.ts`. El clamp
+    // que garantiza la monotonía lo aplica el helper.
+    const g = hermiteRamp((span * (v - 1) * win) / budget, settle);
 
-    const t = Math.min(1, Math.max(0, (eased - startAt) / win));
-    // La cúbica en forma de Horner: `m0·t + A·t² + B·t³` con dos multiplicaciones.
-    const g = t * (m0 + t * (3 - 2 * m0 - rest + t * (m0 + rest - 2)));
-
-    edges[ring] = floorY + softFloor(seamY + startPx - budget * g - floorY, k);
+    const t = (eased - startAt) / win;
+    edges[ring] = floorY + softFloor(seamY + startPx - budget * g(t) - floorY, k);
   }
   return edges;
 }

@@ -119,6 +119,8 @@ para dos formas de uso (timeline propia vs. reveal genérico por `data-reveal`).
 | Escribir texto letra a letra | `staggerChars()` |
 | Un `<video>` conducido por scroll | `createVideoScrub()` |
 | Un canvas | `deviceRatio()` para el buffer, `onViewportToggle()` de `pauseOffscreen` para no dibujar fuera de vista, y colgarse de `gsap.ticker` — **nunca** un `requestAnimationFrame` propio |
+| Algo que llega a un tope y hay que VERLO llegar | `softFloor()` — amortigua el último tramo con velocidad continua. `Math.max` corta la velocidad en el codo y eso es lo que se lee como golpe. No para clamps de seguridad, que nadie mira |
+| Varios elementos sobre el mismo progreso con velocidades distintas | `hermiteRamp(entry, settle)` — se le piden las dos velocidades y devuelve la única cúbica que las cumple. Pedilas en **múltiplos de la del scroll**: un elemento en una página que scrollea ya va a 1× sin animarse |
 | Desorden que tiene que sobrevivir un rebuild | `createSeededRandom()` |
 | Un color que va a animarse | Literal, nunca `var(--token)` — GSAP interpola colores, no declaraciones. Si lo animan dos escenas, va a `motionColors.ts` |
 
