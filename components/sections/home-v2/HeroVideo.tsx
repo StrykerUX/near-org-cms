@@ -12,14 +12,15 @@ import { HERO_UNIT } from "@/components/sections/home-v2/heroGeometry";
 // El encastre entre el hero y QuantumBars sale de una sola unidad: el ancho de
 // una de las 7 columnas de la escalera.
 //
-//   alto del hero  = 100svh          (el hero llena la pantalla)
-//   alto del video = 100%            (el video llena el hero)
-//   top de QuantumBars = −u·1.75     (monta sobre el final del hero)
+//   alto del hero  = 100svh              (el hero llena la pantalla)
+//   alto del video = 100%                (el video llena el hero)
+//   top de QuantumBars = −u·1.5 − 2px    (monta sobre el final del hero)
 //
-// De ahí, el bloque sólido de las barras arranca en `100svh − u·0.25`, o sea
-// u·0.25 ANTES de que el video termine: el gris tapa esa franja y la imagen
-// muere por debajo de la escalera sin dejar juntura visible. En cualquier
-// ventana, sin medir nada.
+// De ahí, el bloque sólido de las barras arranca en `100svh − 2px`: el margen
+// negativo sube la sección u·1.5 y el bloque vive a `top: u·1.5` dentro de ella,
+// así que los dos bordes coinciden justo en la juntura y la imagen muere por
+// debajo de la escalera sin dejar franja visible. En cualquier ventana, sin medir
+// nada. Los 2px son costura antisubpíxel, no un solape de diseño.
 //
 // ── Por qué NO se replica la fórmula del original ────────────────────────────
 // El HTML de referencia usa `100vh − u·1.75` con un piso de 760px, y el video a
