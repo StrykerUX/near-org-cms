@@ -153,7 +153,24 @@ no toca.
 | [`descentCurves.ts`](./descentCurves.ts) | Las curvas de la primera generación, con sus medidas. |
 | [`DescentDebug.tsx`](./DescentDebug.tsx) | El HUD. |
 
-## Lo que falta decidir
+## Ganó `paneles`, y ya está en producción
 
-**Ningún approach está elegido para producción todavía.** Ver la entrada del laboratorio
-en [`docs/pendientes.md`](../../../docs/pendientes.md).
+El mecanismo se portó a `home-v2/`: la forma de la escalera y el reloj de la cascada
+viven en [`home-v2/stairGeometry.ts`](../home-v2/stairGeometry.ts) y los consume
+`QuantumBars`. Este módulo los reexporta para que las rutas del lab sigan funcionando
+sin cambiar de import.
+
+Dos consecuencias que conviene tener presentes al usar el laboratorio ahora:
+
+- **`real` y `zocalo` ya no muestran "el antes".** Importan `HeroVideo` y `QuantumBars`
+  de producción, así que desde el puerto muestran el después. El mecanismo viejo —tres
+  piezas por columna, velocidad única, frenazo contra el borde— solo existe en el
+  historial de git. Está anotado como cola en
+  [`docs/pendientes.md`](../../../docs/pendientes.md).
+- **`paneles` sigue usando `drop = 0.5`** por su defecto heredado de `CARVE`, mientras
+  que producción usa `0`. Es a propósito: `/talla` necesita el excedente de verdad y las
+  dos rutas comparten hero. Para ver lo que hace producción, `?drop=0`.
+
+Lo que queda vivo acá es la comparación entre mecanismos de PINTADO (`talla` contra
+`paneles`), que sigue siendo la pregunta abierta si alguna vez hay que revisar el coste
+de paint del `clip-path`.
