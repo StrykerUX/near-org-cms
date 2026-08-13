@@ -83,7 +83,8 @@ export default function QuantumBars() {
     mm.add(MQ.motion, () => {
       const panels = q("[data-qbar-col]");
       const stage = q("[data-quantum='stage']")[0];
-      if (panels.length !== STAIR_COLUMNS || !stage) return;
+      const track = q("[data-quantum='track']")[0];
+      if (panels.length !== STAIR_COLUMNS || !stage || !track) return;
 
       // ── 1. Los paneles suben en cascada, y al salir se retiran igual ──────
       //
@@ -120,8 +121,10 @@ export default function QuantumBars() {
       /** Recorrido de la SALIDA, el retiro del borde inferior. */
       let outStart = 0;
       let outSpan = 1;
-      /** Fondo del statement. El borde inferior no puede subir por encima de acá. */
-      let textBottomDoc = 0;
+      /** El track del statement y el alto del texto: de acá sale dónde está el texto. */
+      let trackTopDoc = 0;
+      let trackBottomDoc = 0;
+      let stageH = 0;
       /** Alto natural de cada panel. Difiere por columna: su caja termina en su peldaño. */
       let natural: number[] = [];
 
@@ -159,7 +162,11 @@ export default function QuantumBars() {
         if (outStart < inStart + inSpan) outStart = inStart + inSpan;
         outSpan = Math.max(1, sectionBottomDoc - 0.25 * viewportH - outStart);
 
-        textBottomDoc = stage.getBoundingClientRect().bottom + window.scrollY;
+        const trackBox = track.getBoundingClientRect();
+        trackTopDoc = trackBox.top + window.scrollY;
+        trackBottomDoc = trackTopDoc + trackBox.height;
+        stageH = stage.offsetHeight;
+
         natural = panels.map((panel) => panel.offsetHeight);
       };
 
@@ -195,14 +202,30 @@ export default function QuantumBars() {
         // subir por encima de esta línea: si lo hiciera, el texto se quedaría sin marco
         // gris por debajo y quedaría medio sobre gris y medio sobre crema.
         //
-        // Con los valores de hoy el guard NUNCA se activa —hay `u·1.5` de aire y el anillo
-        // exterior solo se retira 436px de los 446 disponibles—, y esa holgura de 10px es
-        // justamente el problema: es una calibración, no una garantía. Bajar el
-        // `paddingBottom` del Container sin tocar nada más rompería el marco en silencio y
-        // solo en algunos viewports, que es el modo de fallo que este archivo ya sufrió
-        // con la juntura de arriba. Con el guard puesto, el aire de abajo vuelve a ser una
+        // Es un guard y no una calibración a propósito. El aire de abajo estuvo a 10px de
+        // que el borde se comiera el texto, y ese tipo de número se rompe en silencio y
+        // solo en algunos viewports — el modo de fallo que este archivo ya sufrió con la
+        // juntura de arriba. Con el guard puesto, el aire de abajo vuelve a ser una
         // decisión de composición libre.
-        const textFloor = textBottomDoc - scroll;
+        //
+        // El texto está PEGADO, así que su posición no se puede cachear: mientras el
+        // sticky aguanta, se queda quieto en pantalla mientras el documento se mueve por
+        // detrás. Se reproduce la cuenta del navegador en vez de preguntársela con un
+        // `getBoundingClientRect` por frame, que sería un reflow forzado en el hot path.
+        //
+        //   · antes de pegarse va en su sitio de flujo, bajando con la página;
+        //   · pegado, su borde superior se queda en media pantalla;
+        //   · al final lo empuja el fondo del track, que sí baja con la página.
+        //
+        // El `-translate-y-1/2` del JSX no entra en esta cuenta —el navegador resuelve el
+        // sticky sobre la caja sin transformar— pero sí en dónde se PINTA, así que el
+        // fondo visible del texto queda media caja por debajo de su borde superior.
+        const trackTopY = trackTopDoc - scroll;
+        const stageTopY = Math.min(
+          Math.max(trackTopY, 0.5 * viewportH),
+          trackBottomDoc - scroll - stageH
+        );
+        const textFloor = stageTopY + stageH / 2;
 
         for (let i = 0; i < panels.length; i++) {
           const ring = ringOf(i);
@@ -282,11 +305,19 @@ export default function QuantumBars() {
         gsap.set(shineLine, { opacity: 1 });
         gsap.set(shine.chars, { opacity: 0 });
 
+        // El trigger es el TRACK y no el statement, aunque el barrido sea del statement.
+        // Un elemento pegado es un mal trigger: ScrollTrigger mide su posición en el
+        // refresh, y si ese refresh cae mientras está pegado —un resize a mitad de la
+        // sección— mide la posición PEGADA y el recorrido queda corrido. El track es un
+        // elemento de flujo normal y mide siempre lo mismo.
+        //
+        // El rango llega hasta `bottom 80%`, que es justo cuando el sticky se suelta: el
+        // barrido termina con el texto todavía quieto, y recién después se va.
         const sweep = gsap.timeline({
           scrollTrigger: {
-            trigger: stage,
+            trigger: track,
             start: "top 80%",
-            end: "bottom 45%",
+            end: "bottom 80%",
             scrub: 0.5,
             markers: DEBUG_MARKERS,
           },
@@ -434,47 +465,66 @@ export default function QuantumBars() {
         </div>
       </div>
 
-      {/* El aire vertical se mide en `--u`: escala con el ancho de columna, así la caja
-          de texto queda siempre a la misma distancia proporcional de los escalones — que
-          es lo que la mantiene centrada dentro del marco de barras a cualquier ancho.
-          El `paddingTop` incluye los 100svh del margen negativo, así que la primera línea
-          sigue cayendo a `u·0.5` por debajo de la juntura, igual que antes.
+      {/* El `paddingTop` son los 100svh del margen negativo y nada más: la colocación del
+          statement la resuelve el sticky de abajo, no el padding.
 
-          El de abajo es `u·1.5` y no `u·2` porque era el bloque vacío más grande de la
-          sección: con `u·2` había ~990px de scroll —casi un viewport— en los que la figura
-          no se movía y la pantalla era gris liso. No baja de ahí por composición, no por
-          límite técnico: el guard de `apply` protege al texto solo, así que este número
-          se puede mover mirando la página. */}
+          El de abajo es `u·1.5` y es la pista de despegue del retiro. No baja de ahí por
+          composición, no por límite técnico: el guard de `apply` protege al texto solo,
+          así que este número se puede mover mirando la página. */}
       <Container
         className="relative"
-        style={{
-          paddingTop: "calc(100svh + var(--u) * 0.5)",
-          paddingBottom: "calc(var(--u) * 1.5)",
-        }}
+        style={{ paddingTop: "100svh", paddingBottom: "calc(var(--u) * 1.5)" }}
       >
-        {/* `isolate` acota el apilado de las dos capas de texto. Las dos ocupan
-            la misma celda de grid: mismo string, mismo ancho, mismos quiebres
-            de línea — es lo que garantiza que el brillo caiga sobre el glifo. */}
-        <div
-          data-quantum="stage"
-          className="relative isolate mx-auto grid max-w-[64rem] px-10 text-center"
-        >
-          <h2 data-quantum="line" className="text-h2 text-pretty [grid-area:1/1]">
-            {STATEMENT}
-          </h2>
-          {/* `opacity-0` en la clase, y el JS lo enciende. Es la excepción a la
-              regla de no preesconder por CSS: esta capa no es contenido —el
-              contenido es el <h2> de arriba, que se ve entero sin JS— sino un
-              brillo decorativo. Sin este 0, un fallo del bundle o
-              reduced-motion dejarían el párrafo AMARILLO pegado encima del
-              negro, ilegible. */}
-          <p
-            data-quantum="shine"
-            aria-hidden="true"
-            className="pointer-events-none text-h2 text-sweep opacity-0 text-pretty [grid-area:1/1]"
+        {/* ── El track del statement ────────────────────────────────────────────
+            El texto se queda QUIETO y centrado mientras el gris pasa por detrás, en vez
+            de desfilar con la página. Antes cruzaba la pantalla sin detenerse y su
+            posición dependía de en qué punto del scroll mirabas: en la mitad del
+            recorrido caía en el tercio inferior, que es lo que se leía como "hay
+            demasiado gris encima".
+
+            `position: sticky` de CSS y NO `pin: true` de ScrollTrigger — regla del repo,
+            con el razonamiento largo en `ProofStats.tsx`: un pin inserta un pin-spacer
+            que pelea con Lenis, con el ResizeObserver del provider y con StrictMode.
+
+            El alto del track es lo que dura la pausa: el texto se pega cuando su caja
+            llega a media pantalla y se suelta cuando el fondo del track la alcanza, o
+            sea `alto del track − alto del texto`. Con `100svh` eso da ~930px a
+            2080×1329, que es casi exactamente el tramo en que el gris llena la pantalla.
+
+            OJO si alguien mueve esto: ningún ancestro puede tener `overflow` distinto de
+            `visible` o el sticky deja de pegarse sin ningún error. Las barras tienen su
+            `overflow-hidden`, pero son un HERMANO de este Container, no un ancestro. */}
+        <div data-quantum="track" style={{ height: "100svh" }}>
+          {/* `isolate` acota el apilado de las dos capas de texto. Las dos ocupan
+              la misma celda de grid: mismo string, mismo ancho, mismos quiebres
+              de línea — es lo que garantiza que el brillo caiga sobre el glifo.
+
+              `top-[50svh]` deja el BORDE SUPERIOR a media pantalla y el
+              `-translate-y-1/2` lo sube media caja, así que lo que queda centrado es el
+              bloque de texto sin que nadie tenga que saber cuánto mide. El transform no
+              afecta al cálculo del sticky —el navegador lo resuelve sobre la caja sin
+              transformar— pero sí a lo que se pinta, que es lo que se quiere. */}
+          <div
+            data-quantum="stage"
+            className="sticky top-[50svh] -translate-y-1/2 isolate mx-auto grid max-w-[64rem] px-10 text-center"
           >
-            {STATEMENT}
-          </p>
+            <h2 data-quantum="line" className="text-h2 text-pretty [grid-area:1/1]">
+              {STATEMENT}
+            </h2>
+            {/* `opacity-0` en la clase, y el JS lo enciende. Es la excepción a la
+                regla de no preesconder por CSS: esta capa no es contenido —el
+                contenido es el <h2> de arriba, que se ve entero sin JS— sino un
+                brillo decorativo. Sin este 0, un fallo del bundle o
+                reduced-motion dejarían el párrafo AMARILLO pegado encima del
+                negro, ilegible. */}
+            <p
+              data-quantum="shine"
+              aria-hidden="true"
+              className="pointer-events-none text-h2 text-sweep opacity-0 text-pretty [grid-area:1/1]"
+            >
+              {STATEMENT}
+            </p>
+          </div>
         </div>
       </Container>
     </section>
