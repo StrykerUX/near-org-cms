@@ -71,15 +71,15 @@ distinto del convexo.
 
 ---
 
-## El descenso del hero — DECIDIDO, quedan dos colas
+## El descenso del hero — DECIDIDO, queda una cola
 
 **Estado:** ganó `paneles` y ya está en producción (`QuantumBars` + el reloj de
-`home-v2/stairGeometry.ts`). El laboratorio sigue en pie como referencia.
+`home-v2/stairGeometry.ts`). El laboratorio se retiró; vive en el historial de
+git.
 
 El objetivo era que la escalera de `QuantumBars` no empezara siendo una barra gris
 plana. Tras dos intentos fallidos sobre la página real nació el laboratorio: doce
-rutas bajo `/prototype/descent`, catálogo en
-[`components/sections/lab/README.md`](../components/sections/lab/README.md).
+rutas bajo `/prototype/descent` con sus secciones en `components/sections/lab/`.
 
 Los tres candidatos finales, y por qué ganó el que ganó:
 
@@ -96,26 +96,14 @@ la imagen, así que precisa imagen debajo. En `paneles` el gris se mueve por enc
 hero y no hay nada que revelar. Con `drop = 0` la franja sin cubrir es 0.0px y el vídeo
 no crece ni un píxel — medido, la caja pasa de 2080×1168 a 2080×1019. Ver `36a09c3`.
 
-**Las dos colas que quedan:**
+**La cola que queda:**
 
-- **Las rutas de referencia del lab quedaron desfasadas.**
-  `/prototype/descent/real` y `/zocalo` importan `HeroVideo` y `QuantumBars` de
-  producción para mostrar "el antes". Ahora que producción cambió, `real` muestra el
-  después y ya no sirve de comparación. Hay que congelar una copia del mecanismo viejo
-  o retirar la ruta y confiar en el historial de git.
 - **`OwnYourOwn` pasa por encima de las barras** (`z-[1]`, ver su línea 175) y la
   sección de barras creció ~100svh de alto total al cambiar su margen negativo. El
   solape se ve bien en el navegador, pero conviene mirarlo con calma en varios tamaños
   de ventana antes de darlo por cerrado.
 
 ## Otros hilos abiertos
-
-**El blur de la reimplementación del flow field.** El efecto de referencia tiene
-un gaussiano separable de 4 pases con downsample a 0.25 y 0.5. No se implementó
-a propósito: ahí existe porque su fuente es un JPG con detalle real, y la base
-procedural sale suave por construcción. Agregarlo significaría meter FBOs y
-ping-pong en algo que hoy es un solo pase sin framebuffers. Revisable si al
-compararlos en `/prototype/flow-compare` se nota que falta suavidad.
 
 **Geist se precarga en todas las páginas públicas.** Son 68KB por página para
 una fuente que solo usa el admin: `GeistSans.variable` está en el `<html>` del

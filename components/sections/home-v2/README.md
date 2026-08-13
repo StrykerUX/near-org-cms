@@ -6,7 +6,7 @@ Port del rebuild de la homepage que llegó como paquete de "design canvas"
 Rige el contrato general de [`../README.md`](../README.md). Este archivo solo
 documenta lo que es propio de este port.
 
-## Qué se comparte con `/prototype/homepage`
+## Qué se toma del catálogo compartido
 
 Cuatro secciones del rebuild quedaron **idénticas** a las que ya existían, así
 que la vista las importa de `components/sections/` en vez de duplicarlas:
@@ -29,7 +29,7 @@ que la separación por carpeta viene a evitar.
 El original pinnea dos secciones. Este repo lo prohíbe: el pin-spacer pelea con
 Lenis, realimenta el `ResizeObserver` de `PrototypeMotionProvider` y en
 StrictMode deja spacers fantasma. El razonamiento completo está en
-`../ProofStats.tsx`.
+[`../README.md`](../README.md).
 
 En `OwnYourOwn` la conversión **no es mecánica**, porque el signo de la
 velocidad cambia: pinneado, el documento está quieto y `y = −SPEED·s` es lo que

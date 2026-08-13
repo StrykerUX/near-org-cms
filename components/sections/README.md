@@ -13,8 +13,9 @@ cualquier archivo aquí.
    `next/image`, `lucide-react`, `clsx`, `@/components/primitives/*`,
    `@/components/sections/*`. Secciones animadas también pueden importar
    `gsap` y `@/components/primitives/motion/*` — precedente: `CompanyGrid.tsx`
-   (marquee), formalizado con el toolkit de `/prototype/homepage`. Una sección
-   animada es `"use client"`; el resto se queda como server component.
+   (marquee), formalizado después en el toolkit de
+   `@/components/primitives/motion/`. Una sección animada es `"use client"`; el
+   resto se queda como server component.
 4. **Prohibido importar**: `@near/cms-core/*`, `@cms/*`, `@prisma/client`,
    `next/headers`, `next/navigation`, `next/cache`, `@/lib/*`, `@/app/*`,
    `@/components/site/*` (chrome compartido — se compone desde afuera, ver
@@ -58,19 +59,26 @@ dar por terminado un cambio.
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
-| `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
+| `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `HomepageV2View` (`PrototypeFooter` también `QuantumSecurityView`) | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado; sobrevivieron porque el port de home-v2 las reusa tal cual. |
 | `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` y `PrototypeFooter` tal cual. |
 | `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). Reusa `PrototypeFooter` tal cual. |
-| `lab/*` | nadie — se montan directo desde su `page.tsx` | Las doce rutas de `/prototype/descent`, todas `noindex`. **No es una familia de secciones, es un sandbox**: existió para resolver el descenso del hero de `home-v2/` sin iterar sobre la página real. Ya cumplió —ganó `paneles` y su mecanismo vive en [`home-v2/stairGeometry.ts`](./home-v2/stairGeometry.ts)— y sigue en pie como referencia. Tiene su propio [README](./lab/README.md) con el catálogo de rutas y lo que quedó desfasado tras el puerto. |
 
-Cinco secciones de las páginas reales usan **sección pegada**: `ProofStats`; en
-`home-v2/`, `ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`,
-`ThreatSequence`. (En `lab/`, `DescentStairs` también monta un track pegado, con
-las mismas reglas; no entra en la cuenta porque es sandbox.)
-Todas con `position: sticky` de CSS
-y un ScrollTrigger que solo LEE el progreso — nunca `pin: true`, que inserta un
-pin-spacer en el documento y pelea con Lenis, con el `ResizeObserver` de
-`PrototypeMotionProvider` y con StrictMode.
+## Sección pegada: `position: sticky`, nunca `pin: true`
+
+Cuatro secciones usan **sección pegada**: en `home-v2/`, `ProofStepper`,
+`NearStack` y `OwnYourOwn`; y en `quantum/`, `ThreatSequence`. Todas con
+`position: sticky` de CSS y un ScrollTrigger que solo LEE el progreso.
+
+**Por qué, en largo** (esta es la copia canónica del razonamiento; vivía en
+`ProofStats.tsx` hasta que esa sección se retiró con `/prototype/homepage`):
+un pin de GSAP inserta un pin-spacer en el documento, lo que arrastra tres
+problemas que `PrototypeMotionProvider` tendría que contener a mano —
+`refresh()` mueve el scroll y congela Lenis, el spacer cambia `scrollHeight` y
+realimenta el `ResizeObserver` del provider, y en StrictMode queda un spacer
+fantasma (ver el comentario de `useGsapContext.ts`). Nada de eso hace falta: el
+sticky lo hace el navegador de forma nativa, y ScrollTrigger queda reducido a
+leer el progreso — sin pin, sin scrub, sin tocar el scroll. Como efecto lateral,
+sin JS la sección sigue siendo legible.
 
 Consecuencia a recordar si alguien las edita: **ningún ancestro del elemento
 pegado puede tener `overflow` distinto de `visible`**, o el sticky deja de
@@ -105,8 +113,9 @@ El precedente es `home-v2/nearStackContent.ts`, que ya lo hacía así.
 ## Toolkit de animación
 
 `components/primitives/motion/` — lo compartido por las secciones animadas.
-Documentado en detalle en cada archivo; ver `HeroBanner.tsx` o `FeatureCards.tsx`
-para dos formas de uso (timeline propia vs. reveal genérico por `data-reveal`).
+Documentado en detalle en cada archivo; ver `home-v2/OwnYourOwn.tsx` o
+`UpdatesList.tsx` para dos formas de uso (timeline propia vs. reveal genérico
+con `useScrollReveal`).
 
 **Por dónde empezar, según lo que hace la sección:**
 
@@ -133,34 +142,8 @@ layout sticky lo escribe SOLO el efecto, vía `enableScene`. No se declara en el
 JSX. Si está en los dos lados, el primer re-render lo devuelve a `"off"` y el
 sticky se desarma sin dar ningún error — tres secciones lo tenían así.
 
-`components/primitives/motion/flowField.ts` + `shaders/flowField.ts` — el
-material de los covers de `LatestUpdates`: un campo de color suave arrastrado
-por un flujo de ruido. Dos etapas y el orden importa: primero se deforma la
-COORDENADA con un campo vectorial de ruido y recién después se evalúa el color
-en la coordenada ya deformada. Al revés —deformar el color— daría un
-desenfoque, no un flujo; lo que produce las vetas es que puntos vecinos
-terminen leyendo zonas lejanas del campo. Cuatro piezas: base de dos focos con
-falloff exponencial donde **cada foco aporta su propio color** (con una rampa
-única sobre una intensidad escalar es imposible tener un color en una zona y
-otro en otra), ocho iteraciones de empuje (una sola daría un desplazamiento
-suave: es la iteración la que acumula el estirado), ruido gradiente 3D, y grano.
-
-El ruido es 3D y no 2D porque el tiempo entra por la tercera dimensión: así el
-campo evoluciona en vez de trasladarse. Y gradiente en vez de value porque ocho
-iteraciones amplifican los artefactos alineados a ejes del value noise hasta
-volverlos una grilla visible.
-
-**Invariante que hay que respetar si alguien lo edita:** el tiempo no puede
-entrar en ninguna coordenada que se use para muestrear color. La versión
-anterior de este material (bandas) tenía un `+ uTime * 0.012` ahí, y como ese
-término crece sin límite el cover se iba a gris plano a los ~90 segundos — un
-bug que no se ve probando treinta segundos. Hoy el tiempo va solo al eje z del
-ruido y a senos acotados, y `flow()` devuelve un uv clampeado a [0,1].
-
-El puntero traslada el origen del ruido, no la intensidad, y su suscripción a
-`pointer.ts` vive solo mientras hay hover. A diferencia de `glyphShine`, **no
-tiene loop propio**: `render()` lo llama `gsap.ticker`, el mismo rAF que ya
-mueve Lenis, así 3 covers animados no agregan 3 loops.
+Los covers de `LatestUpdates` los pinta hoy una escena de Unicorn Studio, no un
+material propio — ver [`docs/unicorn.md`](../../docs/unicorn.md).
 
 `components/primitives/motion/glyphShine.ts` + `shaders/glyphShine.ts` — WebGL2
 crudo (cero dependencias nuevas): renderiza texto a una textura offscreen
@@ -171,8 +154,8 @@ glifo en el canal G, para que el frente de luz avance letra por letra y no en
 el eje X — si avanzara en X, en un heading que hace wrap iluminaría los
 renglones en paralelo y se desincronizaría del stagger del DOM. Factory
 imperativa (`setFront`/`setPointer`/`destroy`) llamada y destruida
-por el `gsap.matchMedia()` de la sección que la usa (ver
-`QuantumRevealHeading.tsx`), nunca un hook con su propio `useEffect` — evita
+por el `gsap.matchMedia()` del componente que la usa (ver
+`primitives/ShineField.tsx`), nunca un hook con su propio `useEffect` — evita
 dos ciclos de vida desincronizables ante un cambio de `prefers-reduced-motion`
 en vivo. `components/primitives/motion/pointer.ts` comparte un solo listener
 global de mouse entre todas las instancias que lo necesiten.

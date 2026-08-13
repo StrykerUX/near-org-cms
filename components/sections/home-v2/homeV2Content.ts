@@ -65,9 +65,9 @@ export const CUSTOMER_STORIES = [
 ] as const;
 
 // ── de ProofStepper.tsx ──
-// Stepper de 5 pruebas. Misma mecánica que components/sections/ProofStats.tsx
-// —sticky de CSS y un ScrollTrigger de SOLO LECTURA, nunca `pin: true`; el
-// porqué está documentado ahí— con tres diferencias de diseño del rebuild:
+// Stepper de 5 pruebas. Sticky de CSS y un ScrollTrigger de SOLO LECTURA, nunca
+// `pin: true`; el porqué está en components/sections/README.md. Tres
+// diferencias de diseño respecto del rebuild:
 //
 //  1. El carril alinea a la IZQUIERDA (todas las palabras arrancan en la misma
 //     X) en vez de a la derecha, y se desplaza en bloque para que la más ancha

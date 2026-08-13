@@ -5,7 +5,8 @@ import { useEffect } from "react";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
 
-// Provider de motion scopeado a /prototype/homepage (montado en su propio
+// Provider de motion scopeado a las páginas de prototipo animadas (montado en
+// el propio
 // layout.tsx). NO reemplaza a components/site/providers/LenisProvider.tsx,
 // que sigue sirviendo app/(site) tal cual — converger ambos es trabajo
 // futuro, no de este prototipo.

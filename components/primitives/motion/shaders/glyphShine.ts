@@ -1,4 +1,4 @@
-// Shaders del glyph-shine de QuantumRevealHeading. GLSL ES 3.00 (WebGL2).
+// Shaders del glyph-shine (ver `primitives/ShineField.tsx`). GLSL ES 3.00 (WebGL2).
 //
 // ⚠️ `#version 300 es` DEBE ser el primer byte del source — pegado al
 // backtick. Un solo `\n` adelante y el compilador asume GLSL ES 1.00.

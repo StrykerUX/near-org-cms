@@ -30,7 +30,7 @@
   --font-size-h3:   clamp(1.25rem, 0.417rem + 1.736vw, 2.5rem);
   --font-size-body: clamp(1rem, 0.764rem + 0.3012vw, 1.125rem);
 
-  /* ── paleta draft del prototipo "homepage" (/prototype/homepage) —
+  /* ── paleta draft del prototipo de homepage —
      estimada de la captura compartida, NO son tokens de marca definitivos.
      Ver app/(site)/brand/page.tsx, todavía placeholder grayscale. Reemplazar
      cuando exista un sistema de color real. ── */

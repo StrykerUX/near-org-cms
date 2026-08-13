@@ -13,9 +13,8 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 //
 // `unicornstudio-react/next` embute el runtime completo de Unicorn Studio: 912KB
 // en disco. Con el import estático, ese peso entraba en el bundle de cliente de
-// TODA página que renderizara esta sección — y como también lo importa
-// `views/FlowCompareView`, el build terminaba con TRES chunks idénticos de 879KB,
-// uno por entrypoint.
+// TODA página que renderizara esta sección, replicado una vez por entrypoint
+// (llegaron a ser tres chunks idénticos de 879KB).
 //
 // `next/dynamic` con `ssr: false` lo saca a un chunk aparte que se pide cuando el
 // componente se monta. Y el componente no se monta hasta que la sección se acerca

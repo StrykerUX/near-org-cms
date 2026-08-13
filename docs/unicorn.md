@@ -1,8 +1,7 @@
 # Unicorn Studio
 
-Los covers de `components/sections/LatestUpdates.tsx` y el panel derecho de
-`/prototype/flow-compare` los pintan escenas hechas en
-[Unicorn Studio](https://unicorn.studio). Son tres, una por color.
+Los covers de `components/sections/LatestUpdates.tsx` los pintan escenas hechas
+en [Unicorn Studio](https://unicorn.studio). Son tres, una por color.
 
 ## Dónde viven las escenas
 
@@ -125,14 +124,14 @@ el material propio que reemplazaron, que era un solo pase sin FBOs enganchado al
 Por eso van con `lazyLoad`: sin eso se pagan las tres antes de que la sección
 esté cerca del viewport.
 
-El bundle del SDK son ~880KB. En `/prototype/flow-compare` quedaba aislado en su
-propio chunk; desde que `LatestUpdates` lo usa, también lo carga
-`/prototype/homepage`.
+El bundle del SDK son ~880KB, y lo carga toda página que monte `LatestUpdates`
+— hoy `/prototype/homepage-v2`.
 
 ## Lo que se perdió al cambiar
 
-El material propio (`components/primitives/motion/flowField.ts`, todavía en uso
-en la página de comparación) tenía un hover **por card**: el puntero abría la
-amplitud del flujo solo en la card de abajo, tweeneado con GSAP. La escena de
-Unicorn tiene su propio tracking de mouse, global y sin gancho de intensidad, así
-que ese comportamiento no sobrevive tal cual.
+El material propio que reemplazó (`components/primitives/motion/flowField.ts`,
+borrado junto con la página de comparación que lo mostraba) tenía un hover **por
+card**: el puntero abría la amplitud del flujo solo en la card de abajo,
+tweeneado con GSAP. La escena de Unicorn tiene su propio tracking de mouse,
+global y sin gancho de intensidad, así que ese comportamiento no sobrevive tal
+cual. El material vive en el historial de git si alguna vez se quiere volver.

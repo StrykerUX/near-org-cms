@@ -274,7 +274,7 @@ export default function HeroVideo() {
       ref={rootRef}
       // svh y no vh: en móvil, `vh` mide contra el viewport CON la barra de URL
       // colapsada, así que el hero sobresale y salta al scrollear. Mismo criterio
-      // que ProofStats, NearStack y ProofStepper.
+      // que NearStack y ProofStepper.
       style={{ "--u": HERO_UNIT, height: "100svh" } as React.CSSProperties}
       // Sin `overflow-hidden`: el video SOBRESALE del hero por abajo a
       // propósito, y recortarlo a la caja de la sección es justo lo que hace que

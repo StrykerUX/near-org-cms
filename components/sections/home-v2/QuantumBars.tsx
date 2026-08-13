@@ -42,7 +42,8 @@ import { BARS_STATEMENT as STATEMENT } from "@/components/sections/home-v2/homeV
 //     alcanzar a los laterales y los cuatro aterrizan amortiguados.
 //
 // El laboratorio donde se probó esto y los siete approaches que fallaron antes están en
-// `components/sections/lab/README.md`. Conviene mirarlo antes de proponer otro ritmo.
+// el historial de git (`components/sections/lab/`, retirado al podar las páginas de
+// concepto). Conviene mirarlo antes de proponer otro ritmo.
 //
 // ── Coste por frame ──────────────────────────────────────────────────────────
 // Siete `scaleY` por `quickSetter`, que van al compositor, contra los 19 tweens que
@@ -502,9 +503,6 @@ export default function QuantumBars() {
             <div key={i} className="relative flex-1">
               <div
                 data-qbar-col
-                // La columna central lleva el marcador que el HUD de `/prototype/descent`
-                // busca para no abortar la lectura.
-                {...(i === 3 ? { "data-qbar-core": "" } : {})}
                 className="absolute inset-x-0 top-0 bg-bar"
                 // El borde inferior es la escalera espejada y no se anima. El superior lo
                 // mueve `scaleY` con origen abajo.
@@ -542,7 +540,7 @@ export default function QuantumBars() {
             demasiado gris encima".
 
             `position: sticky` de CSS y NO `pin: true` de ScrollTrigger — regla del repo,
-            con el razonamiento largo en `ProofStats.tsx`: un pin inserta un pin-spacer
+            con el razonamiento largo en `sections/README.md`: un pin inserta un pin-spacer
             que pelea con Lenis, con el ResizeObserver del provider y con StrictMode.
 
             El track ya no fija ninguna pausa —eso lo resuelve el centrado en la franja de
