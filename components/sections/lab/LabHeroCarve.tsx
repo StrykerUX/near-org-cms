@@ -3,13 +3,20 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
+import {
+  CustomEase,
+  gsap,
+  ScrollTrigger,
+  SplitText,
+} from "@/components/primitives/motion/gsapClient";
 import { createVideoScrub } from "@/components/primitives/motion/videoScrub";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { HERO_UNIT } from "@/components/sections/home-v2/heroGeometry";
 import {
+  CARVE,
   STAIR_COLUMNS,
-  carveDepths,
+  STAIR_DEPTH,
+  carveEdges,
   carvePolygon,
   carveRestVars,
   clearCarve,
@@ -30,37 +37,40 @@ import {
 //   2. El vídeo cuelga `drop · u` por debajo de la juntura, así que hay imagen para
 //      cubrir la zona que el scroll está por revelar. `heroGeometry` documenta que el
 //      HTML original usaba el vídeo a `100% + u·1.5`: esto es en parte volver a eso.
-//   3. Un `clip-path` escalonado sobre la <section> —sobre la sección y no sobre el
-//      vídeo, para que el `bg-cream` viaje con el recorte y no asome por los cantos—
-//      cuya profundidad por columna se anima con el scroll.
+//   3. Un `clip-path` escalonado sobre un LIENZO —un div `absolute inset-0` que lleva
+//      el `bg-cream`, el vídeo y los dos velos— cuya profundidad por columna se anima
+//      con el scroll.
+//
+//      El recorte va sobre el lienzo y no sobre la <section> por una razón concreta:
+//      `clip-path` recorta TODOS los descendientes, así que con la sección recortada el
+//      bloque de copy se cortaba también, y eso ponía un techo a `depth` — a 3.0 el
+//      corte caía a 782px y el subtítulo termina cerca de 736px, o sea a 46px de
+//      empezar a comerse el texto, en silencio. Con el lienzo aparte, la copy queda
+//      SIEMPRE fuera del recorte y el techo desaparece: lo peor que puede pasar con una
+//      escalera muy profunda es que el texto quede sobre gris en vez de sobre crema,
+//      que es un problema de contraste y no un texto cortado a la mitad.
 //
 // ── Por qué esto sí elimina la banda gris ────────────────────────────────────
 // El borde inferior de la imagen no es una línea recta en ningún momento del
 // recorrido. Arranca como una escalera INVERTIDA (más honda en el centro, porque la
 // columna central es la que cuelga `drop·u`) y termina como la escalera definitiva
-// (más honda en los extremos). El relieve entre la columna exterior y la central va de
-// `drop·u` a `u·1.5` — nunca baja de 134px a 1877px de ancho.
+// (más honda en los extremos). El relieve entre la columna exterior y la central nunca
+// baja de `drop·u`, así que el borde no pasa por plano más que en un frame.
 //
 // Y la zona de ancho completo, el "zócalo", no puede aparecer hasta que el recorte de
 // la columna central suba hasta la juntura.
 //
-// Medido con node sobre un viewport de 1877×1050 (u = 268px), con los valores de acá
-// abajo, contra lo que hace producción en el mismo punto:
+// Medido con node sobre un viewport de 1877×1050 (u = 268px), escalera / zócalo en px:
 //
-//   scroll   escalera / zócalo        producción
-//    25px      62 /   0   ∞×            0 /  25   ← barra pura
-//    50px     121 /   0   ∞×            0 /  50   ← barra pura
-//   110px     230 /  24   10×            0 / 110   ← el momento de la captura
-//   150px     257 /  78    3×           38 / 150
-//   200px     287 / 142    2×          101 / 200
+//   scroll   este approach        producción
+//    25px      91 /   0   ∞×        0 /  25   ← barra pura
+//    50px     177 /   0   ∞×        0 /  50   ← barra pura
+//   110px     336 /  34   10×        0 / 110   ← el momento de la captura
+//   200px     460 / 159    3×      101 / 200
 //
-// A 25px de scroll lo visible son 62px de gris en las DOS columnas exteriores y 9px en
-// el par siguiente; a 50px son 121 / 61 / 0 / 0, con las tres centrales todavía tapadas.
-// Eso es literalmente "que se vean los escalones laterales sin ver la sección gris".
-//
-// Pasados los ~400px la relación baja de 1× y no importa: a esa altura la escalera ya
-// está completa y lo que se mira es el marco alrededor del statement, que debe ser un
-// bloque sólido. La medida solo dice algo en la ventana del arranque.
+// A 25px de scroll lo visible son 91px de gris en las columnas exteriores y nada en las
+// centrales; a 50px son 177px. Eso es literalmente "que se vean los escalones laterales
+// sin ver la sección gris".
 //
 // ── Coste ────────────────────────────────────────────────────────────────────
 // Un `clip-path` animado no va al compositor: cada frame paga un style recalc y el
@@ -84,42 +94,24 @@ import {
 //   1.00   1877×1318   1.356×   466px  (25%)
 //   1.50   1877×1452   1.494×   705px  (38%)
 //
-// O sea: subir `drop` para pronunciar el escalonado reencuadra el hero, que es
-// justamente lo que no queremos tocar. El relieve se pronuncia con la CURVA, que es
-// gratis. `drop` se queda en el mínimo que hace falta para que el zócalo no exista en
-// el arranque.
-const DROP = 0.5;
-
-// El tallado carga el grueso al principio: la escalera alcanza sus proporciones reales
-// en los primeros píxeles de scroll y después se acomoda. Es lo contrario a la curva de
-// retención que buscábamos para el hero —esa sigue en su sitio, este recorte es otra
-// cosa— y es lo que decide qué tan PRONUNCIADO se ve el escalonado.
+// O sea: `drop` NO es la perilla del escalonado —eso es `STAIR_DEPTH`, que es gratis—
+// sino la que decide cuánto tarda en aparecer el zócalo. Se queda en el mínimo que hace
+// falta para que no exista en el arranque.
+// ── El reloj no vive acá ─────────────────────────────────────────────────────
 //
-// Medido a 1877×1050 con `drop = 0.5`, salto entre el primer escalón y el segundo:
+// La curva, el relevo, el techo y el cierre están todos en `carveEdges`, en
+// `labStairGeometry`, y los valores por defecto en `CARVE`. Este componente solo PINTA el
+// resultado: recibe la `y` del borde de cada anillo y la convierte en cuatro custom
+// properties del polígono.
 //
-//   scroll   power2.out        power4.out
-//    50px    53px  2 esc       61px  3 esc
-//   110px    62px  4 esc  z3   77px  4 esc  z24
-//   200px    75px  4 esc       96px  4 esc
+// Están ahí y no acá porque `/prototype/descent/paneles` pinta las MISMAS `y` con otro
+// mecanismo —paneles grises escalados, en vez de un recorte de la imagen— y las dos rutas
+// tienen que compartir el reloj exacto. Si estuviera duplicado, cualquier diferencia que
+// se viera entre las dos podría ser del mecanismo o de una deriva entre copias, y no
+// habría forma de distinguirlo.
 //
-// Y el relieve total (402px en la escalera final) llega al 50% a 75px de scroll con
-// `power4.out`, contra 145px con `power2.out`.
-//
-// ⚠️ Solo eases SIN sobrepaso. Un `back.out` o un `elastic.out` devuelven valores > 1,
-// y ahí el borde de la imagen subiría POR ENCIMA de donde empieza el gris de esa
-// columna: reaparecería la franja crema que este approach hace imposible. El progreso
-// se clampea a [0,1] justamente para que una perilla mal puesta no pueda romper eso.
-const CARVE_EASE = "power4.out";
-
-// Retardo del centro respecto a los extremos: el anillo `r` avanza con `e^(1 + lag*r)`.
-//
-// En 0 los cuatro anillos comparten el reloj, y eso mantiene la silueta intermedia
-// RECTA — los cuatro escalones guardan la misma proporción 1 : 0.67 : 0.33 : 0 que la
-// escalera final, solo más chica. Subirlo empuja el zócalo a cero (a 110px de scroll:
-// 0px con lag 0.5 contra 24px con lag 0) y duplica el salto del primer escalón, pero
-// CURVA el perfil: la escalera queda más empinada en los bordes que en el centro, o sea
-// una figura distinta de la final. Se tantea con `?lag=`.
-const CARVE_LAG = 0;
+// Lo único de ritmo que sigue siendo asunto de este archivo es el RECORRIDO, porque
+// depende del alto del hero: está en el `end` del ScrollTrigger, más abajo.
 
 // ── Ajustes del scrub, idénticos al original ─────────────────────────────────
 const SCRUB_RATE = 1;
@@ -128,14 +120,38 @@ const CHASE = 0.14;
 const CHASE_DOCKING = 0.09;
 
 export default function LabHeroCarve({
-  drop = DROP,
-  carveEase = CARVE_EASE,
-  lag = CARVE_LAG,
+  drop = CARVE.drop,
+  depth = STAIR_DEPTH,
+  carveEase = CARVE.easeName,
+  stagger = CARVE.stagger,
+  converge = true,
+  line = CARVE.line,
+  /**
+   * Si este hero es DUEÑO del reveal.
+   *
+   * En `true` (el defecto) lleva el recorte escalonado y se apila en `z-[3]`, por encima
+   * de las barras: es el approach del tallado.
+   *
+   * En `false` no recorta nada y vuelve al apilado de producción, así que las barras le
+   * pintan encima. Lo usa `/prototype/descent/paneles`, donde el reveal es de las barras.
+   * Lo único que queda del tallado ahí es el excedente de vídeo (`drop`), que sigue
+   * haciendo falta para tener imagen por debajo de la juntura.
+   *
+   * Es un flag y no un componente aparte a propósito: las dos rutas tienen que usar EL
+   * MISMO hero para que la comparación aísle el mecanismo de las barras. Una copia de
+   * estas 250 líneas derivaría, y entonces no se sabría si la diferencia es del approach
+   * o del hero.
+   */
+  carve = true,
   debug = false,
 }: {
   drop?: number;
+  depth?: number;
   carveEase?: string;
-  lag?: number;
+  stagger?: number;
+  converge?: boolean;
+  line?: number;
+  carve?: boolean;
   debug?: boolean;
 }) {
   const rootRef = useGsapContext<HTMLElement>(
@@ -146,6 +162,7 @@ export default function LabHeroCarve({
       mm.add(MQ.motion, () => {
         const cleanups: (() => void)[] = [];
 
+        const canvas = q("[data-hero-canvas]")[0];
         const video = q("[data-hero-bg]")[0] as HTMLVideoElement | undefined;
         const wrap = q("[data-hero-wrap]")[0];
         const fade = q("[data-hero-topfade]")[0];
@@ -162,67 +179,100 @@ export default function LabHeroCarve({
         // que sin JS y con reduced-motion quede la composición correcta. Este bloque
         // escribe el estado inicial en su primer frame, que corre en
         // `useLayoutEffect` — antes del primer paint.
-        {
-          const depths = carveDepths(drop);
+        if (canvas && carve) {
+          // La curva se registra acá y no a nivel de módulo: `CustomEase.create` correría
+          // durante el SSR, donde no hace falta. Es idempotente, así que repetirla en cada
+          // mount no acumula nada. Mismo patrón que `descentCurves`.
+          CustomEase.create(CARVE.easeName, CARVE.cp);
           // Un `?ease=` mal escrito no debe dejar el hero sin recorte —sería la reja
           // entera tapada y ningún reveal—, así que cae al valor por defecto.
           const parsed = gsap.parseEase(carveEase);
-          const ease = typeof parsed === "function" ? parsed : gsap.parseEase(CARVE_EASE);
-          // `--u` es `calc(100vw / 7)`, e `innerWidth` incluye la barra de scroll
-          // igual que `100vw`: los dos miden lo mismo. Se cachea y se refresca en
-          // `onRefresh` en vez de leerlo por frame.
-          let unitPx = window.innerWidth / STAIR_COLUMNS;
+          const ease = typeof parsed === "function" ? parsed : gsap.parseEase(CARVE.easeName);
 
-          /** Profundidad del anillo `r` en px desde la juntura. Positiva = cuelga. */
-          const depthAt = (ring: number, e: number) => {
-            const { start, end } = depths[ring];
-            // Con `lag > 0` el centro avanza más lento que los extremos, así que el
-            // zócalo llega más tarde a cambio de curvar la silueta intermedia.
-            const eRing = lag ? e ** (1 + lag * ring) : e;
-            return (start + (end - start) * eRing) * unitPx;
+          // Todo lo que depende del tamaño de la ventana se cachea y se refresca en
+          // `onRefresh`, para no leer layout por frame. `--u` es `calc(100vw / 7)`, e
+          // `innerWidth` incluye la barra de scroll igual que `100vw`.
+          let unitPx = window.innerWidth / STAIR_COLUMNS;
+          let viewportH = window.innerHeight;
+          // Posición DOCUMENTAL de la juntura y del arranque del recorrido, para poder
+          // pasar de coordenadas de documento a coordenadas de pantalla sin medir por frame.
+          let seamDoc = scope.getBoundingClientRect().bottom + window.scrollY;
+          let startScroll = 0;
+          const measure = (start: number) => {
+            unitPx = window.innerWidth / STAIR_COLUMNS;
+            viewportH = window.innerHeight;
+            seamDoc = scope.getBoundingClientRect().bottom + window.scrollY;
+            startScroll = start;
           };
 
-          const applyCarve = (p: number) => {
-            // El clamp es lo que hace que ninguna perilla pueda romper la invariante:
-            // con `e` dentro de [0,1] la profundidad se queda entre `start` y `end`, y
-            // `end` es exactamente donde empieza el gris de esa columna.
-            const e = Math.min(1, Math.max(0, ease(p)));
-            for (let ring = 0; ring < depths.length; ring++) {
-              writeCarve(scope, ring, depthAt(ring, e));
+          const applyCarve = (p: number, scroll: number) => {
+            // El clamp de `e` a [0,1] es lo que hace que ninguna perilla pueda romper la
+            // invariante: fuera de ese rango el borde podría bajar de su `start` o pasarse
+            // del techo, y las dos cosas descubren fondo de página.
+            const eased = Math.min(1, Math.max(0, ease(p)));
+            const seamY = seamDoc - scroll;
+            // Todo el reloj —curva, relevo, techo, cierre— vive en `carveEdges`, que es el
+            // MISMO que usa `/prototype/descent/paneles`. Acá solo se pinta el resultado.
+            const edges = carveEdges({
+              eased,
+              seamY,
+              scrolled: scroll - startScroll,
+              viewportH,
+              unitPx,
+              drop,
+              depth,
+              stagger,
+              converge,
+              line,
+              close: CARVE.close,
+            });
+
+            for (let ring = 0; ring < edges.length; ring++) {
+              writeCarve(canvas, ring, edges[ring] - seamY);
             }
 
             if (!debug) return;
-            // Las dos medidas que describen el defecto que perseguimos. El HUD las
-            // lee de acá porque el componente conoce las profundidades; medirlas con
+            // Las dos medidas que describen el defecto original. El HUD las lee de acá
+            // porque el componente conoce las profundidades; medirlas con
             // `getBoundingClientRect` no sirve — el recorte no aparece en el rect.
-            const seamY = scope.getBoundingClientRect().bottom;
-            const vh = window.innerHeight;
-            const outer = seamY + depthAt(0, e);
-            const center = seamY + depthAt(depths.length - 1, e);
+            const outer = edges[0];
+            const center = edges[edges.length - 1];
             scope.dataset.labProgress = String(p);
             scope.dataset.labStair = String(
-              Math.round(Math.max(0, Math.min(vh, center) - Math.max(0, outer)))
+              Math.round(Math.max(0, Math.min(viewportH, center) - Math.max(0, outer)))
             );
-            scope.dataset.labFlat = String(Math.round(Math.max(0, vh - center)));
+            scope.dataset.labFlat = String(Math.round(Math.max(0, viewportH - center)));
           };
 
           const st = ScrollTrigger.create({
             trigger: scope,
             start: "top top",
-            end: "bottom top",
+            // El recorrido termina cuando la MITAD de la escalera ha salido por el techo
+            // del viewport. Pasado ese punto más de la mitad del relieve está fuera de
+            // pantalla y seguir tallando es trabajo que nadie ve.
+            //
+            // Antes la referencia era el borde SUPERIOR de la figura, y con escaleras
+            // profundas eso se vuelve demasiado corto: a depth 3 el borde sale a los
+            // 246px de scroll, o sea todo el reveal metido en un cuarto de pantalla — lo
+            // contrario de una entrada lenta. Con la mitad, el mismo depth da 648px.
+            // `offsetHeight` y no el rect, para que el parallax de la copy no contamine
+            // la medida. Función porque depende del ancho — `--u` es `100vw/7`.
+            end: () =>
+              `+=${Math.max(1, scope.offsetHeight - ((window.innerWidth / STAIR_COLUMNS) * depth) / 2)}`,
             scrub: true,
             invalidateOnRefresh: true,
             onRefresh: (self) => {
-              unitPx = window.innerWidth / STAIR_COLUMNS;
-              applyCarve(self.progress);
+              measure(self.start);
+              applyCarve(self.progress, self.scroll());
             },
-            onUpdate: (self) => applyCarve(self.progress),
+            onUpdate: (self) => applyCarve(self.progress, self.scroll()),
           });
           // Un reload a mitad de página entra con `progress > 0` y sin ningún update
           // pendiente: sin esto el recorte se quedaría en el estado de reposo del CSS.
-          applyCarve(st.progress);
+          measure(st.start);
+          applyCarve(st.progress, st.scroll());
 
-          cleanups.push(() => clearCarve(scope));
+          cleanups.push(() => clearCarve(canvas));
         }
 
         // ── 1. Fundido superior ligado al scroll ────────────────────────────
@@ -339,7 +389,7 @@ export default function LabHeroCarve({
 
       return () => mm.revert();
     },
-    [drop, carveEase, lag, debug]
+    [drop, depth, carveEase, stagger, converge, line, debug]
   );
 
   return (
@@ -348,62 +398,92 @@ export default function LabHeroCarve({
       // `data-lab-hero` para que el HUD lo encuentre por su primer selector y lea de
       // acá los números publicados.
       data-lab-hero
-      style={
-        {
-          "--u": HERO_UNIT,
-          height: "100svh",
-          // El polígono se escribe UNA vez y no cambia; por frame solo se reescriben
-          // las 4 custom properties que lleva dentro.
-          clipPath: carvePolygon(),
-          ...carveRestVars(drop),
-        } as React.CSSProperties
-      }
-      // `z-[3]`: el hero tapa a QuantumBars, que sigue en `z-[2]`. `OwnYourOwn` está
-      // en `z-[1]` y nunca solapa el hero, así que no hay conflicto.
+      style={{ "--u": HERO_UNIT, height: "100svh" } as React.CSSProperties}
+      // Con recorte, `z-[3]`: el hero tapa a las barras (`z-[2]`) y su recorte es lo que
+      // las descubre. `OwnYourOwn` está en `z-[1]` y nunca solapa el hero.
       //
-      // Sin `overflow-hidden`: el vídeo sobresale por abajo a propósito.
-      className="relative z-[3] flex flex-col bg-cream text-foreground"
+      // Sin recorte, el apilado vuelve al de producción: las barras quedan por encima y
+      // le pintan al hero por arriba, incluida la copy. Eso es lo correcto —y es
+      // exactamente el defecto estructural del tallado: con el hero encima, la copy o se
+      // corta con el recorte o se monta sobre el gris, y las dos están mal.
+      //
+      // El `bg-cream` vive en el lienzo y no acá: si estuviera acá, asomaría por el
+      // recorte y taparía el gris que el recorte acaba de descubrir.
+      className={
+        carve
+          ? "relative z-[3] flex flex-col text-foreground"
+          : "relative flex flex-col text-foreground"
+      }
     >
-      <video
-        data-hero-bg
-        src="/prototype/v2/hero-descent.mp4"
-        poster="/prototype/v2/hero-descent-poster.jpg"
-        muted
-        playsInline
-        preload="metadata"
-        aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 z-0 w-full object-cover object-bottom"
-        // El vídeo cuelga `drop · u` por debajo del hero: es la imagen que el recorte
-        // va a ir retirando. Sin ese excedente, el recorte de la columna central
-        // arrancaría por debajo del final de la imagen y descubriría el gris de una.
-        //
-        // Efecto colateral a mirar: con `object-cover object-bottom`, una caja más
-        // alta obliga a escalar la imagen para cubrir, así que el encuadre se acerca
-        // un ~5% respecto al original.
-        style={{ height: `calc(100% + var(--u) * ${drop})` }}
-      />
+      {/* ── El lienzo ────────────────────────────────────────────────────────
+          Todo lo que se recorta vive acá dentro: el fondo crema, el vídeo y los dos
+          velos. La copy queda FUERA, como hermana, y por eso el recorte no puede
+          cortarla nunca.
 
-      {/* Velo permanente: tapa con crema el 20% superior del vídeo y lo suelta hacia
-          abajo, para que la imagen emerja del fondo en vez de estar pegada encima. */}
+          `absolute inset-0` y no un `bottom` negativo: así el `100%` del polígono sigue
+          siendo la juntura —el píxel donde termina el hero— y las alturas de los velos
+          (`82%`, `60%`) siguen midiendo contra el hero, como en el original. El
+          excedente del vídeo desborda esta caja, que no lleva `overflow-hidden`, y el
+          polígono lo incluye porque sus vértices pueden pasar de `100%`. */}
       <div
+        data-hero-canvas
         aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 z-[1] h-[82%] w-full"
-        style={{
-          backgroundImage:
-            "linear-gradient(to bottom, var(--cream) 0%, var(--cream) 20%, transparent 100%)",
-        }}
-      />
+        style={
+          // Sin recorte no hay `clip-path` en absoluto: el lienzo queda como un contenedor
+          // normal. Nada de `clip-path: none`, que igual crearía un stacking context.
+          (carve
+            ? {
+                // El polígono se escribe UNA vez y no cambia; por frame solo se reescriben
+                // las 4 custom properties que lleva dentro.
+                clipPath: carvePolygon(),
+                ...carveRestVars(drop, depth),
+              }
+            : {}) as React.CSSProperties
+        }
+        className="pointer-events-none absolute inset-0 bg-cream"
+      >
+        <video
+          data-hero-bg
+          src="/prototype/v2/hero-descent.mp4"
+          poster="/prototype/v2/hero-descent-poster.jpg"
+          muted
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 z-0 w-full object-cover object-bottom"
+          // El vídeo cuelga `drop · u` por debajo del hero: es la imagen que el recorte
+          // va a ir retirando. Sin ese excedente, el recorte de la columna central
+          // arrancaría por debajo del final de la imagen y descubriría el gris de una.
+          //
+          // Efecto colateral a mirar: con `object-cover object-bottom`, una caja más
+          // alta obliga a escalar la imagen para cubrir. Medido con el asset real
+          // (1728×972): a `drop = 0.5` la imagen se agranda un 12% y pierde eso de ancho.
+          style={{ height: `calc(100% + var(--u) * ${drop})` }}
+        />
 
-      {/* Segundo velo, ligado al scroll: cierra el hero contra el crema al salir. */}
-      <div
-        data-hero-topfade
-        aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 z-[1] h-[60%] w-full"
-        style={{
-          backgroundImage:
-            "linear-gradient(to bottom, var(--cream) 0%, rgba(245,244,241,0.9) 30%, transparent 100%)",
-        }}
-      />
+        {/* Velo permanente: tapa con crema el 20% superior del vídeo y lo suelta hacia
+            abajo, para que la imagen emerja del fondo en vez de estar pegada encima. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 z-[1] h-[82%] w-full"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, var(--cream) 0%, var(--cream) 20%, transparent 100%)",
+          }}
+        />
+
+        {/* Segundo velo, ligado al scroll: cierra el hero contra el crema al salir. */}
+        <div
+          data-hero-topfade
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 z-[1] h-[60%] w-full"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, var(--cream) 0%, rgba(245,244,241,0.9) 30%, transparent 100%)",
+          }}
+        />
+
+      </div>
 
       {/* Reserva el alto del nav, que es fixed y no ocupa flujo. */}
       <div aria-hidden="true" className="h-[5.5rem] shrink-0" />

@@ -59,6 +59,16 @@ export type DescentReadout = {
   flat: number;
   /** Alto en px de la zona con relieve visible: la escalera. Tiene que ganarle a `flat`. */
   stair: number;
+  /**
+   * La `y` en pantalla de los cuatro bordes, del exterior al centro, tal cual las publica
+   * el componente. `stair` y `flat` resumen la figura en dos números y eso alcanza para
+   * juzgar "escalera contra barra", pero no para juzgar un PERFIL: si la cascada abre
+   * parejo, si los interiores están alcanzando a los laterales, y con qué diferencia
+   * aterrizan los cuatro. Eso son los cuatro números por separado o no es nada.
+   *
+   * Vacío cuando el componente no los publica (producción y los approaches viejos).
+   */
+  edges: string;
 };
 
 /**
@@ -78,6 +88,7 @@ export function useDescentReadout(enabled: boolean): DescentReadout {
     gap: 0,
     flat: 0,
     stair: 0,
+    edges: "",
   });
   const last = useRef("");
 
@@ -89,7 +100,18 @@ export function useDescentReadout(enabled: boolean): DescentReadout {
       // panel sirva en la maqueta y en `/prototype/descent/real`, que monta
       // `HeroVideo` y `QuantumBars` sin tocarlos. Los `[data-qbar-*]` son los mismos
       // en las dos porque la maqueta copió esos nombres a propósito.
+      // El PUBLICADOR primero, y el hero solo como respaldo. No son el mismo elemento en
+      // todas las rutas: `/paneles` monta el hero Y las barras, los dos llevan
+      // `data-lab-hero`, y el que publica los números es el segundo. Buscando por
+      // `data-lab-hero` gana el primero del DOM —el hero, que con `carve={false}` no
+      // publica nada—, y entonces `flat`/`stair` caían al respaldo de rects sin avisar:
+      // dos números con pinta de medida, calculados sobre el elemento equivocado. Es
+      // exactamente el modo de fallo contra el que se escribió la nota de arriba.
+      //
+      // `data-lab-progress` es el atributo que deja `dataset.labProgress`, así que
+      // selecciona a quien está publicando y a nadie más.
       const hero =
+        document.querySelector<HTMLElement>("[data-lab-progress]") ??
         document.querySelector<HTMLElement>("[data-lab-hero]") ??
         document.querySelector<HTMLElement>("[data-hero-bg]")?.closest("section") ??
         null;
@@ -141,12 +163,16 @@ export function useDescentReadout(enabled: boolean): DescentReadout {
             : step
               ? Math.round(onScreen(step.getBoundingClientRect()))
               : 0,
+        // Sin fallback al DOM: los bordes solo los sabe quien los calcula. Derivarlos de
+        // los rects daría cuatro números con pinta de medida y sin serlo — el mismo error
+        // que `flat`/`stair` cometían con el recorte del tallado.
+        edges: published.labEdges ?? "",
       };
 
       // Solo se re-renderiza cuando cambia algo visible: sin esto el panel dispara
       // un render por frame y falsea la medición de rendimiento que uno viene a
       // hacer acá.
-      const key = `${next.p.toFixed(3)}|${next.hold.toFixed(0)}|${next.core.toFixed(2)}|${next.step.toFixed(2)}|${next.gap}|${next.flat}|${next.stair}`;
+      const key = `${next.p.toFixed(3)}|${next.hold.toFixed(0)}|${next.core.toFixed(2)}|${next.step.toFixed(2)}|${next.gap}|${next.flat}|${next.stair}|${next.edges}`;
       if (key === last.current) return;
       last.current = key;
       setReadout(next);
@@ -191,6 +217,7 @@ export default function DescentDebug({
         {approach} · curva {curve}
       </div>
       <Row label="p" value={readout.p.toFixed(3)} />
+      {readout.edges && <Row label="edges" value={readout.edges} />}
       <Row label="hold" value={`${readout.hold.toFixed(0)}px`} />
       <Row label="core" value={readout.core.toFixed(2)} />
       <Row label="step" value={readout.step.toFixed(2)} />

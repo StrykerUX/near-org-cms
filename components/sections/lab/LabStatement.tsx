@@ -7,12 +7,28 @@ import { BARS_STATEMENT as STATEMENT } from "@/components/sections/home-v2/homeV
 // por los dos approaches nuevos por lo mismo que `labTextSweep`: no participa del
 // problema, y tenerlo duplicado dos veces solo abre la puerta a que uno de los dos se
 // quede atrás mientras se los compara.
-export default function LabStatement() {
+export default function LabStatement({
+  /**
+   * El aire por encima del texto, como longitud CSS. Tiene que dejar la primera línea
+   * POR DEBAJO de donde empieza el gris de la columna central: si no, cae sobre crema en
+   * el medio y sobre gris en los costados.
+   *
+   * El defecto reproduce el `u·2` de producción. El approach del tallado pasa
+   * `calc(100svh + var(--u) * 0.5)`, porque ahí el gris arranca en el top del hero y la
+   * referencia es la juntura, no un múltiplo de `--u`.
+   */
+  above = "calc(var(--u) * 2)",
+}: {
+  above?: string;
+}) {
   return (
-    // El aire vertical también se mide en `--u`: escala con el ancho de columna, así
-    // la caja de texto queda siempre a la misma distancia proporcional de los
-    // escalones, que es lo que la mantiene centrada dentro del marco.
-    <Container className="relative py-[calc(var(--u)*2)]">
+    // El aire vertical se mide en `--u`: escala con el ancho de columna, así la caja de
+    // texto queda siempre a la misma distancia proporcional de los escalones, que es lo
+    // que la mantiene centrada dentro del marco.
+    <Container
+      className="relative"
+      style={{ paddingTop: above, paddingBottom: `calc(var(--u) * 2)` }}
+    >
       {/* `isolate` acota el apilado de las dos capas. Las dos ocupan la misma celda
           de grid: mismo string, mismo ancho, mismos quiebres de línea — es lo que
           garantiza que el brillo caiga sobre el glifo. */}

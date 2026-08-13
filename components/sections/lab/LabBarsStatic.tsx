@@ -4,7 +4,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
 import { HERO_UNIT } from "@/components/sections/home-v2/heroGeometry";
-import { STAIR_OFFSET, u } from "./labStairGeometry";
+import { STAIR_SPAN, stairOffsets, u } from "./labStairGeometry";
 import { createStatementSweep } from "./labTextSweep";
 import LabStatement from "./LabStatement";
 
@@ -33,6 +33,25 @@ import LabStatement from "./LabStatement";
 // la juntura.
 
 export default function LabBarsStatic() {
+  // ── Arriba el gris NO tiene escalones ─────────────────────────────────────
+  // Las siete columnas son grises desde el TOP de la sección, que además sube hasta el
+  // TOP DEL HERO (el `marginTop` de abajo). La escalera de arriba vive enteramente en el
+  // recorte del hero, que es quien la dibuja.
+  //
+  // No cambia nada de lo que se ve, y es fácil de comprobar: toda esa franja está dentro
+  // de la caja del hero, que se apila en `z-[3]` y la tapa entera. Lo único visible ahí es
+  // lo que el recorte descubre.
+  //
+  // Y es lo que habilita el cierre. El recorte tiene que poder subir hasta el borde de
+  // ARRIBA DEL VIEWPORT para que las cuatro columnas converjan; con un top escalonado por
+  // columna —o incluso con la sección arrancando a `-u·depth`— el recorte se pasaba del
+  // gris en algún punto del recorrido y dejaba ver el crema de la página. Con el gris
+  // cubriendo el hero entero eso es imposible a cualquier profundidad.
+  //
+  // La de ABAJO sigue siendo la de producción (`u·1.5`) y sigue siendo gris de verdad: es
+  // la transición hacia OwnYourOwn, está por debajo del hero y nadie la recorta.
+  const bottomOffsets = stairOffsets(STAIR_SPAN);
+
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
     const mm = gsap.matchMedia();
@@ -49,38 +68,46 @@ export default function LabBarsStatic() {
   }, []);
 
   return (
-    // El margen negativo no cambia respecto a producción: la sección sigue montando
-    // sobre el final del hero y el gris de la columna central sigue empezando justo en
-    // `100svh`. Lo que cambia es el orden de apilado — el hero pasa a `z-[3]` y tapa
-    // esto hasta que su recorte lo descubre.
+    // `-100svh`: la sección arranca exactamente en el top del hero, así que el gris cubre
+    // toda la zona que el recorte puede llegar a descubrir. El alto TOTAL crece, pero lo
+    // que se ve no: los `100svh` extra quedan detrás del hero, y el aire visible entre la
+    // juntura y el statement sigue siendo `u·0.5` (ver `above` más abajo).
+    //
+    // Ya no hay ningún número que este componente tenga que compartir con `LabHeroCarve`:
+    // la profundidad de la escalera es solo asunto del recorte.
+    //
+    // Lo que cambia respecto a producción es el orden de apilado — el hero pasa a `z-[3]`
+    // y tapa esto hasta que su recorte lo descubre.
     <section
       ref={rootRef}
       style={
         {
           "--u": HERO_UNIT,
-          marginTop: "calc(-1 * var(--u) * 1.5 - 2px)",
+          marginTop: "calc(-100svh - 2px)",
         } as React.CSSProperties
       }
       className="relative z-[2] text-foreground"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 flex">
-          {STAIR_OFFSET.map((offset, i) => (
+          {bottomOffsets.map((_, i) => (
             <div key={i} data-qbar-col className="relative flex-1">
               <div
-                // La columna central lleva el marcador del HUD: su gris empieza
-                // exactamente en la juntura, así que su borde superior es la línea
-                // contra la que se mide todo lo demás.
-                {...(offset === 1.5 ? { "data-qbar-core": "" } : {})}
+                // La columna central lleva el marcador que el HUD busca. Su `gap` ya no
+                // dice nada útil —el gris arranca arriba de todo, no en la juntura— pero
+                // el panel necesita encontrar el elemento para no abortar la lectura.
+                {...(i === 3 ? { "data-qbar-core": "" } : {})}
                 className="absolute inset-x-0 bg-bar"
-                style={{ top: u(offset), bottom: u(offset) }}
+                style={{ top: 0, bottom: u(bottomOffsets[i]) }}
               />
             </div>
           ))}
         </div>
       </div>
 
-      <LabStatement />
+      {/* La juntura está a `100svh` del top de la sección; el texto entra `u·0.5`
+          más abajo, igual que en producción. */}
+      <LabStatement above="calc(100svh + var(--u) * 0.5)" />
     </section>
   );
 }
