@@ -1,10 +1,122 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { ArrowRight } from "lucide-react";
-import UnicornScene, { type UnicornStudioScene } from "unicornstudio-react/next";
+import type { UnicornStudioScene } from "unicornstudio-react/next";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
+import { onViewportToggle } from "@/components/primitives/motion/pauseOffscreen";
+import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+
+// ── El SDK de Unicorn entra en su propio chunk, y solo si se llega a usar ─────
+//
+// `unicornstudio-react/next` embute el runtime completo de Unicorn Studio: 912KB
+// en disco. Con el import estático, ese peso entraba en el bundle de cliente de
+// TODA página que renderizara esta sección — y como también lo importa
+// `views/FlowCompareView`, el build terminaba con TRES chunks idénticos de 879KB,
+// uno por entrypoint.
+//
+// `next/dynamic` con `ssr: false` lo saca a un chunk aparte que se pide cuando el
+// componente se monta. Y el componente no se monta hasta que la sección se acerca
+// al viewport (ver `nearViewport` más abajo), así que en una visita que no llega
+// a scrollear hasta acá, no se descarga nunca.
+//
+// El `lazyLoad` del propio wrapper NO cubría esto: difiere la INICIALIZACIÓN de la
+// escena, no la descarga del SDK que la inicializa.
+const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
+  ssr: false,
+});
+
+// ── Cuándo se montan las escenas ─────────────────────────────────────────────
+//
+// Montar el componente es lo que ARRANCA todo el trabajo caro, y eso no es obvio:
+// el `lazyLoad` del SDK no espera a que la sección se acerque para empezar. Al
+// registrar una escena hace `!lazyLoad || isInView ? initializePlanes() : Mt(m)`,
+// y ese `Mt` es un prewarm que se encola en el acto. Los 100px de margen del SDK
+// solo gobiernan el paso a "en vista", no el arranque.
+//
+// Y el trabajo es del orden de SEGUNDOS, sin que la red tenga nada que ver: medido
+// en localhost, donde el chunk se sirve al instante, las dos primeras cards
+// tardaban ~5s en pintar. Se va en la cola del SDK, que inicializa las escenas DE
+// UNA EN UNA (tres acá, cada una con 5 capas y un blur de 4 pases), planifica cada
+// paso con `requestIdleCallback({timeout: 500})`, y POSPONE la cola mientras
+// detecta scroll reintentando cada 80ms — y con Lenis el scroll sigue emitiendo un
+// rato después de soltar la rueda.
+//
+// De ahí las dos vías de abajo, en orden de preferencia:
+//
+//  1. `useIdlePreload` — tras `window.load` y con el hilo libre. Es la buena: el
+//     lector todavía está en el hero, así que esos segundos no los ve nadie.
+//  2. El gate por scroll (`SCENE_LEAD`) — red de seguridad para cuando (1) no
+//     corre: conexión limitada, o un navegador sin `requestIdleCallback`.
+//
+// Las dos escriben el mismo `ready`, y encender un booleano que ya está encendido
+// no re-renderiza nada, así que no hace falta coordinarlas.
+
+/** Viewports de anticipación del gate por scroll, cuando es el que decide. */
+const SCENE_LEAD = 3;
+
+/**
+ * Tope de espera del idle callback. Sin él, en una pestaña que nunca queda ociosa
+ * la precarga no ocurriría y todo caería en el gate por scroll.
+ */
+const IDLE_TIMEOUT = 2000;
+
+/** La parte de la Network Information API que se usa acá. No está en lib.dom. */
+type Connection = { saveData?: boolean; effectiveType?: string };
+
+/**
+ * `true` si el visitante pidió ahorrar datos o su conexión es mala. En ese caso NO
+ * se precarga: 877KB de SDK para un cover decorativo no es un intercambio que
+ * corresponda hacer en nombre de alguien con datos contados. Queda el gate por
+ * scroll, que solo los descarga si de verdad baja hasta la sección.
+ *
+ * La API es solo de Chromium; donde no existe, se precarga (que es el default
+ * razonable: no hay señal de que la red sea un problema).
+ */
+function prefersLessData(): boolean {
+  const conn = (navigator as Navigator & { connection?: Connection }).connection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  return conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.effectiveType === "3g";
+}
+
+/**
+ * Llama a `onReady` cuando la página terminó de cargar lo necesario para verse Y el
+ * hilo principal está libre.
+ *
+ * Las dos condiciones importan y son distintas: `load` dice que no queda nada
+ * crítico compitiendo por la RED (el LCP ya pasó, por definición, antes de `load`),
+ * y el idle callback dice que no queda nada compitiendo por la CPU — que es lo que
+ * protege al INP del parse de 877KB de JavaScript.
+ *
+ * Consecuencia buscada para SEO: los dos Core Web Vitals que son señal de ranking
+ * quedan fuera del camino de esto por construcción. Y como Googlebot normalmente no
+ * llega a ejecutar un idle callback, tampoco gasta presupuesto de rastreo en un SDK
+ * que solo pinta un canvas decorativo — el HTML indexable (títulos, bylines, links)
+ * sale del servidor y no depende de nada de esto.
+ */
+function useIdlePreload(onReady: () => void) {
+  useEffect(() => {
+    if (prefersLessData()) return;
+    if (typeof window.requestIdleCallback !== "function") return;
+
+    let handle = 0;
+    const schedule = () => {
+      handle = window.requestIdleCallback(onReady, { timeout: IDLE_TIMEOUT });
+    };
+
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+
+    return () => {
+      if (handle) window.cancelIdleCallback(handle);
+      window.removeEventListener("load", schedule);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
 
 // Sin datos reales (fuera de alcance de este draft): copy fijo. Si esta sección
 // se conecta al CMS más adelante, migra a PostCard/PostGrid
@@ -108,7 +220,7 @@ function useMouseOnlyOnHover(hovered: boolean) {
   }, []);
 }
 
-function PostCard({ post }: { post: (typeof POSTS)[number] }) {
+function PostCard({ post, ready }: { post: (typeof POSTS)[number]; ready: boolean }) {
   const [hovered, setHovered] = useState(false);
   const sceneRef = useMouseOnlyOnHover(hovered);
 
@@ -138,8 +250,11 @@ function PostCard({ post }: { post: (typeof POSTS)[number] }) {
         className="absolute inset-2.5 overflow-hidden rounded-[1.4rem]"
         style={{ backgroundImage: post.fallback }}
       >
+        {/* Hasta que `ready` no se enciende, lo que se ve es el gradiente de
+            `fallback` del contenedor de arriba — que es el mismo fallback que ya
+            cubría el caso "la escena no carga". */}
         <div className="absolute inset-0" aria-hidden="true">
-          <UnicornScene
+          {ready && <UnicornScene
             jsonFilePath={post.scene}
             width="100%"
             height="100%"
@@ -152,7 +267,7 @@ function PostCard({ post }: { post: (typeof POSTS)[number] }) {
             lazyLoad
             placeholderClassName="h-full w-full"
             sceneRef={sceneRef}
-          />
+          />}
         </div>
       </div>
 
@@ -202,8 +317,24 @@ export default function LatestUpdates() {
   // de Unicorn Studio, que trae su propio rAF por escena.
   const gridRef = useScrollReveal<HTMLDivElement>();
 
+  // Se enciende una sola vez y no se vuelve a apagar: desmontar las escenas al
+  // salir de vista significaría volver a inicializarlas al volver, que es más caro
+  // que dejarlas corriendo (y el runtime de Unicorn ya pausa las suyas). Las dos
+  // vías que lo encienden están explicadas arriba, junto a SCENE_LEAD.
+  const [ready, setReady] = useState(false);
+  const mount = useCallback(() => setReady(true), []);
+
+  // Vía preferida: en cuanto la página cargó lo crítico y el hilo está libre.
+  useIdlePreload(mount);
+
+  // Red de seguridad: si la de arriba no corrió (conexión limitada, o un navegador
+  // sin requestIdleCallback), el scroll las monta igual antes de llegar.
+  const gateRef = useGsapContext<HTMLDivElement>((_self, scope) => {
+    onViewportToggle(scope, (visible) => visible && mount(), SCENE_LEAD);
+  }, []);
+
   return (
-    <section className="bg-cream text-foreground">
+    <section ref={gateRef} className="bg-cream text-foreground">
       <Container className="flex flex-col gap-20 py-28 md:gap-24 md:py-36">
         <h2 className="text-center text-h1 text-pretty">The latest from NEAR</h2>
 
@@ -223,7 +354,7 @@ export default function LatestUpdates() {
 
           <div ref={gridRef} className="grid grid-cols-1 gap-7 md:grid-cols-3">
             {POSTS.map((post, i) => (
-              <PostCard key={i} post={post} />
+              <PostCard key={i} post={post} ready={ready} />
             ))}
           </div>
         </div>

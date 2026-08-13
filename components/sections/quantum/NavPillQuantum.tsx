@@ -13,7 +13,7 @@ import {
 import { useState, useRef, useLayoutEffect } from "react";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { gsap } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
 
 // The quantum rebuild's nav pill. It differs from `home-v2/NavPillV2` in the
@@ -119,6 +119,14 @@ function NavPanel({ link }: { link: Entry }) {
   );
 }
 
+// La copy del menú vive acá y NO en `quantumContent.ts`, que es la regla del resto de la
+// sección. La excepción tiene motivo: cada entrada lleva su `icon`, que es un componente
+// de React, y ese módulo es de datos puros —strings y arrays, sin JSX— justamente para
+// que el día que la copy venga de la base de datos la forma no cambie. Un árbol de
+// componentes no puede cumplir eso.
+//
+// Al integrar, esto reemplazó a `quantumContent.NAV_LINKS`, que era la lista plana de
+// cuatro etiquetas del nav viejo y quedó sin consumidores.
 const LINKS: Entry[] = [
   {
     label: "Products",
@@ -193,6 +201,12 @@ const LINKS: Entry[] = [
 
 // Extra clearance below the pill as it retracts, so no edge stays peeking.
 const HIDE_MARGIN = 12;
+
+// Where the pill's middle sits, as a percentage of viewport height. It is fixed
+// at `top-6` with ~50px of pill, so its centre lands around 5% down. This is what
+// decides which section the ink flip reads: the tone has to change when the pill
+// crosses the boundary, not when the section's own midpoint does.
+const PILL_BAND = 5;
 
 export default function NavPillQuantum() {
   const [active, setActive] = useState<string | null>(null);
@@ -293,41 +307,48 @@ export default function NavPillQuantum() {
     // `apply()` writes the light values down both branches, so the flip never
     // actually happens. It is restored here, because an attribute with no
     // effect is clearly a bug rather than a decision.
-    let raf = 0;
-    let tone: string | null = null;
+    //
+    // ── Why ScrollTrigger and not a scroll listener ──────────────────────
+    // This used to run `document.querySelectorAll("[data-nav-dark]")` plus one
+    // getBoundingClientRect() per dark section on every animation frame of
+    // scroll, to answer a question ScrollTrigger already tracks: is this band of
+    // the viewport inside that element? One trigger per dark section with an
+    // `onToggle` answers it with zero layout reads per frame, and it comes off
+    // the same ticker Lenis is on.
+    //
+    // The count, not a boolean: two dark sections can overlap the pill's band
+    // during a handover, and a boolean would flip to light in between.
+    //
+    // The triggers are created here and not on mount-order grounds: the dark
+    // sections are siblings of this component, so they exist by the time the
+    // parent provider's coordinated refresh runs.
+    if (nav) {
+      let darkCount = 0;
+      const applyTone = () => {
+        nav.dataset.tone = darkCount > 0 ? "dark" : "light";
+      };
+      applyTone();
 
-    const measure = () => {
-      raf = 0;
-      if (!nav) return;
-      const r = nav.getBoundingClientRect();
-      const mid = r.top + r.height / 2;
-      // The DOM is queried on every measurement rather than once on mount: the
-      // dark sections are siblings of this component, not descendants, so they
-      // may not exist yet when it mounts.
-      const dark = Array.from(document.querySelectorAll("[data-nav-dark]")).some((sec) => {
-        const sr = sec.getBoundingClientRect();
-        return sr.top <= mid && sr.bottom >= mid;
+      document.querySelectorAll<HTMLElement>("[data-nav-dark]").forEach((section) => {
+        ScrollTrigger.create({
+          trigger: section,
+          // The pill sits at the top of the viewport, so the band that matters
+          // is a sliver at `top`. `PILL_BAND` is where its middle falls, as a
+          // fraction of viewport height.
+          start: `top ${PILL_BAND}%`,
+          end: `bottom ${PILL_BAND}%`,
+          onToggle: (self) => {
+            darkCount += self.isActive ? 1 : -1;
+            applyTone();
+          },
+        });
       });
-      const next = dark ? "dark" : "light";
-      if (next === tone) return;
-      tone = next;
-      nav.dataset.tone = next;
-    };
-
-    // A data-attribute is written instead of calling setState: this reacts to
-    // every scroll event, and re-rendering React per event to change two
-    // colours is exactly what the rest of the toolkit avoids.
-    const onScrollTone = () => {
-      if (!raf) raf = requestAnimationFrame(measure);
-    };
-    measure();
-    window.addEventListener("scroll", onScrollTone, { passive: true });
-    window.addEventListener("resize", onScrollTone);
+    }
 
     // ── 1:1 retraction with the gesture ──────────────────────────────────
     mm.add(MQ.motion, () => {
-      // quickSetter and not gsap.to(): this runs on every scroll event, and a
-      // tween per event would mean instantiating hundreds of objects a second
+      // quickSetter and not gsap.to(): this runs on every scroll update, and a
+      // tween per update would mean instantiating hundreds of objects a second
       // to write one property.
       //
       // `top` and NOT `y`. This looks like the wrong choice — transform is the
@@ -340,36 +361,52 @@ export default function NavPillQuantum() {
       // longer carries it.
       const setTop = gsap.quickSetter(scope, "top", "px") as (v: number) => void;
 
-      let last = window.scrollY;
+      // Hoisted out of the handler. Reading `offsetHeight` inside it forced a layout on
+      // every scroll event — and immediately after writing `top`, which is the
+      // read-after-write that makes it a forced synchronous reflow. Now that the
+      // animated property is `top` rather than a transform, the write already touches
+      // layout on its own, so keeping the read out of the handler matters MORE, not less.
+      // The pill's height only changes when the viewport does, so it is measured
+      // on refresh (which ScrollTrigger fires on resize) instead.
+      let hidden = 0;
+      const measureHeight = () => {
+        hidden = -(scope.offsetHeight + HIDE_MARGIN);
+      };
+      measureHeight();
+      ScrollTrigger.addEventListener("refresh", measureHeight);
+
+      let last = 0;
       let offset = 0;
 
-      const onScroll = () => {
-        const y = window.scrollY;
-        const delta = y - last;
-        last = y;
+      // One ScrollTrigger over the whole document rather than a raw scroll
+      // listener: it already batches into the shared ticker (so this write lands
+      // in the same frame slot as every other GSAP write instead of interleaving
+      // with them) and it already knows the scroll position without asking layout.
+      const st = ScrollTrigger.create({
+        start: 0,
+        end: "max",
+        onUpdate: (self) => {
+          const y = self.scroll();
+          const delta = y - last;
+          last = y;
 
-        const hidden = -(scope.offsetHeight + HIDE_MARGIN);
-        offset = Math.min(0, Math.max(hidden, offset - delta));
-        // Always visible at the very top: without this, a negative scroll
-        // bounce on iOS can leave it hidden at the top of the page.
-        if (y <= 2) offset = 0;
+          offset = Math.min(0, Math.max(hidden, offset - delta));
+          // Always visible at the very top: without this, a negative scroll
+          // bounce on iOS can leave it hidden at the top of the page.
+          if (y <= 2) offset = 0;
 
-        setTop(offset);
-      };
+          setTop(offset);
+        },
+      });
+      last = st.scroll();
 
-      window.addEventListener("scroll", onScroll, { passive: true });
       return () => {
-        window.removeEventListener("scroll", onScroll);
+        ScrollTrigger.removeEventListener("refresh", measureHeight);
         setTop(0);
       };
     });
 
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScrollTone);
-      window.removeEventListener("resize", onScrollTone);
-      mm.revert();
-    };
+    return () => mm.revert();
   }, []);
 
   return (
@@ -380,6 +417,10 @@ export default function NavPillQuantum() {
     <div
       ref={rootRef}
       data-q-nav
+      // No `will-change: transform` here, even though the pill moves on every scroll
+      // update: promoting this layer makes it a backdrop root and silently kills the
+      // `backdrop-filter` on the bar and all four panels. Same reason the effect below
+      // animates `top` and not `y`.
       className="pointer-events-none fixed inset-x-0 top-0 z-50"
     >
       <Container className="pt-6">

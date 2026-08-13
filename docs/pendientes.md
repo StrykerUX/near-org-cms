@@ -71,6 +71,43 @@ distinto del convexo.
 
 ---
 
+## El descenso del hero — DECIDIDO, quedan dos colas
+
+**Estado:** ganó `paneles` y ya está en producción (`QuantumBars` + el reloj de
+`home-v2/stairGeometry.ts`). El laboratorio sigue en pie como referencia.
+
+El objetivo era que la escalera de `QuantumBars` no empezara siendo una barra gris
+plana. Tras dos intentos fallidos sobre la página real nació el laboratorio: doce
+rutas bajo `/prototype/descent`, catálogo en
+[`components/sections/lab/README.md`](../components/sections/lab/README.md).
+
+Los tres candidatos finales, y por qué ganó el que ganó:
+
+| Ruta | Mecanismo | Veredicto |
+|---|---|---|
+| `zocalo` | Producción sin tocar; dos líneas del reloj | Descartado: no elimina el zócalo, solo lo vuelve subordinado |
+| `talla` | La reja quieta, se recorta la imagen del hero | Descartado: el hero va encima para que el recorte funcione, así que su copy solo puede quedar cortada o montada sobre el gris. Es un defecto estructural del mecanismo, no un bug |
+| `paneles` | Paneles grises con `scaleY` sobre el hero | **Elegido.** Retira los cuatro problemas de `talla`, va al compositor y el gris tapa la copy del hero como corresponde |
+
+**El reencuadre del vídeo dejó de ser un problema.** Se creía que los tres candidatos
+compartían el costo del excedente (`drop`), que a 1877×1050 eran 228px de recorte
+horizontal, un 12% del ancho. Resultó que solo lo necesita `talla`: ese approach RETIRA
+la imagen, así que precisa imagen debajo. En `paneles` el gris se mueve por encima del
+hero y no hay nada que revelar. Con `drop = 0` la franja sin cubrir es 0.0px y el vídeo
+no crece ni un píxel — medido, la caja pasa de 2080×1168 a 2080×1019. Ver `36a09c3`.
+
+**Las dos colas que quedan:**
+
+- **Las rutas de referencia del lab quedaron desfasadas.**
+  `/prototype/descent/real` y `/zocalo` importan `HeroVideo` y `QuantumBars` de
+  producción para mostrar "el antes". Ahora que producción cambió, `real` muestra el
+  después y ya no sirve de comparación. Hay que congelar una copia del mecanismo viejo
+  o retirar la ruta y confiar en el historial de git.
+- **`OwnYourOwn` pasa por encima de las barras** (`z-[1]`, ver su línea 175) y la
+  sección de barras creció ~100svh de alto total al cambiar su margen negativo. El
+  solape se ve bien en el navegador, pero conviene mirarlo con calma en varios tamaños
+  de ventana antes de darlo por cerrado.
+
 ## Otros hilos abiertos
 
 **El blur de la reimplementación del flow field.** El efecto de referencia tiene

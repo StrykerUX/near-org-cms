@@ -5,7 +5,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { onViewportToggle } from "@/components/primitives/motion/pauseOffscreen";
-import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import CtaPill from "@/components/sections/quantum/CtaPill";
@@ -45,9 +45,30 @@ export default function QuantumHero() {
         lattice = createQuantumLattice(canvas, field, { wave: motionOk });
 
         if (lattice) {
-          const onMove = (e: PointerEvent) => {
+          // The canvas rect is cached instead of read per event. Reading it in
+          // the handler meant a forced layout on every `pointermove` — dozens a
+          // second — to get a value that only changes on resize or scroll.
+          //
+          // `left` is refreshed on ScrollTrigger's refresh (which fires on
+          // resize) and `top` on every scroll, because the field is not fixed:
+          // its viewport position moves as the page scrolls, and a stale `top`
+          // would put the halo above or below the cursor. `scrollY` is read from
+          // the event handler, which is a cached value, not a layout read.
+          let rectLeft = 0;
+          let rectTop = 0;
+          let rectPageTop = 0;
+          const measure = () => {
             const r = canvas.getBoundingClientRect();
-            lattice!.setPointer(e.clientX - r.left, e.clientY - r.top);
+            rectLeft = r.left;
+            rectTop = r.top;
+            rectPageTop = r.top + window.scrollY;
+          };
+          measure();
+          ScrollTrigger.addEventListener("refresh", measure);
+
+          const onMove = (e: PointerEvent) => {
+            rectTop = rectPageTop - window.scrollY;
+            lattice!.setPointer(e.clientX - rectLeft, e.clientY - rectTop);
           };
           const onLeave = () => lattice!.clearPointer();
           field.addEventListener("pointermove", onMove, { passive: true });
@@ -59,6 +80,7 @@ export default function QuantumHero() {
           onViewportToggle(field, (v) => lattice!.setVisible(v));
 
           mctx.add(() => {
+            ScrollTrigger.removeEventListener("refresh", measure);
             field.removeEventListener("pointermove", onMove);
             field.removeEventListener("pointerleave", onLeave);
           });

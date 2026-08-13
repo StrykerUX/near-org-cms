@@ -5,44 +5,11 @@ import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import { NEWS_STORIES as STORIES } from "@/components/sections/quantum/quantumContent";
 
 // Press coverage of the quantum threat and of NEAR's readiness. Three cards,
 // the last one inverted because it is NEAR's own announcement rather than
 // third-party coverage.
-
-type Story = {
-  outlet: string;
-  quote: string;
-  cta: string;
-  href: string;
-  tone: "light" | "dark";
-};
-
-const STORIES: Story[] = [
-  {
-    outlet: "Bloomberg",
-    quote:
-      "As much as $470 billion of Bitcoin could be at risk as quantum computing advances.",
-    cta: "Read the coverage",
-    href: "https://www.bloomberg.com/news/articles/2026-07-07/will-quantum-computers-hack-bitcoin-and-other-cryptocurrencies",
-    tone: "light",
-  },
-  {
-    outlet: "Project Eleven",
-    quote: "Research estimating over 7 million BTC in quantum-exposed addresses.",
-    cta: "See the research",
-    href: "https://bitcoin-risq-list.projecteleven.com/",
-    tone: "light",
-  },
-  {
-    outlet: "NEAR Protocol Brings Quantum-Safe Signing to Mainnet",
-    quote:
-      "With the 2.13 upgrade, NEAR becomes one of the first blockchains to add a NIST-approved post-quantum signature scheme in production.",
-    cta: "Read the announcement",
-    href: "https://www.prnewswire.com/news-releases/near-protocol-brings-quantum-safe-signing-to-mainnet-302829646.html",
-    tone: "dark",
-  },
-];
 
 export default function InTheNews() {
   const gridRef = useScrollReveal<HTMLDivElement>();

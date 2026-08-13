@@ -4,6 +4,7 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { WIPE_STATEMENT as STATEMENT } from "@/components/sections/quantum/quantumContent";
 
 // The transition line between the proof ribbon and the dark section. It fills
 // in letter by letter as you scroll, with a lime-to-teal front running half a
@@ -17,9 +18,6 @@ import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 //
 // Both layers holding the same text is what makes `split.chars` line up index
 // for index between them.
-
-const STATEMENT =
-  "Every blockchain will have to replace its cryptography. NEAR designed accounts so that day is a single transaction, not a migration.";
 
 // Stagger step, in units of the scrubbed timeline. The shine front uses the
 // SAME value to start each letter: that is what keeps it glued to the fill

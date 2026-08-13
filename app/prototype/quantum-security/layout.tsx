@@ -4,7 +4,7 @@ import PrototypeMotionProvider from "@/components/site/providers/PrototypeMotion
 // here and not in app/prototype/, so that /prototype and /prototype/components
 // — sibling routes, not children — stay free of Lenis and ScrollTrigger.refresh().
 //
-// It is not optional for this route. RotationStatement's sticky track, FieldBreak's
+// It is not optional for this route. ThreatSequence's sticky track, FieldBreak's
 // video scrub, the roadmap spine and the word field all measure against the
 // viewport, and without the provider's coordinated refresh they stay pinned to
 // the first paint's height — before the font swaps, before the 7 MB video

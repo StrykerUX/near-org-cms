@@ -8,7 +8,11 @@
 @import "../packages/cms-core/styles/admin.css";
 
 :root {
-  --color-muted: #5A5A5A;
+  /* `--color-muted` vivía acá con un hex propio (#5A5A5A) y otra vez en el
+     `@theme inline` de abajo como `var(--muted)` — dos valores distintos para el
+     mismo nombre. El único consumidor del hex era la regla `.text-muted`, que
+     duplicaba la utilidad que Tailwind ya genera desde el token. Borrados los
+     dos; la fuente única es el `--color-muted` del @theme. */
 
   /* ── DEPRECADA: escala vieja, NO usar en código nuevo ─────────────────────
      La escala real del DS son los tokens `--text-*` del @theme inline de más
@@ -489,10 +493,6 @@
 
 /* ── site animations & utilities (pending redesign) ─────────── */
 
-.text-muted {
-  color: var(--color-muted);
-}
-
 /* Linktree public page — optional glass-card link buttons (tint driven by per-instance CSS vars) */
 .linktree-glass {
   background: var(--lt-glass-bg);
@@ -508,42 +508,10 @@
   transform: translateY(-1px);
 }
 
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(28px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-[data-reveal-hero-h1] {
-  animation: fadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
-}
-
-[data-reveal-hero-card]:nth-of-type(1) {
-  animation: fadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
-}
-
-[data-reveal-hero-card]:nth-of-type(2) {
-  animation: fadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.52s both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-reveal-hero-h1],
-  [data-reveal-hero-card] {
-    animation: none;
-  }
-}
-
-.prose-policy ul {
-  list-style: disc;
-  padding-left: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+/* Borrados acá: `@keyframes marquee` (los dos marquees del sitio los mueve GSAP
+   sobre `[data-marquee]`, no CSS), `@keyframes fadeUp` + `[data-reveal-hero-*]`
+   (cero usos en el árbol), `.prose-policy` (cero usos) y `.text-muted` (Tailwind
+   ya genera esa utilidad desde el token; la regla manual la duplicaba). */
 
 .lucide-plus {
   display: inline-block;

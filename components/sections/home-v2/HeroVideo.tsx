@@ -4,20 +4,23 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
+import { createVideoScrub } from "@/components/primitives/motion/videoScrub";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { HERO_UNIT } from "@/components/sections/home-v2/heroGeometry";
 
 // ── Geometría: la unidad `--u` ───────────────────────────────────────────────
 // El encastre entre el hero y QuantumBars sale de una sola unidad: el ancho de
 // una de las 7 columnas de la escalera.
 //
-//   alto del hero  = 100svh          (el hero llena la pantalla)
-//   alto del video = 100%            (el video llena el hero)
-//   top de QuantumBars = −u·1.75     (monta sobre el final del hero)
+//   alto del hero  = 100svh              (el hero llena la pantalla)
+//   alto del video = 100%                (el video llena el hero)
+//   top de QuantumBars = −u·1.5 − 2px    (monta sobre el final del hero)
 //
-// De ahí, el bloque sólido de las barras arranca en `100svh − u·0.25`, o sea
-// u·0.25 ANTES de que el video termine: el gris tapa esa franja y la imagen
-// muere por debajo de la escalera sin dejar juntura visible. En cualquier
-// ventana, sin medir nada.
+// De ahí, el bloque sólido de las barras arranca en `100svh − 2px`: el margen
+// negativo sube la sección u·1.5 y el bloque vive a `top: u·1.5` dentro de ella,
+// así que los dos bordes coinciden justo en la juntura y la imagen muere por
+// debajo de la escalera sin dejar franja visible. En cualquier ventana, sin medir
+// nada. Los 2px son costura antisubpíxel, no un solape de diseño.
 //
 // ── Por qué NO se replica la fórmula del original ────────────────────────────
 // El HTML de referencia usa `100vh − u·1.75` con un piso de 760px, y el video a
@@ -27,9 +30,6 @@ import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 // —que a scroll 0 están en `scaleY: 0`— y se ve el crema de la página. El
 // original arrastra ese mismo bug; acá el hero llena el viewport y el problema
 // desaparece en origen en vez de parchearse con un `max()`.
-//
-// `--u` se declara en las dos secciones con el mismo valor. Ver QuantumBars.tsx.
-export const HERO_UNIT = "calc(100vw / 7)";
 
 // ── Ajustes del scrub ────────────────────────────────────────────────────────
 //
@@ -47,19 +47,18 @@ const SCRUB_RATE = 1;
 // fps del asset. NO hay forma de leerlo desde el navegador: ningún API de
 // <video> lo expone. Está medido con `ffprobe` sobre
 // public/prototype/v2/hero-descent.mp4 (24/1, 193 frames en 8.04s) y hay que
-// actualizarlo a mano si el archivo se re-encodea.
-//
-// Sirve para no pedir seeks que devuelven el frame que ya se está viendo: a 24
-// fps, `currentTime = 1.0341` y `1.0352` dan exactamente la misma imagen, pero
-// cada asignación dispara igual el pipeline de seek + decode. Redondeando al
-// límite de frame, los seeks bajan de ~60/s a 24/s como mucho.
+// actualizarlo a mano si el archivo se re-encodea. Qué hace con esto el lazo de
+// scrub está documentado en `primitives/motion/videoScrub`.
 const FPS = 24;
-const FRAME = 1 / FPS;
 
 // Factor del lazo de persecución. Más alto = el video sigue al scroll más de
 // cerca, pero con saltos más secos entre frame y frame; más bajo = más suave y
 // más retrasado. Este amortiguado es justamente lo que disimula el escalonado,
 // así que subirlo de más lo devuelve.
+//
+// Van explícitos aunque coincidan con los defaults de `createVideoScrub`: están
+// calibrados contra ESTE clip (un descenso continuo de 8s) y no son un valor
+// genérico que convenga heredar sin mirar.
 const CHASE = 0.14;
 // Cerca del final se persigue más despacio, para que el último tramo "atraque"
 // en vez de frenar de golpe.
@@ -135,17 +134,9 @@ export default function HeroVideo() {
       // scroll, que es justo lo que se lee como movimiento de cámara suave en
       // vez de como una diapositiva atada al dedo.
       //
-      // Encima de ese lazo hay tres filtros, y cada uno ataca una causa distinta
-      // de que el scrub se vea a tirones:
-      //
-      //   1. SNAP A FRAME  — el asset tiene 24 fps, así que pedir `1.0341` y
-      //      `1.0352` devuelve la MISMA imagen. Se redondea al límite de frame y
-      //      solo se asigna cuando el frame de destino cambia de verdad: los
-      //      seeks bajan de ~60/s a 24/s como techo.
-      //   2. BUFFER        — nunca se pide más allá de lo descargado. Con 13 MB
-      //      bajando, pedir un frame que aún no llegó bloquea el decoder.
-      //   3. CONTRAPRESIÓN — no se encola un seek mientras hay otro en vuelo,
-      //      o una ráfaga de scroll acumula cola y el decoder la sirve tarde.
+      // Encima de ese lazo hay tres filtros —snap a frame, tope por buffer
+      // descargado y contrapresión de seeks— y los tres viven en
+      // `primitives/motion/videoScrub`, con el porqué de cada uno documentado ahí.
       //
       // El asset ya es all-intra (193 frames, 193 keyframes), así que el seek en
       // sí es barato: lo que sobraba era la cantidad de seeks, no su coste.
@@ -154,77 +145,17 @@ export default function HeroVideo() {
       // scrubbear, porque su servidor de preview no responde HTTP Range y sin
       // eso el <video> no es seekable. Next sirve public/ con Range en dev y en
       // producción, así que ese rodeo (y el mp4 completo en RAM) no hace falta.
+      //
+      // Este lazo nació inline acá, se extrajo cuando `quantum/FieldBreak`
+      // necesitó lo mismo, y esta llamada cierra la migración: eran ~95 líneas de
+      // lógica delicada duplicada, y la copia de acá arrastraba además una mezcla
+      // de unidades en `target` (a veces fracción de progreso, a veces segundos).
       if (video) {
-        let duration = 0;
-        let target = 0;
-        let current = 0;
-        let raf = 0;
-        // Último frame REALMENTE pedido. Comparar contra esto —y no contra
-        // `video.currentTime`— es lo que evita re-pedir el frame que ya se está
-        // viendo: `currentTime` devuelve el tiempo exacto al que el decoder
-        // aterrizó, que casi nunca coincide con el que se pidió.
-        let shownFrame = -1;
-
-        /** Hasta dónde llega el tramo descargado que contiene a `t`. */
-        const bufferedUntil = (t: number) => {
-          for (let i = 0; i < video.buffered.length; i++) {
-            if (t >= video.buffered.start(i) && t <= video.buffered.end(i)) {
-              return video.buffered.end(i);
-            }
-          }
-          return t; // fuera de todo rango: mejor no adelantarse
-        };
-
-        const tick = () => {
-          raf = 0;
-          if (!duration) return;
-
-          const nearEnd = target > duration - 0.8 && target > current;
-          current += (target - current) * (nearEnd ? CHASE_DOCKING : CHASE);
-
-          // Nunca pedir más allá de lo descargado. Es la diferencia entre
-          // quedarse quieto en el último frame disponible y bloquear el decoder
-          // esperando bytes que todavía no llegaron — que es como se ven los
-          // tirones de los primeros segundos, con los 13 MB aún bajando.
-          const reachable = Math.min(current, bufferedUntil(current));
-          const frame = Math.round(reachable / FRAME);
-
-          // Contrapresión: mientras haya un seek en vuelo no se encola otro. Sin
-          // esto, una ráfaga de scroll acumula una cola de seeks que el decoder
-          // va sirviendo tarde, y eso se ve exactamente como un tirón.
-          // `video.seeking` es estándar y no necesita listeners.
-          if (frame !== shownFrame && !video.seeking) {
-            shownFrame = frame;
-            video.currentTime = frame * FRAME;
-          }
-
-          // El lazo sigue vivo mientras quede algo pendiente, aunque en este
-          // tick no se haya pedido ningún frame nuevo. Los tres casos:
-          //   · todavía falta distancia que recorrer;
-          //   · el frame se calculó pero un seek en vuelo impidió pedirlo;
-          //   · el buffer recortó el objetivo, y hay que reintentar cuando
-          //     lleguen más bytes.
-          const pending =
-            Math.abs(target - current) > FRAME * 0.5 ||
-            frame !== shownFrame ||
-            reachable < current - FRAME;
-          if (pending) raf = requestAnimationFrame(tick);
-        };
-
-        const onMeta = () => {
-          duration = video.duration || 0;
-          // Un primer frame decodificado, si no el hero arranca en negro.
-          shownFrame = 0;
-          video.currentTime = Math.max(0.001, target * duration);
-        };
-        if (video.readyState >= 1) onMeta();
-        else video.addEventListener("loadedmetadata", onMeta, { once: true });
-
-        // Cualquier cosa que lo arranque (una extensión, el navegador
-        // restaurando estado) lo vuelve a pausar: acá el video es una textura
-        // conducida por el scroll, no un clip que se reproduce.
-        const freeze = () => video.pause();
-        video.addEventListener("play", freeze);
+        const scrub = createVideoScrub(video, {
+          fps: FPS,
+          chase: CHASE,
+          chaseDocking: CHASE_DOCKING,
+        });
 
         ScrollTrigger.create({
           trigger: scope,
@@ -232,22 +163,10 @@ export default function HeroVideo() {
           end: "bottom top",
           scrub: true,
           invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const p = self.progress * SCRUB_RATE;
-            if (!duration) {
-              target = p; // se recuerda hasta que llegue la metadata
-              return;
-            }
-            target = Math.min(duration - 0.05, Math.max(0.001, p * duration));
-            if (!raf) raf = requestAnimationFrame(tick);
-          },
+          onUpdate: (self) => scrub.setProgress(self.progress * SCRUB_RATE),
         });
 
-        cleanups.push(() => {
-          if (raf) cancelAnimationFrame(raf);
-          video.removeEventListener("play", freeze);
-          video.removeEventListener("loadedmetadata", onMeta);
-        });
+        cleanups.push(scrub.destroy);
       }
 
       // ── 4. Intro del titular ──────────────────────────────────────────────
@@ -271,8 +190,16 @@ export default function HeroVideo() {
         gsap.set(rest, { autoAlpha: 0, y: 16 });
 
         let split: SplitText | null = null;
+        // `fonts.ready` es una promesa, y el cleanup de abajo puede correr antes
+        // de que resuelva: en dev pasa en cada mount por StrictMode, y en
+        // producción con cualquier navegación rápida. Sin este flag, `run()` hacía
+        // SplitText sobre un nodo ya revertido y creaba una timeline fuera del
+        // gsap.context que ya se cerró — o sea tweens que nadie va a limpiar,
+        // escribiendo sobre un DOM desconectado.
+        let cancelled = false;
 
         const run = () => {
+          if (cancelled) return;
           // Nada de `autoSplit` ni de `onSplit`.
           //
           // `autoSplit` re-partiría el titular al cambiar los anchos,
@@ -330,6 +257,7 @@ export default function HeroVideo() {
         else run();
 
         cleanups.push(() => {
+          cancelled = true;
           split?.revert();
           delete heading.dataset.intro;
         });
@@ -354,14 +282,33 @@ export default function HeroVideo() {
       // escalones de QuantumBars.
       className="relative flex flex-col bg-cream text-foreground"
     >
-      {/* Sin `autoPlay`: es una textura conducida por el scroll. `preload=auto`
-          sí, porque hay que poder hacer seek desde el primer scroll. */}
+      {/* Sin `autoPlay`: es una textura conducida por el scroll.
+
+          `preload="metadata"` y no `auto`: el asset son 12.7MB y con `auto` el
+          navegador los baja ENTEROS antes de que el lector haya scrolleado un
+          píxel, compitiendo con las fuentes y el resto del hero por ancho de
+          banda. Con `metadata` baja la cabecera —suficiente para saber duración y
+          dimensiones, que es lo que el scrub necesita para armarse— y el resto lo
+          pide por rangos HTTP a medida que hace seek. Next sirve public/ con Range
+          en dev y en producción, y `videoScrub` ya nunca pide más allá de lo
+          descargado (su `bufferedUntil`), así que el peor caso es que los primeros
+          seeks se queden en el último frame disponible en vez de bloquear el
+          decoder.
+
+          El `poster` es el primer frame del propio clip, extraído con ffmpeg
+          (59KB). Dos cosas se arreglan con él: el hero ya no arranca vacío
+          esperando que el video decodifique —el poster ES lo que se va a ver, así
+          que el reemplazo es invisible—, y sobre todo el caso
+          `prefers-reduced-motion`, donde el bloque de scrub no corre, `onMeta`
+          nunca se ejecuta, nunca se pide un primer frame y el hero se quedaba en
+          NEGRO. */}
       <video
         data-hero-bg
         src="/prototype/v2/hero-descent.mp4"
+        poster="/prototype/v2/hero-descent-poster.jpg"
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         aria-hidden="true"
         className="pointer-events-none absolute left-0 top-0 z-0 w-full object-cover object-bottom"
         // El video llena el hero, y punto. Como el hero mide 100svh y el bloque

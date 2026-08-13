@@ -1,6 +1,6 @@
+import { Toaster } from "sonner";
 import BannerHost from "@near/cms-core/components/site/BannerHost";
 import LenisProvider from "@/components/site/providers/LenisProvider";
-import AnalyticsScripts from "@/components/site/AnalyticsScripts";
 import SiteFooter from "@/components/site/SiteFooter";
 import { getActiveBanners } from "@/lib/queries/banners";
 
@@ -11,11 +11,15 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <LenisProvider>
-      <AnalyticsScripts />
       <BannerHost banners={banners} slot="top" />
       {children}
       <SiteFooter />
       <BannerHost banners={banners} slot="bottom" />
+      {/* Acá y no en el layout raíz: el único `toast()` del sitio público sale
+          del formulario de contacto del header, que vive en esta sección. En el
+          raíz se hidrataba también en /admin —que monta su propio Toaster— y en
+          las rutas de /prototype, que no lo usan. */}
+      <Toaster position="bottom-center" />
     </LenisProvider>
   );
 }

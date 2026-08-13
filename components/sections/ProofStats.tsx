@@ -4,10 +4,11 @@ import { ArrowUp } from "lucide-react";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import StatCallout from "@/components/primitives/StatCallout";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
+import { enableScene } from "@/components/primitives/motion/stickyScene";
 import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
-import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 
 // Stepper de 5 pasos. La sección se queda pegada mientras el scroll avanza por
 // los steps; en cada uno se resalta una palabra de la columna derecha, la
@@ -87,173 +88,170 @@ const DIM_WORD = 0.06; // opacidad de las palabras inactivas
 const RAIL_COPIES = [-1, 0, 1];
 
 export default function ProofStats() {
-  const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
-    const mm = gsap.matchMedia();
+  // El stepper solo corre en desktop y con movimiento permitido. Por debajo de
+  // eso la sección no se pega, no mide 325svh y los 5 steps se leen apilados en
+  // flujo normal — de eso se encarga el CSS, que cuelga del atributo
+  // data-stepper que este efecto enciende.
+  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop, self }) => {
+    // El float idle del botón corre siempre que haya movimiento permitido,
+    // stepper o no.
+    const arrow = q("[data-arrow]")[0];
+    if (motionOk && arrow) {
+      pauseOffscreen(
+        gsap.to(arrow, {
+          y: -6,
+          duration: 1.4,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        }),
+        scope
+      );
+    }
 
-    // El stepper solo corre en desktop y con movimiento permitido. Por debajo
-    // de eso la sección no se pega, no mide 325svh y los 5 steps se leen
-    // apilados en flujo normal — de eso se encarga el CSS, que cuelga del
-    // atributo data-stepper que este efecto enciende.
-    mm.add({ motionOk: MQ.motion, isDesktop: MQ.desktop }, (mctx) => {
-      const { motionOk, isDesktop } = mctx.conditions as {
-        motionOk: boolean;
-        isDesktop: boolean;
-      };
+    if (!motionOk || !isDesktop) return;
 
-      // El float idle del botón corre siempre que haya movimiento permitido,
-      // stepper o no.
-      const arrow = q("[data-arrow]")[0];
-      if (motionOk && arrow) {
-        pauseOffscreen(
-          gsap.to(arrow, {
-            y: -6,
-            duration: 1.4,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          }),
-          scope
-        );
+    const panels = q("[data-panel]");
+    const words = q("[data-word]");
+    const list = q("[data-list]")[0];
+    const rail = q("[data-rail]")[0];
+    const cursor = q("[data-cursor]")[0];
+    if (panels.length === 0 || words.length !== panels.length || !list || !rail) return;
+
+    const N = panels.length;
+
+    // Enciende el layout superpuesto. Va por atributo y no por breakpoint a
+    // secas: con reduced-motion en desktop los 5 paneles quedarían
+    // encimados e ilegibles si el CSS decidiera solo. Lo escribe `enableScene`
+    // y NO el JSX — si estuviera declarado en los dos lados, un re-render lo
+    // devolvería a "off" y el sticky se desarmaría sin avisar.
+    const stepperOff = enableScene(scope, "stepper");
+
+    let active = -1;
+
+    // self.add() y no una función suelta: los tweens de `go` se crean DENTRO
+    // del onUpdate, o sea después de que el context terminó de capturar. Sin
+    // esto no quedan en el scope, ctx.revert() no los revierte, y un
+    // desmontaje a mitad de un fade deja opacity inline pegada para siempre.
+    self.add("go", (i: number) => {
+      const prev = active;
+      active = i;
+
+      if (prev >= 0 && panels[prev]) {
+        gsap.to(panels[prev], {
+          autoAlpha: 0,
+          duration: 0.25,
+          ease: "power1.out",
+          overwrite: "auto",
+        });
       }
+      // autoAlpha y no opacity: agrega visibility:hidden al llegar a 0, así
+      // los paneles inactivos no quedan focuseables ni los lee un screen
+      // reader.
+      gsap.to(panels[i], {
+        autoAlpha: 1,
+        duration: 0.4,
+        ease: "power1.out",
+        delay: prev >= 0 ? 0.08 : 0,
+        overwrite: "auto",
+      });
 
-      if (!motionOk || !isDesktop) return;
+      // La lista se desplaza para centrar la palabra activa en el carril —
+      // que es exactamente donde está el botón verde. Se LEE DEL DOM en cada
+      // paso, así que un resize o un cambio de tamaño de fuente no lo
+      // desalinea, y no hace falta invalidateOnRefresh (el mismo que rompió
+      // el reveal de QuantumRevealHeading).
+      const w = words[i];
+      const y = rail.clientHeight / 2 - (w.offsetTop + w.offsetHeight / 2);
 
-      const panels = q("[data-panel]");
-      const words = q("[data-word]");
-      const list = q("[data-list]")[0];
-      const rail = q("[data-rail]")[0];
-      const cursor = q("[data-cursor]")[0];
-      if (panels.length === 0 || words.length !== panels.length || !list || !rail) return;
+      // El cursor se recuesta contra el borde izquierdo del título activo,
+      // casi tocándolo. Se mide con rects en vez de offsetLeft porque `list`
+      // está alineado a la derecha y su ancho es el del título más largo, no
+      // el del activo; el tween vertical en curso no afecta esta medición.
+      //
+      // El ancho del botón se LEE (no se hardcodea): su tamaño está en `em`
+      // del display fluido, así que cambia con el viewport. El aire es una
+      // fracción de ese ancho, así el conjunto escala parejo.
+      const cursorW = cursor?.offsetWidth ?? 0;
+      // Clamp en 0: un título más ancho que el carril tiene el borde
+      // izquierdo fuera de cuadro.
+      const cursorX = cursor
+        ? Math.max(
+            0,
+            w.getBoundingClientRect().left -
+              rail.getBoundingClientRect().left -
+              cursorW * 1.16
+          )
+        : 0;
 
-      const N = panels.length;
-
-      // Enciende el layout superpuesto. Va por atributo y no por breakpoint a
-      // secas: con reduced-motion en desktop los 5 paneles quedarían
-      // encimados e ilegibles si el CSS decidiera solo.
-      const host = scope as HTMLElement;
-      host.dataset.stepper = "on";
-
-      let active = -1;
-
-      // mctx.add() y no una función suelta: los tweens de `go` se crean DENTRO
-      // del onUpdate, o sea después de que el context terminó de capturar. Sin
-      // esto no quedan en el scope, ctx.revert() no los revierte, y un
-      // desmontaje a mitad de un fade deja opacity inline pegada para siempre.
-      mctx.add("go", (i: number) => {
-        const prev = active;
-        active = i;
-
-        if (prev >= 0 && panels[prev]) {
-          gsap.to(panels[prev], {
-            autoAlpha: 0,
-            duration: 0.25,
-            ease: "power1.out",
+      if (prev < 0) {
+        // Primer posicionamiento: instantáneo. El bloque real arranca debajo
+        // de un bloque entero de relleno, así que animar hasta acá sería un
+        // desplazamiento de ~700px bien visible al cargar la página.
+        gsap.set(list, { y });
+        if (cursor) gsap.set(cursor, { x: cursorX });
+      } else {
+        gsap.to(list, { y, duration: 0.6, ease: "power3.out", overwrite: "auto" });
+        if (cursor) {
+          gsap.to(cursor, {
+            x: cursorX,
+            duration: 0.6,
+            ease: "power3.out",
             overwrite: "auto",
           });
         }
-        // autoAlpha y no opacity: agrega visibility:hidden al llegar a 0, así
-        // los paneles inactivos no quedan focuseables ni los lee un screen
-        // reader.
-        gsap.to(panels[i], {
-          autoAlpha: 1,
-          duration: 0.4,
-          ease: "power1.out",
-          delay: prev >= 0 ? 0.08 : 0,
-          overwrite: "auto",
-        });
+      }
 
-        // La lista se desplaza para centrar la palabra activa en el carril —
-        // que es exactamente donde está el botón verde. Se LEE DEL DOM en cada
-        // paso, así que un resize o un cambio de tamaño de fuente no lo
-        // desalinea, y no hace falta invalidateOnRefresh (el mismo que rompió
-        // el reveal de QuantumRevealHeading).
-        const w = words[i];
-        const y = rail.clientHeight / 2 - (w.offsetTop + w.offsetHeight / 2);
-
-        // El cursor se recuesta contra el borde izquierdo del título activo,
-        // casi tocándolo. Se mide con rects en vez de offsetLeft porque `list`
-        // está alineado a la derecha y su ancho es el del título más largo, no
-        // el del activo; el tween vertical en curso no afecta esta medición.
-        //
-        // El ancho del botón se LEE (no se hardcodea): su tamaño está en `em`
-        // del display fluido, así que cambia con el viewport. El aire es una
-        // fracción de ese ancho, así el conjunto escala parejo.
-        const cursorW = cursor?.offsetWidth ?? 0;
-        // Clamp en 0: un título más ancho que el carril tiene el borde
-        // izquierdo fuera de cuadro.
-        const cursorX = cursor
-          ? Math.max(
-              0,
-              w.getBoundingClientRect().left -
-                rail.getBoundingClientRect().left -
-                cursorW * 1.16
-            )
-          : 0;
-
-        if (prev < 0) {
-          // Primer posicionamiento: instantáneo. El bloque real arranca debajo
-          // de un bloque entero de relleno, así que animar hasta acá sería un
-          // desplazamiento de ~700px bien visible al cargar la página.
-          gsap.set(list, { y });
-          if (cursor) gsap.set(cursor, { x: cursorX });
-        } else {
-          gsap.to(list, { y, duration: 0.6, ease: "power3.out", overwrite: "auto" });
-          if (cursor) {
-            gsap.to(cursor, {
-              x: cursorX,
-              duration: 0.6,
-              ease: "power3.out",
-              overwrite: "auto",
-            });
-          }
-        }
-
-        // Todas comparten text-foreground, así que el resaltado es puro tween
-        // de opacidad — no hay que animar `color`.
-        gsap.to(words, { opacity: DIM_WORD, duration: 0.4, overwrite: "auto" });
-        gsap.to(w, { opacity: 1, duration: 0.4, overwrite: "auto" });
-      });
-
-      // Estado inicial: los paneles arrancan invisibles (clase invisible +
-      // opacity-0 con el stepper encendido) y este primer go pone el 1º en su
-      // lugar sin delay.
-      mctx.go(0);
-
-      // ScrollTrigger de SOLO LECTURA: ni pin ni scrub. start/end calzan
-      // exactamente con el tramo en que el hijo sticky está pegado, así que
-      // progress 0→1 es el recorrido completo del stepper.
-      ScrollTrigger.create({
-        trigger: scope,
-        start: "top top",
-        end: "bottom bottom",
-        markers: DEBUG_MARKERS,
-        onUpdate: (self) => {
-          // Umbrales uniformes: cada step ocupa 1/N del recorrido. El clamp es
-          // por progress === 1, que daría N.
-          const i = Math.min(N - 1, Math.floor(self.progress * N));
-          if (i !== active) mctx.go(i);
-        },
-      });
-
-      return () => {
-        delete host.dataset.stepper;
-        // Red de seguridad por si algún tween de `go` quedó fuera del scope:
-        // sin esto un desmontaje a mitad de un fade deja opacity/visibility
-        // inline pegadas.
-        const all = [...panels, ...words, list, ...(cursor ? [cursor] : [])];
-        gsap.killTweensOf(all);
-        gsap.set(all, { clearProps: "opacity,visibility,transform" });
-      };
+      // Todas comparten text-foreground, así que el resaltado es puro tween
+      // de opacidad — no hay que animar `color`.
+      gsap.to(words, { opacity: DIM_WORD, duration: 0.4, overwrite: "auto" });
+      gsap.to(w, { opacity: 1, duration: 0.4, overwrite: "auto" });
     });
 
-    return () => mm.revert();
-  }, []);
+    // Estado inicial: los paneles arrancan invisibles (clase invisible +
+    // opacity-0 con el stepper encendido) y este primer go pone el 1º en su
+    // lugar sin delay.
+    self.go(0);
+
+    // ScrollTrigger de SOLO LECTURA: ni pin ni scrub. start/end calzan
+    // exactamente con el tramo en que el hijo sticky está pegado, así que
+    // progress 0→1 es el recorrido completo del stepper.
+    ScrollTrigger.create({
+      trigger: scope,
+      start: "top top",
+      end: "bottom bottom",
+      markers: DEBUG_MARKERS,
+      // `will-change` solo mientras el recorrido está activo. Fijo en el
+      // className, el carril —tres copias de cinco títulos en tipografía
+      // display— quedaba promovido a su propia capa durante toda la sesión.
+      onToggle: (st) => {
+        list.style.willChange = st.isActive ? "transform" : "auto";
+      },
+      // `st` y no `self`: el nombre del contexto de motion ya está tomado en
+      // este scope, y sombrearlo dejaría `self.go` apuntando al ScrollTrigger.
+      onUpdate: (st) => {
+        // Umbrales uniformes: cada step ocupa 1/N del recorrido. El clamp es
+        // por progress === 1, que daría N.
+        const i = Math.min(N - 1, Math.floor(st.progress * N));
+        if (i !== active) self.go(i);
+      },
+    });
+
+    return () => {
+      stepperOff();
+      // Red de seguridad por si algún tween de `go` quedó fuera del scope:
+      // sin esto un desmontaje a mitad de un fade deja opacity/visibility
+      // inline pegadas.
+      const all = [...panels, ...words, list, ...(cursor ? [cursor] : [])];
+      gsap.killTweensOf(all);
+      gsap.set(all, { clearProps: "opacity,visibility,transform" });
+      list.style.willChange = "auto";
+    };
+  });
 
   return (
     <section
       ref={rootRef}
-      data-stepper="off"
       style={
         { "--steps": STEPS.length, "--step-vh": STEP_VH } as React.CSSProperties
       }
@@ -355,7 +353,9 @@ export default function ProofStats() {
           {/* `right-0` + `items-end`: los títulos terminan pegados al borde. */}
           <div
             data-list
-            className="absolute right-0 top-0 flex flex-col items-end gap-2 will-change-transform"
+            // Sin `will-change` fijo: lo pone y lo quita el onToggle del
+            // ScrollTrigger del recorrido.
+            className="absolute right-0 top-0 flex flex-col items-end gap-2"
           >
             {RAIL_COPIES.map((copy) =>
               STEPS.map((step) => (

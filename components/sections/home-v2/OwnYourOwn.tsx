@@ -4,9 +4,10 @@ import Image from "next/image";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
-import { MQ, EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-v2/homeV2Content";
 
 // ── "Own Your Own": el título se queda quieto y las cards lo atraviesan ──────
 //
@@ -40,6 +41,12 @@ import { MQ, EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/mot
 // Lo que importa es la distancia a 1, no el valor: una card en 1 iría clavada
 // al scroll y no se desviaría nada.
 //
+// Esa convención —pedir la velocidad en múltiplos de la del scroll y no en px— es la
+// que después se formalizó en `primitives/motion/velocityRamp.ts`, y esta sección es
+// el precedente que cita. No usa el helper y no hace falta que lo use: acá el perfil
+// es un `sine.in`/`sine.out` de ida y vuelta que ya se ve bien, y `hermiteRamp` sirve
+// para el caso distinto de varios elementos que tienen que alcanzarse entre sí.
+//
 // Estas están acercadas respecto a las del original ([0.9, 1.5, 1.56, 1.6]).
 // Ahí la primera se separaba 54px de su sitio y la última 324 — seis veces más,
 // y la primera se leía como si no participara. Ahora el rango va de 119 a 270px
@@ -57,135 +64,128 @@ const SPEEDS = [0.78, 1.38, 1.44, 1.5] as const;
 // que había antes contra "The NEAR Stack".
 const DRIFT_VH = 60;
 
-const CARDS = [
+// Posición de cada card en el grid y su tinte, en el MISMO orden que
+// `OWN_YOUR_OWN_CARDS`. Se queda acá y no en el módulo de contenido porque es
+// composición: en qué celda cae cada card y cuánto se separa de la anterior.
+//
+// Clases literales y no template strings: Tailwind v4 no detecta clases
+// construidas dinámicamente. Mismo criterio que el mapa WIDTH de Container.
+//
+// El margen superior es la separación con la card anterior, y es lo único que hay
+// que tocar para reespaciarlas. Los valores salen del original.
+const CARD_LAYOUT = [
   {
-    src: "/prototype/feature-assets.png",
-    title: "Assets",
-    body: "You Can Now Pay for AI Usage by Staking NEAR",
-    // Clases literales y no template strings: Tailwind v4 no detecta clases
-    // construidas dinámicamente. Mismo criterio que el mapa WIDTH de Container.
-    //
-    // El margen superior es la separación con la card anterior, y es lo único
-    // que hay que tocar para reespaciarlas. Los valores salen del original.
-    place:
-      "lg:col-start-3 lg:col-span-3 lg:row-start-1 lg:-ml-[100px] lg:mr-[100px]",
+    place: "lg:col-start-3 lg:col-span-3 lg:row-start-1 lg:-ml-[100px] lg:mr-[100px]",
     tint: "bg-white/50",
   },
   {
-    src: "/prototype/feature-intelligence.png",
-    title: "Intelligence",
-    body: "Who Owns the Rails AI Runs On",
     place: "lg:col-start-9 lg:col-span-3 lg:row-start-2 lg:mt-[140px]",
     tint: "bg-card-tint/50",
   },
   {
-    src: "/prototype/feature-alpha.png",
-    title: "Alpha",
-    body: "Adding a New Execution Model to its Engine",
     place: "lg:col-start-3 lg:col-span-3 lg:row-start-3 lg:mt-[152px]",
     tint: "bg-white/50",
   },
   {
-    // Reusa el arte de Intelligence: el mismo glifo de IA, otro titular.
-    src: "/prototype/feature-intelligence.png",
-    title: "Agents",
-    body: "Always-On Agents Running Inside Encrypted Enclaves",
     place: "lg:col-start-9 lg:col-span-3 lg:row-start-4 lg:mt-[150px]",
     tint: "bg-card-tint/50",
   },
 ] as const;
 
 export default function OwnYourOwn() {
-  const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
-    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
-    const mm = gsap.matchMedia();
+  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
+    const cards = q("[data-own-card]");
+    const stage = q("[data-own-stage]")[0];
+    if (cards.length !== SPEEDS.length || !stage) return;
 
-    mm.add({ motionOk: MQ.motion, isDesktop: MQ.desktop }, (mctx) => {
-      const { motionOk, isDesktop } = mctx.conditions as {
-        motionOk: boolean;
-        isDesktop: boolean;
-      };
+    // Con reduced-motion no se anima nada: el JSX ya renderiza el estado
+    // legible, y sin transforms las cards quedan exactamente donde el layout
+    // las puso.
+    if (!motionOk) return;
 
-      const cards = q("[data-own-card]");
-      const stage = q("[data-own-stage]")[0];
-      if (cards.length !== SPEEDS.length || !stage) return;
-
-      // Con reduced-motion no se anima nada: el JSX ya renderiza el estado
-      // legible, y sin transforms las cards quedan exactamente donde el layout
-      // las puso.
-      if (!motionOk) return;
-
-      // En mobile las cards se apilan en una columna y no hay ancho para que
-      // crucen el título, así que el desvío no comunica nada. Reveal genérico.
-      if (!isDesktop) {
-        gsap.from(cards, {
-          autoAlpha: 0,
-          y: REVEAL.y,
-          stagger: REVEAL.stagger,
-          duration: REVEAL.duration,
-          ease: EASE_OUT,
-          scrollTrigger: { trigger: stage, start: REVEAL.start, once: true, markers: DEBUG_MARKERS },
-        });
-        return;
-      }
-
-      // Desvío máximo de cada card. El signo sale de su velocidad: las que van
-      // por encima de 1 se adelantan (y negativo) y la que va por debajo se
-      // queda atrás. Es la única lectura del entorno, y no toca el DOM.
-      const drift = (i: number) => (1 - SPEEDS[i]) * window.innerHeight * (DRIFT_VH / 100);
-
-      // Ida y vuelta sobre el recorrido del grid.
-      //
-      // ── El start ────────────────────────────────────────────────────────
-      // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
-      // lo que había, la coreografía no empezaba hasta que el grid tocaba el
-      // techo de la ventana: quedaban ~850px de scroll con las cards ya en
-      // pantalla y completamente quietas, y al cruzar ese umbral el desvío
-      // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
-      //
-      // El end, en cambio, NO puede ser `bottom top`, que sería el simétrico
-      // natural: el desvío tiene que valer cero cuando se ve el fondo del grid,
-      // y con `bottom top` la última card seguiría ~105px por encima de su sitio
-      // en ese momento. Como los transforms no afectan al layout, ahí reaparece
-      // el hueco contra "The NEAR Stack" — el mismo que ya se arregló una vez.
-      // `bottom bottom` hace que el retorno a cero caiga exactamente ahí.
-      //
-      // De paso el recorrido pasa de ~1300px de scroll a ~2200px, y como el
-      // desvío es el mismo repartido en más distancia, la velocidad máxima cae
-      // a la mitad. Buena parte de la fluidez sale de eso.
-      //
-      // ── Las curvas ──────────────────────────────────────────────────────
-      // `sine.in` en la ida y `sine.out` en la vuelta, en ese orden. Es lo que
-      // pone la velocidad en cero en los dos bordes y el máximo en el medio del
-      // recorrido, donde las cards cruzan el título. Al revés —que era lo que
-      // había— el perfil es 0 → MAX → 0 → MAX → 0: arranca y corta en seco, y
-      // encima se frena justo en el cruce, que es lo que hay que mirar.
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: stage,
-          start: "top bottom",
-          end: "bottom bottom",
-          scrub: true,
-          invalidateOnRefresh: true,
-          markers: DEBUG_MARKERS,
-        },
+    // En mobile las cards se apilan en una columna y no hay ancho para que
+    // crucen el título, así que el desvío no comunica nada. Reveal genérico.
+    if (!isDesktop) {
+      gsap.from(cards, {
+        autoAlpha: 0,
+        y: REVEAL.y,
+        stagger: REVEAL.stagger,
+        duration: REVEAL.duration,
+        ease: EASE_OUT,
+        scrollTrigger: { trigger: stage, start: REVEAL.start, once: true, markers: DEBUG_MARKERS },
       });
+      return;
+    }
 
-      tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.in", duration: 1 })
-        .to(cards, { y: 0, ease: "sine.out", duration: 1 });
+    // Desvío máximo de cada card. El signo sale de su velocidad: las que van
+    // por encima de 1 se adelantan (y negativo) y la que va por debajo se
+    // queda atrás. Es la única lectura del entorno, y no toca el DOM.
+    const drift = (i: number) => (1 - SPEEDS[i]) * window.innerHeight * (DRIFT_VH / 100);
 
-      return () => {
-        gsap.killTweensOf(cards);
-        gsap.set(cards, { clearProps: "transform" });
-      };
+    // Ida y vuelta sobre el recorrido del grid.
+    //
+    // ── El start ────────────────────────────────────────────────────────
+    // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
+    // lo que había, la coreografía no empezaba hasta que el grid tocaba el
+    // techo de la ventana: quedaban ~850px de scroll con las cards ya en
+    // pantalla y completamente quietas, y al cruzar ese umbral el desvío
+    // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
+    //
+    // El end, en cambio, NO puede ser `bottom top`, que sería el simétrico
+    // natural: el desvío tiene que valer cero cuando se ve el fondo del grid,
+    // y con `bottom top` la última card seguiría ~105px por encima de su sitio
+    // en ese momento. Como los transforms no afectan al layout, ahí reaparece
+    // el hueco contra "The NEAR Stack" — el mismo que ya se arregló una vez.
+    // `bottom bottom` hace que el retorno a cero caiga exactamente ahí.
+    //
+    // De paso el recorrido pasa de ~1300px de scroll a ~2200px, y como el
+    // desvío es el mismo repartido en más distancia, la velocidad máxima cae
+    // a la mitad. Buena parte de la fluidez sale de eso.
+    //
+    // ── Las curvas ──────────────────────────────────────────────────────
+    // `sine.in` en la ida y `sine.out` en la vuelta, en ese orden. Es lo que
+    // pone la velocidad en cero en los dos bordes y el máximo en el medio del
+    // recorrido, donde las cards cruzan el título. Al revés —que era lo que
+    // había— el perfil es 0 → MAX → 0 → MAX → 0: arranca y corta en seco, y
+    // encima se frena justo en el cruce, que es lo que hay que mirar.
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: stage,
+        start: "top bottom",
+        end: "bottom bottom",
+        scrub: true,
+        invalidateOnRefresh: true,
+        markers: DEBUG_MARKERS,
+        // `will-change` solo durante el recorrido. Estas cards llevan además
+        // `backdrop-blur`, que ya fuerza su propia capa: fijo en el className,
+        // eran cuatro capas con filtro vivas durante toda la sesión para una
+        // animación que ocupa dos pantallas de scroll.
+        onToggle: (st) => {
+          const value = st.isActive ? "transform" : "auto";
+          for (const card of cards) card.style.willChange = value;
+        },
+      },
     });
 
-    return () => mm.revert();
-  }, []);
+    tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.in", duration: 1 })
+      .to(cards, { y: 0, ease: "sine.out", duration: 1 });
+
+    return () => {
+      gsap.killTweensOf(cards);
+      gsap.set(cards, { clearProps: "transform" });
+      for (const card of cards) card.style.willChange = "auto";
+    };
+  });
 
   return (
-    // z-[1]: esta sección pasa POR ENCIMA de las barras de QuantumBars, que
-    // vienen antes en el documento y montan sobre el hero.
+    // z-[1]: por DEBAJO de las barras de QuantumBars, que son `z-[2]` y vienen antes en
+    // el documento. Acá decía lo contrario —"pasa POR ENCIMA"— y es al revés: si algo de
+    // las barras invade este territorio, las barras ganan.
+    //
+    // Hoy no se nota porque el `overflow-hidden` de QuantumBars las acota a su propia
+    // caja y las dos secciones no se solapan (son hermanas en flujo normal, sin margen
+    // negativo entre ellas). Pero el borde inferior del gris ahora se anima, así que
+    // cualquiera que toque esa zona necesita el orden correcto para razonar.
     //
     // Nada de overflow-hidden en ningún ancestro: convertiría a este elemento en
     // el contenedor de scroll del título sticky y dejaría de pegarse, en
@@ -262,19 +262,27 @@ export default function OwnYourOwn() {
             <h3 className="whitespace-nowrap text-center text-statement">Own Your Own</h3>
           </div>
 
-          {CARDS.map((card) => (
+          {CARDS.map((card, i) => (
             <article
               key={card.title}
               data-own-card
               // z-[2]: las cards cruzan el título por delante, como en la
-              // referencia.
-              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] will-change-transform ${card.tint} ${card.place}`}
+              // referencia. El resto sale de CARD_LAYOUT, emparejado por índice
+              // con el contenido — el `cards.length !== SPEEDS.length` del efecto
+              // ya falla si los tres arrays se desincronizan.
+              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
             >
+              {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
+                  `width`, Next genera el srcset pero el navegador asume que ocupa
+                  el 100% del viewport y baja la variante más grande. La card vive
+                  en `lg:col-span-3` de un grid de 12, o sea ~24vw en desktop y
+                  ancho completo apilada en móvil. */}
               <Image
                 src={card.src}
                 alt=""
                 width={290}
                 height={267}
+                sizes="(min-width: 1024px) 24vw, 100vw"
                 className="block h-auto w-full rounded-[1.15rem]"
               />
               <div className="flex flex-col gap-3 px-3 py-7">

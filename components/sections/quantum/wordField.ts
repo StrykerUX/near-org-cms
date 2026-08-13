@@ -1,5 +1,7 @@
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
+import { createSeededRandom } from "@/components/primitives/motion/seededRandom";
 import { NEAR_MARK_PATH } from "@/components/sections/quantum/NearMark";
+import { FIELD_WORDS as WORDS } from "@/components/sections/quantum/quantumContent";
 
 // The word field that fills the foot of the "Mathematics" section: rows of
 // crypto vocabulary in monospace, with the letters that land on the silhouette
@@ -34,23 +36,6 @@ import { NEAR_MARK_PATH } from "@/components/sections/quantum/NearMark";
 // Imperative factory, created and destroyed by the section's `gsap.matchMedia()`
 // — same contract as `quantumLattice.ts` and `glyphShine`.
 
-const WORDS = [
-  "quantum-safe", "ML-DSA-65", "FIPS-204", "rotate the key", "alice.near", "same account",
-  "one transaction", "post-quantum", "lattice", "access key", "no migration",
-  "live on mainnet", "the key is an attachment", "the account stays", "NEAR",
-  "signed, not seen", "Ed25519", "secp256k1", "add_key", "delete_key", "full access key",
-  "function call key", "nonce", "signature", "public key", "private key", "key pair",
-  "seed phrase", "account model", "named account", "implicit account", "sub-account",
-  "key rotation", "cryptographic agility", "hybrid signatures", "Shor’s algorithm",
-  "Grover", "qubit", "superposition", "entanglement", "decoherence",
-  "quantum Fourier transform", "discrete log", "elliptic curve", "period finding",
-  "harvest now, decrypt later", "module lattice", "short vector", "learning with errors",
-  "Dilithium", "hash-based", "SPHINCS+", "NIST", "forward secrecy", "no new address",
-  "Nightshade", "sharding", "chain abstraction", "intents", "chain signatures",
-  "mainnet 2.13", "validator", "finality", "receipts", "storage staking",
-  "cross-contract call", "access key list", "state", "gas", "RPC", "self-custody",
-];
-
 // How much wider and taller than the host the weave is built. The surplus hangs
 // off both sides, so the field still covers the host after a moderate resize and
 // no edge of the weave is ever exposed while the rebuild is debouncing.
@@ -84,6 +69,18 @@ const LIT_JITTER = 0.28;
 // the letter's resting colour.
 const SPARK_PEAK = "#cfe600";
 const SPARK_MID = "#12b39c";
+// Fallback for the resting colour if a letter somehow has no recorded base. Same
+// deep green as the low end of the CTA ramp.
+const SPARK_REST = "#00b96f";
+
+// How many letters flash per batch, how long the batch takes to all light up, and
+// how long between batches. The count is what decides whether this reads as
+// twinkling or as a slow pulse.
+const SPARK_MIN = 90;
+const SPARK_RANGE = 120;
+const SPARK_SPREAD = 0.9;
+const SPARK_GAP_MIN = 0.5;
+const SPARK_GAP_RANGE = 0.7;
 
 // A resize smaller than this is absorbed by the overscan and ignored. Rebuilding
 // on every pixel of a window drag would re-run the pixel test dozens of times a
@@ -139,11 +136,7 @@ export function createWordField(
     // Fixed seed: the field has to look the same on every load, and identical
     // before and after a rebuild. With Math.random() a resize would reshuffle
     // every word and the "drawing" they form would change under the reader.
-    let seed = 4297;
-    const rnd = () => {
-      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-      return seed / 0x7fffffff;
-    };
+    const rnd = createSeededRandom();
 
     // One centred block, rather than rows laid straight into the host. This is
     // what keeps the pattern under the middle of the section at every width.
@@ -260,6 +253,12 @@ export function createWordField(
     }
 
     // ── 3. motion ────────────────────────────────────────────────────────
+    // The gate sits HERE and not at the top of build(), which looks like it wastes
+    // the whole construction under reduced motion but does not: everything above
+    // this line is what DRAWS — the weave, and the per-character test that decides
+    // which letters fall inside the mark's silhouette. That is content, not
+    // animation. With reduced motion the field is still there and the mark is
+    // still implied; only the fill-in, the parallax and the twinkle are skipped.
     const rows_ = Array.from(block.children) as HTMLElement[];
     const words = Array.from(block.querySelectorAll<HTMLElement>("div > span"));
     if (!motionOk) return;
@@ -311,55 +310,133 @@ export function createWordField(
     if (!lit.length) return;
 
     let live = false;
+
+    // ── one timeline per batch, not one per letter ────────────────────────
+    // Each batch used to build a fresh gsap.timeline PER LETTER — 90 to 210 of
+    // them, each holding three colour tweens, every 0.5-1.2s. That is up to ~630
+    // tween objects a second constructed and thrown away, plus a Map entry per
+    // letter that was only ever read and never deleted, so it grew to hold every
+    // letter that had ever sparked.
+    //
+    // The same effect is three tweens over the whole batch, with the random delay
+    // expressed as a stagger. `from: "random"` spreads the batch over SPARK_SPREAD
+    // in random order rather than giving each letter an independent random delay:
+    // visually the same shimmer, one object instead of hundreds.
+    //
+    // The resting colour differs per letter, so the last tween takes a
+    // function-based value — GSAP calls it once per target.
+    const active = new Set<HTMLElement>();
+    let timer: gsap.core.Tween | null = null;
+
+    const spark = () => {
+      // Math.random() and not the module's seeded generator, on purpose: the
+      // weave has to be reproducible across rebuilds, the twinkle does not — it
+      // is the one place here where real randomness is what is wanted.
+      const wanted = SPARK_MIN + Math.floor(Math.random() * SPARK_RANGE);
+      const batch: HTMLElement[] = [];
+      for (let i = 0; i < wanted; i++) {
+        const el = lit[Math.floor(Math.random() * lit.length)];
+        // A letter already mid-flash is skipped rather than restarted: cutting a
+        // fade halfway is what would read as flicker.
+        if (active.has(el)) continue;
+        active.add(el);
+        batch.push(el);
+      }
+      if (!batch.length) return;
+
+      const stagger = { amount: SPARK_SPREAD, from: "random" as const };
+      gsap
+        .timeline({ onComplete: () => batch.forEach((el) => active.delete(el)) })
+        .to(batch, { color: SPARK_PEAK, duration: 0.07, ease: "none", stagger }, 0)
+        .to(batch, { color: SPARK_MID, duration: 0.34, ease: "none", stagger }, 0.07)
+        .to(
+          batch,
+          {
+            color: (_i: number, target: HTMLElement) => litBase.get(target) ?? SPARK_REST,
+            duration: 0.22,
+            ease: "power1.inOut",
+            stagger,
+          },
+          0.41
+        );
+    };
+
+    // Rescheduling only happens while the section is in view. Before, the
+    // delayedCall re-armed itself forever — cheap, but it also meant the loop was
+    // still ticking away with nothing to do while the reader was three sections
+    // further down. The gate restarts it on the way back in.
+    const schedule = () => {
+      timer?.kill();
+      timer = gsap.delayedCall(SPARK_GAP_MIN + Math.random() * SPARK_GAP_RANGE, () => {
+        if (!live) return;
+        spark();
+        schedule();
+      });
+    };
+
+    // The gate is created here, after `schedule`, so its onToggle is its real
+    // one from the start — reassigning `vars` on a live ScrollTrigger is not
+    // something to rely on.
     const gate = ScrollTrigger.create({
       trigger: section,
       start: "top bottom",
       end: "bottom top",
-      onToggle: (st) => (live = st.isActive),
+      onToggle: (st) => {
+        live = st.isActive;
+        if (live) schedule();
+        else timer?.kill();
+      },
     });
-    const sparks = new Map<HTMLElement, gsap.core.Timeline>();
-    let timer: gsap.core.Tween | null = null;
-
-    const tick = () => {
-      if (live) {
-        // More letters at once and a shorter flash than before: the effect reads
-        // as twinkling rather than as a slow pulse.
-        const n = 90 + Math.floor(Math.random() * 120);
-        for (let i = 0; i < n; i++) {
-          const el = lit[Math.floor(Math.random() * lit.length)];
-          const running = sparks.get(el);
-          if (running && running.isActive()) continue;
-          sparks.set(
-            el,
-            gsap
-              .timeline({ delay: Math.random() * 0.9 })
-              .to(el, { color: SPARK_PEAK, duration: 0.07, ease: "none" })
-              .to(el, { color: SPARK_MID, duration: 0.34, ease: "none" })
-              .to(el, {
-                color: litBase.get(el) ?? "#00b96f",
-                duration: 0.22,
-                ease: "power1.inOut",
-              })
-          );
-        }
-      }
-      timer = gsap.delayedCall(0.5 + Math.random() * 0.7, tick);
-    };
-    timer = gsap.delayedCall(0.6, tick);
+    // `onToggle` does not fire for a section that is already on screen when the
+    // trigger is created, so the initial state is read straight off it.
+    live = gate.isActive;
+    if (live) schedule();
 
     cleanups.push(() => {
       gate.kill();
       timer?.kill();
-      sparks.forEach((t) => t.kill());
-      sparks.clear();
+      gsap.killTweensOf(lit);
+      active.clear();
     });
   }
 
-  build();
+  // ── build is deferred until the section is nearly in view ──────────────
+  // `build()` is the most expensive thing this module does: it lays out ~800
+  // words, then measures a bounding rect PER CHARACTER (~10 000 of them) to work
+  // out which letters fall inside the mark's silhouette, then rasterises that
+  // silhouette to an offscreen canvas and reads it back with getImageData.
+  //
+  // Running it on mount put all of that on the critical path of the first paint,
+  // for a section that is fifth of fourteen and nowhere near the fold — a long
+  // task the reader pays for before seeing anything, to draw something they
+  // cannot see yet. Now it runs when the section is one and a half viewports
+  // away, which is far enough that it is finished well before it scrolls in.
+  //
+  // `once: true` and the trigger self-kills: this is a one-shot, not a gate.
+  let built = false;
+  const buildOnce = () => {
+    if (built) return;
+    built = true;
+    build();
+    // The ScrollTriggers created inside build() have never been measured.
+    ScrollTrigger.refresh();
+  };
+
+  const buildTrigger = ScrollTrigger.create({
+    trigger: section,
+    start: "top 250%",
+    once: true,
+    onEnter: buildOnce,
+  });
+  // A section already within that distance on load gets built immediately —
+  // `onEnter` does not fire for a trigger that starts out past its start point.
+  if (buildTrigger.progress > 0) buildOnce();
 
   // ── rebuild on a real size change ──────────────────────────────────────
   let pending: ReturnType<typeof setTimeout> | undefined;
   const ro = new ResizeObserver(() => {
+    // Nothing to rebuild until the first build has happened.
+    if (!built) return;
     const r = host.getBoundingClientRect();
     if (
       Math.abs(r.width - lastW) < REBUILD_THRESHOLD &&
@@ -380,6 +457,7 @@ export function createWordField(
 
   return {
     destroy: () => {
+      buildTrigger.kill();
       ro.disconnect();
       clearTimeout(pending);
       teardown();

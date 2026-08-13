@@ -8,7 +8,8 @@ The general contract in [`../README.md`](../README.md) applies. This file only
 documents what is specific to this port.
 
 **The words on this page are not owned here.** Their source of truth is the copy
-deck, transcribed at [`docs/quantum-security-brief.md`](../../../docs/quantum-security-brief.md)
+deck, transcribed at [`docs/quantum-security-brief.md`](../../../docs/quantum-security-brief.md). Where that copy lands in code is
+`quantumContent.ts`
 — including which section maps to which component, where the build departs from
 the deck and why, and one contradiction inside the deck that is still open.
 Change copy there first.
@@ -28,9 +29,13 @@ ported first (`ThreatDuel`), and **that treatment has since been replaced.**
 
 What runs now is **`ThreatSequence`**: one pinned viewport holding both deck
 sections as three beats — the mechanism, the attack, the answer. The frame never
-moves; only the core changes. The reasoning, the treatments it beat and the
-iteration before it are all on `/prototype/quantum-threat-concepts` while that
-route survives.
+moves; only the core changes.
+
+The treatments it beat (`ThreatDuel`, `ThreatLede`, `RotationStatement`,
+`concepts/`) and the `/prototype/quantum-threat-concepts` route that compared
+them were deleted once the decision was final — they were ~820 lines of live code
+no real page rendered, holding duplicate copy. What is worth keeping from them is
+the reasoning below, not the code; `git log` has the rest.
 
 Three things in it are load-bearing and easy to break:
 
@@ -52,10 +57,15 @@ Three things in it are load-bearing and easy to break:
   screen. A narrow sector spends most of every revolution off-stage and the
   section reads as having no colour in it. The maths is written out above
   `SWEEP_ARC`.
-- **The rotation is on its own clock, not the scrub.** Tying it to scroll
-  progress freezes it whenever the reader stops, which reads as the page having
-  died. `pauseOffscreen` parks it out of view and resumes at the same angle.
-- **The ring wave IS on the scrub**, unlike the rotation — it is the reader's
+- **The rotation is ON the scrub** — and this is a decision that was reversed, so
+  the trade-off is worth stating. Tying it to scroll progress means it freezes
+  whenever the reader stops, which can read as the page having died; the argument
+  for doing it anyway is that the band arriving IS the third beat, and on its own
+  clock it can arrive before the reader gets there or long after. The angle
+  profile (constant speed plus a decaying burst, `SWEEP_LEAD`) exists to keep it
+  from ever sitting at zero velocity while it travels. `pauseOffscreen` is NOT
+  used here, unlike what this file said until now.
+- **The ring wave is on the scrub too** — it is the reader's
   progress through the beat made visible, so it has to track the scroll. It runs
   outward through beat one and inward through beat two. `RINGS_LIT` is the only
   knob: it sets how many rings are lit at once, and therefore whether this reads
@@ -70,11 +80,8 @@ This section also introduced the `solid` tone on `CtaPill`: a filled white pill
 with black type that takes the gradient on hover. Its resting and hover fills are
 declared together in `[data-q-cta-fill-white]` — they have to be, to animate.
 
-`ThreatLede` and `RotationStatement` are the previous iteration. They are unused
-by any real page and survive only so the concepts route can show what changed.
-
-Why it was replaced — worth keeping, because these are the traps to avoid if
-anyone rebuilds this passage:
+Why the paired-rows treatment was replaced — worth keeping, because these are the
+traps to avoid if anyone rebuilds this passage:
 
 - The merge cost **both** of the deck's headlines. §3's "The quantum threat to
   blockchains" and §4's "A key rotation, not a migration" are the two strongest
@@ -85,9 +92,6 @@ anyone rebuilds this passage:
 - The green hinge between the pairs reads as *becomes*. The content is a
   comparison, not a transformation — `secp256k1 4fA9…c21B` never becomes
   `alice.near`.
-
-`ThreatDuel.tsx` is still in the folder, unused by any real page, because the
-concepts route still renders it for comparison. It goes when that route goes.
 
 The expanding-stack variant (`data-stack-root`: four numbered rows opening one at
 a time, each with its own animated isometric SVG, driven by `initStack` +
@@ -115,14 +119,14 @@ dark sections. Three real differences is a different component.
 
 ## Decisions taken against the original
 
-### `pin: true` → `position: sticky` (`ThreatDuel`)
+### `pin: true` → `position: sticky` (`ThreatSequence`)
 
 The original pins the threat scene for `innerHeight * 1.8`. This repo forbids the
 pin: the pin-spacer fights Lenis, feeds back into `PrototypeMotionProvider`'s
 `ResizeObserver`, and leaves ghost spacers under StrictMode. The full reasoning
 lives in `../ProofStats.tsx`.
 
-Here the travel is **declared** in CSS (`--travel: 180svh`) and the track height
+Here the travel is **declared** in CSS (`--travel: 196svh`) and the track height
 derives from it, so nothing needs measuring. The read-only ScrollTrigger runs
 `top top → bottom bottom` over the track.
 
@@ -130,9 +134,9 @@ Consequence to remember: **no ancestor of the stuck element may have `overflow`
 other than `visible`**, or the sticky silently stops sticking. The
 `overflow-hidden` lives on the stuck child, which is allowed to have it.
 
-The vertical padding is dropped (`group-data-[duel=on]/duel:py-0`) once the
-sticky layout is on. With it, the child is exactly one viewport tall, the content
-does not fit, and the section header gets clipped off the top.
+The vertical padding is dropped once the sticky layout is on. With it, the child
+is exactly one viewport tall, the content does not fit, and the section header
+gets clipped off the top.
 
 ### The nav ink flip: restored, not ported
 
@@ -207,9 +211,14 @@ fill.
 
 **Invariant if anyone edits `MathStatement`:** the field host's inline
 `font-size: 13px` / `line-height: 20px` / `letter-spacing: 0.12em` are geometry,
-not styling. `wordField.ts` computes its row and column counts from `LINE_H = 20`
-and `CHAR_W = 8.6`. Changing one side without the other leaves the weave short or
-overrun, and nothing errors.
+not styling — they decide how dense the weave is.
+
+They no longer have to be kept in sync with constants, though: `wordField.ts`
+MEASURES the real character advance and line height off the host (see `measure()`)
+instead of assuming them. `8.6` and `20` survive only as fallbacks for the case
+where the probe returns zero. This paragraph used to describe an invariant that
+had already been fixed in the code — worth noting as the failure mode of a README
+that documents mechanism.
 
 ## `videoScrub.ts` lives in the toolkit, not here
 

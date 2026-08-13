@@ -51,5 +51,9 @@ Thumbs.db
 # de paquete de escritorio, y todo lo que vive en public/ Next lo publica tal
 # cual en una URL adivinable. Al repo entran solo las 4 faces de
 # assets/fonts/kepler/, que son las que el build necesita.
-public/fonts/kepler-font/
+# Todo public/fonts/, no solo kepler-font/: el mismo razonamiento aplica a
+# cualquier familia que alguien deje ahí (hoy hay 15MB de FK Grotesk sin un solo
+# uso en el código). Las fuentes que el build necesita van en assets/fonts/, que
+# NO es público — next/font/local las procesa y las sirve con hash.
+public/fonts/
 _fonts/

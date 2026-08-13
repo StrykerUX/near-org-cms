@@ -105,7 +105,10 @@ export default function TestimonialMarquee() {
           corre, así que ahí el overflow pasa a scroll manual: si no, los
           testimonios que no entran en pantalla serían inalcanzables. */}
       <div className="overflow-hidden motion-reduce:overflow-x-auto">
-        <div data-marquee className="flex w-max will-change-transform">
+        {/* Sin `will-change` fijo: lo administra `pauseOffscreen`, que lo pone al
+            entrar en viewport y lo suelta al salir. Declararlo acá dejaría la
+            banda promovida a capa durante toda la sesión. */}
+        <div data-marquee className="flex w-max">
           {cards.map((t, i) => {
             const isClone = i >= TESTIMONIALS.length;
             const dark = t.tone === "dark";

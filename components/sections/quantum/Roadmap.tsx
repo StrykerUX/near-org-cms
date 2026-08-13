@@ -7,6 +7,10 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import CtaPill from "@/components/sections/quantum/CtaPill";
+import {
+  ROADMAP_STAGES as STAGES,
+  type RoadmapStage,
+} from "@/components/sections/quantum/quantumContent";
 
 // NEAR's post-quantum roadmap: four stages threaded on a spine that draws
 // itself as you scroll, with only the stage crossing the middle of the frame at
@@ -20,50 +24,35 @@ const DOTS = {
   progress: "[background:conic-gradient(var(--near-green-accent)_0_50%,#dcdad4_50%_100%)]",
   research: "border-2 border-green-ink bg-cream",
   horizon: "border-2 border-[#b3b1ab] bg-cream",
-} as const;
+} satisfies Record<RoadmapStage["dot"], string>;
 
-type Stage = {
-  when: string;
-  whenAccent: string;
-  dot: keyof typeof DOTS;
-  title: string;
-  body: string;
-};
-
-const STAGES: Stage[] = [
-  {
-    when: "Live",
-    whenAccent: "now",
-    dot: "live",
-    title: "Post-quantum signing",
-    body: "FIPS-204 / ML-DSA at the account and protocol level. Rotate through the NEAR CLI.",
-  },
-  {
-    when: "In",
-    whenAccent: "progress",
-    dot: "progress",
-    title: "Wallets and cross-chain",
-    body: "Post-quantum support across software and hardware wallets. Quantum-safe Chain Signatures for cross-chain users on NEAR Intents.",
-  },
-  {
-    when: "In",
-    whenAccent: "research",
-    dot: "research",
-    title: "Ownership proofs",
-    body: "Zero-knowledge seed-phrase ownership proofs as a quantum contingency.",
-  },
-  {
-    when: "On the",
-    whenAccent: "horizon",
-    dot: "horizon",
-    title: "Deep protocol layers",
-    body: "Post-quantum consensus, validators, and epoch sync, the deeper protocol layers that complete the migration.",
-  },
-];
+// `satisfies` y no `as const` a secas: el tipo de `dot` vive ahora en
+// quantumContent (tiene que ser un union de literales para que el contenido sea
+// serializable), así que esto es lo que mantiene los dos lados atados — si alguien
+// agrega una etapa con un `dot` nuevo y se olvida de la clase, el build falla acá
+// en vez de renderizar un punto sin estilo.
 
 // How faint an inactive stage sits. Low enough to read as a ghost, high enough
 // that the text is still legible if someone stops mid-scroll.
 const DIM = 0.18;
+
+// ── Scroll thresholds ────────────────────────────────────────────────────────
+// The spine draws over a longer stretch than any single stage is lit for, on
+// purpose: the line should already be arriving before the stage it points at
+// takes focus, and should still be growing after it.
+const SPINE_START = "top 70%";
+const SPINE_END = "bottom 55%";
+const SPINE_SCRUB = 0.4;
+// A stage is focused while it occupies the middle band of the frame. The two
+// numbers are asymmetric because reading happens above centre: a stage lights up
+// before its top reaches the middle and stays lit until well past it.
+const STAGE_START = "top 62%";
+const STAGE_END = "bottom 42%";
+const STAGE_FADE = 0.45;
+// The dot pops once, slightly before its stage lights up.
+const DOT_START = "top 70%";
+const DOT_FROM_SCALE = 0.3;
+const DOT_DUR = 0.5;
 
 export default function Roadmap() {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
@@ -73,6 +62,7 @@ export default function Roadmap() {
     mm.add(MQ.motion, () => {
       const track = q("[data-roadline]")[0];
       const fill = q("[data-roadline-fill]")[0];
+      const allFades: Element[] = [];
 
       if (track && fill) {
         gsap.fromTo(
@@ -80,15 +70,22 @@ export default function Roadmap() {
           // Revealed by clipping, NOT by scaling. Scaling squashes the gradient
           // into whatever height it has so far, so the colours would slide as it
           // grew; clipping uncovers a gradient that is already at full height.
+          //
+          // `clip-path` is a paint property, so this repaints the fill every
+          // frame of the scrub — but the fill is a 3px-wide hairline, so the
+          // repainted area is a few thousand pixels. Left as is: the compositable
+          // alternative (scaleY on a child, gradient on a fixed-height ancestor)
+          // adds a wrapper and a second transform origin to reason about, to save
+          // a repaint that does not show up in a profile.
           { clipPath: "inset(0 0 100% 0)" },
           {
             clipPath: "inset(0 0 0% 0)",
             ease: "none",
             scrollTrigger: {
               trigger: track,
-              start: "top 70%",
-              end: "bottom 55%",
-              scrub: 0.4,
+              start: SPINE_START,
+              end: SPINE_END,
+              scrub: SPINE_SCRUB,
               invalidateOnRefresh: true,
               markers: DEBUG_MARKERS,
             },
@@ -96,19 +93,27 @@ export default function Roadmap() {
         );
       }
 
+      // One trigger per stage plus one per dot — nine in total for four stages.
+      // Left that way on purpose: consolidating them into a single trigger over
+      // the section means deriving each stage's threshold from overall progress,
+      // and the stages have different heights, so the thresholds would stop being
+      // "this stage is in the middle band" and start being "roughly a quarter of
+      // the way down". ScrollTrigger handles hundreds of instances; the only cost
+      // is re-measuring on refresh, which is nine cheap measurements.
       q("[data-road-item]").forEach((item) => {
         // Only the text columns fade. The dot keeps its opaque halo, which is
         // what makes the spine stop before each circle and pick up after it.
         const fades = item.querySelectorAll("[data-road-fade]");
+        allFades.push(...fades);
         gsap.set(fades, { opacity: DIM });
         ScrollTrigger.create({
           trigger: item,
-          start: "top 62%",
-          end: "bottom 42%",
+          start: STAGE_START,
+          end: STAGE_END,
           onToggle: (st) =>
             gsap.to(fades, {
               opacity: st.isActive ? 1 : DIM,
-              duration: 0.45,
+              duration: STAGE_FADE,
               ease: "power2.out",
               overwrite: "auto",
             }),
@@ -117,13 +122,24 @@ export default function Roadmap() {
         const dot = item.querySelector("[data-road-dot]");
         if (dot) {
           gsap.from(dot, {
-            scale: 0.3,
-            duration: 0.5,
+            scale: DOT_FROM_SCALE,
+            duration: DOT_DUR,
             ease: "back.out(2)",
-            scrollTrigger: { trigger: item, start: "top 70%", once: true },
+            scrollTrigger: { trigger: item, start: DOT_START, once: true },
           });
         }
       });
+
+      // Cleanup explícito aunque el contexto de matchMedia revierta los tweens y
+      // los triggers de arriba igual: este era el único archivo del directorio que
+      // no devolvía nada, y la asimetría invita a asumir que acá no hace falta
+      // limpiar. Lo que el revert NO alcanza por sí solo es el `gsap.set` de
+      // opacidad sobre los fades, que quedaría inline si un tween lo hubiera
+      // tocado a mitad de camino.
+      return () => {
+        gsap.killTweensOf(allFades);
+        gsap.set(allFades, { clearProps: "opacity" });
+      };
     });
 
     return () => mm.revert();

@@ -61,9 +61,12 @@ dar por terminado un cambio.
 | `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
 | `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` y `PrototypeFooter` tal cual. |
 | `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). Reusa `PrototypeFooter` tal cual. |
+| `lab/*` | nadie — se montan directo desde su `page.tsx` | Las doce rutas de `/prototype/descent`, todas `noindex`. **No es una familia de secciones, es un sandbox**: existió para resolver el descenso del hero de `home-v2/` sin iterar sobre la página real. Ya cumplió —ganó `paneles` y su mecanismo vive en [`home-v2/stairGeometry.ts`](./home-v2/stairGeometry.ts)— y sigue en pie como referencia. Tiene su propio [README](./lab/README.md) con el catálogo de rutas y lo que quedó desfasado tras el puerto. |
 
-Cinco secciones usan **sección pegada**: `ProofStats`; en `home-v2/`,
-`ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`, `ThreatDuel`.
+Cinco secciones de las páginas reales usan **sección pegada**: `ProofStats`; en
+`home-v2/`, `ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`,
+`ThreatSequence`. (En `lab/`, `DescentStairs` también monta un track pegado, con
+las mismas reglas; no entra en la cuenta porque es sandbox.)
 Todas con `position: sticky` de CSS
 y un ScrollTrigger que solo LEE el progreso — nunca `pin: true`, que inserta un
 pin-spacer en el documento y pelea con Lenis, con el `ResizeObserver` de
@@ -82,13 +85,53 @@ desktop, el contenido tiene que caer en flujo normal igual.
 `lib/queries/*` alimenta cada `page.tsx`, que le pasa props planas al `view`
 correspondiente, que compone estas secciones.
 
+## Dónde vive la copy
+
+`quantum/quantumContent.ts` y `home-v2/homeV2Content.ts` — los textos, listas y
+URLs de esas dos páginas, fuera de los componentes. Módulos puros: strings y
+arrays de objetos, sin JSX, sin `Date`, sin funciones. Mismo contrato que
+`types.ts`, así que el día que vengan de la base de datos la forma no cambia.
+
+El precedente es `home-v2/nearStackContent.ts`, que ya lo hacía así.
+
+**Qué NO va ahí:**
+
+| | Dónde va | Por qué |
+|---|---|---|
+| Geometría y timing (radios, umbrales de scroll, rampas de color) | Con la animación que los lee | Es mecanismo, no contenido |
+| Clases de layout (en qué celda del grid cae una card) | En el componente | Es composición. Ver `CARD_LAYOUT` en `OwnYourOwn` |
+| Los **titulares** | Todavía en el JSX | Llevan `<Accent>` y `<br />`, así que pasarlos a datos exige elegir un esquema para "texto con un tramo acentuado" — y esa es una decisión del modelo de contenido, no de un refactor. `ROADMAP_STAGES` (`when` + `whenAccent`) muestra la forma que funcionaría |
+
 ## Toolkit de animación
 
-`components/primitives/motion/` — hooks compartidos para secciones animadas
-(`useGsapContext`, `useScrollReveal`, `pauseOffscreen`, registro de plugins y
-tokens de motion). Documentado en detalle en cada archivo; ver `HeroBanner.tsx`
-o `FeatureCards.tsx` para dos formas de uso (timeline propia vs. reveal
-genérico por `data-reveal`).
+`components/primitives/motion/` — lo compartido por las secciones animadas.
+Documentado en detalle en cada archivo; ver `HeroBanner.tsx` o `FeatureCards.tsx`
+para dos formas de uso (timeline propia vs. reveal genérico por `data-reveal`).
+
+**Por dónde empezar, según lo que hace la sección:**
+
+| Necesidad | Qué usar |
+|---|---|
+| Fade + slide al entrar en viewport | `useScrollReveal()` — una línea, sin escribir un tween |
+| Escena que anima en desktop y cae a flujo normal en móvil | `useMotionScope()` — te da `q`, `scope`, `motionOk`, `isDesktop` y el contexto |
+| Solo depende de `prefers-reduced-motion` | `gsap.matchMedia()` con `MQ.motion` directo, **no** `useMotionScope` (declarar `isDesktop` hace que cruzar 1024px reconstruya la escena) |
+| Sección pegada con recorrido propio | `enableScene()` + `trackTimeline()` de `stickyScene` |
+| Escribir texto letra a letra | `staggerChars()` |
+| Un `<video>` conducido por scroll | `createVideoScrub()` |
+| Un canvas | `deviceRatio()` para el buffer, `onViewportToggle()` de `pauseOffscreen` para no dibujar fuera de vista, y colgarse de `gsap.ticker` — **nunca** un `requestAnimationFrame` propio |
+| Algo que llega a un tope y hay que VERLO llegar | `softFloor()` — amortigua el último tramo con velocidad continua. `Math.max` corta la velocidad en el codo y eso es lo que se lee como golpe. No para clamps de seguridad, que nadie mira |
+| Varios elementos sobre el mismo progreso con velocidades distintas | `hermiteRamp(entry, settle)` — se le piden las dos velocidades y devuelve la única cúbica que las cumple. Pedilas en **múltiplos de la del scroll**: un elemento en una página que scrollea ya va a 1× sin animarse |
+| Desorden que tiene que sobrevivir un rebuild | `createSeededRandom()` |
+| Un color que va a animarse | Literal, nunca `var(--token)` — GSAP interpola colores, no declaraciones. Si lo animan dos escenas, va a `motionColors.ts` |
+
+`useGsapContext` es la capa de abajo de todo eso (un `gsap.context()` con su
+`revert()`, sobre `useGSAP` de `@gsap/react`). Una sección normal no debería
+necesitar llamarlo directo.
+
+**La regla del atributo de escena:** el interruptor `data-*` que enciende un
+layout sticky lo escribe SOLO el efecto, vía `enableScene`. No se declara en el
+JSX. Si está en los dos lados, el primer re-render lo devuelve a `"off"` y el
+sticky se desarma sin dar ningún error — tres secciones lo tenían así.
 
 `components/primitives/motion/flowField.ts` + `shaders/flowField.ts` — el
 material de los covers de `LatestUpdates`: un campo de color suave arrastrado

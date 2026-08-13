@@ -79,6 +79,12 @@ export default function ZigguratDivider({
       // las del medio, dando profundidad real al cruzar el divider. Anima
       // `yPercent`, una propiedad distinta a la de arriba (scaleY) y a la
       // de abajo (y) — GSAP compone las tres sin pelear entre sí.
+      //
+      // Graduar la amplitud por distancia al centro con una ease lineal equivale a
+      // graduar la velocidad, que es de lo que trata
+      // `primitives/motion/velocityRamp.ts`. Acá se deja lineal a propósito: esto es
+      // un parallax de ida, sin tope contra el que llegar y sin columnas que tengan
+      // que alcanzarse entre sí, así que una cúbica solo cambiaría cómo se ve.
       const mid = (columns.length - 1) / 2;
       columns.forEach((col, i) => {
         const distance = mid === 0 ? 0 : Math.abs(i - mid) / mid; // 0 centro, 1 bordes

@@ -119,12 +119,17 @@ jerarquías distintas y unificarlos aplana el contraste entre ellas.
 
 ## Geometría compartida hero ↔ barras
 
-`HeroVideo` exporta `HERO_UNIT` (`calc(100vw / 7)`), el ancho de una columna de
+`heroGeometry.ts` exporta `HERO_UNIT` (`calc(100vw / 7)`), el ancho de una columna de
 la escalera. De esa unidad salen el alto del hero (`100svh − u·1.75`), el alto
 del video (`100% + u·1.5`) y el `margin-top` negativo de `QuantumBars`. El efecto
 neto es que el top de `QuantumBars` queda **siempre** a `100svh − u·1.75` del
 documento, que es exactamente donde termina el video: los escalones nacen del
 borde inferior de la imagen.
+
+Vive en su propio módulo puro y no exportada desde `HeroVideo.tsx` —que es donde
+estaba— porque `QuantumBars` la importaba de ahí: dos secciones acopladas a nivel
+de módulo por una constante, y un componente cliente actuando de fuente de
+geometría para otro.
 
 Cambiar uno de esos números sin los otros rompe la juntura, en silencio y solo a
 ciertos anchos de ventana.

@@ -7,8 +7,12 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+// CustomEase lo usa por ahora solo el laboratorio del descenso
+// (components/sections/lab/): permite declarar una curva de scroll con puntos de
+// control en vez de elegir entre los eases con nombre de GSAP.
+import { CustomEase } from "gsap/CustomEase";
 
-gsap.registerPlugin(ScrollTrigger, SplitText); // idempotente
+gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase); // idempotente
 
 if (typeof window !== "undefined") {
   // iOS/Android colapsan la address bar al scrollear: eso dispara un resize
@@ -20,4 +24,4 @@ if (typeof window !== "undefined") {
   gsap.ticker.lagSmoothing(0);
 }
 
-export { gsap, ScrollTrigger, SplitText };
+export { gsap, ScrollTrigger, SplitText, CustomEase };
