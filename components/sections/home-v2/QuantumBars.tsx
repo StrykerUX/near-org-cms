@@ -116,6 +116,8 @@ export default function QuantumBars() {
       /** Recorrido de la SALIDA, el retiro del borde inferior. */
       let outStart = 0;
       let outSpan = 1;
+      /** Fondo del statement. El borde inferior no puede subir por encima de acá. */
+      let textBottomDoc = 0;
       /** Alto natural de cada panel. Difiere por columna: su caja termina en su peldaño. */
       let natural: number[] = [];
 
@@ -136,20 +138,24 @@ export default function QuantumBars() {
         inStart = sectionTopDoc;
         inSpan = Math.max(1, seamOffset - (unitPx * SCROLL_DEPTH) / 2);
 
-        // SALIDA. Los dos extremos son hitos reales, no números calibrados, y de ahí sale
-        // la garantía que importa: el statement NUNCA se queda sin marco gris por debajo.
+        // SALIDA. Los dos extremos son hitos reales, no números calibrados:
         //
-        //   · arranca cuando el fondo del statement cruza el top del viewport, o sea
-        //     cuando el texto ya salió de pantalla;
-        //   · termina con el fondo de la sección a un cuarto de viewport del techo, para
-        //     que el gesto se complete a la vista y no fuera de cuadro.
+        //   · arranca cuando el fondo de la sección ENTRA en pantalla, o sea en el primer
+        //     frame en que el gesto puede verse;
+        //   · termina con ese fondo a un cuarto de viewport del techo, para que se
+        //     complete a la vista y no fuera de cuadro.
         //
-        // Sin ese anclaje habría que limitar cuánto sube el borde, y el margen es
-        // ridículo: la columna central solo tiene `u·0.5` antes de morder el texto.
-        const stageBottomDoc = stage.getBoundingClientRect().bottom + window.scrollY;
-        outStart = stageBottomDoc;
+        // El arranque estuvo un tiempo atado a "el statement ya salió por arriba", que era
+        // prudente de más: en ese momento el fondo de la sección ya está a media pantalla,
+        // así que el gesto empezaba por la mitad y se perdía su primer tramo. El texto no
+        // necesitaba tanto — lo protege el guard de `apply`, no el reloj.
+        outStart = sectionBottomDoc - viewportH;
+        // Nunca antes de que termine la entrada: con un viewport muy alto los dos extremos
+        // de la sección caben a la vez, y solapar los dos gestos vuelve la figura ilegible.
+        if (outStart < inStart + inSpan) outStart = inStart + inSpan;
         outSpan = Math.max(1, sectionBottomDoc - 0.25 * viewportH - outStart);
 
+        textBottomDoc = stage.getBoundingClientRect().bottom + window.scrollY;
         natural = panels.map((panel) => panel.offsetHeight);
       };
 
@@ -181,12 +187,27 @@ export default function QuantumBars() {
           ...EXIT,
         });
 
+        // El fondo del statement, mientras siga en pantalla. El borde inferior no puede
+        // subir por encima de esta línea: si lo hiciera, el texto se quedaría sin marco
+        // gris por debajo y quedaría medio sobre gris y medio sobre crema.
+        //
+        // Con los valores de hoy el guard NUNCA se activa —hay `u·1.5` de aire y el anillo
+        // exterior solo se retira 436px de los 446 disponibles—, y esa holgura de 10px es
+        // justamente el problema: es una calibración, no una garantía. Bajar el
+        // `paddingBottom` del Container sin tocar nada más rompería el marco en silencio y
+        // solo en algunos viewports, que es el modo de fallo que este archivo ya sufrió
+        // con la juntura de arriba. Con el guard puesto, el aire de abajo vuelve a ser una
+        // decisión de composición libre.
+        const textFloor = textBottomDoc - scroll;
+
         for (let i = 0; i < panels.length; i++) {
           const ring = ringOf(i);
           const t = top[ring];
+          let b = bottom[ring];
+          if (textFloor > 0 && b < textFloor) b = textFloor;
           // Los dos bordes no pueden cruzarse. Pasa al final del recorrido, cuando el de
           // abajo alcanza al de arriba: a partir de ahí el panel mide 0, no negativo.
-          const b = bottom[ring] > t ? bottom[ring] : t;
+          if (b < t) b = t;
           setY[i](t - sectionTopY);
           setScale[i]((b - t) / natural[i]);
         }
@@ -405,12 +426,18 @@ export default function QuantumBars() {
           de texto queda siempre a la misma distancia proporcional de los escalones — que
           es lo que la mantiene centrada dentro del marco de barras a cualquier ancho.
           El `paddingTop` incluye los 100svh del margen negativo, así que la primera línea
-          sigue cayendo a `u·0.5` por debajo de la juntura, igual que antes. */}
+          sigue cayendo a `u·0.5` por debajo de la juntura, igual que antes.
+
+          El de abajo es `u·1.5` y no `u·2` porque era el bloque vacío más grande de la
+          sección: con `u·2` había ~990px de scroll —casi un viewport— en los que la figura
+          no se movía y la pantalla era gris liso. No baja de ahí por composición, no por
+          límite técnico: el guard de `apply` protege al texto solo, así que este número
+          se puede mover mirando la página. */}
       <Container
         className="relative"
         style={{
           paddingTop: "calc(100svh + var(--u) * 0.5)",
-          paddingBottom: "calc(var(--u) * 2)",
+          paddingBottom: "calc(var(--u) * 1.5)",
         }}
       >
         {/* `isolate` acota el apilado de las dos capas de texto. Las dos ocupan
