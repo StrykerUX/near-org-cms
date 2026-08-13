@@ -9,6 +9,7 @@ import {
   CASCADE,
   SCROLL_DEPTH,
   STAIR_COLUMNS,
+  STAIR_RINGS,
   STAIR_SPAN,
   cascadeEdges,
   ringOf,
@@ -57,8 +58,11 @@ const CHAR_STEP = 0.03;
 //
 // Mismas perillas que la entrada salvo una: `drop = 0` hace que los cuatro anillos
 // arranquen en la MISMA línea —el fondo de la sección— en vez de escalonados. Eso es lo
-// que permite que la escalera se abra hacia afuera al salir, con los laterales primero,
-// que es el espejo exacto de lo que pasa arriba.
+// que permite que la escalera se abra al salir en vez de limitarse a subir.
+//
+// El ORDEN sí es el contrario al de la entrada: arriba el gesto va de los laterales al
+// centro, abajo del centro a los laterales. Se resuelve en el bucle de `apply` dando
+// vuelta el índice de anillo, no acá.
 //
 // Con la escalera de partida sí escalonada (que es lo que pone el layout) el orden se
 // invierte y no hay forma de arreglarlo con velocidades: el anillo central arranca 1.5·u
@@ -203,7 +207,15 @@ export default function QuantumBars() {
         for (let i = 0; i < panels.length; i++) {
           const ring = ringOf(i);
           const t = top[ring];
-          let b = bottom[ring];
+          // La salida recorre los anillos al REVÉS que la entrada: el central se retira
+          // primero y los laterales últimos, así que el hueco se abre desde el medio.
+          //
+          // `cascadeEdges` siempre devuelve del anillo que sale primero al que sale
+          // último, así que dar vuelta el orden de LECTURA invierte el gesto entero
+          // —arranques escalonados y gradiente de velocidad— sin tocar el reloj ni
+          // duplicar constantes. Intercambiar `fast` y `slow` en `EXIT` no alcanzaría:
+          // dejaría las velocidades invertidas pero los arranques en el orden viejo.
+          let b = bottom[STAIR_RINGS - 1 - ring];
           if (textFloor > 0 && b < textFloor) b = textFloor;
           // Los dos bordes no pueden cruzarse. Pasa al final del recorrido, cuando el de
           // abajo alcanza al de arriba: a partir de ahí el panel mide 0, no negativo.
