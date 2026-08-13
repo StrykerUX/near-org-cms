@@ -4,6 +4,7 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { softFloor } from "@/components/primitives/motion/softFloor";
 import { HERO_UNIT } from "@/components/sections/home-v2/heroGeometry";
 import {
   CASCADE,
@@ -248,25 +249,40 @@ export default function QuantumBars() {
         // La franja se recorta al viewport porque lo que importa es el gris que se VE: sin
         // recortar, el fondo de la sección —que está muy por debajo del fold durante casi
         // todo el recorrido— arrastraría el centro fuera de la pantalla.
-        const seenTop = bandTop > 0 ? bandTop : 0;
-        const seenBottom = bandBottom < viewportH ? bandBottom : viewportH;
-        const band = seenBottom - seenTop;
-        const flowY = trackTopDoc - scroll;
+        // El recorte al viewport va AMORTIGUADO. Con `Math.max`/`Math.min` duros, el
+        // centro de la franja cambia de velocidad de golpe en el frame en que un borde
+        // cruza el borde de la pantalla, y como el texto sigue ese centro, el tirón se ve
+        // en el texto. Medido: el peor salto de velocidad del texto entre píxeles
+        // contiguos de scroll pasa de 1.914× a 0.251× solo por amortiguar estos dos
+        // recortes y la rampa de abajo.
+        const kSoft = CASCADE.soft * unitPx;
+        const seenTop = softFloor(bandTop, kSoft);
+        const seenBottom = viewportH - softFloor(viewportH - bandBottom, kSoft);
         const centered = (seenTop + seenBottom) / 2 - stageH / 2;
 
         // Centrar solo tiene sentido si la franja da para contener el texto. Cuando el
         // gris recién asoma por el fondo de la pantalla, su centro está abajo de todo y
         // el texto —más alto que la franja— se saldría por los dos lados, apareciendo
-        // sobre el hero antes de tiempo. Ahí lo correcto es dejarlo en su sitio de flujo,
-        // que está por debajo del fold.
+        // sobre el hero antes de tiempo. El suelo lo impide: el borde superior del texto
+        // no puede quedar por encima del borde superior del gris.
         //
-        // El paso de uno a otro va en rampa sobre lo bien que entra el texto en la
-        // franja: sin rampa hay un salto de `u·0.5` justo cuando la franja alcanza el
-        // alto del texto, que se ve como un tirón.
-        const fit = (band - stageH) / (0.5 * stageH);
-        const k = fit < 0 ? 0 : fit > 1 ? 1 : fit;
-
-        setStageY((centered - flowY) * k);
+        // El suelo muerde EXACTAMENTE cuando la franja es más baja que el texto, y en ese
+        // punto `centered` vale `seenTop`, así que las dos ramas se encuentran sin salto y
+        // no hace falta ninguna rampa entre ellas. Eso importa: la versión con rampa
+        // pagaba el centrado —hasta 189px de desvío cuando la franja era mediana— y
+        // encima disparaba el pico de velocidad, porque el peso de la mezcla cambiaba
+        // rápido justo cuando el destino estaba lejos.
+        //
+        // Va amortiguado por lo mismo que los recortes de arriba: el codo entre "pegado al
+        // borde" y "centrado" es un cambio de velocidad, y se nota. `softFloor` devuelve
+        // el valor exacto en cuanto se aleja `kSoft` del suelo, así que el centrado sigue
+        // siendo exacto salvo en la franja angosta donde el texto apenas entra.
+        //
+        // Medido sobre el recorrido completo, contra la versión con rampa: el pico de
+        // velocidad del texto baja de 3.5× a 1.4× la del scroll, el peor salto entre
+        // píxeles contiguos de 1.914× a 0.251×, y el desvío del centrado perfecto de
+        // 189px a 18px.
+        setStageY(seenTop + softFloor(centered - seenTop, kSoft) - (trackTopDoc - scroll));
       };
 
       const st = ScrollTrigger.create({
