@@ -226,6 +226,12 @@
   --color-green-ink: var(--green-ink);
   --color-gray-intermediate: var(--gray-intermediate);
 
+  /* The CTA ramp, promoted from raw vars to real colour tokens: the protocol
+     diagrams need it as `stroke-*` / `fill-*`, not only inside a gradient. */
+  --color-cta-deep: var(--cta-deep);
+  --color-cta-mint: var(--cta-mint);
+  --color-cta-lime: var(--cta-lime);
+
   --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, Menlo, monospace;
   /* Kepler self-hosteada vía next/font/local (ver lib/fonts.ts). Las vars
@@ -841,4 +847,46 @@ button:hover .lucide-plus {
     background-size: 200% 100%;
     background-position: 0% center;
   }
+}
+
+/* ── The layout grid ────────────────────────────────────────────────────────
+   One column grid for the whole marketing site, so sections stop inventing
+   their own arithmetic (`calc((100vw/7)*0.4667)` and friends).
+
+   Twelve columns, because 12 divides by 2, 3, 4 and 6 — every split this site
+   actually uses (halves, thirds, the 5|2|5 spine) lands on a column edge
+   instead of near one. The gutter is a token and steps with the breakpoint;
+   the outer margin stays `Container`'s job, so the grid is independent of how
+   wide the page is allowed to get.
+
+   Usage: `<Grid>` from `@/components/primitives/Grid`, then Tailwind's own
+   `col-span-*` / `col-start-*` on the children. Add `?grid` to any URL to
+   overlay the columns and check work against them.                          */
+:root {
+  --grid-cols: 12;
+  --grid-gutter: 16px;
+}
+@media (min-width: 768px)  { :root { --grid-gutter: 20px; } }
+@media (min-width: 1024px) { :root { --grid-gutter: 24px; } }
+@media (min-width: 1536px) { :root { --grid-gutter: 32px; } }
+
+@utility grid-ds {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+}
+
+/* Dev-only column ruler. Off unless `?grid` put the flag on <html>, so it can
+   ship without a guard and without a bundle-size argument. */
+[data-grid-overlay] { display: none; }
+html[data-grid="on"] [data-grid-overlay] {
+  display: grid;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+html[data-grid="on"] [data-grid-overlay] > div > span {
+  background: color-mix(in srgb, var(--near-green) 14%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--near-green) 22%, transparent);
 }
