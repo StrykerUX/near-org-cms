@@ -28,33 +28,35 @@
 // que la silueta sea proporcional en todo instante, B deja la reja quieta y anima el
 // recorte de la imagen.
 
-import { hermiteRamp } from "@/components/primitives/motion/velocityRamp";
-import { softFloor } from "@/components/primitives/motion/softFloor";
+// ── Lo que ya NO se define acá ───────────────────────────────────────────────
+//
+// La forma de la escalera y el reloj de la cascada se PROMOVIERON a
+// `home-v2/stairGeometry.ts` cuando el approach de paneles ganó: son producción, no
+// sandbox. Este módulo los reexporta para que los componentes del lab —que solo existen
+// para comparar approaches entre sí— no tengan que cambiar de import mientras el
+// laboratorio siga en pie.
+//
+// Lo que queda definido acá abajo es lo del TALLADO (`carve*`), que solo usa `/talla` y
+// no se llevó a producción.
+export {
+  STAIR_COLUMNS,
+  STAIR_RINGS,
+  STAIR_SPAN,
+  CASCADE,
+  ringOf,
+  u,
+  stairOffsets,
+  cascadeEdges,
+} from "@/components/sections/home-v2/stairGeometry";
+export type { CascadeInput } from "@/components/sections/home-v2/stairGeometry";
 
-export const STAIR_COLUMNS = 7;
-
-/**
- * Alto de la franja de escalones, en unidades de `--u`. Es la profundidad de la FIGURA:
- * con `depth` la escalera baja `depth · u` desde el borde superior de la columna
- * exterior hasta el valle central, en tres saltos de `depth · u / 3`.
- *
- * Producción usa 1.5, o sea saltos de `u · 0.5` = 134px a 1877px de ancho. El approach
- * B lo sube porque "escalones más pronunciados" es, literalmente, esto — y no algo que
- * la curva del reveal pueda simular: la curva decide a qué velocidad se llega al salto
- * final, nunca cuánto mide.
- *
- * Lo que crece con `depth`, y hay que tenerlo presente antes de subirlo:
- *
- *   depth   salto final   la escalera muerde…   alto de la sección
- *   1.50      134px         402px del hero        1273px
- *   2.00      179px         536px                 1541px
- *   2.25      201px         603px                 1675px   ← el valor del approach B
- *   2.50      223px         670px (64% del hero)  1809px
- *
- * El vídeo NO tiene que crecer con `depth` (el excedente lo fija `drop`, ver abajo), así
- * que profundizar la figura no cuesta reencuadre.
- */
-export const STAIR_SPAN = 1.5;
+import {
+  STAIR_COLUMNS,
+  STAIR_RINGS,
+  STAIR_SPAN,
+  ringOf,
+  u,
+} from "@/components/sections/home-v2/stairGeometry";
 
 /**
  * La profundidad del approach B: `u` por escalón, o sea la cascada a 45° — cada salto
@@ -77,22 +79,8 @@ export const STAIR_SPAN = 1.5;
 export const STAIR_DEPTH = 3;
 
 /**
- * La figura en UNA pieza por columna: cada columna es gris de `u·offset` a
- * `bottom: u·offset`. Con `depth = 1.5` es la unión exacta de las tres piezas de
- * producción, así que el estado final no cambia — y de paso desaparecen las dos costuras
- * de `+1px` que las piezas necesitaban entre sí.
- *
- * La columna central lleva `depth`: su gris empieza justo en la juntura, que es donde hoy
- * empieza el bloque uniforme.
- */
-export function stairOffsets(depth = STAIR_SPAN): number[] {
-  const step = depth / 3;
-  return [0, step, step * 2, depth, step * 2, step, 0];
-}
-
-/**
- * La figura en TRES piezas, tal cual producción. La usa el approach C, que no toca
- * la estructura: solo el reloj.
+ * La figura en TRES piezas, tal cual la dibujaba producción antes del puerto. La usa el
+ * approach C, que no tocaba la estructura: solo el reloj.
  */
 export const STAIR_CAPS: ({ offset: number; height: number } | null)[] = [
   { offset: 0, height: 1.5 },
@@ -103,14 +91,6 @@ export const STAIR_CAPS: ({ offset: number; height: number } | null)[] = [
   { offset: 0.5, height: 1 },
   { offset: 0, height: 1.5 },
 ];
-
-export const STAIR_RINGS = 4;
-
-/** Anillo al que pertenece la columna `i`. Las 7 columnas son 4 anillos espejados. */
-export const ringOf = (i: number) => Math.min(i, STAIR_COLUMNS - 1 - i);
-
-/** `--u` en múltiplos, para escribir en estilos inline. */
-export const u = (n: number) => `calc(var(--u) * ${n})`;
 
 // ── El perfil de tallado (approach B) ────────────────────────────────────────
 //
@@ -366,175 +346,6 @@ export function clearCarve(el: HTMLElement) {
   for (let ring = 0; ring < STAIR_RINGS; ring++) el.style.removeProperty(CARVE_VAR(ring));
 }
 
-// ── El reloj de la CASCADA ───────────────────────────────────────────────────
-//
-// Un segundo reloj, alternativo a `carveEdges`, para el approach de paneles. Devuelve lo
-// mismo (la `y` en pantalla del borde superior de cada anillo) y se consume igual, así que
-// las dos rutas pueden alternarse con una perilla.
-//
-// ── Qué le falta a `carveEdges`, y por qué no se arregla con una curva ───────
-//
-// `carveEdges` mueve los cuatro anillos a la MISMA velocidad y los escalona solo por el
-// arranque. La escalera se abre porque unos empezaron antes, no porque vayan a distinta
-// velocidad. Y el final es un `Math.max(ceiling, y)`: cada anillo llega al borde a ~2.5×
-// la velocidad del scroll y se detiene EN UN FRAME. Eso es un choque, no un aterrizaje, y
-// no hay curva global que lo suavice — la curva reparte el recorrido en el tiempo, pero el
-// frenazo lo produce el clamp, que es discontinuo en velocidad por definición.
-//
-// ── Los tres actos que este reloj sí produce ─────────────────────────────────
-//
-//  1. CASCADA POR VELOCIDAD. Cada anillo entra a una velocidad distinta, graduada de
-//     afuera hacia adentro (`fast` → `slow`, en múltiplos de la velocidad del scroll).
-//     Los laterales se despegan de la juntura al triple del scroll y el central a poco
-//     más que el scroll: la escalera se abre porque los de afuera VAN más rápido, no solo
-//     porque salieron antes.
-//
-//  2. ALCANCE. La curva de cada anillo es una Hermite cúbica con las dos pendientes
-//     prescritas: entra a `v_r` y llega a `settle`. Para los anillos interiores esa
-//     combinación —entrada lenta, salida lenta, mismo recorrido en menos progreso— tiene
-//     que pasar por un PICO de velocidad a mitad de camino. No se programa: sale de la
-//     familia de curvas. Medido con los defaults, el central llega a 3.4× el scroll justo
-//     cuando el lateral ya bajó a 1.6×.
-//
-//  3. ATERRIZAJE SUAVE. El clamp duro se reemplaza por `softFloor`, que amortigua los
-//     últimos `soft · u` píxeles. La velocidad EN PANTALLA del borde cae de forma continua
-//     hasta cero en vez de cortarse: medido, el anillo exterior pasa de 1.5× a 0 a lo
-//     largo de ~104px de scroll.
-//
-// ── Lo que se derivó en vez de calibrarse ────────────────────────────────────
-// Las velocidades por anillo son un pedido; el RECORRIDO de cada uno (`budget`) sale de
-// las medidas del viewport para que el borde toque el fondo del amortiguador exactamente
-// en su `land`. Por eso la cobertura total al final del scroll está garantizada en
-// cualquier pantalla y con cualquier `?ease=`, y no hay ningún número calibrado a ojo que
-// pueda quedar corto en un viewport raro. Ver la demostración en `cascadeEdges`.
-
-/** Los valores con los que está calibrada la cascada. */
-export const CASCADE = {
-  /** Radio del amortiguador de llegada, en `--u`. Con 0 el final es el choque duro de hoy. */
-  soft: 0.25,
-  /** Desfase entre arranques, en progreso. Es la perilla de "cuánta escalera". */
-  spread: 0.11,
-  /** Progreso en el que aterriza el anillo CENTRAL, que es el último. */
-  land: 0.92,
-  /** Cuánto se adelanta el aterrizaje de cada anillo hacia afuera. 0 = los cuatro juntos. */
-  lag: 0.02,
-  /** Velocidad de entrada del anillo EXTERIOR, en múltiplos de la velocidad del scroll. */
-  fast: 2.9,
-  /** Ídem del anillo CENTRAL. Que sea menor que `fast` es, literalmente, la cascada. */
-  slow: 1.35,
-  /** Velocidad de llegada, común a los cuatro. Más bajo = más ease-out al final. */
-  settle: 0.25,
-} as const;
-
-export type CascadeInput = {
-  /** Progreso pasado por `?ease=`, en [0,1]. Es el reloj de los ANILLOS. */
-  eased: number;
-  /** `y` en pantalla de la juntura, viva. Es el reloj de la JUNTURA: `seamDoc − scroll`. */
-  seamY: number;
-  /** `y` en pantalla de la juntura en el arranque del recorrido. Medida, constante. */
-  seamY0: number;
-  /** Largo del recorrido del ScrollTrigger, en px. */
-  span: number;
-  viewportH: number;
-  unitPx: number;
-  drop: number;
-  /** Altura de pantalla, en fracción del viewport, donde aterrizan. 0 = el borde. */
-  line: number;
-  soft: number;
-  spread: number;
-  land: number;
-  lag: number;
-  fast: number;
-  slow: number;
-  settle: number;
-};
-
-/**
- * La `y` en pantalla del borde superior del gris de cada anillo, del exterior al centro.
- * Mismo contrato de salida que `carveEdges`, para que el consumidor solo cambie una línea.
- *
- * ── La cuenta, anillo por anillo ────────────────────────────────────────────
- *
- *   s_r    = spread · r                       arranque escalonado, de afuera hacia adentro
- *   L_r    = land − lag · (3 − r)             aterrizaje escalonado hacia atrás
- *   win_r  = L_r − s_r                        la ventana del anillo: el exterior tiene más
- *   D_r    = seamY0 − span·L_r + start_r·u + k − F        ← el presupuesto, ver abajo
- *   m0_r   = span · (v_r − 1) · win_r / D_r   ← la pendiente que da la velocidad pedida
- *   g_r(t) = m0·t + (3−2m0−settle)·t² + (m0+settle−2)·t³
- *   y_r    = F + softFloor(seamY + start_r·u − D_r·g_r(t_r) − F, k)
- *
- * ── Por qué `D_r` es una derivación y no un número ──────────────────────────
- * Se pide que el borde LIBRE del anillo toque el fondo del amortiguador (`F − k`) justo
- * en `eased = L_r`. Como la juntura viaja con el scroll —`seamY(p) = seamY0 − span·p`—, ese
- * pedido se despeja en una línea y da el `D_r` de arriba. Todo lo demás se apoya en eso.
- *
- * ── Por qué `m0_r` está en múltiplos de la velocidad del SCROLL ─────────────
- * Un panel pegado a la juntura ya sube a 1× el scroll sin moverse un píxel por su cuenta:
- * lo arrastra la página. Así que la velocidad que uno VE es `span + D_r·g_r'/win_r`, y
- * pedirla en múltiplos del scroll (`v_r`) es la única forma de que `fast`/`slow`
- * signifiquen lo mismo en cualquier viewport. Despejando `g_r'(0) = m0_r` sale la fórmula.
- *
- * ── Las tres garantías, demostradas y no calibradas ─────────────────────────
- *
- *  · COBERTURA TOTAL. En `eased = 1` todos los `t_r` valen 1, así que
- *    `free_r = seamY0 − span + start_r·u − D_r = (F − k) − span·(1 − L_r) ≤ F − k`,
- *    o sea `y_r = F` exacto. Vale en cualquier viewport y con cualquier `?ease=` monótona
- *    con `e(1) = 1`, así que el estado final es idéntico al de `carveEdges` y el traspaso
- *    a la sección siguiente no cambia.
- *
- *  · MONOTONÍA (y por lo tanto scroll en reversa exacto). `free_r` decrece en `p` porque
- *    `g_r' > 0`, y `softFloor` es creciente en su argumento. Además es función PURA del
- *    progreso: no hay estado entre frames que un `refresh()` o un resize puedan ensuciar.
- *
- *  · `g_r' > 0` SIEMPRE. `g_r'` es una parábola con extremos `m0 > 0` y `settle > 0`; solo
- *    puede hacerse negativa si abre hacia arriba y su vértice cae dentro de (0,1), y eso
- *    exige `m0 > 3 − 2·settle`. El clamp de `m0` lo prohíbe, así que la propiedad queda
- *    probada de una línea en vez de depender de que nadie mueva mal una perilla.
- */
-export function cascadeEdges(input: CascadeInput): number[] {
-  const {
-    eased,
-    seamY,
-    seamY0,
-    span,
-    viewportH,
-    unitPx,
-    drop,
-    line,
-    soft,
-    spread,
-    land,
-    lag,
-    fast,
-    slow,
-    settle,
-  } = input;
-
-  const k = Math.max(0, soft) * unitPx;
-  const floorY = line * viewportH;
-  const last = STAIR_RINGS - 1;
-
-  const edges: number[] = new Array(STAIR_RINGS);
-  for (let ring = 0; ring < STAIR_RINGS; ring++) {
-    const startAt = spread * ring;
-    const landAt = land - lag * (last - ring);
-    const win = Math.max(1e-3, landAt - startAt);
-    // Cuánto cuelga este anillo por debajo de la juntura al arrancar. Mismo número que
-    // `carveDepths().start`: el excedente de vídeo que hace falta no cambia.
-    const startPx = ((drop * ring) / 3) * unitPx;
-
-    // El presupuesto de ascenso propio, o sea lo que este anillo sube POR ENCIMA de lo
-    // que ya lo arrastra el scroll.
-    const budget = Math.max(1, seamY0 - span * landAt + startPx + k - floorY);
-    const v = fast + ((slow - fast) * ring) / last;
-    // De "entrar a `v` veces la velocidad del scroll" a la pendiente que pide
-    // `hermiteRamp`. La conversión vive acá y no en el helper porque depende del
-    // recorrido concreto de este anillo; ver la nota de `velocityRamp.ts`. El clamp
-    // que garantiza la monotonía lo aplica el helper.
-    const g = hermiteRamp((span * (v - 1) * win) / budget, settle);
-
-    const t = (eased - startAt) / win;
-    edges[ring] = floorY + softFloor(seamY + startPx - budget * g(t) - floorY, k);
-  }
-  return edges;
-}
+// El reloj de la CASCADA vivía acá y se promovió entero a `home-v2/stairGeometry.ts`
+// junto con la forma de la escalera: ganó el approach y es producción. Se reexporta
+// arriba, así que `LabBarsPanels` lo sigue importando de este módulo sin cambios.
