@@ -105,6 +105,7 @@ export default function QuantumBars() {
       const setScale = panels.map(
         (panel) => gsap.quickSetter(panel, "scaleY") as (v: number) => void
       );
+      const setStageY = gsap.quickSetter(stage, "y", "px") as (v: number) => void;
 
       // Medidas que solo cambian al redimensionar. `offsetHeight` es un valor de LAYOUT:
       // no lo contamina el `scaleY` que estamos escribiendo, a diferencia de
@@ -121,9 +122,8 @@ export default function QuantumBars() {
       /** Recorrido de la SALIDA, el retiro del borde inferior. */
       let outStart = 0;
       let outSpan = 1;
-      /** El track del statement y el alto del texto: de acá sale dónde está el texto. */
+      /** Sitio de flujo del statement y su alto: de acá sale cuánto desplazarlo. */
       let trackTopDoc = 0;
-      let trackBottomDoc = 0;
       let stageH = 0;
       /** Alto natural de cada panel. Difiere por columna: su caja termina en su peldaño. */
       let natural: number[] = [];
@@ -162,25 +162,23 @@ export default function QuantumBars() {
         if (outStart < inStart + inSpan) outStart = inStart + inSpan;
         outSpan = Math.max(1, sectionBottomDoc - 0.25 * viewportH - outStart);
 
-        const trackBox = track.getBoundingClientRect();
-        trackTopDoc = trackBox.top + window.scrollY;
-        trackBottomDoc = trackTopDoc + trackBox.height;
+        // El sitio de FLUJO del texto y su alto: de ahí sale cuánto hay que desplazarlo
+        // para dejarlo centrado en la franja. `offsetHeight` y no el rect, porque el rect
+        // ya vendría con el `y` que nosotros mismos escribimos.
+        trackTopDoc = track.getBoundingClientRect().top + window.scrollY;
         stageH = stage.offsetHeight;
-        // Lo que el CSS necesita para centrar el texto en su `top` sin conocer su alto.
-        // Va acá y no en un efecto aparte porque es la misma medida que ya se toma para
-        // el guard, y las dos tienen que salir del mismo layout.
-        scope.style.setProperty("--stage-half", `${stageH / 2}px`);
 
         natural = panels.map((panel) => panel.offsetHeight);
       };
 
       const apply = (scroll: number) => {
         const sectionTopY = sectionTopDoc - scroll;
+        const seamY = seamDoc - scroll;
 
         // El borde SUPERIOR: sube desde la juntura y tapa el hero.
         const top = cascadeEdges({
           eased: clamp01((scroll - inStart) / inSpan),
-          seamY: seamDoc - scroll,
+          seamY,
           seamY0: seamDoc - inStart,
           span: inSpan,
           viewportH,
@@ -202,35 +200,8 @@ export default function QuantumBars() {
           ...EXIT,
         });
 
-        // El fondo del statement, mientras siga en pantalla. El borde inferior no puede
-        // subir por encima de esta línea: si lo hiciera, el texto se quedaría sin marco
-        // gris por debajo y quedaría medio sobre gris y medio sobre crema.
-        //
-        // Es un guard y no una calibración a propósito. El aire de abajo estuvo a 10px de
-        // que el borde se comiera el texto, y ese tipo de número se rompe en silencio y
-        // solo en algunos viewports — el modo de fallo que este archivo ya sufrió con la
-        // juntura de arriba. Con el guard puesto, el aire de abajo vuelve a ser una
-        // decisión de composición libre.
-        //
-        // El texto está PEGADO, así que su posición no se puede cachear: mientras el
-        // sticky aguanta, se queda quieto en pantalla mientras el documento se mueve por
-        // detrás. Se reproduce la cuenta del navegador en vez de preguntársela con un
-        // `getBoundingClientRect` por frame, que sería un reflow forzado en el hot path.
-        //
-        //   · antes de pegarse va en su sitio de flujo, bajando con la página;
-        //   · pegado, su borde superior se queda en la línea de aparcado;
-        //   · al final lo empuja el fondo del track, que sí baja con la página.
-        //
-        // La línea de aparcado es la misma que el `top` del CSS, y tiene que seguir
-        // siéndolo: si las dos se separan, el guard protege una posición donde el texto
-        // no está.
-        const parkY = 0.5 * viewportH - stageH / 2;
-        const trackTopY = trackTopDoc - scroll;
-        const stageTopY = Math.min(
-          Math.max(trackTopY, parkY),
-          trackBottomDoc - scroll - stageH
-        );
-        const textFloor = stageTopY + stageH;
+        let bandTop = -Infinity;
+        let bandBottom = Infinity;
 
         for (let i = 0; i < panels.length; i++) {
           const ring = ringOf(i);
@@ -244,13 +215,58 @@ export default function QuantumBars() {
           // duplicar constantes. Intercambiar `fast` y `slow` en `EXIT` no alcanzaría:
           // dejaría las velocidades invertidas pero los arranques en el orden viejo.
           let b = bottom[STAIR_RINGS - 1 - ring];
-          if (textFloor > 0 && b < textFloor) b = textFloor;
           // Los dos bordes no pueden cruzarse. Pasa al final del recorrido, cuando el de
           // abajo alcanza al de arriba: a partir de ahí el panel mide 0, no negativo.
           if (b < t) b = t;
           setY[i](t - sectionTopY);
           setScale[i]((b - t) / natural[i]);
+
+          // La franja donde las SIETE columnas son grises: del borde superior más bajo al
+          // inferior más alto. Es el rectángulo lleno que el lector ve como "el gris".
+          if (t > bandTop) bandTop = t;
+          if (b < bandBottom) bandBottom = b;
         }
+
+        // ── El statement se centra en la franja, no en la pantalla ────────────
+        //
+        // Esto reemplaza a un `position: sticky` que lo dejaba clavado a media pantalla.
+        // El sticky fallaba por una razón de fondo: la franja gris CAMBIA DE TAMAÑO —crece
+        // al entrar y se encoge al salir— así que un punto fijo solo está centrado durante
+        // el rato en que la franja llena el viewport. Medido con el sticky puesto, el aire
+        // por encima y por debajo del texto daba 675/257 al entrar y 44/12 al salir; solo
+        // en el medio daba 467/467.
+        //
+        // Centrándolo en la franja los dos aires son iguales POR CONSTRUCCIÓN, en todo el
+        // recorrido: valen `(franja − alto del texto) / 2` los dos. No hay nada que
+        // calibrar y no hay un momento privilegiado en el que se vea bien.
+        //
+        // Y la pausa sale gratis: mientras la franja llena la pantalla su centro no se
+        // mueve, así que el texto se queda quieto sin que nadie lo fije. Cuando la franja
+        // se encoge por abajo, el texto sube con ella en vez de quedar acorralado contra
+        // el borde.
+        //
+        // La franja se recorta al viewport porque lo que importa es el gris que se VE: sin
+        // recortar, el fondo de la sección —que está muy por debajo del fold durante casi
+        // todo el recorrido— arrastraría el centro fuera de la pantalla.
+        const seenTop = bandTop > 0 ? bandTop : 0;
+        const seenBottom = bandBottom < viewportH ? bandBottom : viewportH;
+        const band = seenBottom - seenTop;
+        const flowY = trackTopDoc - scroll;
+        const centered = (seenTop + seenBottom) / 2 - stageH / 2;
+
+        // Centrar solo tiene sentido si la franja da para contener el texto. Cuando el
+        // gris recién asoma por el fondo de la pantalla, su centro está abajo de todo y
+        // el texto —más alto que la franja— se saldría por los dos lados, apareciendo
+        // sobre el hero antes de tiempo. Ahí lo correcto es dejarlo en su sitio de flujo,
+        // que está por debajo del fold.
+        //
+        // El paso de uno a otro va en rampa sobre lo bien que entra el texto en la
+        // franja: sin rampa hay un salto de `u·0.5` justo cuando la franja alcanza el
+        // alto del texto, que se ve como un tirón.
+        const fit = (band - stageH) / (0.5 * stageH);
+        const k = fit < 0 ? 0 : fit > 1 ? 1 : fit;
+
+        setStageY((centered - flowY) * k);
       };
 
       const st = ScrollTrigger.create({
@@ -500,41 +516,25 @@ export default function QuantumBars() {
             con el razonamiento largo en `ProofStats.tsx`: un pin inserta un pin-spacer
             que pelea con Lenis, con el ResizeObserver del provider y con StrictMode.
 
-            El alto del track es lo que dura la pausa: el texto se pega cuando su caja
-            llega a media pantalla y se suelta cuando el fondo del track la alcanza, o
-            sea `alto del track − alto del texto`. Con `50svh` eso da ~270px a 2080×1329.
-            Y ese número es el dial de TODA la sección, porque cada píxel de pausa cuesta
-            un píxel de alto: con `100svh` la pausa era de 930px y la sección medía
-            3100px, casi el doble de lo que mide con la pausa corta.
+            El track ya no fija ninguna pausa —eso lo resuelve el centrado en la franja de
+            `apply`, y de ahí sale gratis— pero se queda por dos motivos: es el sitio de
+            flujo desde el que `apply` desplaza el texto, y es el trigger del barrido, que
+            necesita un elemento de flujo normal con un recorrido propio.
 
-            `min-height` y no `height`: en una ventana baja el texto puede medir más que
-            50svh, y con altura fija se saldría del track y el sticky quedaría inerte. Con
-            el mínimo, el track crece hasta el texto, la pausa se reduce a cero y el
-            statement simplemente desfila — que es la degradación correcta.
-
-            OJO si alguien mueve esto: ningún ancestro puede tener `overflow` distinto de
-            `visible` o el sticky deja de pegarse sin ningún error. Las barras tienen su
-            `overflow-hidden`, pero son un HERMANO de este Container, no un ancestro. */}
-        <div data-quantum="track" style={{ minHeight: "50svh" }}>
+            Su `min-height` es lo que le da ese recorrido al barrido. No hace falta que sea
+            grande: cada píxel de más es un píxel de sección. */}
+        <div data-quantum="track" style={{ minHeight: "40svh" }}>
           {/* `isolate` acota el apilado de las dos capas de texto. Las dos ocupan
               la misma celda de grid: mismo string, mismo ancho, mismos quiebres
               de línea — es lo que garantiza que el brillo caiga sobre el glifo.
 
-              El centrado sale del `top`, no de un transform. La primera versión usaba
-              `top: 50svh` con `-translate-y-1/2`, y eso tiene un problema que no se ve
-              hasta que pasa: el transform mueve lo que se PINTA pero no la caja, así que
-              el texto aparecía media caja más arriba de donde el layout lo había puesto
-              —encima del hero— mientras el sticky seguía razonando sobre la caja.
-              Restando la media altura en el propio `top`, lo pintado y lo calculado son
-              la misma cosa.
-
-              `--stage-half` la escribe `measure` con la mitad del alto real del texto. El
-              fallback en 0 es para el caso sin JS: el texto queda colgando del medio en
-              vez de centrado, que se ve peor pero nunca se sale de su sitio. */}
+              Sin `position` ni `top`: la coloca `apply` con un `y`, centrándola en la
+              franja gris que se ve en cada frame. Acá solo vive su sitio de FLUJO, que es
+              el que se usa sin JS y con reduced-motion — por debajo de la juntura, o sea
+              siempre sobre gris. */}
           <div
             data-quantum="stage"
-            style={{ top: "calc(50svh - var(--stage-half, 0px))" }}
-            className="sticky isolate mx-auto grid max-w-[64rem] px-10 text-center"
+            className="isolate mx-auto grid max-w-[64rem] px-10 text-center"
           >
             <h2 data-quantum="line" className="text-h2 text-pretty [grid-area:1/1]">
               {STATEMENT}
