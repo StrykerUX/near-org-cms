@@ -8,6 +8,7 @@ import { staggerChars } from "@/components/primitives/motion/staggerChars";
 import { CTA_RAMP, CTA_RAMP_HEAD } from "@/components/primitives/motion/motionColors";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
+import { hermiteRamp } from "@/components/primitives/motion/velocityRamp";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { SEQUENCE_HEAD as HEAD, SEQUENCE_TAIL as TAIL, SEQUENCE_BEATS as BEATS, EXTERNAL_LINKS } from "@/components/sections/quantum/quantumContent";
 
@@ -211,6 +212,20 @@ const SWEEP_TURN = 360;
 const SWEEP_LEAD = 29;
 const SWEEP_LEAD_FRAC = 0.1;
 
+// The burst's shape: enters at 3× and decays to a standstill, so it hands the band over
+// to the base rate without a step in velocity. `hermiteRamp` states that as the two
+// endpoint slopes instead of leaving it implicit in an expanded cubic.
+//
+// This used to be written by hand as `1 - (1 - x) ** 3`, which is the SAME curve —
+// hermiteRamp(3, 0) expands to `3t - 3t² + t³`, identical to a floating-point epsilon.
+// It moved to the shared helper because the argument above ("decay to zero velocity
+// exactly where the clamp lands, so the seam is invisible") is a general one, and two
+// other scenes needed it and re-derived it separately.
+//
+// Hoisted: the ramp is a closure over its coefficients, so building it per frame would
+// allocate for nothing.
+const SWEEP_LEAD_RAMP = hermiteRamp(3, 0);
+
 // Punches the inner hole. `closest-side` is required: a circle radial-gradient
 // defaults to farthest-CORNER, so on a square element 100% would land out at the
 // diagonal and the hole would come out the wrong size.
@@ -292,8 +307,9 @@ export default function ThreatSequence() {
         p: 1,
         ease: "none",
         onUpdate: () => {
-          const x = Math.min(1, progress.p / SWEEP_LEAD_FRAC);
-          const lead = SWEEP_LEAD * (1 - Math.pow(1 - x, 3));
+          // No `Math.min` here any more: `hermiteRamp` clamps its input to [0,1], so the
+          // burst saturates on its own once the lead window is spent.
+          const lead = SWEEP_LEAD * SWEEP_LEAD_RAMP(progress.p / SWEEP_LEAD_FRAC);
           setRotation(SWEEP_PARK + SWEEP_TURN * progress.p + lead);
         },
         scrollTrigger: {
