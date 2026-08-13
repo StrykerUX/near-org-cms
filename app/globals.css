@@ -255,8 +255,11 @@
 
   /* Rail — por encima de display, y DECORATIVO: la cinta de palabras que corre
      al borde del stepper, al 6% de opacidad. No es un nivel de jerarquía; no
-     usarlo para texto que se lea. */
-  --text-rail: clamp(4.375rem, 3.0099rem + 5.8245vw, 10rem);
+     usarlo para texto que se lea.
+     Su rampa es más empinada que el resto de la escala a propósito: las
+     palabras largas del carril están PENSADAS para desbordar el viewport y
+     cortarse, así que el tope no lo fija la legibilidad sino el encuadre. */
+  --text-rail: clamp(5.5rem, 3.5rem + 8.5vw, 13rem);
   --text-rail--line-height: 1;
   --text-rail--letter-spacing: -0.02em;
   --text-rail--font-weight: 500;

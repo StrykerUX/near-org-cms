@@ -2,7 +2,6 @@
 
 import { ArrowUp } from "lucide-react";
 import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { enableScene } from "@/components/primitives/motion/stickyScene";
 import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
@@ -15,19 +14,20 @@ import { PROOF_STEPS as STEPS } from "@/components/sections/home-v2/homeV2Conten
 // porqué está documentado ahí— con tres diferencias de diseño del rebuild:
 //
 //  1. El carril alinea a la IZQUIERDA (todas las palabras arrancan en la misma
-//     X) en vez de a la derecha, y se desplaza en bloque para que la más ancha
-//     roce el borde del viewport. Como consecuencia el cursor queda FIJO en X:
-//     ya no tiene que perseguir el borde izquierdo de cada título.
-//  2. El recorrido es mucho más corto: 7svh por paso contra 65svh. Las cinco
-//     pruebas pasan casi al vuelo, a propósito.
-//  3. El cursor lleva el gradiente lima→verde en vez del verde plano.
-const STEP_VH = "7svh";
+//     X) en vez de a la derecha, y arranca en una fracción FIJA del viewport:
+//     las palabras largas se salen del borde derecho y se cortan, a propósito.
+//     Como consecuencia el cursor queda FIJO en X: ya no tiene que perseguir el
+//     borde izquierdo de cada título.
+//  2. El cursor lleva el gradiente lima→verde en vez del verde plano.
+const STEP_VH = "45svh";
 const DIM_WORD = 0.06;
 
-// La palabra más ancha del set: es la que se alinea contra el borde derecho del
-// viewport, y de ahí sale la X de todo el bloque. Se busca por texto y no por
-// índice para que reordenar STEPS no rompa el encuadre en silencio.
-const ANCHOR_WORD = "Confidential";
+// Fracción del ancho del viewport donde arranca el carril. Es un valor de
+// composición, no un encuadre: NADA lo ajusta para que la palabra más ancha
+// quepa — que "Confidential" o "1+ Million" se corten contra el borde es el
+// efecto buscado, y el overflow-hidden del carril evita que eso ensanche la
+// página.
+const RAIL_START = 0.78;
 
 // Tres copias del set (relleno · reales · relleno) para que nunca se vea un
 // extremo del carril. Solo el bloque del medio lleva `data-word`. Ver el
@@ -58,19 +58,20 @@ export default function ProofStepper() {
 
     let active = -1;
 
-    // Desplazamiento horizontal del bloque entero: la palabra ancla termina
-    // justo dentro del borde derecho del viewport. Se recalcula en cada
-    // refreshInit porque depende de innerWidth y del ancho real del glifo
-    // (que cambia cuando montreal, display:swap, termina de cargar).
+    // Desplazamiento horizontal del bloque entero: todas las palabras arrancan
+    // en la misma X, RAIL_START del viewport, sin importar cuánto midan. Se
+    // recalcula en cada refreshInit porque depende de innerWidth y del tamaño
+    // del cursor (que cambia cuando montreal, display:swap, termina de cargar).
     self.add("placeRail", () => {
-      const anchor = words.find((w) => w.textContent?.trim() === ANCHOR_WORD) ?? words[0];
       const railLeft = rail.getBoundingClientRect().left;
-      const x = Math.max(0, window.innerWidth - railLeft - anchor.offsetWidth);
-      gsap.set(list, { x });
       // El cursor se recuesta a la izquierda del bloque, a poco menos de un
       // ancho de sí mismo. Su tamaño está en `em` del display fluido, así que
-      // se LEE en vez de hardcodearse.
-      if (cursor) gsap.set(cursor, { x: Math.max(0, x - 1.16 * cursor.offsetWidth) });
+      // se LEE en vez de hardcodearse. Ese hueco es también el piso de la X del
+      // bloque: por debajo, el cursor caería fuera del carril y se cortaría.
+      const gap = cursor ? 1.16 * cursor.offsetWidth : 0;
+      const x = Math.max(gap, window.innerWidth * RAIL_START - railLeft);
+      gsap.set(list, { x });
+      if (cursor) gsap.set(cursor, { x: x - gap });
     });
 
     self.add("go", (i: number) => {
@@ -163,13 +164,16 @@ export default function ProofStepper() {
                 data-panel
                 className="grid grid-cols-1 items-baseline gap-6 group-data-[stepper=on]/proof:invisible group-data-[stepper=on]/proof:opacity-0 group-data-[stepper=on]/proof:[grid-area:1/1] lg:grid-cols-[15rem_minmax(0,28rem)] lg:gap-x-24 lg:gap-y-10"
               >
-                <Eyebrow className="text-foreground">{step.eyebrow}</Eyebrow>
+                {/* h4 y no el primitive Eyebrow: acá el rótulo NO es un
+                    kicker de 12px en versalitas, es la etiqueta del paso y se
+                    lee a la par del dato. */}
+                <h4 className="text-h4 text-foreground">{step.eyebrow}</h4>
                 <div className="flex flex-col gap-5">
                   <p className="flex items-baseline gap-2">
                     <span className="text-display-serif italic">{step.value}</span>
                     <span className="text-h3">{step.label}</span>
                   </p>
-                  <p className="max-w-xs text-body-sm text-gray-blue text-pretty">{step.body}</p>
+                  <p className="max-w-sm text-body-lg text-gray-blue text-pretty">{step.body}</p>
                 </div>
               </div>
             ))}
