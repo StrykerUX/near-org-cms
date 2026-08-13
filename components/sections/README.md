@@ -61,9 +61,12 @@ dar por terminado un cambio.
 | `NavPill`, `HeroBanner`, `QuantumRevealHeading`, `ProofStats`, `VideoStory`, `StackShowcase`, `FeatureCards`, `ClosingCta`, `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `PrototypeHomepageView` | `/prototype/homepage` — draft de landing animada, sin datos reales. `CustomerStory` se reusa tal cual. |
 | `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` y `PrototypeFooter` tal cual. |
 | `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). Reusa `PrototypeFooter` tal cual. |
+| `lab/*` | nadie — se montan directo desde su `page.tsx` | Las doce rutas de `/prototype/descent`, todas `noindex`. **No es una familia de secciones, es un sandbox**: prueba formas de resolver el descenso del hero de `home-v2/` sin iterar sobre la página real. Nada de acá se importa desde `app/(site)`, y lo que se lleve a producción cuando gane un approach es el mecanismo, no estos archivos. Tiene su propio [README](./lab/README.md) con el catálogo de rutas. |
 
-Cinco secciones usan **sección pegada**: `ProofStats`; en `home-v2/`,
-`ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`, `ThreatSequence`.
+Cinco secciones de las páginas reales usan **sección pegada**: `ProofStats`; en
+`home-v2/`, `ProofStepper`, `NearStack` y `OwnYourOwn`; y en `quantum/`,
+`ThreatSequence`. (En `lab/`, `DescentStairs` también monta un track pegado, con
+las mismas reglas; no entra en la cuenta porque es sandbox.)
 Todas con `position: sticky` de CSS
 y un ScrollTrigger que solo LEE el progreso — nunca `pin: true`, que inserta un
 pin-spacer en el documento y pelea con Lenis, con el `ResizeObserver` de

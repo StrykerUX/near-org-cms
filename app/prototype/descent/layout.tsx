@@ -1,6 +1,7 @@
 import PrototypeMotionProvider from "@/components/site/providers/PrototypeMotionProvider";
 
-// Un layout para las cuatro rutas del laboratorio, en vez de uno por ruta.
+// Un layout para las doce rutas del laboratorio, en vez de uno por ruta. El catálogo de
+// cuáles son y qué prueba cada una está en `components/sections/lab/README.md`.
 //
 // El provider es obligatorio acá por lo mismo que en /prototype/homepage-v2: hay
 // ScrollTriggers que miden contra el viewport, y sin su refresh coordinado quedan

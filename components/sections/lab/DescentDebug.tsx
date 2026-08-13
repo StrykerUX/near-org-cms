@@ -40,6 +40,29 @@ import { gsap } from "@/components/primitives/motion/gsapClient";
 // El criterio es la RELACIÓN entre las dos: mientras `stair > flat` lo que se ve se lee
 // como una escalera; cuando `flat` gana, se lee como una barra. El panel se pone en
 // alarma en ese caso, no en el de `gap`.
+//
+// ── Y por qué después hizo falta `edges` ─────────────────────────────────────
+// `stair` y `flat` resumen la figura en dos números, y para el defecto que las motivó
+// —escalera contra barra— con eso alcanza. Pero un resumen de dos números no puede
+// describir un PERFIL, y el approach de la cascada (`cascadeEdges`) es justamente un
+// perfil: los cuatro anillos entran a velocidades distintas, los interiores aceleran a
+// mitad de camino para alcanzar a los laterales, y los cuatro aterrizan amortiguados.
+// Nada de eso se ve en `stair`, que puede dar el mismo número con la cascada abriéndose
+// pareja o con un anillo clavado y el resto muy atrás.
+//
+// `edges` son las cuatro `y` en crudo, del anillo exterior al central. Con ellas se lee
+// de un vistazo lo que los otros campos no dicen:
+//
+//   · los SALTOS entre anillos consecutivos, que son la escalera. Si crecen hacia el
+//     centro, los interiores están alcanzando; si crecen hacia afuera, todavía se abre.
+//   · el ATERRIZAJE: con qué diferencia llegan los cuatro al final. Un `0/0/0/0` es
+//     cobertura total; un `0/152/449/746` es el reloj viejo, con el lateral ya clavado
+//     en el borde y el centro 746px atrás.
+//
+// Lo publica el componente que las calcula y no hay respaldo de rects: unos bordes
+// derivados del DOM serían cuatro números con pinta de medida sin serlo, que es
+// exactamente el modo de fallo de esta sección. Por eso el campo va vacío en producción
+// y en los approaches que no lo publican, y la fila del panel no se dibuja.
 
 export type DescentReadout = {
   /** Progreso del recorrido del hero, 0..1. */

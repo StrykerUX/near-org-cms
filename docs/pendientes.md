@@ -71,6 +71,42 @@ distinto del convexo.
 
 ---
 
+## El descenso del hero — falta elegir approach
+
+**Estado:** tres candidatos vivos y medidos, ninguno elegido. El laboratorio no
+bloquea nada; `home-v2` sigue con el descenso de hoy.
+
+El objetivo es que la escalera de `QuantumBars` no empiece siendo una barra gris
+plana. Tras dos intentos fallidos sobre la página real nació el laboratorio:
+doce rutas bajo `/prototype/descent`, catálogo en
+[`components/sections/lab/README.md`](../components/sections/lab/README.md).
+
+Los tres candidatos, y en qué se diferencian de verdad:
+
+| Ruta | Mecanismo | Lo que lo hace atractivo | Lo que le falta |
+|---|---|---|---|
+| `zocalo` | Producción sin tocar; cambian dos líneas del reloj | Cambio mínimo, cero riesgo geométrico | No elimina el zócalo, solo lo vuelve subordinado |
+| `talla` | La reja quieta, se recorta la imagen del hero | La franja crema se vuelve imposible **por construcción** | El hero va encima, así que su copy solo puede quedar cortada o montada sobre el gris — defecto estructural, no bug |
+| `paneles` | Paneles grises con `scaleY` sobre el hero, como producción | Retira los cuatro problemas de `talla` y va al compositor | Sigue necesitando el excedente de vídeo (`drop`), ~12% de reencuadre |
+
+**`paneles` es el que va ganando** y es el único con reloj propio
+(`cascadeEdges`: entrada de velocidad graduada, alcance de los interiores y
+aterrizaje amortiguado). `?flow=carve` lo devuelve al reloj de `talla` para el
+A/B, y siete perillas más calibran en vivo sin recompilar.
+
+**Lo que falta para poder decidir:**
+
+- **Medir el paint de `talla` en el navegador.** Un `clip-path` animado no va al
+  compositor. Es el único costo que su approach no puede descartar sin medirlo, y
+  es la razón por la que existe `paneles`. Si resultara despreciable, la
+  invariante del crema volvería a pesar.
+- **El reencuadre del vídeo.** `drop` es lo único que los tres candidatos
+  comparten como costo, y es una decisión de diseño (el hero se recorta ~12%), no
+  técnica. Nadie la validó todavía.
+- **Qué pasa con el statement del hero en `paneles`.** Ahora el gris lo tapa al
+  subir, que es lo correcto y lo que hace producción — pero conviene mirarlo con
+  copy real antes de dar por buena la transición.
+
 ## Otros hilos abiertos
 
 **El blur de la reimplementación del flow field.** El efecto de referencia tiene

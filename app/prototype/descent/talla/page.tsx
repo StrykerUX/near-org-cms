@@ -9,7 +9,8 @@ export const metadata: Metadata = toMetadata(meta);
 // completa desde el primer frame y el hero, apilado encima, va retirando su imagen con
 // un recorte escalonado. Ver el docblock de `LabHeroCarve`.
 //
-// Tres perillas, y conviene saber cuál mover:
+// Seis perillas, y conviene saber cuál mover — las dos primeras son las que cambian el
+// efecto, el resto afina:
 //
 //   `?depth=` — la profundidad de la FIGURA, en unidades de `--u`: cuánto mide cada
 //               salto. Defecto 3 (saltos de una unidad `--u` = 268px, cascada a 45°);

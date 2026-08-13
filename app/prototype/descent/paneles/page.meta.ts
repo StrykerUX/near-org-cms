@@ -4,7 +4,7 @@ const meta = {
   route: "/prototype/descent/paneles",
   title: "Descenso · paneles",
   description:
-    "El mismo efecto que el tallado y con el mismo reloj, pintado al revés: paneles grises que se escalan por encima del hero, en vez de un recorte de la imagen por debajo del gris.",
+    "Paneles grises que se escalan por encima del hero, en vez del recorte de la imagen por debajo del gris que hace el tallado. Los anillos entran a velocidades graduadas de afuera hacia adentro, los interiores aceleran para alcanzar a los laterales y los cuatro aterrizan amortiguados.",
   nav: false,
   sitemap: false,
   robots: "noindex",
