@@ -73,12 +73,24 @@ export default function PrototypeMotionProvider({
     mm.add(MQ.motion, () => {
       const instance = new Lenis({ autoRaf: false });
       lenis = instance;
+      // Dev-only handle. Lenis owns the scroll position, so anything outside
+      // React that needs to move the page — a screenshot harness, a manual
+      // console poke — has to go through it; `window.scrollTo` gets animated
+      // straight back. Without this the only way to capture a section was to
+      // guess at document coordinates, which is how a whole page once got
+      // built without anyone seeing it.
+      if (process.env.NODE_ENV !== "production") {
+        (window as unknown as { __lenis?: Lenis }).__lenis = instance;
+      }
       instance.on("scroll", ScrollTrigger.update);
       const raf = (time: number) => instance.raf(time * 1000);
       gsap.ticker.add(raf);
       return () => {
         gsap.ticker.remove(raf);
         instance.destroy();
+        if (process.env.NODE_ENV !== "production") {
+          delete (window as unknown as { __lenis?: Lenis }).__lenis;
+        }
         lenis = null;
       };
     });
