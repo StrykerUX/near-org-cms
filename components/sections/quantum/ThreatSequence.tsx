@@ -676,7 +676,13 @@ export default function ThreatSequence() {
                   </h2>
                 )}
 
-                <p data-sub className="max-w-[54ch] text-body text-white/60 text-pretty">
+                {/* Design change from Figma (NEARORG_CLAUDE_QUANTUM): the beat
+                    copy moved up one step of the scale and lost its
+                    transparency. At `text-body` on a 60% white it was the
+                    quietest thing in the sequence while carrying the whole
+                    explanation; full white at body-lg makes it read as the
+                    second voice rather than a footnote. */}
+                <p data-sub className="max-w-[54ch] text-body-lg text-white text-pretty">
                   {beat.body}
                 </p>
               </div>

@@ -225,16 +225,11 @@ export const ROADMAP_STAGES: RoadmapStage[] = [
   },
 ];
 
-// ── de NavPillQuantum.tsx ──
-// Order is deliberate and not alphabetical: Developers first because it is the
-// most-used, About last because it is the least. Every one of them is a
-// dropdown, hence the chevron on each.
-export const NAV_LINKS = [
-  { label: "Developers" },
-  { label: "Stack" },
-  { label: "Founders" },
-  { label: "About" },
-];
+// `NAV_LINKS` vivía acá: la lista plana de cuatro etiquetas del nav viejo. Se fue al
+// integrar el menú real, cuyas entradas llevan un `icon` que es un componente de React —
+// y este módulo es de datos puros, sin JSX, para que la forma no cambie el día que la
+// copy venga de la base de datos. El menú se declara en `NavPillQuantum.tsx`, con la
+// excepción anotada ahí.
 
 // ── de StatementWipe.tsx ──
 // The transition line between the proof ribbon and the dark section. It fills

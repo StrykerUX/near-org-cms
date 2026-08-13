@@ -146,15 +146,18 @@ export default function Roadmap() {
   }, []);
 
   return (
-    // The gradient hands off to the white of "In the news" over the last 560px
+    // The gradient hands off to the white of "In the news" over the last 400px
     // rather than at the section boundary, so the seam falls inside the
     // roadmap's bottom padding instead of on a visible edge.
+    // The distance is absolute, so it has to be re-tuned whenever the section's
+    // height changes: at the old 2062px height this was 560px (~27%), and the
+    // tightened timeline keeps roughly that share of a shorter section.
     <section
       ref={rootRef}
       id="roadmap"
-      className="text-foreground [background:linear-gradient(to_bottom,var(--cream)_0%,var(--cream)_calc(100%-560px),#ffffff_100%)]"
+      className="text-foreground [background:linear-gradient(to_bottom,var(--cream)_0%,var(--cream)_calc(100%-400px),#ffffff_100%)]"
     >
-      <Container className="flex flex-col gap-[120px] pb-60 pt-[170px]">
+      <Container className="flex flex-col gap-20 pb-36 pt-28">
         <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-24">
           <div className="flex flex-col gap-5">
             <Eyebrow className="text-ink-soft">Roadmap</Eyebrow>
@@ -210,7 +213,12 @@ export default function Roadmap() {
               <div
                 key={stage.title}
                 data-road-item
-                className="relative grid items-center gap-6 py-20 lg:grid-cols-[1fr_96px_1fr] lg:py-[110px]"
+                // 110px above AND below each stage was 220px of padding around
+                // ~98px of content — the timeline was mostly air, and four of
+                // them made the section a scroll in its own right. 56px still
+                // reads as a sequence of separate beats rather than a list,
+                // and takes ~430px off the section.
+                className="relative grid items-center gap-6 py-12 lg:grid-cols-[1fr_96px_1fr] lg:py-14"
               >
                 <p
                   data-road-fade
