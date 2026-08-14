@@ -18,7 +18,7 @@ import ClosingRing from "@/components/sections/quantum/ClosingRing";
 // one already in the repo, down to the link groups and the legal row. If it ever
 // diverges it gets copied into quantum/ AT THAT MOMENT — see the rule in
 // components/sections/home-v2/README.md.
-import PrototypeFooter from "@/components/sections/PrototypeFooter";
+import FooterV2 from "@/components/sections/FooterV2";
 
 export default function QuantumSecurityView() {
   return (
@@ -40,7 +40,7 @@ export default function QuantumSecurityView() {
         <InTheNews />
         <QuantumFaq />
         <ClosingRing />
-        <PrototypeFooter />
+        <FooterV2 />
       </main>
     </>
   );

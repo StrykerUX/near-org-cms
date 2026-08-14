@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
@@ -8,7 +9,7 @@ import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 
 // Copia divergente de components/sections/PrototypeFooter.tsx, según la regla
-// de home-v2/README.md.
+// de 
 //
 // En desktop el footer EN FLUJO es solo el wordmark, sentado justo debajo de
 // Latest Updates. A ~100px del fondo de la página, un tirón lleva el scroll
@@ -61,6 +62,14 @@ const WORDMARK_CROP_PCT =
 
 // Los grupos de links, una sola vez: los renderizan la versión estática de
 // mobile (cream) y el panel del takeover (sobre negro) con paletas distintas.
+// Solo se cablean los destinos que existen como rutas del prototipo; el resto
+// queda en "#" — un link equivocado es peor que un placeholder evidente.
+// (Mismo mapa que PrototypeFooter, al que este footer reemplaza.)
+const HREFS: Record<string, string> = {
+  Protocol: "/prototype/protocol",
+  "Quantum Security": "/prototype/quantum-security",
+};
+
 function LinkColumns({ dark }: { dark: boolean }) {
   return (
     <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-4 lg:gap-x-16">
@@ -82,8 +91,8 @@ function LinkColumns({ dark }: { dark: boolean }) {
                 <ul className="flex flex-col gap-1.5">
                   {section.links.map((link) => (
                     <li key={link}>
-                      <a
-                        href="#"
+                      <Link
+                        href={HREFS[link] ?? "#"}
                         className={`text-body-sm transition-colors ${
                           dark
                             ? "text-cream/70 hover:text-cream"
@@ -91,7 +100,7 @@ function LinkColumns({ dark }: { dark: boolean }) {
                         }`}
                       >
                         {link}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>

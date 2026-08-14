@@ -533,13 +533,11 @@ export default function NearStack() {
           <div className="flex w-full flex-col gap-2">
             <RailBlock
               block={PROTOCOL_BLOCK}
-              index="01"
               expanded={expanded("protocol")}
               onSelect={goTo}
             />
             <RailBlock
               block={INTENTS_BLOCK}
-              index="02"
               expanded={expanded("intents")}
               onSelect={goTo}
             />
@@ -558,7 +556,7 @@ export default function NearStack() {
                 // productos se expandían juntos apenas abría la caja de AI.
                 <div
                   data-open={aiOpen}
-                  className="group/ai rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:border-cream/45 data-[open=false]:hover:bg-cream/[0.04] motion-reduce:transition-none"
+                  className="group/ai rounded-2xl border border-cream transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.06] motion-reduce:transition-none"
                 >
                   {/* Click en la barra de NEAR AI = saltar a SU parada (el
                       anillo entero encendido); el scroll sigue a los tres. */}
@@ -568,14 +566,7 @@ export default function NearStack() {
                     aria-expanded={aiOpen}
                     className="w-full cursor-pointer rounded-2xl px-4 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint"
                   >
-                    <span className="block text-h4 text-cream/45">
-                      <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/ai:text-cta-mint motion-reduce:transition-none">
-                        03
-                      </sup>
-                      <span className="transition-colors duration-300 group-data-[open=true]/ai:text-cream motion-reduce:transition-none">
-                        {AI_BLOCK.name}
-                      </span>
-                    </span>
+                    <span className="block text-h4 text-cream">{AI_BLOCK.name}</span>
                   </button>
                   <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/ai:grid-rows-[1fr] motion-reduce:transition-none">
                     <div className="overflow-hidden">
@@ -612,7 +603,6 @@ export default function NearStack() {
 
             <RailBlock
               block={NEARCOM_BLOCK}
-              index="04"
               expanded={expanded("nearcom")}
               onSelect={goTo}
             />
@@ -628,13 +618,11 @@ export default function NearStack() {
 
 function RailBlock({
   block,
-  index,
   nested = false,
   expanded,
   onSelect,
 }: {
   block: StackLeaf;
-  index?: string;
   nested?: boolean;
   expanded: boolean;
   onSelect?: (key: StackLeaf["key"]) => void;
@@ -646,8 +634,8 @@ function RailBlock({
     <div
       data-open={expanded}
       className={`group/blk ${
-        nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
-      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:border-cream/45 data-[open=false]:hover:bg-cream/[0.04] motion-reduce:transition-none`}
+        nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream"
+      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.06] motion-reduce:transition-none`}
     >
       {/* La barra de título es un botón: click = saltar a la parada de esta
           caja en el track (goTo). Scroll y click, el mismo mecanismo. */}
@@ -660,15 +648,9 @@ function RailBlock({
         }`}
       >
         {/* span y no <p>: un botón solo admite phrasing content. */}
-        <span className={`block ${nested ? "text-body text-cream/80" : "text-h4 text-cream/45"}`}>
-          {index && (
-            <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
-              {index}
-            </sup>
-          )}
-          <span className="transition-colors duration-300 group-data-[open=true]/blk:text-cream motion-reduce:transition-none">
-            {block.name}
-          </span>
+        {/* Título siempre en cream pleno; sin numeración — pedido. */}
+        <span className={`block ${nested ? "text-body text-cream/80" : "text-h4 text-cream"}`}>
+          {block.name}
         </span>
       </button>
       {/* grid-rows 0fr↔1fr: el navegador interpola la altura sin medir nada. */}
