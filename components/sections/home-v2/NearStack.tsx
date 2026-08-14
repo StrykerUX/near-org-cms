@@ -41,10 +41,14 @@ import {
 // referencia: son las constantes *_Y de abajo, pensadas para ajuste visual.
 //
 // Interacción (decidida con Lawrence):
-//   · Los bloques de texto se expanden AL SCROLLEAR (reading line) y cada uno
-//     ilumina su capa: solo la capa activa va en verde, el resto wireframe.
-//   · El arte es hoverable; el hover GANA sobre el estado de scroll y al
-//     salir el puntero se vuelve a él. El texto NO se mueve por hover.
+//   · La escena es un BUILD-UP por scroll: en Protocol solo existe la
+//     columna; cada parada del rail hace ANIMAR SU CAPA a escena y las
+//     anteriores se quedan verdes. Dentro de NEAR AI solo el producto activo
+//     va verde y sus hermanos quedan wireframe; near.com entra como elemento
+//     verde completo y deja el ensamble entero encendido.
+//   · El arte es hoverable; el hover GANA sobre el estado de scroll (solo lo
+//     hovereado verde, el resto de lo visible en wireframe) y al salir el
+//     puntero se vuelve a él. El texto NO se mueve por hover.
 //   · La columna es sólida y al hover se PARTE en sus seis cubos — cada cubo
 //     es un feature del protocolo, hoverable individualmente.
 //   · Cada pieza encendida por hover lleva su bubble tag (pill), como en los
@@ -94,6 +98,27 @@ type Hover =
 
 const SEG_KEYS = ["ironclaw", "cloud", "market"] as const;
 
+// El orden narrativo del build-up = el orden de las paradas del rail.
+const STAGE_ORDER: readonly StackKey[] = [
+  "protocol",
+  "intents",
+  "ironclaw",
+  "cloud",
+  "market",
+  "nearcom",
+];
+
+// El z-layering de la columna: el cubo de ARRIBA es la capa más alta de todo
+// el ensamble y el de ABAJO la más baja. La columna se pinta DOS veces — los
+// cubos 3–5 debajo de los anillos, los 0–2 encima — y las máscaras de los
+// anillos (que ya recortan el canal de la columna) hacen que las dos mitades
+// calcen con la comp madre. Los ids duplicados de gradientes no molestan:
+// las dos instancias definen exactamente lo mismo.
+const HIDE_UPPER_CUBES =
+  '[&_[data-stack-cube="0"]]:hidden [&_[data-stack-cube="1"]]:hidden [&_[data-stack-cube="2"]]:hidden';
+const HIDE_LOWER_CUBES =
+  '[&_[data-stack-cube="3"]]:hidden [&_[data-stack-cube="4"]]:hidden [&_[data-stack-cube="5"]]:hidden';
+
 export default function NearStack() {
   // El objetivo de scroll (bloque activo del rail). Solo manda cuando no hay
   // hover y el modo enhanced está armado.
@@ -125,21 +150,36 @@ export default function NearStack() {
     return () => setEnhanced(false);
   });
 
-  // El target que ilumina el arte: hover gana; sin hover manda el scroll; en
-  // fallback, "all" = el ensamble completo en verde.
   const hoverTarget: StackKey | null = hover
     ? hover.kind === "cube"
       ? "protocol"
-      : hover.key === "protocol" || hover.key === "intents" || hover.key === "nearcom"
-        ? hover.key
-        : hover.key
+      : hover.key
     : null;
-  const target: StackKey | "all" = hoverTarget ?? (enhanced ? scrollKey : "all");
 
-  const litColumn = target === "all" || target === "protocol";
-  const litIntents = target === "all" || target === "intents";
-  const litNearcom = target === "all" || target === "nearcom";
-  const litSeg = target === "all" ? "all" : SEG_KEYS.find((k) => k === target) ?? null;
+  // La escena es un BUILD-UP: cada parada del rail AGREGA su capa y las
+  // anteriores se quedan; las capas que todavía no llegaron están OCULTAS del
+  // todo — no wireframe. En fallback (mobile/reduced-motion) está el ensamble
+  // completo desde el arranque.
+  const stage = enhanced ? STAGE_ORDER.indexOf(scrollKey) : STAGE_ORDER.length - 1;
+  const showIntents = stage >= 1;
+  const showAi = stage >= 2;
+  const showNearcom = stage >= 5;
+
+  // Con hover, SOLO lo hovereado va verde y el resto de lo visible cae a
+  // wireframe. Sin hover, lo acumulado va verde — salvo el anillo de AI
+  // mientras se recorren sus tres productos: ahí solo el activo va verde y
+  // sus dos hermanos quedan en wireframe (los stills de referencia). Recién
+  // en near.com el anillo completo queda verde.
+  const litColumn = hover ? hoverTarget === "protocol" : true;
+  const litIntents = showIntents && (hover ? hoverTarget === "intents" : true);
+  const litNearcom = showNearcom && (hover ? hoverTarget === "nearcom" : true);
+  const litSeg: string | null = !showAi
+    ? null
+    : hover
+      ? (SEG_KEYS.find((k) => k === hoverTarget) ?? null)
+      : stage >= 5
+        ? "all"
+        : (SEG_KEYS.find((k) => k === scrollKey) ?? "all");
 
   // Los grupos internos del arte (segmentos de AI, cubos de la columna) no son
   // props de los componentes generados: se manejan imperativo sobre los hooks
@@ -214,7 +254,13 @@ export default function NearStack() {
   });
   // Los paths son el área de hit, no la caja del wrapper: sin esto la cáscara
   // exterior (que abarca todo el stage) se tragaría el hover de todo lo demás.
-  const layerClass = "pointer-events-none absolute [&_path]:pointer-events-auto";
+  // Una capa que todavía no llegó al build-up está oculta Y sin hit-area.
+  const layerClass = (visible: boolean) =>
+    `pointer-events-none absolute transition-[opacity,transform] duration-500 motion-reduce:transition-none ${
+      visible
+        ? "translate-y-0 opacity-100 [&_path]:pointer-events-auto"
+        : "translate-y-4 opacity-0"
+    }`;
   const greenClass = (lit: boolean) =>
     `absolute left-0 top-0 w-full transition-opacity duration-300 motion-reduce:transition-none ${lit ? "opacity-100" : "opacity-0"}`;
 
@@ -257,18 +303,27 @@ export default function NearStack() {
               onPointerLeave={onLeave}
               className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:max-w-[620px]"
             >
-              {/* Orden de apilado = orden de dibujo de la comp madre: columna
-                  al fondo, anillos encima — sus máscaras ya recortan el canal
-                  de la columna, así que el tejido delante/detrás sale solo. */}
-              <div data-stack-layer="protocol" className={layerClass} style={layerStyle("column")}>
+              {/* Apilado: mitad BAJA de la columna (cubos 3–5) al fondo,
+                  anillos encima (sus máscaras recortan el canal de la
+                  columna), y la mitad ALTA (cubos 0–2) por encima de todo —
+                  el cubo de arriba es la capa más alta del ensamble. */}
+              <div
+                data-stack-layer="protocol"
+                className={`${layerClass(true)} ${HIDE_UPPER_CUBES}`}
+                style={layerStyle("column")}
+              >
                 <ColumnWire className="w-full" />
                 <ColumnGreen className={greenClass(litColumn)} />
               </div>
-              <div data-stack-layer="intents" className={layerClass} style={layerStyle("intents")}>
+              <div
+                data-stack-layer="intents"
+                className={layerClass(showIntents)}
+                style={layerStyle("intents")}
+              >
                 <IntentsWire className="w-full" />
                 <IntentsGreen className={greenClass(litIntents)} />
               </div>
-              <div data-stack-layer="ai" className={layerClass} style={layerStyle("ai")}>
+              <div data-stack-layer="ai" className={layerClass(showAi)} style={layerStyle("ai")}>
                 <AiRingWire className="w-full" />
                 {/* La verde de AI queda siempre montada y visible a nivel svg:
                     la iluminación por segmento la maneja el efecto de arriba
@@ -277,9 +332,21 @@ export default function NearStack() {
                   <AiRingGreen className="absolute left-0 top-0 w-full" />
                 </div>
               </div>
-              <div data-stack-layer="nearcom" className={layerClass} style={layerStyle("nearcom")}>
+              <div
+                data-stack-layer="nearcom"
+                className={layerClass(showNearcom)}
+                style={layerStyle("nearcom")}
+              >
                 <NearcomWire className="w-full" />
                 <NearcomGreen className={greenClass(litNearcom)} />
+              </div>
+              <div
+                data-stack-layer="protocol"
+                className={`${layerClass(true)} ${HIDE_LOWER_CUBES}`}
+                style={layerStyle("column")}
+              >
+                <ColumnWire className="w-full" />
+                <ColumnGreen className={greenClass(litColumn)} />
               </div>
 
               {/* El bubble tag de la pieza hovereada. Decorativo: el nombre
