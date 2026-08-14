@@ -6,6 +6,7 @@ import {
   tokenRemainingSeconds,
   verifyReviewToken,
 } from "@/lib/review-access";
+import { resolveRequestOrigin } from "@/lib/request-origin";
 
 // Canje del link de revisión: `/review?token=…&to=/prototype/homepage-v2`.
 //
@@ -51,7 +52,11 @@ export async function GET(request: Request) {
   const validToken = token as string;
   const maxAge = tokenRemainingSeconds(validToken);
 
-  const response = NextResponse.redirect(new URL(destination, url.origin));
+  // El origen sale de las cabeceras y NO de `url.origin`: detrás de un proxy,
+  // `url.origin` es el puerto interno de Next, y redirigir ahí manda la cookie
+  // al dominio equivocado — el modo revisión no se activaría nunca.
+  const origin = resolveRequestOrigin(request.headers) ?? url.origin;
+  const response = NextResponse.redirect(new URL(destination, origin));
   response.cookies.set(REVIEW_COOKIE_NAME, validToken, reviewCookieOptions(maxAge));
   // Espejo legible por el cliente, para que el widget sepa que tiene que
   // montarse sin obligar al layout a leer cookies. Ver REVIEW_UI_COOKIE_NAME.

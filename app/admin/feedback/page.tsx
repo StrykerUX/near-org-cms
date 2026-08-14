@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import FeedbackInbox from "@/components/admin/FeedbackInbox";
 import { createReviewToken } from "@/lib/review-access";
+import { resolveRequestOrigin } from "@/lib/request-origin";
 import { SITEPING_PROJECT } from "@/lib/siteping-config";
 
 // Excepción deliberada al patrón de `app/admin/*` (re-exports de una línea a
@@ -17,22 +18,14 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-/**
- * La base sale del header `host` y no de `NEXTAUTH_URL` porque en Railway esa
- * variable apunta al dominio canónico, y quien abre el admin puede estar en el
- * dominio de preview. Un link de revisión hacia otro host llegaría sin cookie
- * y parecería caducado.
- */
-async function resolveBaseUrl(): Promise<string> {
-  const headerList = await headers();
-  const host = headerList.get("host");
-  if (!host) return process.env.NEXTAUTH_URL?.replace(/\/$/, "") ?? "";
-  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
-  return `${protocol}://${host}`;
-}
-
 export default async function AdminFeedbackPage() {
-  const base = await resolveBaseUrl();
+  // El origen sale de las cabeceras del request y no de `NEXTAUTH_URL`: esa
+  // variable apunta al dominio canónico, y quien abre el admin puede estar en
+  // otro (preview, o el subdominio local de portless). Un link de revisión
+  // hacia otro host llegaría sin cookie y parecería caducado.
+  const headerList = await headers();
+  const base =
+    resolveRequestOrigin(headerList) ?? process.env.NEXTAUTH_URL?.replace(/\/$/, "") ?? "";
   const token = createReviewToken();
   const reviewUrl = `${base}/review?token=${token}`;
 
