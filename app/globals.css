@@ -890,3 +890,13 @@ html[data-grid="on"] [data-grid-overlay] > div > span {
   background: color-mix(in srgb, var(--near-green) 14%, transparent);
   outline: 1px solid color-mix(in srgb, var(--near-green) 22%, transparent);
 }
+
+/* La luz que recorre el contorno de la pieza hovereada del NEAR Stack
+   (home-v2). El -600 son 5 períodos exactos del dash "34 86" (120), así el
+   loop no tiene costura. Consumida por los paths data-sheen-path de
+   stackArt.generated.tsx. */
+@keyframes stack-sheen-run {
+  to {
+    stroke-dashoffset: -600;
+  }
+}

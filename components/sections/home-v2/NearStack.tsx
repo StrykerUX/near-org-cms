@@ -224,8 +224,9 @@ export default function NearStack() {
       g.style.transform = split ? `translateY(${((i - 2.5) * 32).toFixed(0)}px)` : "translateY(0px)";
       g.style.opacity = hoveredCube !== null && i !== hoveredCube ? "0.3" : "1";
     });
-    // El sheen: la banda animada barre SOLO la pieza bajo el cursor. Para el
-    // anillo de AI la unidad es el segmento; para el resto, la capa entera.
+    // El sheen: la luz recorre el contorno de SOLO la pieza bajo el cursor.
+    // Unidades: el CUBO individual en la columna, el segmento en el anillo de
+    // AI, la capa entera en intents/near.com.
     const hoverLayer = hover
       ? hover.kind === "cube"
         ? "protocol"
@@ -236,8 +237,15 @@ export default function NearStack() {
     const hoverSegKey = hover?.kind === "seg" ? hover.key : null;
     stage.querySelectorAll<SVGPathElement>("[data-sheen-path]").forEach((p) => {
       const layer = p.closest("[data-stack-layer]")?.getAttribute("data-stack-layer");
-      const on =
-        layer === "ai" ? p.dataset.sheenSeg != null && p.dataset.sheenSeg === hoverSegKey : layer === hoverLayer;
+      let on = false;
+      if (layer === "ai") {
+        on = p.dataset.sheenSeg != null && p.dataset.sheenSeg === hoverSegKey;
+      } else if (layer === "protocol") {
+        const cube = p.closest("[data-stack-cube]")?.getAttribute("data-stack-cube");
+        on = hoveredCube !== null && cube === String(hoveredCube);
+      } else {
+        on = layer === hoverLayer;
+      }
       p.style.transition = "opacity 350ms";
       p.style.opacity = on ? "1" : "0";
     });
