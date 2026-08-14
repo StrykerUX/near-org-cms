@@ -1,62 +1,227 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import { LAYERS, VIEW_BOX, type FaceRole } from "./nearStackGeometry";
-import { TIERS } from "./nearStackContent";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
+import { ScrollTrigger } from "@/components/primitives/motion/gsapClient";
+import {
+  ColumnGreen,
+  ColumnWire,
+  AiRingGreen,
+  AiRingWire,
+  IntentsGreen,
+  IntentsWire,
+  NearcomGreen,
+  NearcomWire,
+} from "./stackArt.generated";
+import {
+  PROTOCOL_BLOCK,
+  INTENTS_BLOCK,
+  AI_BLOCK,
+  NEARCOM_BLOCK,
+  PROTOCOL_FEATURES,
+  type StackKey,
+  type StackLeaf,
+} from "./nearStackContent";
 
-// ── NearStack: objeto isométrico + acordeón de cuatro capas ──────────────────
+// ── NearStack: los SVG de marca ensamblados + scroll e iluminación por capa ──
 //
-// Rediseño sobre los frames WIP de brand (2026-08-13): la escena de scroll
-// anterior se reemplaza por un estado `active` compartido entre el arte y el
-// rail. Un solo número gobierna las dos mitades:
+// Tercera forma de la sección, ahora sobre los EXPORTS reales de brand
+// (SLIDE_10–13): cuatro capas — columna (Protocol), anillo interior (Intents),
+// anillo de tres segmentos (NEAR AI) y cáscara exterior (near.com) — cada una
+// con su gemela wireframe. Los archivos salen de una misma composición madre:
+// cada anillo trae una MÁSCARA con el canal de la columna recortado, así que
+// el tejido delante/detrás está horneado y el apilado es por orden de capas.
 //
-//   · en el SVG, la capa activa se pinta con caras verdes sólidas (lime arriba,
-//     mint a la izquierda, deep a la derecha — el vocabulario de cubos de
-//     protocol/spineDiagrams); el resto queda en wireframe hairline.
-//   · en el rail, el item activo expande su panel (body + link "Visit …");
-//     los demás quedan como filas colapsadas.
+// La alineación horizontal es EXACTA, derivada de esas máscaras (el canal de
+// la columna aparece en x=275.81 en la exterior, 221.07 en la de AI y 133.44
+// en la de Intents — mismo ancho 103u en todas ⇒ escala 1:1). Las verticales
+// NO son derivables de los archivos y están estimadas contra los stills de
+// referencia: son las constantes *_Y de abajo, pensadas para ajuste visual.
 //
-// Todo el movimiento es transición CSS: dos clases que cambian con `active`
-// (fill de caras, grid-template-rows del panel). No hay nada que interpolar a
-// mano, así que GSAP no participa — y con reduced-motion las transiciones se
-// apagan por clase y el cambio es instantáneo, con el mismo contenido.
-//
-// El hover se filtra por pointerType: en touch, el navegador sintetiza
-// pointerenter en el tap y el reset de pointerleave llegaría al tocar cualquier
-// otra cosa, colapsando lo que el usuario acaba de abrir. Mouse hovering y
-// touch tapping son caminos separados a propósito.
+// Interacción (decidida con Lawrence):
+//   · Los bloques de texto se expanden AL SCROLLEAR (reading line) y cada uno
+//     ilumina su capa: solo la capa activa va en verde, el resto wireframe.
+//   · El arte es hoverable; el hover GANA sobre el estado de scroll y al
+//     salir el puntero se vuelve a él. El texto NO se mueve por hover.
+//   · La columna es sólida y al hover se PARTE en sus seis cubos — cada cubo
+//     es un feature del protocolo, hoverable individualmente.
+//   · Cada pieza encendida por hover lleva su bubble tag (pill), como en los
+//     stills.
+//   · Mobile / reduced-motion: sin scroll-scene — todo expandido y el arte
+//     completo en verde (el look ensamblado del still final).
 
-/** Tier que queda encendido cuando el puntero no está sobre la sección. */
-const DEFAULT_TIER = 0;
+/* ── Geometría del ensamble (espacio de la capa exterior, 695 de ancho) ──── */
 
-// Caras verdes de una capa encendida. Mismo mapeo de roles que los GreenCube
-// de protocol/spineDiagrams: la luz viene de arriba a la izquierda.
-const LIT_FILL: Record<FaceRole, string> = {
-  top: "fill-cta-lime",
-  left: "fill-cta-mint",
-  right: "fill-cta-deep",
+const STAGE_W = 695;
+const STAGE_H = 650;
+// x exactas (máscaras); y estimadas de los stills — TUNEAR EN BROWSER.
+const POS = {
+  column: { x: 275.81, y: 0, w: 104 },
+  intents: { x: 142.37, y: 206, w: 371 },
+  ai: { x: 54.74, y: 127, w: 546 },
+  nearcom: { x: 0, y: 40, w: 695 },
+} as const;
+
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(2)}%`;
+
+/* ── Bubble tags: ancla en % del stage por pieza encendida ────────────────── */
+
+const SEG_NAMES: Record<string, string> = {
+  ironclaw: "IronClaw",
+  cloud: "NEAR AI Cloud",
+  market: "Agent Market",
 };
 
-export default function NearStack() {
-  // -1 = nada encendido (tap sobre el item abierto lo colapsa). Cualquier
-  // salida del puntero vuelve a DEFAULT_TIER, así que el estado "vacío" solo
-  // se ve en touch/teclado, donde es una decisión del usuario.
-  const [active, setActive] = useState<number>(DEFAULT_TIER);
+const TAG_ANCHORS: Record<string, { x: number; y: number }> = {
+  protocol: { x: 57, y: 14 },
+  intents: { x: 68, y: 44 },
+  ironclaw: { x: 20, y: 30 },
+  cloud: { x: 82, y: 48 },
+  market: { x: 40, y: 78 },
+  nearcom: { x: 7, y: 52 },
+};
+// Centro vertical de cada cubo (top→bottom) en unidades de columna: el ápice
+// mide 62 y cada cubo ~95 de paso. El tag va a la derecha de la columna.
+const cubeAnchor = (i: number) => ({ x: 57, y: ((78 + i * 95) / STAGE_H) * 100 });
 
-  const hoverTier = (e: React.PointerEvent, tier: number) => {
-    if (e.pointerType === "mouse") setActive(tier);
+type Hover =
+  | { kind: "layer"; key: "protocol" | "intents" | "nearcom" }
+  | { kind: "seg"; key: "ironclaw" | "cloud" | "market" }
+  | { kind: "cube"; index: number }
+  | null;
+
+const SEG_KEYS = ["ironclaw", "cloud", "market"] as const;
+
+export default function NearStack() {
+  // El objetivo de scroll (bloque activo del rail). Solo manda cuando no hay
+  // hover y el modo enhanced está armado.
+  const [scrollKey, setScrollKey] = useState<StackKey>("protocol");
+  const [hover, setHover] = useState<Hover>(null);
+  // false = fallback (SSR, mobile, reduced-motion): todo verde, todo
+  // expandido. true = scroll-scene de desktop.
+  const [enhanced, setEnhanced] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  // Reading line: cada slot del rail activa su key al cruzar el 60% del
+  // viewport. Solo desktop + motion — el hook revierte solo al salir de esas
+  // condiciones y el cleanup nos devuelve al fallback.
+  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
+    if (!motionOk || !isDesktop) return;
+    setEnhanced(true);
+    const slots = q("[data-stack-slot]");
+    slots.forEach((slot) => {
+      const key = slot.dataset.stackSlot as StackKey;
+      ScrollTrigger.create({
+        trigger: slot,
+        start: "top 60%",
+        end: "bottom 60%",
+        onToggle: (self) => {
+          if (self.isActive) setScrollKey(key);
+        },
+      });
+    });
+    return () => setEnhanced(false);
+  });
+
+  // El target que ilumina el arte: hover gana; sin hover manda el scroll; en
+  // fallback, "all" = el ensamble completo en verde.
+  const hoverTarget: StackKey | null = hover
+    ? hover.kind === "cube"
+      ? "protocol"
+      : hover.key === "protocol" || hover.key === "intents" || hover.key === "nearcom"
+        ? hover.key
+        : hover.key
+    : null;
+  const target: StackKey | "all" = hoverTarget ?? (enhanced ? scrollKey : "all");
+
+  const litColumn = target === "all" || target === "protocol";
+  const litIntents = target === "all" || target === "intents";
+  const litNearcom = target === "all" || target === "nearcom";
+  const litSeg = target === "all" ? "all" : SEG_KEYS.find((k) => k === target) ?? null;
+
+  // Los grupos internos del arte (segmentos de AI, cubos de la columna) no son
+  // props de los componentes generados: se manejan imperativo sobre los hooks
+  // data-* con transiciones inline. Es la mitad "no declarativa" del estado y
+  // vive toda en este efecto.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    stage.querySelectorAll<SVGGElement>("[data-ai-green] [data-stack-seg]").forEach((g) => {
+      g.style.transition = "opacity 300ms";
+      g.style.opacity = litSeg === "all" || g.dataset.stackSeg === litSeg ? "1" : "0";
+    });
+    // El split: hover sobre la columna la parte en sus seis cubos (verde y
+    // wireframe a la vez — comparten geometría y orden de grupos).
+    const split = hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
+    stage.querySelectorAll<SVGGElement>("[data-stack-cube]").forEach((g) => {
+      const i = Number(g.dataset.stackCube);
+      g.style.transform = split ? `translateY(${((i - 2.5) * 16).toFixed(0)}px)` : "translateY(0px)";
+    });
+  }, [litSeg, hover]);
+
+  /* ── Hover por delegación: un solo par de handlers sobre el stage ──────── */
+
+  const onOver = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    const t = e.target as Element;
+    const layerEl = t.closest("[data-stack-layer]");
+    const layer = layerEl?.getAttribute("data-stack-layer");
+    const cube = t.closest("[data-stack-cube]");
+    const seg = t.closest("[data-stack-seg]");
+    if (layer === "protocol" && cube) {
+      setHover({ kind: "cube", index: Number(cube.getAttribute("data-stack-cube")) });
+    } else if (layer === "ai" && seg) {
+      setHover({
+        kind: "seg",
+        key: seg.getAttribute("data-stack-seg") as "ironclaw" | "cloud" | "market",
+      });
+    } else if (layer === "protocol" || layer === "intents" || layer === "nearcom") {
+      setHover({ kind: "layer", key: layer });
+    } else {
+      // El puntero está sobre el fondo entre piezas.
+      setHover(null);
+    }
   };
-  const hoverReset = (e: React.PointerEvent) => {
-    if (e.pointerType === "mouse") setActive(DEFAULT_TIER);
+  const onLeave = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") setHover(null);
   };
+
+  // El tag visible: solo con hover, pegado a la pieza encendida.
+  const tag = hover
+    ? hover.kind === "cube"
+      ? { label: PROTOCOL_FEATURES[hover.index], ...cubeAnchor(hover.index) }
+      : hover.kind === "seg"
+        ? { label: SEG_NAMES[hover.key], ...TAG_ANCHORS[hover.key] }
+        : {
+            label:
+              hover.key === "protocol"
+                ? "NEAR Protocol"
+                : hover.key === "intents"
+                  ? "NEAR Intents"
+                  : "near.com",
+            ...TAG_ANCHORS[hover.key],
+          }
+    : null;
+
+  /* ── Capas: wrapper posicionado + wireframe debajo + verde encima ──────── */
+
+  const layerStyle = (k: keyof typeof POS) => ({
+    left: pct(POS[k].x, STAGE_W),
+    top: pct(POS[k].y, STAGE_H),
+    width: pct(POS[k].w, STAGE_W),
+  });
+  // Los paths son el área de hit, no la caja del wrapper: sin esto la cáscara
+  // exterior (que abarca todo el stage) se tragaría el hover de todo lo demás.
+  const layerClass = "pointer-events-none absolute [&_path]:pointer-events-auto";
+  const greenClass = (lit: boolean) =>
+    `absolute left-0 top-0 w-full transition-opacity duration-300 motion-reduce:transition-none ${lit ? "opacity-100" : "opacity-0"}`;
+
+  const expanded = (key: StackKey) => !enhanced || scrollKey === key;
 
   return (
-    <section className="bg-ink text-cream">
-      {/* pt-32 iguala el pb-32 con que cierra OwnYourOwn: el corte entre las
-          dos secciones es a sangre, así que el aire a cada lado tiene que
-          coincidir o la juntura se lee descentrada. */}
+    <section ref={rootRef} className="bg-ink text-cream">
       <Container className="flex flex-col gap-14 pb-32 pt-32 lg:gap-20">
         <div className="flex flex-col items-center gap-3 text-center">
           <h2 className="text-h1 text-pretty">
@@ -81,127 +246,154 @@ export default function NearStack() {
           </p>
         </div>
 
-        {/* El reset de hover vive acá y no en cada mitad: cruzar del arte al
-            rail no debe pasar por el estado default en el medio. */}
-        <div
-          onPointerLeave={hoverReset}
-          className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16"
-        >
-          {/* El arte va PRIMERO en el DOM: en mobile queda apilado arriba del
-              rail, como piden los frames. Decorativo (aria-hidden): cada capa
-              es alcanzable como texto en el rail de al lado. */}
-          <svg
-            viewBox={VIEW_BOX}
-            aria-hidden="true"
-            className="mx-auto block w-full max-w-[420px] lg:max-h-[62svh] lg:max-w-[640px]"
-          >
-            {/* El orden de LAYERS ES el z-order y no se puede reordenar: cada
-                anillo tiene una parte por detrás del eje y otra por delante, y
-                ese cruce es todo el efecto de profundidad. */}
-            {LAYERS.map((layer, li) => {
-              const lit = layer.tier === active;
-              return (
-                <g key={li}>
-                  {layer.pieces.map((p) => (
-                    <g
-                      key={p.id}
-                      data-piece={p.id}
-                      className="cursor-pointer"
-                      onPointerEnter={(e) => hoverTier(e, layer.tier)}
-                      // Click directo sobre el arte (touch incluido): enciende,
-                      // nunca colapsa — el toggle es del rail, donde está el
-                      // contenido que se abre y se cierra.
-                      onClick={() => setActive(layer.tier)}
-                    >
-                      {p.faces.map((f, fi) => (
-                        <path
-                          key={fi}
-                          d={f.d}
-                          // El fill apagado tiene que ser EXACTAMENTE el fondo
-                          // de la sección: el back-face culling de la geometría
-                          // solo se lee como oclusión sólida si coinciden. Por
-                          // eso los dos salen del token `ink` (ver el README).
-                          className={`${lit ? LIT_FILL[f.role] : "fill-ink"} stroke-cream/40 transition-[fill] duration-300 motion-reduce:transition-none`}
-                          strokeWidth={1}
-                          strokeLinejoin="round"
-                          vectorEffect="non-scaling-stroke"
-                        />
-                      ))}
-                    </g>
-                  ))}
-                </g>
-              );
-            })}
-          </svg>
-
-          <div className="flex w-full flex-col gap-3">
-            {TIERS.map((tier, i) => {
-              const open = i === active;
-              return (
-                <div
-                  key={tier.name}
-                  data-open={open}
-                  onPointerEnter={(e) => hoverTier(e, i)}
-                  className="group/tier rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
-                >
-                  <button
-                    type="button"
-                    aria-expanded={open}
-                    aria-controls={`near-stack-panel-${i}`}
-                    // Toggle y no set: el segundo tap/Enter sobre el item
-                    // abierto lo colapsa (es el camino de mobile y teclado; en
-                    // desktop el hover ya lo dejó abierto antes del click).
-                    onClick={() => setActive((prev) => (prev === i ? -1 : i))}
-                    // Solo focus VISIBLE abre el panel: el focus de un click de
-                    // mouse llegaría antes que el click y el toggle vería el
-                    // item ya abierto — o sea, click sobre un item cerrado lo
-                    // abriría y cerraría en el mismo gesto.
-                    onFocus={(e) => {
-                      if (e.currentTarget.matches(":focus-visible")) setActive(i);
-                    }}
-                    className="w-full cursor-pointer rounded-2xl px-6 pb-4 pt-5 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint"
-                  >
-                    <span className="text-h4 text-cream/40 transition-colors duration-300 group-data-[open=true]/tier:text-cream motion-reduce:transition-none">
-                      <sup className="index-marker mr-2 align-super text-cream/30 transition-colors duration-300 group-data-[open=true]/tier:text-cta-mint motion-reduce:transition-none">
-                        0{i + 1}
-                      </sup>
-                      {tier.name}
-                    </span>
-                  </button>
-
-                  {/* grid-template-rows 0fr ↔ 1fr en vez de animar height: el
-                      navegador interpola sin que nadie mida. El overflow-hidden
-                      va en el hijo interno para que el padding del contenido
-                      quede DENTRO de la caja que se recorta. */}
-                  <div
-                    id={`near-stack-panel-${i}`}
-                    className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/tier:grid-rows-[1fr] motion-reduce:transition-none"
-                  >
-                    <div className="overflow-hidden">
-                      <div className="flex flex-col items-center gap-5 px-6 pb-6 sm:px-10">
-                        <p className="max-w-[46ch] text-center text-body-sm text-cream/60 text-pretty">
-                          {tier.body}
-                        </p>
-                        <a
-                          href={tier.link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          // Un panel colapsado no es display:none — sin esto el
-                          // Tab aterrizaría en links invisibles.
-                          tabIndex={open ? 0 : -1}
-                          className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
-                        >
-                          {tier.link.label} <span aria-hidden="true">→</span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+          {/* El arte, sticky en desktop: acompaña todo el recorrido del rail.
+              El stage mantiene la proporción del ensamble y las capas van en
+              % de esa caja, así que escala entero. */}
+          <div className="lg:sticky lg:top-[8svh] lg:self-start">
+            <div
+              ref={stageRef}
+              onPointerOver={onOver}
+              onPointerLeave={onLeave}
+              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:max-w-[620px]"
+            >
+              {/* Orden de apilado = orden de dibujo de la comp madre: columna
+                  al fondo, anillos encima — sus máscaras ya recortan el canal
+                  de la columna, así que el tejido delante/detrás sale solo. */}
+              <div data-stack-layer="protocol" className={layerClass} style={layerStyle("column")}>
+                <ColumnWire className="w-full" />
+                <ColumnGreen className={greenClass(litColumn)} />
+              </div>
+              <div data-stack-layer="intents" className={layerClass} style={layerStyle("intents")}>
+                <IntentsWire className="w-full" />
+                <IntentsGreen className={greenClass(litIntents)} />
+              </div>
+              <div data-stack-layer="ai" className={layerClass} style={layerStyle("ai")}>
+                <AiRingWire className="w-full" />
+                {/* La verde de AI queda siempre montada y visible a nivel svg:
+                    la iluminación por segmento la maneja el efecto de arriba
+                    grupo por grupo. */}
+                <div data-ai-green>
+                  <AiRingGreen className="absolute left-0 top-0 w-full" />
                 </div>
-              );
-            })}
+              </div>
+              <div data-stack-layer="nearcom" className={layerClass} style={layerStyle("nearcom")}>
+                <NearcomWire className="w-full" />
+                <NearcomGreen className={greenClass(litNearcom)} />
+              </div>
+
+              {/* El bubble tag de la pieza hovereada. Decorativo: el nombre
+                  accesible vive en el rail. */}
+              {tag && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute z-10 flex -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-cream/25 bg-ink/85 px-2.5 py-1 backdrop-blur-sm"
+                  style={{ left: `${tag.x}%`, top: `${tag.y}%` }}
+                >
+                  <span className="size-2 rounded-full bg-cta-mint" />
+                  <span className="text-caption text-cream">{tag.label}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* El rail. Cada slot con data-stack-slot es una parada de la
+              reading line; los min-h le dan aire al recorrido para que el
+              scroll tenga dónde contar la secuencia. */}
+          <div className="flex w-full flex-col gap-3">
+            <RailBlock block={PROTOCOL_BLOCK} index="01" expanded={expanded("protocol")} />
+            <RailBlock block={INTENTS_BLOCK} index="02" expanded={expanded("intents")} />
+
+            {/* NEAR AI: heading + intro siempre visibles, y un sub-bloque
+                expandible por producto — cada uno es su propia parada de
+                scroll y enciende su segmento del anillo. */}
+            <div className="rounded-2xl border border-cream/12 px-6 pb-4 pt-5">
+              <p className="text-h4 text-cream">
+                <sup className="mr-2 align-super text-caption text-cream/30">03</sup>
+                {AI_BLOCK.name}
+              </p>
+              <p className="mt-3 max-w-[46ch] text-body-sm text-cream/60 text-pretty">
+                {AI_BLOCK.intro}
+              </p>
+              <div className="mt-4 flex flex-col gap-2">
+                {AI_BLOCK.subs.map((sub) => (
+                  <RailBlock key={sub.key} block={sub} nested expanded={expanded(sub.key)} />
+                ))}
+              </div>
+              <a
+                href={AI_BLOCK.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-block pb-1 text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+              >
+                {AI_BLOCK.link.label} <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <RailBlock block={NEARCOM_BLOCK} index="04" expanded={expanded("nearcom")} />
           </div>
         </div>
       </Container>
     </section>
+  );
+}
+
+/* ── Una parada del rail: fila con panel colapsable ───────────────────────── */
+
+function RailBlock({
+  block,
+  index,
+  nested = false,
+  expanded,
+}: {
+  block: StackLeaf;
+  index?: string;
+  nested?: boolean;
+  expanded: boolean;
+}) {
+  return (
+    <div
+      data-stack-slot={block.key}
+      data-open={expanded}
+      className={`group/blk ${
+        nested
+          ? "rounded-xl border border-cream/10 lg:min-h-[16svh]"
+          : "rounded-2xl border border-cream/12 lg:min-h-[22svh]"
+      } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none lg:flex lg:flex-col lg:justify-center`}
+    >
+      <div className={nested ? "px-4 pb-2 pt-3" : "px-6 pb-3 pt-5"}>
+        <p className={nested ? "text-body text-cream/80" : "text-h4 text-cream/45"}>
+          {index && (
+            <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
+              {index}
+            </sup>
+          )}
+          <span className="transition-colors duration-300 group-data-[open=true]/blk:text-cream motion-reduce:transition-none">
+            {block.name}
+          </span>
+        </p>
+      </div>
+      {/* grid-rows 0fr↔1fr: el navegador interpola la altura sin medir nada. */}
+      <div
+        className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none"
+      >
+        <div className="overflow-hidden">
+          <div className={`flex flex-col gap-3 ${nested ? "px-4 pb-3" : "px-6 pb-5"}`}>
+            <p className="max-w-[46ch] text-body-sm text-cream/60 text-pretty">{block.body}</p>
+            {block.link && (
+              <a
+                href={block.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                tabIndex={expanded ? 0 : -1}
+                className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+              >
+                {block.link.label} <span aria-hidden="true">→</span>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
