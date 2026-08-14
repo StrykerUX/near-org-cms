@@ -379,38 +379,59 @@ export default function NearStack() {
             </div>
           </div>
 
-          {/* El rail. Cada slot con data-stack-slot es una parada de la
-              reading line; los min-h le dan aire al recorrido para que el
-              scroll tenga dónde contar la secuencia. */}
+          {/* El rail: cuatro cajas iguales — colapsadas son la MISMA barra de
+              título compacta, apretadas entre sí. */}
           <div className="flex w-full flex-col gap-2">
             <RailBlock block={PROTOCOL_BLOCK} index="01" expanded={expanded("protocol")} />
             <RailBlock block={INTENTS_BLOCK} index="02" expanded={expanded("intents")} />
 
-            {/* NEAR AI: heading + intro siempre visibles, y un sub-bloque
-                expandible por producto — cada uno es su propia parada de
-                scroll y enciende su segmento del anillo. */}
-            <div className="rounded-2xl border border-cream/12 px-4 pb-3 pt-3">
-              <p className="text-h4 text-cream">
-                <sup className="mr-2 align-super text-caption text-cream/30">03</sup>
-                {AI_BLOCK.name}
-              </p>
-              <p className="mt-2 max-w-[46ch] text-body-sm text-cream/60 text-pretty">
-                {AI_BLOCK.intro}
-              </p>
-              <div className="mt-3 flex flex-col gap-1.5">
-                {AI_BLOCK.subs.map((sub) => (
-                  <RailBlock key={sub.key} block={sub} nested expanded={expanded(sub.key)} />
-                ))}
-              </div>
-              <a
-                href={AI_BLOCK.link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-block text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
-              >
-                {AI_BLOCK.link.label} <span aria-hidden="true">→</span>
-              </a>
-            </div>
+            {/* NEAR AI: colapsada es una barra de título idéntica a las otras
+                tres. Abierta (cualquiera de sus tres paradas) revela el intro
+                y las filas de productos, y adentro cada producto se expande
+                en SU parada — dos niveles del mismo mecanismo 0fr↔1fr. */}
+            {(() => {
+              const aiOpen = !enhanced || AI_BLOCK.subs.some((s) => scrollKey === s.key);
+              return (
+                <div
+                  data-open={aiOpen}
+                  className="group/blk rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
+                >
+                  <div className="px-4 py-2.5">
+                    <p className="text-h4 text-cream/45">
+                      <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
+                        03
+                      </sup>
+                      <span className="transition-colors duration-300 group-data-[open=true]/blk:text-cream motion-reduce:transition-none">
+                        {AI_BLOCK.name}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none">
+                    <div className="overflow-hidden">
+                      <div className="flex flex-col gap-2 px-4 pb-3">
+                        <p className="max-w-[46ch] text-body-sm text-cream/60 text-pretty">
+                          {AI_BLOCK.intro}
+                        </p>
+                        <div className="flex flex-col gap-1.5">
+                          {AI_BLOCK.subs.map((sub) => (
+                            <RailBlock key={sub.key} block={sub} nested expanded={expanded(sub.key)} />
+                          ))}
+                        </div>
+                        <a
+                          href={AI_BLOCK.link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          tabIndex={aiOpen ? 0 : -1}
+                          className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+                        >
+                          {AI_BLOCK.link.label} <span aria-hidden="true">→</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <RailBlock block={NEARCOM_BLOCK} index="04" expanded={expanded("nearcom")} />
           </div>
