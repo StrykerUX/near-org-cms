@@ -228,25 +228,24 @@ export function AiRingGreen(props: React.SVGProps<SVGSVGElement>) {
 </mask>
       <g mask="url(#ag-mask0_11_498)">
       <g data-stack-seg="ironclaw">
-        <path d="M272.64 391.54L60.02 262.34V213.55L82.9102 227.52V247.18L272.64 362.65V391.54Z" fill="url(#ag-paint0_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M60.02 171.5V118.33L82.9102 132.29V185.4L60.02 171.5Z" fill="url(#ag-paint1_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M346.88 61.59L323.92 75.6201V48.3L346.88 34.3101V61.59Z" fill="#37C142" stroke="#F5F4F1" strokeWidth="0.58" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M323.92 48.3L272.56 17.35L82.9102 132.29L60.02 118.33L272.62 -10.71L346.84 34.34L323.92 48.3Z" fill="url(#ag-paint6_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 44.5701L106.07 146.21V171.23L82.9102 185.56V132.29L272.37 17.3701L272.64 44.5701Z" fill="url(#ag-paint9_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      </g>
+      <g data-stack-seg="cloud">
         <path d="M410.46 308.15L486.17 262.34V118.46L463.27 132.43V247.18L410.46 279.26V308.15Z" fill="url(#ag-paint2_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M386.68 293.61L410.46 308.15V279.26L386.68 264.72V293.61Z" fill="#37C142" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M410.46 279.26L386.68 264.68L439.74 232.73L463.51 247.05L410.46 279.26Z" fill="url(#ag-paint3_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M463.25 132.43L356.15 67.6703L379.37 53.7803L486.17 118.46L463.25 132.43Z" fill="url(#ag-paint7_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M439.74 232.73V146.21L356.41 95.4199L356.15 67.6699L463.27 132.43L463.51 247.05L439.74 232.73Z" fill="url(#ag-paint10_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-seg="cloud">
-        <path d="M386.68 293.61L410.46 308.15V279.26L386.68 264.72V293.61Z" fill="#37C142" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M346.88 61.59L323.92 75.6201V48.3L346.88 34.3101V61.59Z" fill="#37C142" stroke="#F5F4F1" strokeWidth="0.58" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M272.64 391.54V362.65L374.29 301.01V329.9L327.24 358.49L272.64 391.54Z" fill="url(#ag-paint4_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M106.06 213.35L106.1 232.6L82.9399 246.93V227.42L106.06 213.35Z" fill="url(#ag-paint8_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        
-      </g>
       <g data-stack-seg="market">
-        <path d="M60.02 171.5V118.33L82.9102 132.29V185.4L60.02 171.5Z" fill="url(#ag-paint1_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 391.54L60.02 262.34V213.55L82.9102 227.52V247.18L272.64 362.65V391.54Z" fill="url(#ag-paint0_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 391.54V362.65L374.29 301.01V329.9L327.24 358.49L272.64 391.54Z" fill="url(#ag-paint4_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M374.29 301.01L350.52 286.69L272.63 333.67H272.64L106.07 232.73L82.9102 247.05L272.64 362.56H272.79L327.24 329.61L374.29 301.01Z" fill="url(#ag-paint5_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M323.92 48.3L272.56 17.35L82.9102 132.29L60.02 118.33L272.62 -10.71L346.84 34.34L323.92 48.3Z" fill="url(#ag-paint6_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M106.06 213.35L106.1 232.6L82.9399 246.93V227.42L106.06 213.35Z" fill="url(#ag-paint8_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M59.96 213.35L83.01 199.62L106.06 213.35L83.01 227.3L59.96 213.35Z" fill="#37C142" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M272.64 44.5701L106.07 146.21V171.23L82.9102 185.56V132.29L272.37 17.3701L272.64 44.5701Z" fill="url(#ag-paint9_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
       </g>
     </svg>
@@ -261,25 +260,24 @@ export function AiRingWire(props: React.SVGProps<SVGSVGElement>) {
 </mask>
       <g mask="url(#aw-mask0_11_333)">
       <g data-stack-seg="ironclaw">
-        <path d="M272.64 391.54L60.02 262.34V213.55L82.9102 227.52V247.18L272.64 362.65V391.54Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M60.02 171.5V118.33L82.9102 132.29V185.4L60.02 171.5Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M346.88 61.5901L323.92 75.6201V48.3L346.88 34.3101V61.5901Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.58" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M323.92 48.3L272.56 17.3501L82.9102 132.29L60.02 118.33L272.62 -10.71L346.84 34.3401L323.92 48.3Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 44.5701L106.07 146.21V171.23L82.9102 185.56V132.29L272.37 17.3701L272.64 44.5701Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      </g>
+      <g data-stack-seg="cloud">
         <path d="M410.46 308.15L486.17 262.34V118.46L463.27 132.43V247.18L410.46 279.26V308.15Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M386.68 293.61L410.46 308.15V279.26L386.68 264.72V293.61Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M410.46 279.26L386.68 264.68L439.74 232.73L463.51 247.05L410.46 279.26Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M463.25 132.43L356.15 67.6703L379.37 53.7803L486.17 118.46L463.25 132.43Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M439.74 232.73V146.21L356.41 95.4199L356.15 67.6699L463.27 132.43L463.51 247.05L439.74 232.73Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-seg="cloud">
-        <path d="M386.68 293.61L410.46 308.15V279.26L386.68 264.72V293.61Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M346.88 61.5901L323.92 75.6201V48.3L346.88 34.3101V61.5901Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.58" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M272.64 391.54V362.65L374.29 301.01V329.9L327.24 358.49L272.64 391.54Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M106.06 213.35L106.1 232.6L82.9399 246.93V227.42L106.06 213.35Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        
-      </g>
       <g data-stack-seg="market">
-        <path d="M60.02 171.5V118.33L82.9102 132.29V185.4L60.02 171.5Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 391.54L60.02 262.34V213.55L82.9102 227.52V247.18L272.64 362.65V391.54Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 391.54V362.65L374.29 301.01V329.9L327.24 358.49L272.64 391.54Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M374.29 301.01L350.52 286.69L272.63 333.67H272.64L106.07 232.73L82.9102 247.05L272.64 362.56H272.79L327.24 329.61L374.29 301.01Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M323.92 48.3L272.56 17.3501L82.9102 132.29L60.02 118.33L272.62 -10.71L346.84 34.3401L323.92 48.3Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M106.06 213.35L106.1 232.6L82.9399 246.93V227.42L106.06 213.35Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M59.96 213.35L83.01 199.62L106.06 213.35L83.01 227.3L59.96 213.35Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M272.64 44.5701L106.07 146.21V171.23L82.9102 185.56V132.29L272.37 17.3701L272.64 44.5701Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
       </g>
     </svg>

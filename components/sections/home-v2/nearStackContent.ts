@@ -70,12 +70,32 @@ export const NEARCOM_BLOCK: StackLeaf = {
 
 // Los seis features del protocolo, UNO POR CUBO de la columna, en el orden de
 // los cubos de arriba hacia abajo (data-stack-cube 0…5). Son los seis claims
-// de /prototype/protocol — misma lista, mismo orden.
-export const PROTOCOL_FEATURES: readonly string[] = [
-  "Nightshade 3.0",
-  "Dynamic resharding",
-  "Speed. Scale. Access.",
-  "Private Shard",
-  "Quantum-safe accounts",
-  "Chain Signatures",
+// de /prototype/protocol; los `desc` son resúmenes de una línea de esos
+// claims — BORRADOR: el doc fuente que los origina no llegó al hilo, así que
+// salen de la copy de la página de protocol, pendientes de revisión.
+export const PROTOCOL_FEATURES: readonly { name: string; desc: string }[] = [
+  {
+    name: "Nightshade 3.0",
+    desc: "Consensus decoupled from execution, with atomic multi-contract interactions.",
+  },
+  {
+    name: "Dynamic resharding",
+    desc: "Shards split automatically at their state-size threshold — no vote, no downtime.",
+  },
+  {
+    name: "Speed. Scale. Access.",
+    desc: "600ms blocks, 1.2s finality, global contracts running network-wide.",
+  },
+  {
+    name: "Private Shard",
+    desc: "Shielded transactions with selective disclosure — confidential by default.",
+  },
+  {
+    name: "Quantum-safe accounts",
+    desc: "One key rotation to NIST-approved quantum-safe signing (FIPS-204).",
+  },
+  {
+    name: "Chain Signatures",
+    desc: "One account signs natively across 30+ chains, with no bridges.",
+  },
 ];

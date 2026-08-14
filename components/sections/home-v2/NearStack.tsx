@@ -252,19 +252,26 @@ export default function NearStack() {
     if (e.pointerType === "mouse") setHover(null);
   };
 
-  // El contenido del tag: solo con hover. La POSICIÓN la escribe onMove
-  // directo sobre el nodo — un setState por pointermove sería un re-render
-  // por pixel de movimiento.
-  const tagLabel = hover
+  // El contenido del tag: solo con hover. Los cubos de la columna llevan
+  // ADEMÁS su texto secundario (el resumen del claim), y ahí el tag deja de
+  // ser pill y pasa a caja. La POSICIÓN la escribe onMove directo sobre el
+  // nodo — un setState por pointermove sería un re-render por pixel.
+  const tag = hover
     ? hover.kind === "cube"
-      ? PROTOCOL_FEATURES[hover.index]
-      : hover.kind === "seg"
-        ? SEG_NAMES[hover.key]
-        : hover.key === "protocol"
-          ? "NEAR Protocol"
-          : hover.key === "intents"
-            ? "NEAR Intents"
-            : "near.com"
+      ? {
+          label: PROTOCOL_FEATURES[hover.index].name,
+          desc: PROTOCOL_FEATURES[hover.index].desc,
+        }
+      : {
+          label:
+            hover.kind === "seg"
+              ? SEG_NAMES[hover.key]
+              : hover.key === "protocol"
+                ? "NEAR Protocol"
+                : hover.key === "intents"
+                  ? "NEAR Intents"
+                  : "near.com",
+        }
     : null;
 
   const tagRef = useRef<HTMLDivElement>(null);
@@ -409,15 +416,25 @@ export default function NearStack() {
                   nodo vive siempre montado (onMove le escribe left/top) y el
                   hover solo lo prende y le cambia el texto. Decorativo: el
                   nombre accesible vive en el rail. */}
+              {/* Pill para capas/segmentos; con desc (los cubos del split) se
+                  vuelve una caja de esquinas apenas redondeadas con el texto
+                  secundario debajo del nombre. */}
               <div
                 ref={tagRef}
                 aria-hidden="true"
-                className={`pointer-events-none absolute z-10 flex items-center gap-2 whitespace-nowrap rounded-full border border-cream/25 bg-ink/85 px-4 py-1.5 backdrop-blur-sm transition-opacity duration-150 ${
-                  tagLabel ? "opacity-100" : "opacity-0"
-                }`}
+                className={`pointer-events-none absolute z-10 border border-cream/25 bg-ink/85 backdrop-blur-sm transition-opacity duration-150 ${
+                  tag ? "opacity-100" : "opacity-0"
+                } ${tag?.desc ? "w-[19rem] rounded-lg px-4 py-3" : "rounded-full px-4 py-1.5"}`}
               >
-                <span className="size-3 rounded-full bg-cta-mint" />
-                <span className="text-body text-cream">{tagLabel}</span>
+                <span className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="size-3 shrink-0 rounded-full bg-cta-mint" />
+                  <span className="text-body text-cream">{tag?.label}</span>
+                </span>
+                {tag?.desc && (
+                  <span className="mt-1.5 block text-caption text-cream/65 text-pretty">
+                    {tag.desc}
+                  </span>
+                )}
               </div>
             </div>
           </div>
