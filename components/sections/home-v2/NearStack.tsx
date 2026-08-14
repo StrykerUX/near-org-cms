@@ -78,17 +78,8 @@ const SEG_NAMES: Record<string, string> = {
   market: "Agent Market",
 };
 
-const TAG_ANCHORS: Record<string, { x: number; y: number }> = {
-  protocol: { x: 57, y: 14 },
-  intents: { x: 68, y: 44 },
-  ironclaw: { x: 20, y: 30 },
-  cloud: { x: 82, y: 48 },
-  market: { x: 40, y: 78 },
-  nearcom: { x: 7, y: 52 },
-};
-// Centro vertical de cada cubo (top→bottom) en unidades de columna: el ápice
-// mide 62 y cada cubo ~95 de paso. El tag va a la derecha de la columna.
-const cubeAnchor = (i: number) => ({ x: 57, y: ((78 + i * 95) / STAGE_H) * 100 });
+// El bubble tag no tiene anclas por pieza: va CLAVADO al cursor (se posiciona
+// imperativo en cada pointermove, sin re-render), como un cursor label.
 
 type Hover =
   | { kind: "layer"; key: "protocol" | "intents" | "nearcom" }
@@ -250,22 +241,41 @@ export default function NearStack() {
     if (e.pointerType === "mouse") setHover(null);
   };
 
-  // El tag visible: solo con hover, pegado a la pieza encendida.
-  const tag = hover
+  // El contenido del tag: solo con hover. La POSICIÓN la escribe onMove
+  // directo sobre el nodo — un setState por pointermove sería un re-render
+  // por pixel de movimiento.
+  const tagLabel = hover
     ? hover.kind === "cube"
-      ? { label: PROTOCOL_FEATURES[hover.index], ...cubeAnchor(hover.index) }
+      ? PROTOCOL_FEATURES[hover.index]
       : hover.kind === "seg"
-        ? { label: SEG_NAMES[hover.key], ...TAG_ANCHORS[hover.key] }
-        : {
-            label:
-              hover.key === "protocol"
-                ? "NEAR Protocol"
-                : hover.key === "intents"
-                  ? "NEAR Intents"
-                  : "near.com",
-            ...TAG_ANCHORS[hover.key],
-          }
+        ? SEG_NAMES[hover.key]
+        : hover.key === "protocol"
+          ? "NEAR Protocol"
+          : hover.key === "intents"
+            ? "NEAR Intents"
+            : "near.com"
     : null;
+
+  const tagRef = useRef<HTMLDivElement>(null);
+  const onMove = (e: React.PointerEvent) => {
+    const el = tagRef.current;
+    const stage = stageRef.current;
+    if (!el || !stage) return;
+    const r = stage.getBoundingClientRect();
+    el.style.left = `${e.clientX - r.left + 14}px`;
+    el.style.top = `${e.clientY - r.top - 14}px`;
+  };
+
+  // Click sobre el arte = mismo salto que clickear su panel: la pieza
+  // clickeada pasa a ser la parada activa del track (y su panel se abre).
+  const onStageClick = (e: React.MouseEvent) => {
+    const t = e.target as Element;
+    const layer = t.closest("[data-stack-layer]")?.getAttribute("data-stack-layer");
+    const seg = t.closest("[data-stack-seg]")?.getAttribute("data-stack-seg");
+    if (layer === "ai" && seg) goTo(seg as StackKey);
+    else if (layer === "protocol") goTo("protocol");
+    else if (layer === "intents" || layer === "nearcom") goTo(layer);
+  };
 
   /* ── Capas: wrapper posicionado + wireframe debajo + verde encima ──────── */
 
@@ -333,8 +343,10 @@ export default function NearStack() {
             <div
               ref={stageRef}
               onPointerOver={onOver}
+              onPointerMove={onMove}
               onPointerLeave={onLeave}
-              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:h-[64svh] lg:w-auto lg:max-w-full"
+              onClick={onStageClick}
+              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:h-[64svh] lg:w-auto lg:max-w-full [&_path]:cursor-pointer"
             >
               {/* Apilado: mitad BAJA de la columna (cubos 3–5) al fondo,
                   anillos encima (sus máscaras recortan el canal de la
@@ -382,18 +394,20 @@ export default function NearStack() {
                 <ColumnGreen className={greenClass(litColumn)} />
               </div>
 
-              {/* El bubble tag de la pieza hovereada. Decorativo: el nombre
-                  accesible vive en el rail. */}
-              {tag && (
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute z-10 flex -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-cream/25 bg-ink/85 px-2.5 py-1 backdrop-blur-sm"
-                  style={{ left: `${tag.x}%`, top: `${tag.y}%` }}
-                >
-                  <span className="size-2 rounded-full bg-cta-mint" />
-                  <span className="text-caption text-cream">{tag.label}</span>
-                </div>
-              )}
+              {/* El bubble tag de la pieza hovereada, clavado al cursor: el
+                  nodo vive siempre montado (onMove le escribe left/top) y el
+                  hover solo lo prende y le cambia el texto. Decorativo: el
+                  nombre accesible vive en el rail. */}
+              <div
+                ref={tagRef}
+                aria-hidden="true"
+                className={`pointer-events-none absolute z-10 flex items-center gap-1.5 whitespace-nowrap rounded-full border border-cream/25 bg-ink/85 px-2.5 py-1 backdrop-blur-sm transition-opacity duration-150 ${
+                  tagLabel ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <span className="size-2 rounded-full bg-cta-mint" />
+                <span className="text-caption text-cream">{tagLabel}</span>
+              </div>
             </div>
           </div>
 
