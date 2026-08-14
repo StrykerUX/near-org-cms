@@ -215,7 +215,7 @@ export default function NearStack() {
     const split = hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
     stage.querySelectorAll<SVGGElement>("[data-stack-cube]").forEach((g) => {
       const i = Number(g.dataset.stackCube);
-      g.style.transform = split ? `translateY(${((i - 2.5) * 16).toFixed(0)}px)` : "translateY(0px)";
+      g.style.transform = split ? `translateY(${((i - 2.5) * 32).toFixed(0)}px)` : "translateY(0px)";
     });
   }, [litSeg, hover]);
 
@@ -320,7 +320,9 @@ export default function NearStack() {
           en pantalla — nada se recorta en ningún punto del recorrido. */}
       <div className="group-data-[mode=track]/stack:sticky group-data-[mode=track]/stack:top-0 group-data-[mode=track]/stack:flex group-data-[mode=track]/stack:h-svh group-data-[mode=track]/stack:flex-col group-data-[mode=track]/stack:justify-center">
         <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-0 lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
-        <div className="flex flex-col items-center gap-3 text-center">
+        {/* En modo track el bloque de título sube respecto del centro del
+            viewport pineado — pedido de Lawrence. */}
+        <div className="flex flex-col items-center gap-3 text-center group-data-[mode=track]/stack:-translate-y-10">
           <h2 className="text-h1 text-pretty">
             The NEAR <Accent>Stack</Accent>
           </h2>
@@ -444,7 +446,7 @@ export default function NearStack() {
                 // productos se expandían juntos apenas abría la caja de AI.
                 <div
                   data-open={aiOpen}
-                  className="group/ai rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cta-mint/70 motion-reduce:transition-none"
+                  className="group/ai rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:border-cream/45 data-[open=false]:hover:bg-cream/[0.04] motion-reduce:transition-none"
                 >
                   {/* Click en la barra de NEAR AI = saltar a SU parada (el
                       anillo entero encendido); el scroll sigue a los tres. */}
@@ -533,7 +535,7 @@ function RailBlock({
       data-open={expanded}
       className={`group/blk ${
         nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
-      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 motion-reduce:transition-none`}
+      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:border-cream/45 data-[open=false]:hover:bg-cream/[0.04] motion-reduce:transition-none`}
     >
       {/* La barra de título es un botón: click = saltar a la parada de esta
           caja en el track (goTo). Scroll y click, el mismo mecanismo. */}
