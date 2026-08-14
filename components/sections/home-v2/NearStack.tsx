@@ -275,14 +275,17 @@ export default function NearStack() {
         }
     : null;
 
+  // onMove escribe las coordenadas CRUDAS del cursor; el desplazamiento del
+  // tag respecto de ese punto va por clases: la caja de los cubos se CENTRA
+  // en el mouse, la pill se corre a la derecha.
   const tagRef = useRef<HTMLDivElement>(null);
   const onMove = (e: React.PointerEvent) => {
     const el = tagRef.current;
     const stage = stageRef.current;
     if (!el || !stage) return;
     const r = stage.getBoundingClientRect();
-    el.style.left = `${e.clientX - r.left + 14}px`;
-    el.style.top = `${e.clientY - r.top - 14}px`;
+    el.style.left = `${e.clientX - r.left}px`;
+    el.style.top = `${e.clientY - r.top}px`;
   };
 
   // Click sobre el arte = mismo salto que clickear su panel: la pieza
@@ -425,7 +428,11 @@ export default function NearStack() {
                 aria-hidden="true"
                 className={`pointer-events-none absolute z-10 border border-cream/25 bg-ink/85 backdrop-blur-sm transition-opacity duration-150 ${
                   tag ? "opacity-100" : "opacity-0"
-                } ${tag?.desc ? "w-[19rem] rounded-lg px-4 py-3" : "rounded-full px-4 py-1.5"}`}
+                } ${
+                  tag?.desc
+                    ? "w-[19rem] -translate-x-1/2 -translate-y-1/2 rounded-lg px-4 py-3"
+                    : "translate-x-4 -translate-y-1/2 rounded-full px-4 py-1.5"
+                }`}
               >
                 <span className="flex items-center gap-2 whitespace-nowrap">
                   <span className="size-3 shrink-0 rounded-full bg-cta-mint" />
