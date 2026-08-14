@@ -430,8 +430,8 @@ export default function NearStack() {
                   tag ? "opacity-100" : "opacity-0"
                 } ${
                   tag?.desc
-                    ? "w-[19rem] -translate-x-[calc(100%+1rem)] -translate-y-1/2 rounded-lg px-4 py-3"
-                    : "-translate-x-[calc(100%+0.75rem)] -translate-y-1/2 rounded-full px-4 py-1.5"
+                    ? "w-[19rem] translate-x-4 -translate-y-1/2 rounded-lg px-4 py-3"
+                    : "translate-x-3 -translate-y-1/2 rounded-full px-4 py-1.5"
                 }`}
               >
                 <span className="flex items-center gap-2 whitespace-nowrap">
