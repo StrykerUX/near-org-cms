@@ -96,32 +96,32 @@ export function ColumnGreen(props: React.SVGProps<SVGSVGElement>) {
 <stop offset="1" stopColor="#009F22"/>
 </linearGradient>
 </defs>
-      <g data-stack-cube="5" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
+      <g data-stack-cube="5" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
         <path d="M51.585 476.095L0.304993 506.655V600.835V597.785V602.155L51.585 632.715L102.875 602.155V597.785V599.175V506.655L51.585 476.095Z" fill="url(#cg-paint0_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.585 537.695V632.715" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M0.304993 506.655L51.585 476.095L102.875 506.655L51.585 537.695L0.304993 506.655Z" fill="url(#cg-paint1_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="4" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
+      <g data-stack-cube="4" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
         <path d="M51.585 380.945L0.304993 411.495V505.675V502.625V506.995L51.585 537.555L102.875 506.995V502.625V504.015V411.495L51.585 380.945Z" fill="url(#cg-paint2_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.585 442.535V537.555" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M0.304993 411.495L51.585 380.945L102.875 411.495L51.585 442.535L0.304993 411.495Z" fill="url(#cg-paint3_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="3" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
+      <g data-stack-cube="3" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
         <path d="M51.585 285.785L0.304993 316.335V410.525V407.465V411.845L51.585 442.395L102.875 411.845V407.465V408.855V316.335L51.585 285.785Z" fill="url(#cg-paint4_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.585 347.375V442.395" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M0.304993 316.335L51.585 285.785L102.875 316.335L51.585 347.375L0.304993 316.335Z" fill="url(#cg-paint5_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="2" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
+      <g data-stack-cube="2" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
         <path d="M51.585 190.625L0.304993 221.175V315.365V312.305V316.685L51.585 347.235L102.875 316.685V312.305V313.695V221.175L51.585 190.625Z" fill="url(#cg-paint6_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.585 252.215V347.235" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M0.304993 221.175L51.585 190.625L102.875 221.175L51.585 252.215L0.304993 221.175Z" fill="url(#cg-paint7_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="1" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
+      <g data-stack-cube="1" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
         <path d="M51.585 95.4653L0.304993 126.015V220.205V217.145V221.525L51.585 252.075L102.875 221.525V217.145V218.535V126.015L51.585 95.4653Z" fill="url(#cg-paint8_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.585 157.065V252.075" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M0.304993 126.015L51.585 95.4653L102.875 126.015L51.585 157.065L0.304993 126.015Z" fill="url(#cg-paint9_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="0" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
+      <g data-stack-cube="0" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
         <path d="M51.585 0.305176L0.304993 30.8652V125.045V121.985V126.365L51.585 156.915L102.875 126.365V121.985V123.385V30.8652L51.585 0.305176Z" fill="url(#cg-paint10_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.585 61.9053V156.915" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M0.304993 30.8652L51.585 0.305176L102.875 30.8652L51.585 61.9052L0.304993 30.8652Z" fill="url(#cg-paint11_linear_11_523)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
@@ -133,35 +133,35 @@ export function ColumnWire(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 104 634" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs></defs>
-      <g data-stack-cube="5" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
-        <path d="M51.5852 476.095L0.305176 506.655V600.835V597.785V602.155L51.5852 632.715L102.875 602.155V597.785V599.175V506.655L51.5852 476.095Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      <g data-stack-cube="5" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
+        <path d="M51.5852 476.095L0.305176 506.655V600.835V597.785V602.155L51.5852 632.715L102.875 602.155V597.785V599.175V506.655L51.5852 476.095Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.5854 537.695V632.715" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M0.305176 506.655L51.5852 476.095L102.875 506.655L51.5852 537.695L0.305176 506.655Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.305176 506.655L51.5852 476.095L102.875 506.655L51.5852 537.695L0.305176 506.655Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="4" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
-        <path d="M51.5852 380.945L0.305176 411.495V505.675V502.625V506.995L51.5852 537.555L102.875 506.995V502.625V504.015V411.495L51.5852 380.945Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      <g data-stack-cube="4" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
+        <path d="M51.5852 380.945L0.305176 411.495V505.675V502.625V506.995L51.5852 537.555L102.875 506.995V502.625V504.015V411.495L51.5852 380.945Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.5854 442.535V537.555" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M0.305176 411.495L51.5852 380.945L102.875 411.495L51.5852 442.535L0.305176 411.495Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.305176 411.495L51.5852 380.945L102.875 411.495L51.5852 442.535L0.305176 411.495Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="3" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
-        <path d="M51.5852 285.785L0.305176 316.335V410.525V407.465V411.845L51.5852 442.395L102.875 411.845V407.465V408.855V316.335L51.5852 285.785Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      <g data-stack-cube="3" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
+        <path d="M51.5852 285.785L0.305176 316.335V410.525V407.465V411.845L51.5852 442.395L102.875 411.845V407.465V408.855V316.335L51.5852 285.785Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.5854 347.375V442.395" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M0.305176 316.335L51.5852 285.785L102.875 316.335L51.5852 347.375L0.305176 316.335Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.305176 316.335L51.5852 285.785L102.875 316.335L51.5852 347.375L0.305176 316.335Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="2" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
-        <path d="M51.5852 190.625L0.305176 221.175V315.365V312.305V316.685L51.5852 347.235L102.875 316.685V312.305V313.695V221.175L51.5852 190.625Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      <g data-stack-cube="2" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
+        <path d="M51.5852 190.625L0.305176 221.175V315.365V312.305V316.685L51.5852 347.235L102.875 316.685V312.305V313.695V221.175L51.5852 190.625Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.5854 252.215V347.235" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M0.305176 221.175L51.5852 190.625L102.875 221.175L51.5852 252.215L0.305176 221.175Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.305176 221.175L51.5852 190.625L102.875 221.175L51.5852 252.215L0.305176 221.175Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="1" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
-        <path d="M51.5852 95.4653L0.305176 126.015V220.205V217.145V221.525L51.5852 252.075L102.875 221.525V217.145V218.535V126.015L51.5852 95.4653Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      <g data-stack-cube="1" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
+        <path d="M51.5852 95.4653L0.305176 126.015V220.205V217.145V221.525L51.5852 252.075L102.875 221.525V217.145V218.535V126.015L51.5852 95.4653Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.5854 157.065V252.075" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M0.305176 126.015L51.5852 95.4653L102.875 126.015L51.5852 157.065L0.305176 126.015Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.305176 126.015L51.5852 95.4653L102.875 126.015L51.5852 157.065L0.305176 126.015Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
-      <g data-stack-cube="0" className="[transition:transform_.5s_cubic-bezier(.65,0,.35,1)]">
-        <path d="M51.5852 0.305176L0.305176 30.8652V125.045V121.985V126.365L51.5852 156.915L102.875 126.365V121.985V123.385V30.8652L51.5852 0.305176Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+      <g data-stack-cube="0" className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]">
+        <path d="M51.5852 0.305176L0.305176 30.8652V125.045V121.985V126.365L51.5852 156.915L102.875 126.365V121.985V123.385V30.8652L51.5852 0.305176Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M51.5854 61.9053V156.915" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M0.305176 30.8652L51.5852 0.305176L102.875 30.8652L51.5852 61.9052L0.305176 30.8652Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.305176 30.8652L51.5852 0.305176L102.875 30.8652L51.5852 61.9052L0.305176 30.8652Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
     </svg>
   );
@@ -261,25 +261,25 @@ export function AiRingWire(props: React.SVGProps<SVGSVGElement>) {
 </mask>
       <g mask="url(#aw-mask0_11_333)">
       <g data-stack-seg="ironclaw">
-        <path d="M272.64 391.54L60.02 262.34V213.55L82.9102 227.52V247.18L272.64 362.65V391.54Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M410.46 308.15L486.17 262.34V118.46L463.27 132.43V247.18L410.46 279.26V308.15Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M410.46 279.26L386.68 264.68L439.74 232.73L463.51 247.05L410.46 279.26Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M463.25 132.43L356.15 67.6703L379.37 53.7803L486.17 118.46L463.25 132.43Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M439.74 232.73V146.21L356.41 95.4199L356.15 67.6699L463.27 132.43L463.51 247.05L439.74 232.73Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 391.54L60.02 262.34V213.55L82.9102 227.52V247.18L272.64 362.65V391.54Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M410.46 308.15L486.17 262.34V118.46L463.27 132.43V247.18L410.46 279.26V308.15Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M410.46 279.26L386.68 264.68L439.74 232.73L463.51 247.05L410.46 279.26Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M463.25 132.43L356.15 67.6703L379.37 53.7803L486.17 118.46L463.25 132.43Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M439.74 232.73V146.21L356.41 95.4199L356.15 67.6699L463.27 132.43L463.51 247.05L439.74 232.73Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
       <g data-stack-seg="cloud">
-        <path d="M386.68 293.61L410.46 308.15V279.26L386.68 264.72V293.61Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M346.88 61.5901L323.92 75.6201V48.3L346.88 34.3101V61.5901Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.58" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M272.64 391.54V362.65L374.29 301.01V329.9L327.24 358.49L272.64 391.54Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M106.06 213.35L106.1 232.6L82.9399 246.93V227.42L106.06 213.35Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M386.68 293.61L410.46 308.15V279.26L386.68 264.72V293.61Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M346.88 61.5901L323.92 75.6201V48.3L346.88 34.3101V61.5901Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.58" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 391.54V362.65L374.29 301.01V329.9L327.24 358.49L272.64 391.54Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M106.06 213.35L106.1 232.6L82.9399 246.93V227.42L106.06 213.35Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
         
       </g>
       <g data-stack-seg="market">
-        <path d="M60.02 171.5V118.33L82.9102 132.29V185.4L60.02 171.5Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M374.29 301.01L350.52 286.69L272.63 333.67H272.64L106.07 232.73L82.9102 247.05L272.64 362.56H272.79L327.24 329.61L374.29 301.01Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M323.92 48.3L272.56 17.3501L82.9102 132.29L60.02 118.33L272.62 -10.71L346.84 34.3401L323.92 48.3Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M59.96 213.35L83.01 199.62L106.06 213.35L83.01 227.3L59.96 213.35Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M272.64 44.5701L106.07 146.21V171.23L82.9102 185.56V132.29L272.37 17.3701L272.64 44.5701Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M60.02 171.5V118.33L82.9102 132.29V185.4L60.02 171.5Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M374.29 301.01L350.52 286.69L272.63 333.67H272.64L106.07 232.73L82.9102 247.05L272.64 362.56H272.79L327.24 329.61L374.29 301.01Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M323.92 48.3L272.56 17.3501L82.9102 132.29L60.02 118.33L272.62 -10.71L346.84 34.3401L323.92 48.3Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M59.96 213.35L83.01 199.62L106.06 213.35L83.01 227.3L59.96 213.35Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M272.64 44.5701L106.07 146.21V171.23L82.9102 185.56V132.29L272.37 17.3701L272.64 44.5701Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
       </g>
     </svg>
@@ -340,12 +340,12 @@ export function IntentsWire(props: React.SVGProps<SVGSVGElement>) {
 <path d="M133.32 114.3H177.69V220.59H0V0.00997925H133.31V114.29L133.32 114.3ZM236.43 0.00997925V114.29H191.58V220.58H369.77V0H236.43V0.00997925Z" fill="white"/>
 </mask>
       <g mask="url(#iw-mask0_11_321)">
-        <path d="M304.72 89.7699L184.82 17.4199L65.3601 89.6499L42.4302 75.6099L184.88 -10.6401L327.87 75.7799L304.72 89.7699Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M146.12 196.3L42.4302 133.45V75.6099L65.3003 89.5598V118.28L146.12 167.41V196.3Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M169.87 181.76L146.12 196.3V167.41L169.87 152.87V181.76Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M224.39 196.61L327.87 133.61V75.7798L304.77 89.7397L304.72 118.45L224.39 167.72V196.61Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M199.95 181.64L224.39 196.61V167.72L199.95 152.75V181.64Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M184.88 17.3301L65.3601 89.6501V118.25L65.3003 118.28L146.12 167.41L169.87 152.84L89.0903 103.97L89.1301 103.95L184.82 46.0501L280.98 104.12L199.95 152.73L224.39 167.72L304.72 118.45L304.77 89.8001L184.88 17.3301Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M304.72 89.7699L184.82 17.4199L65.3601 89.6499L42.4302 75.6099L184.88 -10.6401L327.87 75.7799L304.72 89.7699Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M146.12 196.3L42.4302 133.45V75.6099L65.3003 89.5598V118.28L146.12 167.41V196.3Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M169.87 181.76L146.12 196.3V167.41L169.87 152.87V181.76Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M224.39 196.61L327.87 133.61V75.7798L304.77 89.7397L304.72 118.45L224.39 167.72V196.61Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M199.95 181.64L224.39 196.61V167.72L199.95 152.75V181.64Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M184.88 17.3301L65.3601 89.6501V118.25L65.3003 118.28L146.12 167.41L169.87 152.84L89.0903 103.97L89.1301 103.95L184.82 46.0501L280.98 104.12L199.95 152.73L224.39 167.72L304.72 118.45L304.77 89.8001L184.88 17.3301Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
     </svg>
   );
@@ -405,13 +405,13 @@ export function NearcomWire(props: React.SVGProps<SVGSVGElement>) {
 <path d="M378.97 0V96.9V446.35H275.81V96.8V16.81H0V581.51H251.54L276.1 588.67H378.67L410.6 581.51H694.35V0H378.97Z" fill="white"/>
 </mask>
       <g mask="url(#nw-mask0_11_353)">
-        <path d="M564.61 188.22L327.31 44.8701L90.3799 187.96L90.3999 360.4L67.3003 375.4L67.23 173.97L327.37 16.8101L587.53 174.26L587.97 373.93L564.75 359.84L564.61 188.22Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M587.58 174.3L327.31 16.7202L67.3003 174L44.1499 160.01L327.37 -11.3398L610.5 160.34L587.58 174.3Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M564.74 359.8L327.31 503.57L179.62 414.46L156.16 429.34L327.38 532.91L587.97 373.93L564.74 359.8Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M587.99 373.92L327.38 532.91L156.16 429.34V458.78L326.49 561.63L610.5 389.4V160.34L587.53 174.26L587.99 373.92Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M143.32 421.43L119.55 435.97V407.08L143.32 392.54V421.43Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M119.55 407.08L143.32 392.51L90.27 360.55L67.3003 375.4L119.55 407.08Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M67.3003 375.4L67.23 173.97L44.1499 160.01L43.8501 361.18V390.28L119.55 435.97V407.08L67.3003 375.4Z" fill="#1E1E1E" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M564.61 188.22L327.31 44.8701L90.3799 187.96L90.3999 360.4L67.3003 375.4L67.23 173.97L327.37 16.8101L587.53 174.26L587.97 373.93L564.75 359.84L564.61 188.22Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M587.58 174.3L327.31 16.7202L67.3003 174L44.1499 160.01L327.37 -11.3398L610.5 160.34L587.58 174.3Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M564.74 359.8L327.31 503.57L179.62 414.46L156.16 429.34L327.38 532.91L587.97 373.93L564.74 359.8Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M587.99 373.92L327.38 532.91L156.16 429.34V458.78L326.49 561.63L610.5 389.4V160.34L587.53 174.26L587.99 373.92Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M143.32 421.43L119.55 435.97V407.08L143.32 392.54V421.43Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M119.55 407.08L143.32 392.51L90.27 360.55L67.3003 375.4L119.55 407.08Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M67.3003 375.4L67.23 173.97L44.1499 160.01L43.8501 361.18V390.28L119.55 435.97V407.08L67.3003 375.4Z" fill="#151515" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
     </svg>
   );

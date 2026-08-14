@@ -356,7 +356,7 @@ export default function NearStack() {
               onPointerMove={onMove}
               onPointerLeave={onLeave}
               onClick={onStageClick}
-              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:h-[64svh] lg:w-auto lg:max-w-full [&_path]:cursor-pointer"
+              className="relative mx-auto aspect-[695/650] w-full max-w-[340px] lg:h-[51svh] lg:w-auto lg:max-w-full [&_path]:cursor-pointer"
             >
               {/* Apilado: mitad BAJA de la columna (cubos 3–5) al fondo,
                   anillos encima (sus máscaras recortan el canal de la
@@ -418,12 +418,12 @@ export default function NearStack() {
               <div
                 ref={tagRef}
                 aria-hidden="true"
-                className={`pointer-events-none absolute z-10 flex items-center gap-1.5 whitespace-nowrap rounded-full border border-cream/25 bg-ink/85 px-2.5 py-1 backdrop-blur-sm transition-opacity duration-150 ${
+                className={`pointer-events-none absolute z-10 flex items-center gap-2 whitespace-nowrap rounded-full border border-cream/25 bg-ink/85 px-4 py-1.5 backdrop-blur-sm transition-opacity duration-150 ${
                   tagLabel ? "opacity-100" : "opacity-0"
                 }`}
               >
-                <span className="size-2 rounded-full bg-cta-mint" />
-                <span className="text-caption text-cream">{tagLabel}</span>
+                <span className="size-3 rounded-full bg-cta-mint" />
+                <span className="text-body text-cream">{tagLabel}</span>
               </div>
             </div>
           </div>
