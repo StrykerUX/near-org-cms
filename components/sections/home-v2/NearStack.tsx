@@ -181,34 +181,23 @@ export default function NearStack() {
   const showAi = stage >= 2;
   const showNearcom = stage >= 6;
 
-  // Hover = FOCO, no re-iluminación: la pieza hovereada mantiene/gana su
-  // verde y todo lo demás visible conserva su estado pero se ATENÚA con el
-  // MISMO fade que los cubos hermanos del split (opacity 0.3, 250ms). Sin
-  // hover, lo acumulado va verde — al LLEGAR a NEAR AI el anillo entero se
-  // enciende, después cada producto enciende solo su pieza, y near.com
-  // vuelve a encender todo.
-  const litColumn = true;
-  const litIntents = showIntents;
-  const litNearcom = showNearcom;
+  // Hover sobre la COLUMNA: las otras piezas visibles no caen a wireframe —
+  // se quedan como están pero ATENUADAS (fills al 15% de opacidad, líneas al
+  // 70%; ver dimClass). Hover sobre cualquier otra pieza: solo lo hovereado
+  // verde, el resto de lo visible en wireframe. Sin hover, lo acumulado va
+  // verde — al LLEGAR a NEAR AI el anillo entero se enciende, después cada
+  // producto enciende solo su pieza, y near.com vuelve a encender todo.
+  const dimOthers = hoverTarget === "protocol";
+  const litColumn = hover ? hoverTarget === "protocol" : true;
+  const litIntents = showIntents && (hover && !dimOthers ? hoverTarget === "intents" : true);
+  const litNearcom = showNearcom && (hover && !dimOthers ? hoverTarget === "nearcom" : true);
   const litSeg: string | null = !showAi
     ? null
-    : hover
-      ? (SEG_KEYS.find((k) => k === hoverTarget) ??
-        (stage === 2 || stage >= 6 ? "all" : (SEG_KEYS.find((k) => k === scrollKey) ?? "all")))
+    : hover && !dimOthers
+      ? (SEG_KEYS.find((k) => k === hoverTarget) ?? null)
       : stage === 2 || stage >= 6
         ? "all"
         : (SEG_KEYS.find((k) => k === scrollKey) ?? "all");
-
-  // La capa "de foco" del hover, para atenuar a las demás.
-  const hoverLayer = hover
-    ? hover.kind === "cube"
-      ? "protocol"
-      : hover.kind === "seg"
-        ? "ai"
-        : hover.key
-    : null;
-  const fadedLayer = (layer: "protocol" | "intents" | "ai" | "nearcom") =>
-    hoverLayer !== null && hoverLayer !== layer;
 
   // Los grupos internos del arte (segmentos de AI, cubos de la columna) no son
   // props de los componentes generados: se manejan imperativo sobre los hooks
@@ -217,20 +206,9 @@ export default function NearStack() {
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
-    // Segmentos del anillo de AI. Verde: 1 encendido / 0 apagado, y 0.3 si
-    // está encendido pero OTRO segmento tiene el hover (mismo fade que los
-    // cubos). El wireframe de un segmento hermano también se atenúa.
-    const hoverSeg = hover?.kind === "seg" ? hover.key : null;
-    stage.querySelectorAll<SVGPathElement>("[data-ai-green] [data-stack-seg]").forEach((g) => {
-      const seg = g.dataset.stackSeg;
-      const lit = litSeg === "all" || seg === litSeg;
-      g.style.transition = "opacity 250ms";
-      g.style.opacity = !lit ? "0" : hoverSeg && seg !== hoverSeg ? "0.3" : "1";
-    });
-    stage.querySelectorAll<SVGPathElement>("[data-ai-wire] [data-stack-seg]").forEach((g) => {
-      const seg = g.dataset.stackSeg;
-      g.style.transition = "opacity 250ms";
-      g.style.opacity = hoverSeg && seg !== hoverSeg ? "0.3" : "1";
+    stage.querySelectorAll<SVGGElement>("[data-ai-green] [data-stack-seg]").forEach((g) => {
+      g.style.transition = "opacity 300ms";
+      g.style.opacity = litSeg === "all" || g.dataset.stackSeg === litSeg ? "1" : "0";
     });
     // El split: hover sobre la columna la parte en sus seis cubos (verde y
     // wireframe a la vez — comparten geometría y orden de grupos). Con un
@@ -337,9 +315,10 @@ export default function NearStack() {
         ? "translate-y-0 opacity-100 [&_path]:pointer-events-auto"
         : "translate-y-4 opacity-0"
     }`;
-  // Atenuación de foco: mismo fade que los cubos hermanos del split.
-  const fadeClass = (faded: boolean) =>
-    `transition-opacity duration-[250ms] motion-reduce:transition-none ${faded ? "opacity-30" : ""}`;
+  // Atenuación al hoverear la columna: los fills de las demás piezas al 15%
+  // de opacidad y sus líneas al 70% — presencia sin competir.
+  const dimClass = (dim: boolean) =>
+    dim ? "[&_path]:[fill-opacity:0.15] [&_path]:[stroke-opacity:0.7]" : "";
   const greenClass = (lit: boolean) =>
     `absolute left-0 top-0 w-full transition-opacity duration-300 motion-reduce:transition-none ${lit ? "opacity-100" : "opacity-0"}`;
 
@@ -391,60 +370,50 @@ export default function NearStack() {
               {/* overflow-visible en los svg de la columna: al partirse, los
                   cubos de las puntas se corren FUERA del viewBox y el clip
                   default del svg los cortaba. */}
-              {/* Cada capa lleva un wrapper de FADE interno (el de visibilidad
-                  anima a 500ms; el de foco a 250ms, como los cubos). */}
               <div
                 data-stack-layer="protocol"
                 className={`${layerClass(true)} ${HIDE_UPPER_CUBES}`}
                 style={layerStyle("column")}
               >
-                <div className={fadeClass(fadedLayer("protocol"))}>
-                  <ColumnWire className="w-full overflow-visible" />
-                  <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
-                </div>
+                <ColumnWire className="w-full overflow-visible" />
+                <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
               </div>
               <div
                 data-stack-layer="intents"
-                className={layerClass(showIntents)}
+                className={`${layerClass(showIntents)} ${dimClass(dimOthers)}`}
                 style={layerStyle("intents")}
               >
-                <div className={fadeClass(fadedLayer("intents"))}>
-                  <IntentsWire className="w-full" />
-                  <IntentsGreen className={greenClass(litIntents)} />
-                </div>
+                <IntentsWire className="w-full" />
+                <IntentsGreen className={greenClass(litIntents)} />
               </div>
-              <div data-stack-layer="ai" className={layerClass(showAi)} style={layerStyle("ai")}>
-                <div className={fadeClass(fadedLayer("ai"))}>
-                  <div data-ai-wire>
-                    <AiRingWire className="w-full" />
-                  </div>
-                  {/* La verde de AI queda siempre montada y visible a nivel
-                      svg: encendido y fade por segmento los maneja el efecto
-                      de arriba path por path. */}
-                  <div data-ai-green>
-                    <AiRingGreen className="absolute left-0 top-0 w-full" />
-                  </div>
+              <div
+                data-stack-layer="ai"
+                className={`${layerClass(showAi)} ${dimClass(dimOthers)}`}
+                style={layerStyle("ai")}
+              >
+                <AiRingWire className="w-full" />
+                {/* La verde de AI queda siempre montada y visible a nivel svg:
+                    la iluminación por segmento la maneja el efecto de arriba
+                    grupo por grupo. */}
+                <div data-ai-green>
+                  <AiRingGreen className="absolute left-0 top-0 w-full" />
                 </div>
               </div>
               <div
                 data-stack-layer="nearcom"
-                className={layerClass(showNearcom)}
+                className={`${layerClass(showNearcom)} ${dimClass(dimOthers)}`}
                 style={layerStyle("nearcom")}
               >
-                <div className={fadeClass(fadedLayer("nearcom"))}>
-                  <NearcomWire className="w-full" />
-                  <NearcomGreen className={greenClass(litNearcom)} />
-                </div>
+                <NearcomWire className="w-full" />
+                <NearcomGreen className={greenClass(litNearcom)} />
               </div>
               <div
                 data-stack-layer="protocol"
                 className={`${layerClass(true)} ${HIDE_LOWER_CUBES}`}
                 style={layerStyle("column")}
               >
-                <div className={fadeClass(fadedLayer("protocol"))}>
-                  <ColumnWire className="w-full overflow-visible" />
-                  <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
-                </div>
+                <ColumnWire className="w-full overflow-visible" />
+                <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
               </div>
 
               {/* El bubble tag de la pieza hovereada, clavado al cursor: el
