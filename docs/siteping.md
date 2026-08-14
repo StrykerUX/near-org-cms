@@ -26,9 +26,14 @@ SITEPING_API_KEY=       # firma las operaciones destructivas (PATCH/DELETE)
 REVIEW_ACCESS_SECRET=   # firma los links de revisión
 ```
 
-Las dos son obligatorias. **En producción SitePing lanza al arrancar si falta
-`SITEPING_API_KEY`** — se niega a exponer una superficie destructiva sin
-autenticar, y hace bien.
+Las dos hacen falta para que la herramienta funcione, pero **ninguna de las dos
+tumba el sitio si falta** — comprobado arrancando sin cada una:
+
+| Falta | Qué pasa |
+|---|---|
+| `SITEPING_API_KEY` | Se pueden crear y leer comentarios, pero no resolverlos ni borrarlos (401 en PATCH/DELETE). El arranque NO falla, pese a lo que dice su documentación |
+| `REVIEW_ACCESS_SECRET` | `/admin/feedback` no puede emitir links y revienta; el widget nunca se activa porque ningún token verifica |
+| Cualquiera de las dos | El sitio público, el blog y el resto del admin siguen intactos |
 
 Rotar `REVIEW_ACCESS_SECRET` **invalida todos los links de revisión emitidos**.
 Es la única forma de revocar: los tokens son autocontenidos y no se guardan en
@@ -41,11 +46,14 @@ la base, así que no se pueden revocar de a uno.
 | Firma y verificación de tokens | `lib/review-access.ts` |
 | Nombres de cookie (cliente-safe) | `lib/review-cookies.ts` |
 | Canje del link | `app/review/route.ts` |
+| Origen público tras proxy | `lib/request-origin.ts` |
 | Handler compartido | `lib/siteping-handler.ts` |
 | Endpoint del widget | `app/api/siteping/route.ts` |
 | Endpoint del inbox | `app/api/admin/siteping/route.ts` |
+| Modo revisión para el admin | `app/api/admin/review-session/route.ts` |
 | Widget | `components/site/ReviewWidget.tsx` |
 | Inbox | `components/admin/FeedbackInbox.tsx` + `app/admin/feedback/page.tsx` |
+| Tema del inbox | `components/admin/feedback-inbox.css` |
 | Capturas a R2 | `lib/siteping-screenshots.ts` |
 | Tablas | `SitepingFeedback`, `SitepingAnnotation` en el schema de cms-core |
 
@@ -69,6 +77,19 @@ widget. Existe para no romper el ISR: si el layout leyera la cookie real con
 `cookies()`, Next marcaría toda la sección `(site)` como dinámica y el blog
 perdería su render estático. Falsificar la cookie espejo muestra la UI y devuelve
 403 en el primer request.
+
+**4. El origen sale de las cabeceras, nunca de `request.url`.** Detrás de un
+proxy —portless en local, Railway en producción— `new URL(request.url).origin`
+es el puerto INTERNO de Next, no la URL por la que entró la persona. Redirigir
+ahí guarda la cookie en el dominio equivocado y el modo revisión no se activa
+nunca. Eso ya rompió el flujo una vez; está centralizado en
+`lib/request-origin.ts` para que no vuelva a divergir.
+
+**5. El tema del inbox repite la clase tres veces.** `.spd-root.spd-root
+.spd-root` no es un typo: el paquete inyecta su hoja en runtime, después de la
+nuestra, y sus reglas de tema (`.spd-root[data-theme="dark"]`) valen 0,2,0. Con
+la clase duplicada se EMPATA y gana la suya por orden — el tema se cargaba
+entero y no se veía. Triplicada queda en 0,3,0 y gana por especificidad.
 
 ## Permisos
 

@@ -80,9 +80,9 @@ RESEND_API_KEY=
 SITEPING_API_KEY=       REVIEW_ACCESS_SECRET=
 ```
 
-Las dos últimas son de los comentarios de revisión (ver `docs/siteping.md`).
-**En producción el arranque falla si falta `SITEPING_API_KEY`** — SitePing se
-niega a exponer PATCH/DELETE sin autenticar.
+Las dos últimas son de los comentarios de revisión (ver `docs/siteping.md`). Si
+faltan, la herramienta de feedback se degrada pero el sitio y el resto del admin
+siguen funcionando.
 
 
 ## Important Patterns
