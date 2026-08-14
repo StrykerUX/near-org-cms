@@ -892,11 +892,15 @@ html[data-grid="on"] [data-grid-overlay] > div > span {
 }
 
 /* La luz que recorre el contorno de la pieza hovereada del NEAR Stack
-   (home-v2). El -600 son 5 períodos exactos del dash "34 86" (120), así el
-   loop no tiene costura. Consumida por los paths data-sheen-path de
-   stackArt.generated.tsx. */
+   (home-v2). El -900 son 3 períodos exactos del dash (300), así el loop no
+   tiene costura. --sheen-phase desfasa las tres pasadas del feather (cola,
+   media y núcleo) para que queden centradas entre sí. Consumida por los
+   paths data-sheen-path de stackArt.generated.tsx. */
 @keyframes stack-sheen-run {
+  from {
+    stroke-dashoffset: var(--sheen-phase, 0px);
+  }
   to {
-    stroke-dashoffset: -600;
+    stroke-dashoffset: calc(var(--sheen-phase, 0px) - 900px);
   }
 }
