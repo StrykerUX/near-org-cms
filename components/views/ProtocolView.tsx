@@ -2,7 +2,6 @@ import { GridOverlay } from "@/components/primitives/Grid";
 import NavPillQuantum from "@/components/sections/quantum/NavPillQuantum";
 import PrototypeFooter from "@/components/sections/PrototypeFooter";
 import ProtocolHero from "@/components/sections/protocol/ProtocolHero";
-import ProofGrid from "@/components/sections/protocol/ProofGrid";
 import AiScale from "@/components/sections/protocol/AiScale";
 import ProtocolSpine from "@/components/sections/protocol/ProtocolSpine";
 import DeveloperBlock from "@/components/sections/protocol/DeveloperBlock";
@@ -23,8 +22,9 @@ import ClosingCta from "@/components/sections/protocol/ClosingCta";
 // follows anything loud:
 //
 //   hero          loud    cream + field
-//   proof         quiet   cream
 //   ai scale      medium  white
+//   (la franja de proof ya no es sección: sus cifras viven como texto
+//   secundario en el encabezado del acto oscuro — ver ProtocolSpine)
 //   FEATURED ACT  loud    DARK, sticky, three beats
 //   compact row   quiet   cream
 //   developers    medium  white + dark editor
@@ -37,7 +37,6 @@ export default function ProtocolView() {
       <NavPillQuantum />
       <main>
         <ProtocolHero />
-        <ProofGrid />
         <AiScale />
         <ProtocolSpine />
         <DeveloperBlock />

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import Button from "@/components/primitives/Button";
 import Container from "@/components/primitives/Container";
@@ -92,15 +93,17 @@ export default function NavPillV2() {
               sin necesidad de una segunda copia del asset. La altura fluida va
               inline — es una imagen, no texto, así que no le corresponde un rol
               de la escala tipográfica. */}
-          <Image
-            src="/prototype/v2/near-wordmark.svg"
-            alt="NEAR"
-            width={80}
-            height={21}
-            className="block w-auto brightness-0 invert"
-            style={{ height: "clamp(1rem, 0.92rem + 0.35vw, 1.3rem)" }}
-            priority
-          />
+          <Link href="/prototype/homepage-v2" className="flex items-center">
+            <Image
+              src="/prototype/v2/near-wordmark.svg"
+              alt="NEAR"
+              width={80}
+              height={21}
+              className="block w-auto brightness-0 invert"
+              style={{ height: "clamp(1rem, 0.92rem + 0.35vw, 1.3rem)" }}
+              priority
+            />
+          </Link>
 
           <div className="hidden items-center gap-8 md:flex">
             {LINKS.map((link) => (

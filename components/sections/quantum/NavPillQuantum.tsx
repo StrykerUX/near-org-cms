@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   IconInterface, IconIntents, IconAgents,
   IconLayers, IconAbstraction, IconQuantum,
@@ -37,12 +38,14 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
 // group. That is not decoration: it is why the panel is a grid whose column
 // count comes from the data rather than a fixed number.
 //
-// `href` is "#" throughout. The destinations exist in the sitemap tab, but
-// wiring them is a separate job and half of them are redirects that do not
-// resolve yet — a wrong link is worse than an obvious placeholder.
+// `href` es opcional por leaf: solo se cablean los destinos que EXISTEN como
+// rutas del prototipo (Protocol, Quantum Security, y el logo → home). El
+// resto sigue en "#" a propósito — un link equivocado es peor que un
+// placeholder evidente.
 type Leaf = {
   label: string;
   desc: string;
+  href?: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 type Group = { label: string; items: Leaf[] };
@@ -62,9 +65,9 @@ function NavGroup({ group }: { group: Group }) {
         <p className="mb-1 px-3 text-body-sm text-white/45">{group.label}</p>
       )}
       {group.items.map((item) => (
-        <a
+        <Link
           key={item.label}
-          href="#"
+          href={item.href ?? "#"}
           className="group/item flex items-center gap-3.5 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/[0.09]"
         >
           <span
@@ -77,7 +80,7 @@ function NavGroup({ group }: { group: Group }) {
             <span className="whitespace-nowrap text-label uppercase text-white">{item.label}</span>
             <span className="whitespace-nowrap text-caption text-white/55">{item.desc}</span>
           </span>
-        </a>
+        </Link>
       ))}
     </div>
   );
@@ -141,9 +144,9 @@ const LINKS: Entry[] = [
     label: "Stack",
     hero: "/prototype/quantum/iso-07-light.png",
     items: [
-      { label: "Protocol", desc: "The settlement layer for the agent economy", icon: IconLayers },
+      { label: "Protocol", desc: "The settlement layer for the agent economy", href: "/prototype/protocol", icon: IconLayers },
       { label: "Chain Abstraction", desc: "How NEAR connects any chain", icon: IconAbstraction },
-      { label: "Quantum Security", desc: "Quantum-adaptable from day one", icon: IconQuantum },
+      { label: "Quantum Security", desc: "Quantum-adaptable from day one", href: "/prototype/quantum-security", icon: IconQuantum },
     ],
   },
   {
@@ -484,7 +487,7 @@ export default function NavPillQuantum() {
             className="absolute inset-x-0 -top-6 h-6"
           />
 
-          <a href="#" className="flex items-center">
+          <Link href="/prototype/homepage-v2" className="flex items-center">
             {/* The wordmark is a black SVG flipped to white with a filter, rather
                 than shipping a second copy of the asset. The fluid height is
                 inline — it is an image, not text, so no typographic scale role
@@ -500,7 +503,7 @@ export default function NavPillQuantum() {
               style={{ height: "clamp(1rem, 0.92rem + 0.35vw, 1.3rem)" }}
               priority
             />
-          </a>
+          </Link>
 
           <div className="flex items-center gap-10 self-stretch">
             <div ref={tabsRef} className="hidden items-center self-stretch md:flex">

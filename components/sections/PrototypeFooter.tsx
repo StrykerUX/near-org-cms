@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 
@@ -37,6 +38,13 @@ const GROUPS = [
 ];
 
 const LEGAL = ["Privacy", "Terms of Use", "Cookie Policy"];
+
+// Solo se cablean los destinos que existen como rutas del prototipo; el resto
+// queda en "#" — un link equivocado es peor que un placeholder evidente.
+const HREFS: Record<string, string> = {
+  Protocol: "/prototype/protocol",
+  "Quantum Security": "/prototype/quantum-security",
+};
 
 // The wordmark is the SVG and not the 1440px PNG that used to be here: it is
 // displayed at 100% of the viewport width, so on anything wider than 1440 CSS
@@ -102,12 +110,12 @@ export default function PrototypeFooter() {
                     <ul className="flex flex-col gap-1.5">
                       {section.links.map((link) => (
                         <li key={link}>
-                          <a
-                            href="#"
+                          <Link
+                            href={HREFS[link] ?? "#"}
                             className="text-body-sm text-muted-foreground transition-colors hover:text-foreground"
                           >
                             {link}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>

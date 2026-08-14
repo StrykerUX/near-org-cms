@@ -3,31 +3,28 @@
 import { gsap } from "@/components/primitives/motion/gsapClient";
 
 /**
- * Six diagrams for the protocol spine — one per section, each animating what
- * its section actually claims.
+ * Six diagrams for the protocol spine — one per claim, each animating what its
+ * claim actually says.
  *
- * Hand-drawn SVG rather than generated art, for one reason: these have to
- * MOVE. A still can show a shard; only a moving one can show it splitting at
- * its threshold, which is the entire point of that section. The visual
- * language is the page's existing isometric one (hairline strokes, planes on
- * a 30° axis, one lit element in the CTA greens), so they sit next to the
- * `iso-*` renders without looking imported.
+ * Visual language (second pass): the NEAR Stack isometric CUBES, matched to
+ * the brand frames Lawrence supplied — wireframe hairline cubes for structure,
+ * and solid cubes with three green faces (lime top, mint left, deep right) for
+ * whatever is live or active. Dark ground; the cards these render in stay
+ * dark. The first pass drew flat planes and dots, which read as engineering
+ * schematics rather than the brand's object world.
  *
- * Contract per diagram:
- *   · `Art` renders SVG only — no text. Numbers and words live in the HTML
- *     beside it, where the type scale governs them and a screen reader can
- *     reach them.
+ * Contract per diagram (unchanged):
+ *   · `Art` renders SVG only — no text. Numbers and words live in the HTML.
  *   · `build(root)` returns a paused timeline. The card plays it on open and
- *     kills it on close, so nothing animates off-screen.
- *   · Every element that moves carries a `data-*` hook. Nothing is selected
- *     by tag or by nth-child, so the markup stays editable.
+ *     kills it on close; they play once and HOLD their resolved state.
+ *   · Every element that moves carries a `data-*` hook.
  */
 
 /* ── Isometric helpers ───────────────────────────────────────────────────── */
 
 const CX = 160;
 const CY = 104;
-/** How far consensus sits above execution. Big enough to read as separation. */
+/** How far consensus sits above execution in the Nightshade diagram. */
 const LIFT_Z = 58;
 const COS30 = 0.866;
 
@@ -54,6 +51,46 @@ const planeGrid = (half: number, z: number, n: number) => {
 const HAIR = "stroke-cream/40";
 const HAIR_SOFT = "stroke-cream/20";
 
+/**
+ * The three visible faces of a cube: world square x±s / y±s, bottom at z,
+ * edge 2s. Everything cube-shaped on this page is built from these paths.
+ */
+const cubeFaces = (x: number, y: number, z: number, s: number) => ({
+  top: `M ${iso(x - s, y - s, z + 2 * s)} L ${iso(x + s, y - s, z + 2 * s)} L ${iso(x + s, y + s, z + 2 * s)} L ${iso(x - s, y + s, z + 2 * s)} Z`,
+  left: `M ${iso(x - s, y + s, z + 2 * s)} L ${iso(x + s, y + s, z + 2 * s)} L ${iso(x + s, y + s, z)} L ${iso(x - s, y + s, z)} Z`,
+  right: `M ${iso(x + s, y + s, z + 2 * s)} L ${iso(x + s, y - s, z + 2 * s)} L ${iso(x + s, y - s, z)} L ${iso(x + s, y + s, z)} Z`,
+});
+
+/** Solid brand cube: lime top, mint left, deep right — the reference's ramp. */
+function GreenCube({ x = 0, y = 0, z = 0, s }: { x?: number; y?: number; z?: number; s: number }) {
+  const f = cubeFaces(x, y, z, s);
+  return (
+    <g>
+      <path d={f.top} className="fill-cta-lime stroke-none" />
+      <path d={f.left} className="fill-cta-mint stroke-none" />
+      <path d={f.right} className="fill-cta-deep stroke-none" />
+    </g>
+  );
+}
+
+/** Hairline wireframe cube — structure, capacity, the not-yet-active. */
+function WireCube({
+  x = 0,
+  y = 0,
+  z = 0,
+  s,
+  className = HAIR,
+}: {
+  x?: number;
+  y?: number;
+  z?: number;
+  s: number;
+  className?: string;
+}) {
+  const f = cubeFaces(x, y, z, s);
+  return <path d={`${f.top} ${f.left} ${f.right}`} fill="none" className={className} />;
+}
+
 /** Shared frame. 320×200 keeps every diagram on one coordinate system. */
 function Frame({ children }: { children: React.ReactNode }) {
   return (
@@ -73,8 +110,7 @@ function Frame({ children }: { children: React.ReactNode }) {
 
 /**
  * Prepare a stroked path for a draw-on: measure it and park it fully offset.
- * GSAP's DrawSVG plugin does this, but it is not in this repo's licence, and
- * dash arithmetic is four lines.
+ * GSAP's DrawSVG plugin does this, but it is not in this repo's licence.
  */
 const armDraw = (el: Element) => {
   const len = (el as SVGPathElement).getTotalLength();
@@ -95,7 +131,7 @@ function NightshadeArt() {
       {/* Execution: the plane that stays put. */}
       <path d={plane(58, 0)} className={HAIR} />
       <path d={planeGrid(58, 0, 3)} className={HAIR_SOFT} />
-      {/* Consensus: the plane that lifts away from it. */}
+      {/* Consensus: the plane that lifts away, its validators as live cubes. */}
       <g data-lift>
         <path d={plane(58, LIFT_Z)} className="stroke-cream/70" />
         <path d={planeGrid(58, LIFT_Z, 3)} className={HAIR_SOFT} />
@@ -105,20 +141,20 @@ function NightshadeArt() {
           [-29, 29],
           [29, 29],
         ].map(([x, y]) => (
-          <circle
-            key={`${x}:${y}`}
-            data-validator
-            cx={CX + (x - y) * COS30}
-            cy={CY + (x + y) * 0.5 - LIFT_Z}
-            r={3.6}
-            className="fill-cta-mint stroke-none"
-            style={{ opacity: 0.18 }}
-          />
+          <g key={`${x}:${y}`} data-validator style={{ opacity: 0.18 }}>
+            <GreenCube x={x} y={y} z={LIFT_Z} s={6} />
+          </g>
         ))}
       </g>
-      {/* The state witness that lets the two stay decoupled. */}
-      <circle data-witness r={2.6} className="fill-cta-lime stroke-none" style={{ opacity: 0 }} />
-      <path data-witness-track d={`M ${iso(0, 0, LIFT_Z - 3)} L ${iso(0, 0, 2)}`} className="stroke-cta-deep/50" />
+      {/* The state witness travelling between the layers. */}
+      <path
+        data-witness-track
+        d={`M ${iso(0, 0, LIFT_Z - 3)} L ${iso(0, 0, 2)}`}
+        className="stroke-cta-deep/50"
+      />
+      <g data-witness style={{ opacity: 0 }}>
+        <GreenCube x={0} y={0} z={LIFT_Z - 10} s={4} />
+      </g>
     </Frame>
   );
 }
@@ -128,24 +164,21 @@ function buildNightshade(root: HTMLElement) {
   const tl = gsap.timeline({ paused: true, defaults: { lazy: false } });
   const lift = q("[data-lift]");
   const track = q("[data-witness-track]");
-  const witness = q("[data-witness]")[0] as unknown as SVGCircleElement | undefined;
 
   gsap.set(lift, { y: -30, autoAlpha: 0 });
   drawIn(tl, track, 0.5);
 
   tl.to(lift, { y: 0, autoAlpha: 1, duration: 0.9, ease: "power3.out" }, 0)
-    .to(q("[data-validator]"), { opacity: 1, duration: 0.35, stagger: 0.09 }, 0.45);
-
-  if (witness) {
-    // Travels the same line the witness path draws — consensus proving to
-    // execution, which is the upgrade in one gesture.
-    tl.fromTo(
-      witness,
-      { attr: { cx: CX, cy: CY - LIFT_Z + 3 }, opacity: 0 },
-      { attr: { cx: CX, cy: CY - 2 }, opacity: 1, duration: 0.75, ease: "power1.in" },
+    .to(q("[data-validator]"), { opacity: 1, duration: 0.35, stagger: 0.09 }, 0.45)
+    // Consensus proving to execution — the upgrade in one gesture: the
+    // witness cube rides the track down and hands off.
+    .fromTo(
+      q("[data-witness]"),
+      { y: 0, opacity: 0 },
+      { y: LIFT_Z - 14, opacity: 1, duration: 0.75, ease: "power1.in" },
       0.95
-    ).to(witness, { opacity: 0, duration: 0.2 }, 1.6);
-  }
+    )
+    .to(q("[data-witness]"), { opacity: 0, duration: 0.2 }, 1.7);
   return tl;
 }
 
@@ -175,13 +208,17 @@ function ReshardingArt() {
       </g>
       {/* The threshold it is filling toward. */}
       <path data-threshold d={`M ${iso(-56, 0)} L ${iso(56, 0)}`} className="stroke-cta-lime" strokeWidth={1.5} />
-      {/* Two halves, which separate once the split lands. */}
+      {/* Two halves, which separate once the split lands — each born with its
+          own live cube, because a new shard is a new working validator set. */}
       <g data-half-a>
         <path d={`M ${iso(-56, -56)} L ${iso(0, -56)} L ${iso(0, 56)} L ${iso(-56, 56)} Z`} className="stroke-cream/55" />
         <path
           d={`M ${iso(-28, -56)} L ${iso(-28, 56)} M ${iso(-56, -28)} L ${iso(0, -28)} M ${iso(-56, 0)} L ${iso(0, 0)} M ${iso(-56, 28)} L ${iso(0, 28)}`}
           className={HAIR_SOFT}
         />
+        <g data-born style={{ opacity: 0 }}>
+          <GreenCube x={-28} y={0} z={0} s={8} />
+        </g>
       </g>
       <g data-half-b>
         <path d={`M ${iso(0, -56)} L ${iso(56, -56)} L ${iso(56, 56)} L ${iso(0, 56)} Z`} className="stroke-cream/55" />
@@ -189,6 +226,9 @@ function ReshardingArt() {
           d={`M ${iso(28, -56)} L ${iso(28, 56)} M ${iso(0, -28)} L ${iso(56, -28)} M ${iso(0, 0)} L ${iso(56, 0)} M ${iso(0, 28)} L ${iso(56, 28)}`}
           className={HAIR_SOFT}
         />
+        <g data-born style={{ opacity: 0 }}>
+          <GreenCube x={28} y={0} z={0} s={8} />
+        </g>
       </g>
       <path data-cut d={`M ${iso(0, -56)} L ${iso(0, 56)}`} className="stroke-cta-mint" strokeWidth={2} />
     </Frame>
@@ -210,70 +250,42 @@ function buildResharding(root: HTMLElement) {
     .to(q("[data-half-a]"), { x: -17, y: -10, duration: 0.8, ease: "power2.out" }, 1.6)
     .to(q("[data-half-b]"), { x: 17, y: 10, duration: 0.8, ease: "power2.out" }, 1.6)
     .to(q("[data-load]"), { autoAlpha: 0, duration: 0.5 }, 1.6)
-    // The whole shard and the cut that made it stop existing the moment there
-    // are two shards. Leaving them on is what turned the split into a cross.
-    .to([q("[data-whole]"), q("[data-cut]"), q("[data-threshold]")], { autoAlpha: 0, duration: 0.45 }, 1.7);
+    // The whole shard and the cut stop existing the moment there are two.
+    .to([q("[data-whole]"), q("[data-cut]"), q("[data-threshold]")], { autoAlpha: 0, duration: 0.45 }, 1.7)
+    .to(q("[data-born]"), { opacity: 1, duration: 0.4, stagger: 0.12, ease: "power2.out" }, 2.0);
   return tl;
 }
 
 /* ── 03 · Speed. Scale. Access. — 600ms blocks, 1.2s finality ────────────── */
 
-const RAIL_Y = 80;
-const RAIL_X0 = 28;
-const BLOCK_W = 42;
-const BLOCK_H = 30;
-const BLOCK_GAP = 6;
-const N_BLOCKS = 6;
-/** Finality rests two blocks behind the head: 1.2s against 600ms, to scale. */
-const FINAL_BLOCKS = 4;
-const blockX = (i: number) => RAIL_X0 + i * (BLOCK_W + BLOCK_GAP);
+// The reference frames' column: a stack of wireframe cube slots, one solid
+// green cube stepping down them — block production as discrete arrivals, not
+// a bar filling. A mint top-face outline follows two slots behind: finality
+// at 1.2s against 600ms blocks, to scale.
+const STACK_S = 12;
+const STACK_N = 5;
+const STEP_Z = STACK_S * 2;
+const STACK_TOP_Z = (STACK_N - 1) * STEP_Z;
+/** Screen offset that seats the whole column in the frame. */
+const STACK_DY = 52;
 
 function SpeedArt() {
   return (
     <Frame>
-      {/* Blocks as a chain, not as ticks on a ruler: the thing being measured
-          is production, and production is a run of blocks. */}
-      {Array.from({ length: N_BLOCKS }, (_, i) => (
-        <g key={i} data-block style={{ transformOrigin: `${blockX(i) + BLOCK_W / 2}px ${RAIL_Y}px` }}>
-          <rect
-            x={blockX(i)}
-            y={RAIL_Y - BLOCK_H / 2}
-            width={BLOCK_W}
-            height={BLOCK_H}
-            className="fill-cream/6 stroke-cream/45"
-          />
-          <path
-            d={`M ${blockX(i) + 9} ${RAIL_Y - 6} h 24 M ${blockX(i) + 9} ${RAIL_Y} h 24 M ${blockX(i) + 9} ${RAIL_Y + 6} h 15`}
-            className="stroke-cream/20"
-          />
-          {i > 0 && (
-            <path
-              d={`M ${blockX(i) - BLOCK_GAP} ${RAIL_Y} h ${BLOCK_GAP}`}
-              className="stroke-cream/35"
-            />
-          )}
+      <g transform={`translate(0, ${STACK_DY})`}>
+        {Array.from({ length: STACK_N }, (_, i) => (
+          <WireCube key={i} z={i * STEP_Z} s={STACK_S} />
+        ))}
+        <g data-head style={{ opacity: 0 }}>
+          <GreenCube z={STACK_TOP_Z} s={STACK_S} />
         </g>
-      ))}
-
-      {/* Finality, running underneath and never catching up. */}
-      <path
-        d={`M ${RAIL_X0} ${RAIL_Y + 40} H ${blockX(N_BLOCKS - 1) + BLOCK_W}`}
-        className={HAIR_SOFT}
-      />
-      <path
-        data-final
-        d={`M ${RAIL_X0} ${RAIL_Y + 40} H ${blockX(N_BLOCKS - 1) + BLOCK_W}`}
-        className="stroke-cta-mint"
-        strokeWidth={2.5}
-        style={{ transformOrigin: `${RAIL_X0}px ${RAIL_Y + 40}px` }}
-      />
-      <circle data-head cx={RAIL_X0} cy={RAIL_Y + 40} r={4} className="fill-cta-lime stroke-none" />
-
-      {/* The gap between produced and final, called out as a measurement. */}
-      <g data-lag style={{ opacity: 0 }}>
         <path
-          d={`M ${blockX(FINAL_BLOCKS - 1) + BLOCK_W} ${RAIL_Y + 52} v 8 H ${blockX(N_BLOCKS - 1) + BLOCK_W} v -8`}
-          className="stroke-cta-lime/70"
+          data-final-ring
+          d={cubeFaces(0, 0, STACK_TOP_Z, STACK_S).top}
+          fill="none"
+          className="stroke-cta-mint"
+          strokeWidth={1.75}
+          style={{ opacity: 0 }}
         />
       </g>
     </Frame>
@@ -283,66 +295,53 @@ function SpeedArt() {
 function buildSpeed(root: HTMLElement) {
   const q = gsap.utils.selector(root);
   const tl = gsap.timeline({ paused: true, defaults: { lazy: false } });
-  const blocks = q("[data-block]");
-  const stopX = blockX(FINAL_BLOCKS - 1) + BLOCK_W;
-  const fullX = blockX(N_BLOCKS - 1) + BLOCK_W;
+  const drop = (STACK_N - 1) * STEP_Z;
 
-  gsap.set(blocks, { scaleX: 0.2, autoAlpha: 0 });
-  gsap.set(q("[data-final]"), { scaleX: 0 });
-
-  tl.to(blocks, {
-    scaleX: 1,
-    autoAlpha: 1,
-    duration: 0.32,
-    stagger: 0.16,
-    ease: "back.out(1.4)",
-  })
+  // steps() eases make the descent land slot by slot — arrivals, not a slide.
+  tl.to(q("[data-head]"), { opacity: 1, duration: 0.25 }, 0)
+    .to(q("[data-head]"), { y: drop, duration: 1.6, ease: `steps(${STACK_N - 1})` }, 0.3)
+    .to(q("[data-final-ring]"), { opacity: 1, duration: 0.2 }, 0.8)
+    // Finality trails two slots — produced but not yet final, held honestly.
     .to(
-      q("[data-final]"),
-      { scaleX: (stopX - RAIL_X0) / (fullX - RAIL_X0), duration: 1.35, ease: "none" },
-      0.3
-    )
-    .to(q("[data-head]"), { attr: { cx: stopX }, duration: 1.35, ease: "none" }, 0.3)
-    // The last two blocks are produced but not yet final — the honest reading
-    // of "600ms blocks, 1.2s finality" rather than a bar that fills to 100%.
-    .to(blocks.slice(FINAL_BLOCKS), { autoAlpha: 0.35, duration: 0.4 }, 1.5)
-    .to(q("[data-lag]"), { opacity: 1, duration: 0.4 }, 1.7);
+      q("[data-final-ring]"),
+      { y: drop - 2 * STEP_Z, duration: 1.2, ease: `steps(${STACK_N - 3})` },
+      0.9
+    );
   return tl;
 }
 
-/* ── 04 · Private Shard — shielded, with selective disclosure ────────────── */
+/* ── 04 · Private Shard — transactions go dark on entry ──────────────────── */
+
+// The story runs on the TRANSACTIONS, not on the box: three live green cubes
+// drop into the shard and turn to wireframe ghosts the moment they cross in —
+// shielded from public view is something that HAPPENS to them, on screen.
+// Then one ghost re-lights while an auditor looks (selective disclosure) and
+// goes dark again. The held end state is the claim: a shard full of ghosts.
+const SHARD_S = 34;
+const TX_S = 7;
+const TX_POS = [
+  { x: -11, y: 9, z: 2 },
+  { x: 11, y: -9, z: 2 },
+  { x: 0, y: 0, z: 26 },
+] as const;
+/** Which ghost gets disclosed. */
+const TX_SHOWN = 1;
 
 function PrivateShardArt() {
   return (
     <Frame>
-      <defs>
-        <pattern id="shield-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
-          <line x1="0" y1="0" x2="0" y2="6" className="stroke-cream/20" strokeWidth={1} />
-        </pattern>
-        <clipPath id="shard-clip">
-          <path d={plane(52, 0)} />
-        </clipPath>
-      </defs>
-      <path d={plane(52, 0)} className={HAIR} />
-      {/* Shielded from public view — the contents are there, unreadable. */}
-      <g clipPath="url(#shard-clip)">
-        <rect data-hatch x={CX - 100} y={CY - 60} width={200} height={120} fill="url(#shield-hatch)" stroke="none" />
-      </g>
-      <path d={planeGrid(52, 0, 3)} className={HAIR_SOFT} />
-      {/* The one record that gets disclosed. */}
-      <g data-record>
-        <path
-          d={`M ${iso(-17, -17)} L ${iso(17, -17)} L ${iso(17, 17)} L ${iso(-17, 17)} Z`}
-          className="fill-cta-deep/45 stroke-cta-mint"
-        />
-      </g>
-      {/* The beam that opens for it, and closes again. */}
-      <path
-        data-beam
-        d={`M ${iso(-17, -17, 58)} L ${iso(17, -17, 58)} L ${iso(17, 17)} L ${iso(-17, 17)} Z`}
-        className="fill-cta-lime/12 stroke-none"
-        style={{ opacity: 0 }}
-      />
+      <WireCube s={SHARD_S} className={HAIR} />
+      <path d={planeGrid(SHARD_S, SHARD_S * 2, 2)} className={HAIR_SOFT} />
+      {TX_POS.map((p, i) => (
+        <g key={i} data-tx style={{ opacity: 0 }}>
+          <g data-tx-green>
+            <GreenCube x={p.x} y={p.y} z={p.z} s={TX_S} />
+          </g>
+          <g data-tx-ghost style={{ opacity: 0 }}>
+            <WireCube x={p.x} y={p.y} z={p.z} s={TX_S} className="stroke-cream/55" />
+          </g>
+        </g>
+      ))}
     </Frame>
   );
 }
@@ -350,56 +349,63 @@ function PrivateShardArt() {
 function buildPrivateShard(root: HTMLElement) {
   const q = gsap.utils.selector(root);
   const tl = gsap.timeline({ paused: true, defaults: { lazy: false } });
+  const txs = q("[data-tx]");
+  const greens = q("[data-tx-green]");
+  const ghosts = q("[data-tx-ghost]");
 
-  gsap.set(q("[data-record]"), { autoAlpha: 0, scale: 0.85, transformOrigin: `${CX}px ${CY}px` });
+  txs.forEach((tx, i) => {
+    const at = 0.1 + i * 0.5;
+    // In from above, live and visible…
+    tl.fromTo(
+      tx,
+      { y: -64, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.55, ease: "power2.in" },
+      at
+    )
+      // …and dark the moment it lands inside. Confidential by default.
+      .to(greens[i], { opacity: 0, duration: 0.28 }, at + 0.55)
+      .to(ghosts[i], { opacity: 0.55, duration: 0.28 }, at + 0.55);
+  });
 
-  tl.fromTo(q("[data-hatch]"), { autoAlpha: 0.35 }, { autoAlpha: 1, duration: 0.7 }, 0)
-    .to(q("[data-beam]"), { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.7)
-    .to(q("[data-record]"), { autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 0.85)
-    // …and it shuts again. Selective, not open.
-    .to(q("[data-beam]"), { opacity: 0, duration: 0.6 }, 2.0)
-    .to(q("[data-record]"), { autoAlpha: 0.35, duration: 0.6 }, 2.0);
+  // Selective disclosure: one ghost re-lights while someone with the right to
+  // look is looking, then goes dark with the rest.
+  tl.to(greens[TX_SHOWN], { opacity: 1, duration: 0.3, ease: "power2.out" }, 2.4)
+    .to(txs[TX_SHOWN], { y: -4, duration: 0.3, yoyo: true, repeat: 1, ease: "power1.inOut" }, 2.4)
+    .to(greens[TX_SHOWN], { opacity: 0, duration: 0.5 }, 3.3);
   return tl;
 }
 
-/* ── 05 · Quantum-safe accounts — one key rotation ───────────────────────── */
+/* ── 05 · Quantum-safe accounts — the crypto module swap ─────────────────── */
 
-const ACC_R = 52;
-
-/** An arc on the account ring, from `a0°` to `a1°`, clockwise from 12 o'clock. */
-const arc = (r: number, a0: number, a1: number) => {
-  const pt = (a: number) => {
-    const rad = ((a - 90) * Math.PI) / 180;
-    return `${(CX + Math.cos(rad) * r).toFixed(1)},${(CY + Math.sin(rad) * r).toFixed(1)}`;
-  };
-  return `M ${pt(a0)} A ${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${pt(a1)}`;
-};
+// "Accounts are decoupled from cryptography" drawn literally: the ACCOUNT is
+// the big wireframe volume and never moves; the CRYPTOGRAPHY is a small
+// module docked into its right face. The old module undocks and slides away,
+// the ML-DSA module slides in and seats, and the account's own edges take a
+// green charge — same account, new signing. (Second concept for this card:
+// the key glyph and the shell swap were both vetoed.)
+const ACC_S = 26;
+const MOD_S = 9;
+/** Where the module docks: seated into the account's right face. */
+const DOCK = { x: ACC_S + MOD_S, y: 0, z: 16 } as const;
+/** Screen-space vector for sliding along the +x isometric axis. */
+const SLIDE = (w: number) => ({ x: w * COS30, y: w * 0.5 });
 
 function QuantumArt() {
   return (
     <Frame>
-      {/* The account. Everything else swaps; this does not. */}
-      <circle cx={CX} cy={CY} r={ACC_R + 22} className={HAIR_SOFT} />
-      <circle data-account cx={CX} cy={CY} r={ACC_R} className="stroke-cream/45" />
-
-      {/* The rotation itself, as an arc that closes on the ring. */}
-      <path data-sweep d={arc(ACC_R, 0, 359)} className="stroke-cta-lime" strokeWidth={2} />
-
-      {/* Old key out to the left, new key in from the right. Two bits and
-          three bits — the second is visibly a bigger key. */}
-      <g data-key-old style={{ transformOrigin: `${CX}px ${CY}px` }}>
-        <path d={`M ${CX - 20} ${CY} h 40`} className="stroke-cream/55" strokeWidth={1.5} />
-        <circle cx={CX - 20} cy={CY} r={7} className="stroke-cream/55" strokeWidth={1.5} />
-        <path d={`M ${CX + 8} ${CY} v 9 M ${CX + 17} ${CY} v 6`} className="stroke-cream/55" strokeWidth={1.5} />
+      <g data-acc>
+        <WireCube s={ACC_S} className={HAIR} />
+        <path d={planeGrid(ACC_S, ACC_S * 2, 2)} className={HAIR_SOFT} />
       </g>
-      <g data-key-new style={{ transformOrigin: `${CX}px ${CY}px`, opacity: 0 }}>
-        <path d={`M ${CX - 22} ${CY} h 44`} className="stroke-cta-mint" strokeWidth={2} />
-        <circle cx={CX - 22} cy={CY} r={8} className="fill-cta-deep/40 stroke-cta-mint" strokeWidth={2} />
-        <path
-          d={`M ${CX + 2} ${CY} v 11 M ${CX + 11} ${CY} v 8 M ${CX + 20} ${CY} v 11`}
-          className="stroke-cta-mint"
-          strokeWidth={2}
-        />
+      {/* The charge: the same edges, green, faded up when the swap lands. */}
+      <g data-acc-charge style={{ opacity: 0 }}>
+        <WireCube s={ACC_S} className="stroke-cta-mint" />
+      </g>
+      <g data-mod-old>
+        <WireCube x={DOCK.x} y={DOCK.y} z={DOCK.z} s={MOD_S} className="stroke-cream/55" />
+      </g>
+      <g data-mod-new style={{ opacity: 0 }}>
+        <GreenCube x={DOCK.x} y={DOCK.y} z={DOCK.z} s={MOD_S} />
       </g>
     </Frame>
   );
@@ -408,57 +414,67 @@ function QuantumArt() {
 function buildQuantum(root: HTMLElement) {
   const q = gsap.utils.selector(root);
   const tl = gsap.timeline({ paused: true, defaults: { lazy: false } });
-  const sweep = q("[data-sweep]");
-  sweep.forEach(armDraw);
+  const out = SLIDE(46);
 
+  // The old module undocks — cryptography leaving, account untouched…
   tl.to(
-    q("[data-key-old]"),
-    { rotation: 180, x: -26, autoAlpha: 0, duration: 0.7, ease: "power2.in" },
+    q("[data-mod-old]"),
+    { x: out.x, y: out.y, autoAlpha: 0, duration: 0.65, ease: "power2.in" },
     0.35
   )
+    // …the quantum-safe module rides the same axis in and seats.
     .fromTo(
-      q("[data-key-new]"),
-      { rotation: -180, x: 26, autoAlpha: 0 },
-      { rotation: 0, x: 0, autoAlpha: 1, duration: 0.85, ease: "back.out(1.3)" },
-      0.8
+      q("[data-mod-new]"),
+      { x: SLIDE(72).x, y: SLIDE(72).y, autoAlpha: 0 },
+      { x: 0, y: 0, autoAlpha: 1, duration: 0.85, ease: "back.out(1.4)" },
+      0.9
     )
-    // One rotation, drawn as one turn of the ring. It stays green: the account
-    // is the same account, and it is now on quantum-safe keys.
-    .to(sweep, { strokeDashoffset: 0, duration: 1.3, ease: "power2.inOut" }, 0.3)
-    .to(q("[data-account]"), { autoAlpha: 0.2, duration: 0.5 }, 1.5);
+    // The click: the account's edges take the green charge and keep a trace
+    // of it. One rotation, and it signs quantum-safe from here on.
+    .fromTo(q("[data-acc-charge]"), { opacity: 0 }, { opacity: 0.9, duration: 0.25 }, 1.75)
+    .to(q("[data-acc-charge]"), { opacity: 0.35, duration: 0.6 }, 2.1);
   return tl;
 }
 
 /* ── 06 · Chain Signatures — one account, many chains ────────────────────── */
 
-const TARGETS = [
-  { x: 262, y: 34 },
-  { x: 290, y: 104 },
-  { x: 250, y: 172 },
+// Source account bottom-left as a solid cube; three destination chains as
+// wireframe cubes. Signature lines draw outward, and each chain's TOP FACE
+// lights green on arrival — a native transaction landing, no bridge in the
+// middle.
+const SRC = { dx: -104, dy: 10 };
+const CHAINS = [
+  { dx: 96, dy: -58 },
+  { dx: 122, dy: -2 },
+  { dx: 88, dy: 54 },
 ];
+const TGT_S = 9;
 
 function ChainSignaturesArt() {
   return (
     <Frame>
-      <circle cx={48} cy={104} r={30} className={HAIR_SOFT} />
-      <circle cx={48} cy={104} r={22} className={HAIR_SOFT} />
-      <circle data-source cx={48} cy={104} r={15} className="fill-cta-deep/40 stroke-cta-mint" />
-      {TARGETS.map((t, i) => (
+      <g transform={`translate(${SRC.dx}, ${SRC.dy})`}>
+        <WireCube s={16} className={HAIR_SOFT} />
+        <g data-source>
+          <GreenCube s={12} />
+        </g>
+      </g>
+      {CHAINS.map((c, i) => (
         <g key={i}>
           <path
             data-arc
-            d={`M 63 104 Q ${(63 + t.x) / 2} ${104 + (t.y - 104) * 0.12} ${t.x - 14} ${t.y}`}
+            d={`M ${CX + SRC.dx + 24} ${CY + SRC.dy - 8} Q ${(CX + SRC.dx + CX + c.dx) / 2} ${CY + SRC.dy + (c.dy - SRC.dy) * 0.12} ${CX + c.dx - 18} ${CY + c.dy}`}
             className="stroke-cta-mint/80"
           />
-          <circle data-target cx={t.x} cy={t.y} r={9} className="fill-cream/8 stroke-cream/55" />
-          <circle
-            data-target-core
-            cx={t.x}
-            cy={t.y}
-            r={3.4}
-            className="fill-cta-lime stroke-none"
-            style={{ opacity: 0 }}
-          />
+          <g transform={`translate(${c.dx}, ${c.dy})`}>
+            <WireCube s={TGT_S} className="stroke-cream/55" />
+            <path
+              data-target-core
+              d={cubeFaces(0, 0, 0, TGT_S).top}
+              className="fill-cta-lime stroke-none"
+              style={{ opacity: 0 }}
+            />
+          </g>
         </g>
       ))}
     </Frame>
@@ -471,15 +487,14 @@ function buildChainSignatures(root: HTMLElement) {
 
   tl.fromTo(
     q("[data-source]"),
-    { scale: 0.7, autoAlpha: 0.4, transformOrigin: "48px 104px" },
+    { scale: 0.7, autoAlpha: 0.4, transformOrigin: `${CX}px ${CY}px` },
     { scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(1.6)" },
     0
   );
   // One signature fans out to every chain at once — no bridge, no relay hop.
   drawIn(tl, q("[data-arc]"), 0.35, 0.14);
   tl.to(q("[data-target-core]"), { opacity: 1, duration: 0.3, stagger: 0.14 }, 0.95)
-    .to(q("[data-target]"), { attr: { r: 14 }, duration: 0.3, stagger: 0.14, yoyo: true, repeat: 1 }, 0.95)
-    .to(q("[data-target-core]"), { opacity: 0.25, duration: 0.6 }, 2.1);
+    .to(q("[data-target-core]"), { opacity: 0.45, duration: 0.6 }, 2.1);
   return tl;
 }
 
