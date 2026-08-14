@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SitepingInbox } from "@siteping/dashboard";
 import { Check, Copy } from "lucide-react";
+import { REVIEW_UI_COOKIE_NAME } from "@/lib/review-cookies";
 
 // Inbox de comentarios de revisión + el link que se le manda al equipo.
 //
@@ -66,7 +67,32 @@ function ReviewLink({ reviewUrl }: { reviewUrl: string }) {
   );
 }
 
+/**
+ * Le da modo revisión al propio admin, para que "Abrir en la página" lleve a la
+ * página CON el widget y con el comentario enfocado.
+ *
+ * Sin esto el botón parece roto: abre la URL correcta pero sin nada encima,
+ * porque quien administra normalmente no abrió un link `/review?token=…`.
+ *
+ * Solo se pide si la cookie no está: es una escritura, no queremos repetirla en
+ * cada visita al inbox.
+ */
+function useAdminReviewSession() {
+  useEffect(() => {
+    const active = document.cookie
+      .split("; ")
+      .some((entry) => entry === `${REVIEW_UI_COOKIE_NAME}=1`);
+    if (active) return;
+
+    // Sin `catch` ruidoso: si falla, el inbox sigue siendo perfectamente
+    // utilizable y lo único que se pierde es la comodidad del deep link.
+    void fetch("/api/admin/review-session", { method: "POST" }).catch(() => {});
+  }, []);
+}
+
 export default function FeedbackInbox({ reviewUrl, projectName }: FeedbackInboxProps) {
+  useAdminReviewSession();
+
   return (
     <div className="flex flex-col gap-6">
       <ReviewLink reviewUrl={reviewUrl} />

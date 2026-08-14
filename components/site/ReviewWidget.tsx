@@ -31,6 +31,12 @@ function SitepingMount() {
     // primera URL y los comentarios de la página siguiente no aparecerían.
     watchNavigation: true,
     scopeAnnotationsByUrl: true,
+    // Viene desactivado por defecto, y sin él "Abrir en la página" —el botón
+    // del inbox— lleva a la URL correcta pero el widget ignora el `?siteping=`
+    // que trae, así que no enfoca nada. El nombre del parámetro es el mismo que
+    // usa `SitepingInbox` por defecto; si se cambia acá, hay que cambiar
+    // `deepLinkParam` allá.
+    deepLink: true,
   });
 
   return null;
