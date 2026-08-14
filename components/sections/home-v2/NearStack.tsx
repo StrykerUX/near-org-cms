@@ -452,9 +452,13 @@ export default function NearStack() {
               const aiOpen =
                 !enhanced || scrollKey === "ai" || AI_BLOCK.subs.some((s) => scrollKey === s.key);
               return (
+                // OJO: grupo `ai`, NO `blk` — los RailBlock anidados usan
+                // `group-data-[open=true]/blk:*`, y con el MISMO nombre acá el
+                // selector matcheaba contra este padre abierto: los tres
+                // productos se expandían juntos apenas abría la caja de AI.
                 <div
                   data-open={aiOpen}
-                  className="group/blk rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
+                  className="group/ai rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
                 >
                   {/* Click en la barra de NEAR AI = saltar a SU parada (el
                       anillo entero encendido); el scroll sigue a los tres. */}
@@ -465,15 +469,15 @@ export default function NearStack() {
                     className="w-full cursor-pointer rounded-2xl px-4 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint"
                   >
                     <span className="block text-h4 text-cream/45">
-                      <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
+                      <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/ai:text-cta-mint motion-reduce:transition-none">
                         03
                       </sup>
-                      <span className="transition-colors duration-300 group-data-[open=true]/blk:text-cream motion-reduce:transition-none">
+                      <span className="transition-colors duration-300 group-data-[open=true]/ai:text-cream motion-reduce:transition-none">
                         {AI_BLOCK.name}
                       </span>
                     </span>
                   </button>
-                  <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none">
+                  <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/ai:grid-rows-[1fr] motion-reduce:transition-none">
                     <div className="overflow-hidden">
                       <div className="flex flex-col gap-2 px-4 pb-3">
                         <p className="max-w-[46ch] text-body-sm text-cream/60 text-pretty">
