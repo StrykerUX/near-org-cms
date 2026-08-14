@@ -245,8 +245,41 @@ export default function NearStack() {
 
   /* ── Hover por delegación: un solo par de handlers sobre el stage ──────── */
 
+  // Modo columna: con el hover YA en la columna, moverse en vertical recorre
+  // sus seis cubos por POSICIÓN Y del puntero — dentro del corredor
+  // horizontal de la columna ninguna otra pieza puede robar el hover (los
+  // anillos cruzan por delante y por detrás justo ahí, y el split abre
+  // huecos entre cubos). Devuelve true si capturó el evento.
+  const columnCorridor = (e: React.PointerEvent): boolean => {
+    const inColumn =
+      hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
+    if (!inColumn) return false;
+    const col = stageRef.current?.querySelector('[data-stack-layer="protocol"]');
+    if (!col) return false;
+    const r = col.getBoundingClientRect();
+    if (e.clientX < r.left - 16 || e.clientX > r.right + 16) return false;
+    // Centros de los seis cubos en pantalla, CON el split aplicado (el
+    // translateY del split va en unidades del svg → escala con r.height).
+    const s = r.height / 634;
+    let best = 0;
+    let bestD = Infinity;
+    for (let i = 0; i < 6; i++) {
+      const c = r.top + (78 + 95 * i + (i - 2.5) * 32) * s;
+      const d = Math.abs(e.clientY - c);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    // Demasiado lejos por arriba/abajo: soltar el modo columna.
+    if (bestD > 120 * s) return false;
+    setHover({ kind: "cube", index: best });
+    return true;
+  };
+
   const onOver = (e: React.PointerEvent) => {
     if (e.pointerType !== "mouse") return;
+    if (columnCorridor(e)) return;
     const t = e.target as Element;
     const layerEl = t.closest("[data-stack-layer]");
     const layer = layerEl?.getAttribute("data-stack-layer");
@@ -309,6 +342,9 @@ export default function NearStack() {
     const r = stage.getBoundingClientRect();
     el.style.left = `${e.clientX - r.left}px`;
     el.style.top = `${e.clientY - r.top}px`;
+    // pointerover no dispara entre huecos del mismo elemento: el corredor de
+    // la columna también se evalúa en cada move.
+    if (e.pointerType === "mouse") columnCorridor(e);
   };
 
   // Click sobre el arte = mismo salto que clickear su panel: la pieza
@@ -374,16 +410,16 @@ export default function NearStack() {
           </p>
         </div>
 
-        {/* items-START: el rail queda top-justificado bajo el heading y solo
-            crece hacia abajo. */}
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+        {/* La grilla llena lo que queda del viewport pineado. El rail va
+            self-start (top-justificado bajo el heading, crece hacia abajo);
+            la celda del arte se estira y CENTRA el ensamble en vertical entre
+            el fondo del texto de arriba y el fondo del frame. */}
+        <div className="grid grid-cols-1 gap-12 group-data-[mode=track]/stack:min-h-0 group-data-[mode=track]/stack:flex-1 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
           {/* El arte. En lg el stage se dimensiona POR ALTURA (64svh — un 20%
               menos que la pasada anterior — con el aspect dando el ancho):
               como vive dentro del viewport pineado, el ensamble entero queda
-              siempre en pantalla, de punta a punta. (El lift de -50px del
-              layout centrado anterior ya no aplica: ahora todo cuelga del
-              heading, top-justificado.) */}
-          <div>
+              siempre en pantalla, de punta a punta. */}
+          <div className="lg:flex lg:h-full lg:items-center lg:justify-center lg:self-stretch">
             <div
               ref={stageRef}
               onPointerOver={onOver}
