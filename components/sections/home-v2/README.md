@@ -24,7 +24,21 @@ que la separación por carpeta viene a evitar.
 
 ## Lo que se decidió distinto del original
 
-### `pin: true` → `position: sticky` (`OwnYourOwn`, `NearStack`)
+### `NearStack`: escena de scroll → acordeón por hover (rediseño 2026-08)
+
+`NearStack` ya no es un port del original: se rediseñó sobre los frames WIP de
+brand ("The NEAR Stack", 2026-08-13). La escena de scroll pegada, el popover
+flotante y la banda de foundation se retiraron; en su lugar un estado `active`
+único mapea las cuatro capas del objeto isométrico (que conserva
+`nearStackGeometry.ts` tal cual) contra un rail de cuatro cajas redondeadas.
+Hover/focus/tap encienden la capa en los verdes CTA (lime/mint/deep por cara,
+el vocabulario de `protocol/spineDiagrams`) y expanden el panel del item con su
+copy y su link "Visit …". Todo por transición CSS — GSAP no participa. Con eso,
+las notas históricas de esta sección sobre el rail de NearStack (click para
+saltar de fase, popovers 1-3, `attr: { stroke }` → `stroke-opacity`) quedaron
+obsoletas y se quitaron de este archivo.
+
+### `pin: true` → `position: sticky` (`OwnYourOwn`)
 
 El original pinnea dos secciones. Este repo lo prohíbe: el pin-spacer pelea con
 Lenis, realimenta el `ResizeObserver` de `PrototypeMotionProvider` y en
@@ -50,14 +64,6 @@ observer, el handler de resize y el anti-duplicado de pin-spacers.
 | `sizeRail()` + `ResizeObserver` para el `minHeight` de los títulos | los 6 títulos en la misma celda de grid |
 | clon del `<h2>` + `ResizeObserver` sincronizando `left/top/width` | dos capas de texto en la misma celda de grid |
 | `height: scrollHeight → auto` con `onComplete` diferido | `grid-template-rows: 0fr → 1fr` |
-| `root.style.height = '100vh'` para que el rail no desincronice el pin | el track manda la altura; el contenido no puede cambiarla |
-
-### `attr: { stroke }` → `stroke-opacity` + `currentColor` (`NearStack`)
-
-Los dos estados del original son el mismo blanco con distinta alpha (0.85 y
-0.3), así que el dim/bright es una transición CSS de **un** número por grupo en
-vez de ~30 tweens de atributo. Como efecto secundario, React y GSAP dejan de
-tener que compartir el atributo `stroke`: GSAP se queda solo con `opacity` e `y`.
 
 ### `fetch → Blob → objectURL` para el video: eliminado (`HeroVideo`)
 
@@ -69,14 +75,6 @@ el video deja de ser seekable y hay que reponer ese rodeo.
 
 ## Lo que se perdió a propósito
 
-- **Click en un tier del rail de `NearStack` para saltar a su fase.** Usa
-  `lenis.scrollTo()`, y Lenis está encapsulado en `PrototypeMotionProvider`; las
-  secciones tienen prohibido importar de `@/components/site/*`. Reponerlo
-  significa exponer un `useLenis()` desde el provider.
-- **Popover del tier 4 (near.com).** El original tampoco lo tiene: el HTML
-  define `data-tier-popover` 1, 2 y 3, y el JS pide `i + 1`, así que el 4 nunca
-  existió y el 3 es código muerto. La geometría se ilumina igual. Agregar la
-  clave `"3"` a `POPOVERS` en `nearStackContent.ts` lo hace aparecer solo.
 - **`initBarFields`, `initQuantumBarEffect`, `[data-sr-stack]`.** Código muerto
   en el original: sus selectores no existen en el HTML o la función no se llama.
 - **`image-slot.js`.** Web component de placeholder del canvas de diseño. Su

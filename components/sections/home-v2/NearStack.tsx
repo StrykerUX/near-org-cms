@@ -1,445 +1,207 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
-import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
-import { enableScene, trackTimeline } from "@/components/primitives/motion/stickyScene";
-import { gsap } from "@/components/primitives/motion/gsapClient";
-import { LAYERS, VIEW_BOX, AI_SEGMENT_IDS } from "./nearStackGeometry";
-import { TIERS, POPOVERS, FOUNDATION } from "./nearStackContent";
+import { LAYERS, VIEW_BOX, type FaceRole } from "./nearStackGeometry";
+import { TIERS } from "./nearStackContent";
 
-// 4 tiers + una fase final que colapsa el rail y sube la banda de foundation.
-const PHASES = 5;
-// svh de scroll pegado por fase. Es el `PER` del original.
-const STEP_VH = "65svh";
+// ── NearStack: objeto isométrico + acordeón de cuatro capas ──────────────────
+//
+// Rediseño sobre los frames WIP de brand (2026-08-13): la escena de scroll
+// anterior se reemplaza por un estado `active` compartido entre el arte y el
+// rail. Un solo número gobierna las dos mitades:
+//
+//   · en el SVG, la capa activa se pinta con caras verdes sólidas (lime arriba,
+//     mint a la izquierda, deep a la derecha — el vocabulario de cubos de
+//     protocol/spineDiagrams); el resto queda en wireframe hairline.
+//   · en el rail, el item activo expande su panel (body + link "Visit …");
+//     los demás quedan como filas colapsadas.
+//
+// Todo el movimiento es transición CSS: dos clases que cambian con `active`
+// (fill de caras, grid-template-rows del panel). No hay nada que interpolar a
+// mano, así que GSAP no participa — y con reduced-motion las transiciones se
+// apagan por clase y el cambio es instantáneo, con el mismo contenido.
+//
+// El hover se filtra por pointerType: en touch, el navegador sintetiza
+// pointerenter en el tap y el reset de pointerleave llegaría al tocar cualquier
+// otra cosa, colapsando lo que el usuario acaba de abrir. Mouse hovering y
+// touch tapping son caminos separados a propósito.
 
-// Ancho del popover flotante. Se usa en el clamp de posición, así que vive acá
-// y no solo en la clase.
-const POP_W = 280;
+/** Tier que queda encendido cuando el puntero no está sobre la sección. */
+const DEFAULT_TIER = 0;
 
-const GRADIENT_BY_ROLE = {
-  top: "url(#ns-core-top)",
-  right: "url(#ns-core-right)",
-  left: "url(#ns-core-left)",
-} as const;
+// Caras verdes de una capa encendida. Mismo mapeo de roles que los GreenCube
+// de protocol/spineDiagrams: la luz viene de arriba a la izquierda.
+const LIT_FILL: Record<FaceRole, string> = {
+  top: "fill-cta-lime",
+  left: "fill-cta-mint",
+  right: "fill-cta-deep",
+};
 
 export default function NearStack() {
-  // `active` es estado de React y no una variable del closure: acá lo consumen
-  // cuatro cosas del JSX —el body abierto, el color
-  // del label, el gate del hover y el estado de cada pieza del SVG—, y
-  // mantenerlo imperativo obligaría a duplicar toda esa lógica en tweens.
-  // Cambia 5 veces por pasada de scroll, así que el costo es irrelevante.
-  const [active, setActive] = useState(0);
-  const [hovered, setHovered] = useState(-1);
-  const [hoveredSeg, setHoveredSeg] = useState<string | null>(null);
-  const [sceneOn, setSceneOn] = useState(false);
-  const [popKey, setPopKey] = useState<string | null>(null);
+  // -1 = nada encendido (tap sobre el item abierto lo colapsa). Cualquier
+  // salida del puntero vuelve a DEFAULT_TIER, así que el estado "vacío" solo
+  // se ve en touch/teclado, donde es una decisión del usuario.
+  const [active, setActive] = useState<number>(DEFAULT_TIER);
 
-  const popRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<HTMLDivElement>(null);
-
-  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
-    // Las dos ramas estáticas ya están renderizadas por el JSX y no necesitan
-    // código: sin `sceneOn` no hay track ni sticky, la escena se ve en su
-    // estado final (que es el `buildScene(true)` del original) y los cuatro
-    // bodies quedan abiertos. En mobile además la escena se oculta por CSS.
-    if (!motionOk || !isDesktop) return;
-
-    const track = q("[data-stack-track]")[0];
-    const stage = q("[data-stack-stage]")[0];
-    const head = q("[data-stack-head]")[0];
-    const foundation = q("[data-stack-foundation]")[0];
-    if (!track) return;
-
-    // El interruptor del layout se escribe en el dataset (ver `enableScene`) y NO
-    // se declara en el JSX: así React nunca lo pisa al re-renderizar por un cambio
-    // de `active`, y sobre todo se aplica de forma SÍNCRONA — el trackTimeline de
-    // abajo mide el track con su altura real en vez de con la del contenido.
-    // `sceneOn` es el mismo hecho, pero para lo que sí depende de React.
-    //
-    // Va DESPUÉS del guard: si el markup no trae el track, encenderlo dejaría la
-    // sección con la altura del recorrido y sin nada que la anime.
-    const sceneOff = enableScene(scope, "scene");
-    setSceneOn(true);
-
-    // El estado inicial se aplica acá y NO por CSS: preesconder en la hoja de
-    // estilos significa que un fallo del bundle deja la escena invisible para
-    // siempre. Mismo criterio que el `.from()` de useScrollReveal.
-    gsap.set(q("[data-tier-group]"), { opacity: 0, y: -110 });
-    gsap.set(foundation, { yPercent: 140 });
-
-    const tl = trackTimeline(track, {
-      scrollTrigger: {
-        onUpdate: (self) => {
-          const i = Math.floor(self.progress * PHASES);
-          // Pasada la última fase: se cierra el rail entero (-1) y la banda
-          // de foundation toma la escena.
-          setActive(i > TIERS.length - 1 ? -1 : i);
-        },
-      },
-    });
-
-    // Cada anillo aterriza justo cuando su item del rail se abre. `y` va en
-    // unidades del viewBox, no en px: en SVG, GSAP escribe el atributo
-    // transform, que vive en el sistema de coordenadas del propio SVG.
-    TIERS.forEach((_, i) => {
-      const at = Math.max(0, i * 0.2 - 0.08);
-      tl.fromTo(
-        q(`[data-tier-group="${i}"]`),
-        { opacity: 0, y: -110 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: Math.max(0.07, i * 0.2 + 0.015 - at),
-          ease: "power1.out",
-          immediateRender: false,
-        },
-        at
-      );
-    });
-
-    // Fase final: el bloque sube para dejarle sitio a la banda de foundation.
-    //
-    // Suben el HEADER Y EL STAGE juntos. El original mueve solo el stage, y
-    // eso lo mete por debajo del titular —que está quieto dentro del sticky—
-    // hasta superponer el subtítulo con la primera fila del rail. Moviendo los
-    // dos, la distancia entre ellos no cambia y el conjunto sale por arriba
-    // como una pieza.
-    tl.to([head, stage].filter(Boolean), {
-      y: () => -Math.round(window.innerHeight * 0.2),
-      duration: 0.16,
-      ease: "power1.inOut",
-    }, 0.8);
-    tl.to(foundation, { yPercent: 0, duration: 0.16, ease: "power1.out" }, 0.81);
-
-    // Estira el timeline a duración 1 para que su tiempo sea literalmente el
-    // progress del scroll. Sin esto, las fases se comprimen contra el final.
-    tl.to({}, { duration: 1 }, 0);
-
-    return () => {
-      sceneOff();
-      // Los dos setState son necesarios y NO son un `setState` sobre un
-      // componente desmontado: este cleanup corre en dos situaciones, y en la
-      // segunda el componente sigue vivo. Si el lector cruza los 1024px o cambia
-      // `prefers-reduced-motion`, matchMedia revierte esta rama y `sceneOn` tiene
-      // que volver a false para que `isOpen()` abra los cuatro bodies y la sección
-      // se lea en flujo normal. En el desmontaje real son no-ops que React ignora.
-      setSceneOn(false);
-      setActive(0);
-      const all = [...q("[data-tier-group]"), stage, head, foundation].filter(Boolean);
-      gsap.killTweensOf(all);
-      gsap.set(all, { clearProps: "opacity,transform" });
-    };
-  });
-
-  // Sin el recorrido de scroll, los cuatro bodies quedan abiertos: es la única
-  // forma de que la sección se lea entera sin JS, en mobile y con reduced-motion.
-  const isOpen = (i: number) => !sceneOn || i === active;
-
-  /** Trazo de cada pieza: el verde solo en el segmento de AI bajo el puntero.
-   *
-   *  Esto se aplica como `style` inline a cada pieza, así que un cambio de
-   *  `hovered`/`hoveredSeg` re-renderiza el árbol de ~35 grupos × 4-8 paths
-   *  (~200 nodos). Evaluado y NO cambiado a CSS, a propósito:
-   *
-   *  · Ocurre una vez por `pointerenter` de un grupo, no una vez por frame — el
-   *    caso que sí era por frame (la posición del popover) es el que se arregló.
-   *  · Pasarlo a `:hover` puro requiere marcar las piezas con data-attrs y
-   *    reescribir el markup de los 200 nodos, y `tier >= active` no se expresa en
-   *    CSS sin generar una clase por tier.
-   *
-   *  Si el hover llega a sentirse pesado al barrer el puntero por el stack, el
-   *  camino es sacar `hovered`/`hoveredSeg` del estado (a `:hover` + un
-   *  `data-ai-seg`) y dejar solo `active`, que cambia 5 veces por pasada. Antes
-   *  de eso, medirlo. */
-  const strokeOf = (tier: number, id: string) => {
-    if (hoveredSeg === id) return { color: "var(--near-green-accent)", strokeOpacity: 1 };
-    // El núcleo verde nunca se atenúa: es el eje de la escena, no un anillo.
-    if (tier === 0) return { color: "#fff", strokeOpacity: 0.9 };
-    // Un tier que todavía no voló conserva el trazo pleno (está en opacity 0
-    // igual, así que solo importa el frame en que entra).
-    const bright = tier >= active || tier === hovered;
-    return { color: "#fff", strokeOpacity: bright ? 0.85 : 0.3 };
+  const hoverTier = (e: React.PointerEvent, tier: number) => {
+    if (e.pointerType === "mouse") setActive(tier);
   };
-
-  const popBox = useRef({ left: 0, top: 0, pageTop: 0, width: 0, height: 0, popH: 0 });
-
-  const measurePopBox = () => {
-    const host = sceneRef.current;
-    if (!host) return;
-    const r = host.getBoundingClientRect();
-    popBox.current = {
-      left: r.left,
-      top: r.top,
-      // La escena no es fixed: su `top` de viewport se mueve con el scroll. Se
-      // guarda la posición de PÁGINA y el `top` se deriva restando `scrollY`, que
-      // es un valor cacheado por el navegador y no una lectura de layout.
-      pageTop: r.top + window.scrollY,
-      width: r.width,
-      height: r.height,
-      // El popover ya está montado cuando esto corre en `pointerenter`? No: su
-      // contenido depende de `popKey`, que se setea en el mismo handler. Se lee
-      // el alto que tenga ahora y se corrige en el primer movimiento — que es
-      // exactamente lo que hacía antes, solo que una vez en lugar de siempre.
-      popH: popRef.current?.offsetHeight ?? 0,
-    };
+  const hoverReset = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") setActive(DEFAULT_TIER);
   };
-
-  const onPieceEnter = (tier: number, id: string) => {
-    if (active >= 0 && tier > active) return; // todavía no voló
-    // Se miden acá las dos cosas que `onPieceMove` necesita, una sola vez por
-    // entrada del puntero en vez de una vez por movimiento. Ver el comentario de
-    // `onPieceMove`.
-    measurePopBox();
-    setHovered(tier);
-    if (AI_SEGMENT_IDS.includes(id)) {
-      setHoveredSeg(id);
-      setPopKey(id);
-    } else {
-      setHoveredSeg(null);
-      setPopKey(POPOVERS[String(tier)] ? String(tier) : null);
-    }
-  };
-
-  const onPieceLeave = () => {
-    setHovered(-1);
-    setHoveredSeg(null);
-    setPopKey(null);
-  };
-
-  // La posición del popover se escribe IMPERATIVAMENTE. Un setState por
-  // mousemove serían ~60 renders por segundo del árbol entero — es el error
-  // clásico al portar esto. El contenido sí es estado; la posición no.
-  //
-  // Pero escribir imperativamente no alcanzaba: el handler LEÍA
-  // `host.getBoundingClientRect()` y `pop.offsetHeight` en cada evento, o sea dos
-  // reflows forzados por cada píxel que se mueve el puntero sobre cualquiera de
-  // los ~35 grupos del SVG. Ninguno de los dos valores cambia mientras el puntero
-  // se mueve: el de la escena solo con scroll o resize, y el alto del popover
-  // solo cuando cambia su contenido. Ahora se miden en `pointerenter` —una vez
-  // por hover en vez de una por píxel— y el handler solo hace aritmética y una
-  // escritura. Un resize a mitad de un hover deja el encuadre desfasado hasta la
-  // siguiente entrada del puntero, que es un caso que no vale la pena cubrir.
-  const onPieceMove = (e: React.MouseEvent) => {
-    const pop = popRef.current;
-    if (!pop) return;
-    const box = popBox.current;
-    if (box.width === 0) return; // sin medición previa no hay dónde encuadrar
-
-    // El alto del popover se completa en el primer movimiento tras el enter: en
-    // el `pointerenter` su contenido todavía no está renderizado.
-    if (box.popH === 0) box.popH = pop.offsetHeight;
-
-    const top = box.pageTop - window.scrollY;
-    const x = Math.max(0, Math.min(e.clientX - box.left + 18, box.width - POP_W - 12));
-    const y = Math.max(0, Math.min(e.clientY - top + 18, box.height - box.popH - 12));
-    // translate3d y no left/top: compone en la GPU en vez de disparar layout.
-    pop.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  };
-
-  const popover = popKey ? POPOVERS[popKey] : null;
 
   return (
-    // `data-scene` NO se declara acá a propósito: lo escribe el efecto en el
-    // dataset. Ver el comentario en el bloque de motion.
-    <section
-      ref={rootRef}
-      style={{ "--phases": PHASES, "--step-vh": STEP_VH } as React.CSSProperties}
-      className="group/stack relative bg-ink text-white"
-    >
-      <div
-        data-stack-track
-        className="group-data-[scene=on]/stack:h-[calc(var(--phases)*var(--step-vh)+100svh)]"
-      >
-        {/* El hijo sticky ES el `root.style.height=100vh; overflow:hidden` del
-            original, pero sin mutar estilos y sin pin-spacer. El overflow acá es
-            legal —y necesario, es lo que esconde la banda de foundation bajo el
-            fold—: la regla del repo prohíbe overflow en los ANCESTROS de un
-            sticky, no en el sticky mismo.
+    <section className="bg-ink text-cream">
+      {/* pt-32 iguala el pb-32 con que cierra OwnYourOwn: el corte entre las
+          dos secciones es a sangre, así que el aire a cada lado tiene que
+          coincidir o la juntura se lee descentrada. */}
+      <Container className="flex flex-col gap-14 pb-32 pt-32 lg:gap-20">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <h2 className="text-h1 text-pretty">
+            The NEAR <Accent>Stack</Accent>
+          </h2>
+          <p className="max-w-[26ch] text-h3 text-cream/70 text-balance">
+            Open infrastructure{" "}
+            <span
+              aria-hidden="true"
+              className="inline-block size-[0.78em] translate-y-[0.06em] rounded-full"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to bottom right, var(--near-teal), var(--near-green-accent), var(--near-teal))",
+              }}
+            />{" "}
+            powering the{" "}
+            <span
+              aria-hidden="true"
+              className="inline-block size-[0.72em] translate-y-[0.04em] rotate-45 rounded-[0.12em] bg-near-green-accent"
+            />{" "}
+            agent economy
+          </p>
+        </div>
 
-            De paso desaparece el motivo del `height` fijo del original: abrir y
-            cerrar los bodies del rail ya no puede cambiar la altura del
-            documento, porque la manda el track y no el contenido. */}
-        <div className="relative group-data-[scene=on]/stack:sticky group-data-[scene=on]/stack:top-0 group-data-[scene=on]/stack:h-svh group-data-[scene=on]/stack:overflow-hidden">
-          {/* `pt-32` iguala el `pb-32` con que cierra OwnYourOwn: el corte entre
-              las dos secciones es a sangre, así que el aire a cada lado tiene
-              que coincidir o la juntura se lee descentrada. */}
-          <Container className="flex flex-col gap-6 pb-12 pt-32">
-            {/* Sube junto con el stage en la fase final — ver el bloque de
-                motion. Si se queda quieto, el stage se le mete debajo. */}
-            <div data-stack-head className="flex flex-col items-center gap-3 text-center">
-              <h2 className="text-h1 text-pretty">The NEAR Stack</h2>
-              <p className="max-w-[26ch] text-h3 text-white/70 text-balance">
-                Open infrastructure{" "}
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-[0.78em] translate-y-[0.06em] rounded-full"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to bottom right, var(--near-teal), var(--near-green-accent), var(--near-teal))",
-                  }}
-                />{" "}
-                powering the{" "}
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-[0.72em] translate-y-[0.04em] rotate-45 rounded-[0.12em] bg-near-green-accent"
-                />{" "}
-                agent economy
-              </p>
-            </div>
-
-            <div
-              data-stack-stage
-              className="grid grid-cols-1 items-center gap-16 lg:grid-cols-[1.15fr_1fr]"
-            >
-              {/* La escena se OCULTA en mobile y el rail toma el ancho completo:
-                  el objeto isométrico a 360px de ancho no se lee. */}
-              <div ref={sceneRef} className="relative hidden lg:block">
-                <svg
-                  viewBox={VIEW_BOX}
-                  aria-hidden="true"
-                  className="mx-auto block max-h-[56svh] w-full max-w-[640px]"
-                >
-                  <defs>
-                    <linearGradient id="ns-core-top" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#ecfdb0" />
-                      <stop offset="100%" stopColor="#b9f34e" />
-                    </linearGradient>
-                    <linearGradient id="ns-core-right" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8bf29c" />
-                      <stop offset="100%" stopColor="#049d4e" />
-                    </linearGradient>
-                    <linearGradient id="ns-core-left" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#d8f2d0" />
-                      <stop offset="100%" stopColor="#54ca80" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* El orden de LAYERS ES el z-order y no se puede reordenar:
-                      cada anillo tiene una parte por detrás del eje y otra por
-                      delante, y ese cruce es todo el efecto de profundidad.
-
-                      GSAP escribe SOLO opacity e y en estos grupos; el trazo lo
-                      maneja React vía style. Propiedades distintas, sin pelea. */}
-                  {LAYERS.map((layer, li) => (
-                    <g key={li} data-tier-group={layer.tier}>
-                      {layer.pieces.map((p) => (
-                        <g
-                          key={p.id}
-                          data-piece={p.id}
-                          style={strokeOf(layer.tier, p.id)}
-                          className="cursor-pointer transition-[stroke-opacity,color] duration-300"
-                          onMouseEnter={() => onPieceEnter(layer.tier, p.id)}
-                          onMouseMove={onPieceMove}
-                          onMouseLeave={onPieceLeave}
-                        >
-                          {p.faces.map((f, fi) => (
-                            <path
-                              key={fi}
-                              d={f.d}
-                              // El fill de las caras "shell" tiene que ser
-                              // EXACTAMENTE el fondo de la sección: el back-face
-                              // culling solo se lee como oclusión sólida si
-                              // coinciden. Por eso los dos salen de --ink.
-                              fill={p.kind === "core" ? GRADIENT_BY_ROLE[f.role] : "var(--ink)"}
-                              stroke="currentColor"
-                              strokeWidth={1}
-                              strokeLinejoin="round"
-                              vectorEffect="non-scaling-stroke"
-                            />
-                          ))}
-                        </g>
+        {/* El reset de hover vive acá y no en cada mitad: cruzar del arte al
+            rail no debe pasar por el estado default en el medio. */}
+        <div
+          onPointerLeave={hoverReset}
+          className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16"
+        >
+          {/* El arte va PRIMERO en el DOM: en mobile queda apilado arriba del
+              rail, como piden los frames. Decorativo (aria-hidden): cada capa
+              es alcanzable como texto en el rail de al lado. */}
+          <svg
+            viewBox={VIEW_BOX}
+            aria-hidden="true"
+            className="mx-auto block w-full max-w-[420px] lg:max-h-[62svh] lg:max-w-[640px]"
+          >
+            {/* El orden de LAYERS ES el z-order y no se puede reordenar: cada
+                anillo tiene una parte por detrás del eje y otra por delante, y
+                ese cruce es todo el efecto de profundidad. */}
+            {LAYERS.map((layer, li) => {
+              const lit = layer.tier === active;
+              return (
+                <g key={li}>
+                  {layer.pieces.map((p) => (
+                    <g
+                      key={p.id}
+                      data-piece={p.id}
+                      className="cursor-pointer"
+                      onPointerEnter={(e) => hoverTier(e, layer.tier)}
+                      // Click directo sobre el arte (touch incluido): enciende,
+                      // nunca colapsa — el toggle es del rail, donde está el
+                      // contenido que se abre y se cierra.
+                      onClick={() => setActive(layer.tier)}
+                    >
+                      {p.faces.map((f, fi) => (
+                        <path
+                          key={fi}
+                          d={f.d}
+                          // El fill apagado tiene que ser EXACTAMENTE el fondo
+                          // de la sección: el back-face culling de la geometría
+                          // solo se lee como oclusión sólida si coinciden. Por
+                          // eso los dos salen del token `ink` (ver el README).
+                          className={`${lit ? LIT_FILL[f.role] : "fill-ink"} stroke-cream/40 transition-[fill] duration-300 motion-reduce:transition-none`}
+                          strokeWidth={1}
+                          strokeLinejoin="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
                       ))}
                     </g>
                   ))}
-                </svg>
+                </g>
+              );
+            })}
+          </svg>
 
-                {/* Vive dentro del contenedor de la escena porque su posición se
-                    mide contra él. `left/top: 0` fijos + transform: el
-                    movimiento no toca layout. */}
+          <div className="flex w-full flex-col gap-3">
+            {TIERS.map((tier, i) => {
+              const open = i === active;
+              return (
                 <div
-                  ref={popRef}
-                  aria-hidden="true"
-                  data-on={popover !== null}
-                  style={{ width: POP_W }}
-                  className="pointer-events-none absolute left-0 top-0 z-[5] rounded-xl border border-white/[0.18] bg-ink/95 px-4 py-3.5 opacity-0 transition-opacity duration-200 data-[on=true]:opacity-100"
+                  key={tier.name}
+                  data-open={open}
+                  onPointerEnter={(e) => hoverTier(e, i)}
+                  className="group/tier rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
                 >
-                  {popover && (
-                    <>
-                      <Eyebrow className="mb-2 text-white/45">{popover.eyebrow}</Eyebrow>
-                      {popover.items.map((item) => (
-                        <p key={item.title} className="mb-1.5 text-body-sm text-white/85 last:mb-0">
-                          <span className="text-label text-white">{item.title}</span> · {item.blurb}
-                        </p>
-                      ))}
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col">
-                {TIERS.map((tier, i) => (
-                  <div
-                    key={tier.name}
-                    data-open={isOpen(i)}
-                    // El hover del rail ilumina la geometría, pero solo de los
-                    // tiers que ya volaron: encender uno que todavía no está en
-                    // pantalla no comunica nada.
-                    onMouseEnter={() => {
-                      if (active < 0 || i <= active) setHovered(i);
+                  <button
+                    type="button"
+                    aria-expanded={open}
+                    aria-controls={`near-stack-panel-${i}`}
+                    // Toggle y no set: el segundo tap/Enter sobre el item
+                    // abierto lo colapsa (es el camino de mobile y teclado; en
+                    // desktop el hover ya lo dejó abierto antes del click).
+                    onClick={() => setActive((prev) => (prev === i ? -1 : i))}
+                    // Solo focus VISIBLE abre el panel: el focus de un click de
+                    // mouse llegaría antes que el click y el toggle vería el
+                    // item ya abierto — o sea, click sobre un item cerrado lo
+                    // abriría y cerraría en el mismo gesto.
+                    onFocus={(e) => {
+                      if (e.currentTarget.matches(":focus-visible")) setActive(i);
                     }}
-                    onMouseLeave={() => setHovered(-1)}
-                    className="group/tier border-t border-white/15 pb-3.5 pt-4.5 last:border-b"
+                    className="w-full cursor-pointer rounded-2xl px-6 pb-4 pt-5 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint"
                   >
-                    <h3 className="text-h4 text-white/35 transition-colors duration-300 group-data-[open=true]/tier:text-white">
-                      <sup className="index-marker mr-2 align-super text-white/30">
+                    <span className="text-h4 text-cream/40 transition-colors duration-300 group-data-[open=true]/tier:text-cream motion-reduce:transition-none">
+                      <sup className="index-marker mr-2 align-super text-cream/30 transition-colors duration-300 group-data-[open=true]/tier:text-cta-mint motion-reduce:transition-none">
                         0{i + 1}
                       </sup>
                       {tier.name}
-                    </h3>
+                    </span>
+                  </button>
 
-                    {/* grid-template-rows 0fr ↔ 1fr es la sustitución moderna de
-                        animar height contra scrollHeight: el navegador interpola
-                        sin que nadie mida, y no queda un `height:auto` diferido
-                        que pueda colgarse si el tween se mata a mitad.
-                        El overflow-hidden va en el hijo interno para que el
-                        margen superior del <p> quede DENTRO de la caja que se
-                        recorta. */}
-                    <div className="grid transition-[grid-template-rows] duration-500 ease-out motion-reduce:transition-none group-data-[open=true]/tier:grid-rows-[1fr] grid-rows-[0fr]">
-                      <div className="overflow-hidden">
-                        <p className="mt-3.5 max-w-[38ch] text-body-sm text-white/55 text-pretty">
+                  {/* grid-template-rows 0fr ↔ 1fr en vez de animar height: el
+                      navegador interpola sin que nadie mida. El overflow-hidden
+                      va en el hijo interno para que el padding del contenido
+                      quede DENTRO de la caja que se recorta. */}
+                  <div
+                    id={`near-stack-panel-${i}`}
+                    className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/tier:grid-rows-[1fr] motion-reduce:transition-none"
+                  >
+                    <div className="overflow-hidden">
+                      <div className="flex flex-col items-center gap-5 px-6 pb-6 sm:px-10">
+                        <p className="max-w-[46ch] text-center text-body-sm text-cream/60 text-pretty">
                           {tier.body}
                         </p>
+                        <a
+                          href={tier.link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          // Un panel colapsado no es display:none — sin esto el
+                          // Tab aterrizaría en links invisibles.
+                          tabIndex={open ? 0 : -1}
+                          className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+                        >
+                          {tier.link.label} <span aria-hidden="true">→</span>
+                        </a>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </Container>
-
-          {/* Espera bajo el fold y sube en la fase final. En estático (mobile /
-              reduced-motion) queda en flujo normal al pie de la sección. */}
-          <div
-            data-stack-foundation
-            className="group-data-[scene=on]/stack:absolute group-data-[scene=on]/stack:inset-x-0 group-data-[scene=on]/stack:bottom-0"
-          >
-            <Container className="pb-12 pt-8">
-              <div className="mx-auto grid max-w-[1120px] gap-16 border-t border-white/15 pt-8 lg:grid-cols-2">
-                {FOUNDATION.map((block) => (
-                  <div key={block.title} className="flex flex-col gap-3">
-                    <Eyebrow className="text-white/40">{block.title}</Eyebrow>
-                    <p className="max-w-[40ch] text-body-sm text-white/55 text-pretty">
-                      {block.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </Container>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

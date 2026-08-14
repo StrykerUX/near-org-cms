@@ -155,8 +155,10 @@ const BAR_BACK: Pt[] = [
   [-60, -72],
 ];
 
-// El anillo de NEAR AI se parte en tres, uno por producto, para poder
-// resaltarlos por separado al hover.
+// El anillo de NEAR AI se parte en tres piezas, una por producto. Herencia del
+// diseño anterior (que las resaltaba por separado); hoy las tres llevan el
+// mismo tier y se encienden juntas, pero partirlas sigue siendo inocuo y
+// re-unirlas obligaría a recalcular el z-order.
 const AI_A: Pt[] = [
   [6, 72],
   [72, 72],
@@ -206,6 +208,3 @@ export const LAYERS: readonly Layer[] = [
   },
   { tier: 3, pieces: [piece("com-front", "shell", prism(sh(U_FRONT, 37), null, 76, 110))] },
 ];
-
-/** Los tres segmentos del anillo de NEAR AI, hovereables uno por uno. */
-export const AI_SEGMENT_IDS: readonly string[] = ["ai-cloud", "ai-ironclaw", "ai-market"];
