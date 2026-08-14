@@ -224,6 +224,23 @@ export default function NearStack() {
       g.style.transform = split ? `translateY(${((i - 2.5) * 32).toFixed(0)}px)` : "translateY(0px)";
       g.style.opacity = hoveredCube !== null && i !== hoveredCube ? "0.3" : "1";
     });
+    // El sheen: la banda animada barre SOLO la pieza bajo el cursor. Para el
+    // anillo de AI la unidad es el segmento; para el resto, la capa entera.
+    const hoverLayer = hover
+      ? hover.kind === "cube"
+        ? "protocol"
+        : hover.kind === "seg"
+          ? "ai"
+          : hover.key
+      : null;
+    const hoverSegKey = hover?.kind === "seg" ? hover.key : null;
+    stage.querySelectorAll<SVGPathElement>("[data-sheen-path]").forEach((p) => {
+      const layer = p.closest("[data-stack-layer]")?.getAttribute("data-stack-layer");
+      const on =
+        layer === "ai" ? p.dataset.sheenSeg != null && p.dataset.sheenSeg === hoverSegKey : layer === hoverLayer;
+      p.style.transition = "opacity 350ms";
+      p.style.opacity = on ? "1" : "0";
+    });
   }, [litSeg, hover]);
 
   /* ── Hover por delegación: un solo par de handlers sobre el stage ──────── */
@@ -341,11 +358,14 @@ export default function NearStack() {
       {/* El viewport sticky: lockea cuando el tope de la sección toca el tope
           del frame, con TODO adentro (título, arte y rail) centrado y entero
           en pantalla — nada se recorta en ningún punto del recorrido. */}
-      <div className="group-data-[mode=track]/stack:sticky group-data-[mode=track]/stack:top-0 group-data-[mode=track]/stack:flex group-data-[mode=track]/stack:h-svh group-data-[mode=track]/stack:flex-col group-data-[mode=track]/stack:justify-center">
-        <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-0 lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
+      {/* justify-START, no center: el headline queda anclado arriba y las
+          cajas abren hacia ABAJO — nada de lo que se expande puede empujar
+          al título. */}
+      <div className="group-data-[mode=track]/stack:sticky group-data-[mode=track]/stack:top-0 group-data-[mode=track]/stack:flex group-data-[mode=track]/stack:h-svh group-data-[mode=track]/stack:flex-col group-data-[mode=track]/stack:justify-start">
+        <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-[5svh] lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
         {/* En modo track el bloque de título sube respecto del centro del
             viewport pineado — pedido de Lawrence. */}
-        <div className="flex flex-col items-center gap-3 text-center group-data-[mode=track]/stack:-translate-y-10">
+        <div className="flex flex-col items-center gap-3 text-center">
           <h2 className="text-h1 text-pretty">
             The NEAR <Accent>Stack</Accent>
           </h2>
@@ -354,13 +374,16 @@ export default function NearStack() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+        {/* items-START: el rail queda top-justificado bajo el heading y solo
+            crece hacia abajo. */}
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
           {/* El arte. En lg el stage se dimensiona POR ALTURA (64svh — un 20%
               menos que la pasada anterior — con el aspect dando el ancho):
               como vive dentro del viewport pineado, el ensamble entero queda
-              siempre en pantalla, de punta a punta. El -translate lo sube
-              50px respecto del centro, a pedido. */}
-          <div className="lg:-translate-y-[50px]">
+              siempre en pantalla, de punta a punta. (El lift de -50px del
+              layout centrado anterior ya no aplica: ahora todo cuelga del
+              heading, top-justificado.) */}
+          <div>
             <div
               ref={stageRef}
               onPointerOver={onOver}
