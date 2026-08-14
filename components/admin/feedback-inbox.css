@@ -9,13 +9,20 @@
  * El dashboard NO usa Shadow DOM (a diferencia del widget), así que basta con
  * CSS normal.
  *
- * ── Por qué la clase va repetida ─────────────────────────────────────────────
- * `.spd-root.spd-root` no es un typo. El paquete inyecta su CSS con un
- * `<style>` creado en runtime, o sea DESPUÉS de esta hoja, y sus reglas de tema
- * son `.spd-root[data-theme="dark"]` (especificidad 0,2,0) contra un
- * `.spd-root` normal (0,1,0). Sin repetir la clase, cada variable de acá pierde
- * —por especificidad las de tema, por orden de aparición las de base— y el
- * archivo entero no hace absolutamente nada. Repetirla sube a 0,3,0 y gana.
+ * ── Por qué la clase va repetida TRES veces ──────────────────────────────────
+ * `.spd-root.spd-root.spd-root` no es un typo, y el número importa.
+ *
+ * El paquete inyecta su CSS con un `<style>` creado en runtime — o sea DESPUÉS
+ * de esta hoja — y sus reglas de tema son `.spd-root[data-theme="dark"]`:
+ * una clase más un atributo, especificidad **0,2,0**.
+ *
+ * Duplicar la clase da 0,2,0 también: EMPATA, no gana. Y en un empate decide el
+ * orden de aparición, que siempre lo pierde esta hoja por ser un `<link>`
+ * estático contra un `<style>` inyectado. Con la clase duplicada el archivo se
+ * cargaba, tenía los selectores correctos, y aun así el inbox seguía azul.
+ *
+ * Triplicarla da 0,3,0 y gana por especificidad, que es lo único que no depende
+ * del orden en que el paquete decida inyectar su hoja.
  *
  * El tema se selecciona por `data-theme` y no por la clase `.dark` del admin
  * porque ese atributo lo escribe el propio inbox a partir del prop `theme`, que
@@ -24,7 +31,7 @@
  * Si al actualizar el paquete algo se ve raro, comparar contra `.spd-root` en
  * su bundle: pueden haber añadido variables que acá no se están mapeando. */
 
-.spd-root.spd-root {
+.spd-root.spd-root.spd-root {
   /* ── Superficies y texto: salen de los tokens del DS, así que siguen solos
         el toggle claro/oscuro del admin ──────────────────────────────────── */
   --spd-bg: var(--background);
@@ -58,7 +65,7 @@
  * texto de apoyo no crearía ninguna jerarquía) ni un "borde fuerte". Se
  * declaran por tema porque un gris que funciona sobre #0B0B0B no funciona sobre
  * blanco. Los cuatro pasan AA sobre su fondo. */
-.spd-root.spd-root[data-theme="light"] {
+.spd-root.spd-root.spd-root[data-theme="light"] {
   --spd-border-strong: #c9c9c9;
   --spd-text-2: #5a5a5a;
   --spd-text-3: #767676;
@@ -69,7 +76,7 @@
   --spd-st-wontfix: #8a8a8a;
 }
 
-.spd-root.spd-root[data-theme="dark"] {
+.spd-root.spd-root.spd-root[data-theme="dark"] {
   /* #4d4d4d es el escalón siguiente de la rampa del admin, entre --border
      (#3a3a3a) y el texto. */
   --spd-border-strong: #4d4d4d;
@@ -95,6 +102,6 @@
  *
  * Es la única regla que pisa una declaración suya en vez de alimentar una
  * variable, y existe solo porque ese color no es configurable. */
-.spd-root.spd-root .spd-btn-primary {
+.spd-root.spd-root.spd-root .spd-btn-primary {
   color: var(--background);
 }
