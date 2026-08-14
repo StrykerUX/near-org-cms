@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
@@ -263,16 +264,21 @@ export default function NearStack() {
           sub: PROTOCOL_FEATURES[hover.index].sub,
           desc: PROTOCOL_FEATURES[hover.index].desc,
         }
-      : {
-          label:
-            hover.kind === "seg"
-              ? SEG_NAMES[hover.key]
-              : hover.key === "protocol"
+      : hover.kind === "seg"
+        ? // Los productos de AI llevan su copy explicativa en la caja, igual
+          // que los cubos de la columna.
+          {
+            label: SEG_NAMES[hover.key],
+            desc: AI_BLOCK.subs.find((s) => s.key === hover.key)?.body,
+          }
+        : {
+            label:
+              hover.key === "protocol"
                 ? "NEAR Protocol"
                 : hover.key === "intents"
                   ? "NEAR Intents"
                   : "near.com",
-        }
+          }
     : null;
 
   // onMove escribe las coordenadas CRUDAS del cursor; el desplazamiento del
@@ -600,17 +606,28 @@ function RailBlock({
         <div className="overflow-hidden">
           <div className={`flex flex-col gap-2 ${nested ? "px-3.5 pb-2.5" : "px-4 pb-3"}`}>
             <p className="max-w-[46ch] text-body-sm text-cream/60 text-pretty">{block.body}</p>
-            {block.link && (
-              <a
-                href={block.link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                tabIndex={expanded ? 0 : -1}
-                className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
-              >
-                {block.link.label} <span aria-hidden="true">→</span>
-              </a>
-            )}
+            {block.link &&
+              // Rutas internas (Protocol → /prototype/protocol) van por
+              // next/link y en la misma pestaña; las externas abren aparte.
+              (block.link.href.startsWith("/") ? (
+                <Link
+                  href={block.link.href}
+                  tabIndex={expanded ? 0 : -1}
+                  className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+                >
+                  {block.link.label} <span aria-hidden="true">→</span>
+                </Link>
+              ) : (
+                <a
+                  href={block.link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  tabIndex={expanded ? 0 : -1}
+                  className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+                >
+                  {block.link.label} <span aria-hidden="true">→</span>
+                </a>
+              ))}
           </div>
         </div>
       </div>

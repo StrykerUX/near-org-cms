@@ -27,21 +27,22 @@ export const PROTOCOL_BLOCK: StackLeaf = {
   key: "protocol",
   name: "NEAR Protocol",
   body: "The settlement layer at the center of the stack — everything else is built around it. Fully sharded and quantum-resistant, with five years on mainnet at 100% uptime, built to clear the agent economy at scale.",
-  link: { label: "Visit nearprotocol.com", href: "https://nearprotocol.com" },
+  // Interno: la página de Protocol de ESTE sitio (el prototipo).
+  link: { label: "Explore the Protocol", href: "/prototype/protocol" },
 };
 
 export const INTENTS_BLOCK: StackLeaf = {
   key: "intents",
   name: "NEAR Intents",
   body: "The first ring out from the protocol. Intents deal in outcomes, not transactions: say what should happen — a swap, a transfer, a settlement across 30+ chains — and a network of solvers competes to make it true. No bridges, no juggling gas.",
-  link: { label: "Visit near-intents.org", href: "https://near-intents.org" },
+  link: { label: "Visit intents.near.org", href: "https://intents.near.org" },
 };
 
 export const AI_BLOCK = {
   name: "NEAR AI",
   intro:
     "Confidential AI infrastructure, wrapped around the core. Inference and agents run inside encrypted enclaves: requests stay private by design, and every output can be independently verified.",
-  link: { label: "Visit nearai.com", href: "https://nearai.com" },
+  link: { label: "Visit near.ai", href: "https://near.ai" },
   subs: [
     {
       key: "ironclaw",
