@@ -10,6 +10,7 @@
 export type StackKey =
   | "protocol"
   | "intents"
+  | "ai"
   | "ironclaw"
   | "cloud"
   | "market"

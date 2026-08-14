@@ -90,9 +90,12 @@ type Hover =
 const SEG_KEYS = ["ironclaw", "cloud", "market"] as const;
 
 // El orden narrativo del build-up = el orden de las paradas del rail.
+// "ai" es la llegada al anillo completo (los TRES productos encendidos a la
+// vez); recién después el recorrido entra a los tres productos de a uno.
 const STAGE_ORDER: readonly StackKey[] = [
   "protocol",
   "intents",
+  "ai",
   "ironclaw",
   "cloud",
   "market",
@@ -176,21 +179,23 @@ export default function NearStack() {
   const stage = enhanced ? scrollIdx : STAGE_ORDER.length - 1;
   const showIntents = stage >= 1;
   const showAi = stage >= 2;
-  const showNearcom = stage >= 5;
+  const showNearcom = stage >= 6;
 
-  // Con hover, SOLO lo hovereado va verde y el resto de lo visible cae a
-  // wireframe. Sin hover, lo acumulado va verde — salvo el anillo de AI
-  // mientras se recorren sus tres productos: ahí solo el activo va verde y
-  // sus dos hermanos quedan en wireframe (los stills de referencia). Recién
-  // en near.com el anillo completo queda verde.
+  // Hover sobre la COLUMNA: las otras piezas visibles no caen a wireframe —
+  // se quedan como están pero ATENUADAS (fills al 15% de opacidad, líneas al
+  // 70%; ver dimClass). Hover sobre cualquier otra pieza: solo lo hovereado
+  // verde, el resto de lo visible en wireframe. Sin hover, lo acumulado va
+  // verde — al LLEGAR a NEAR AI el anillo entero se enciende, después cada
+  // producto enciende solo su pieza, y near.com vuelve a encender todo.
+  const dimOthers = hoverTarget === "protocol";
   const litColumn = hover ? hoverTarget === "protocol" : true;
-  const litIntents = showIntents && (hover ? hoverTarget === "intents" : true);
-  const litNearcom = showNearcom && (hover ? hoverTarget === "nearcom" : true);
+  const litIntents = showIntents && (hover && !dimOthers ? hoverTarget === "intents" : true);
+  const litNearcom = showNearcom && (hover && !dimOthers ? hoverTarget === "nearcom" : true);
   const litSeg: string | null = !showAi
     ? null
-    : hover
+    : hover && !dimOthers
       ? (SEG_KEYS.find((k) => k === hoverTarget) ?? null)
-      : stage >= 5
+      : stage === 2 || stage >= 6
         ? "all"
         : (SEG_KEYS.find((k) => k === scrollKey) ?? "all");
 
@@ -288,11 +293,15 @@ export default function NearStack() {
   // exterior (que abarca todo el stage) se tragaría el hover de todo lo demás.
   // Una capa que todavía no llegó al build-up está oculta Y sin hit-area.
   const layerClass = (visible: boolean) =>
-    `pointer-events-none absolute transition-[opacity,transform] duration-500 motion-reduce:transition-none ${
+    `pointer-events-none absolute transition-[opacity,transform] duration-500 motion-reduce:transition-none [&_path]:transition-[fill-opacity,stroke-opacity] [&_path]:duration-300 ${
       visible
         ? "translate-y-0 opacity-100 [&_path]:pointer-events-auto"
         : "translate-y-4 opacity-0"
     }`;
+  // Atenuación al hoverear la columna: los fills de las demás piezas al 15%
+  // de opacidad y sus líneas al 70% — presencia sin competir.
+  const dimClass = (dim: boolean) =>
+    dim ? "[&_path]:[fill-opacity:0.15] [&_path]:[stroke-opacity:0.7]" : "";
   const greenClass = (lit: boolean) =>
     `absolute left-0 top-0 w-full transition-opacity duration-300 motion-reduce:transition-none ${lit ? "opacity-100" : "opacity-0"}`;
 
@@ -304,7 +313,7 @@ export default function NearStack() {
     // mataría el sticky (misma trampa de siempre).
     <section
       ref={rootRef}
-      className="group/stack bg-ink text-cream data-[mode=track]:h-[400svh]"
+      className="group/stack bg-ink text-cream data-[mode=track]:h-[460svh]"
     >
       {/* El viewport sticky: lockea cuando el tope de la sección toca el tope
           del frame, con TODO adentro (título, arte y rail) centrado y entero
@@ -338,8 +347,9 @@ export default function NearStack() {
           {/* El arte. En lg el stage se dimensiona POR ALTURA (64svh — un 20%
               menos que la pasada anterior — con el aspect dando el ancho):
               como vive dentro del viewport pineado, el ensamble entero queda
-              siempre en pantalla, de punta a punta. */}
-          <div>
+              siempre en pantalla, de punta a punta. El -translate lo sube
+              50px respecto del centro, a pedido. */}
+          <div className="lg:-translate-y-[50px]">
             <div
               ref={stageRef}
               onPointerOver={onOver}
@@ -352,23 +362,30 @@ export default function NearStack() {
                   anillos encima (sus máscaras recortan el canal de la
                   columna), y la mitad ALTA (cubos 0–2) por encima de todo —
                   el cubo de arriba es la capa más alta del ensamble. */}
+              {/* overflow-visible en los svg de la columna: al partirse, los
+                  cubos de las puntas se corren FUERA del viewBox y el clip
+                  default del svg los cortaba. */}
               <div
                 data-stack-layer="protocol"
                 className={`${layerClass(true)} ${HIDE_UPPER_CUBES}`}
                 style={layerStyle("column")}
               >
-                <ColumnWire className="w-full" />
-                <ColumnGreen className={greenClass(litColumn)} />
+                <ColumnWire className="w-full overflow-visible" />
+                <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
               </div>
               <div
                 data-stack-layer="intents"
-                className={layerClass(showIntents)}
+                className={`${layerClass(showIntents)} ${dimClass(dimOthers)}`}
                 style={layerStyle("intents")}
               >
                 <IntentsWire className="w-full" />
                 <IntentsGreen className={greenClass(litIntents)} />
               </div>
-              <div data-stack-layer="ai" className={layerClass(showAi)} style={layerStyle("ai")}>
+              <div
+                data-stack-layer="ai"
+                className={`${layerClass(showAi)} ${dimClass(dimOthers)}`}
+                style={layerStyle("ai")}
+              >
                 <AiRingWire className="w-full" />
                 {/* La verde de AI queda siempre montada y visible a nivel svg:
                     la iluminación por segmento la maneja el efecto de arriba
@@ -379,7 +396,7 @@ export default function NearStack() {
               </div>
               <div
                 data-stack-layer="nearcom"
-                className={layerClass(showNearcom)}
+                className={`${layerClass(showNearcom)} ${dimClass(dimOthers)}`}
                 style={layerStyle("nearcom")}
               >
                 <NearcomWire className="w-full" />
@@ -390,8 +407,8 @@ export default function NearStack() {
                 className={`${layerClass(true)} ${HIDE_LOWER_CUBES}`}
                 style={layerStyle("column")}
               >
-                <ColumnWire className="w-full" />
-                <ColumnGreen className={greenClass(litColumn)} />
+                <ColumnWire className="w-full overflow-visible" />
+                <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
               </div>
 
               {/* El bubble tag de la pieza hovereada, clavado al cursor: el
@@ -432,17 +449,18 @@ export default function NearStack() {
                 y las filas de productos, y adentro cada producto se expande
                 en SU parada — dos niveles del mismo mecanismo 0fr↔1fr. */}
             {(() => {
-              const aiOpen = !enhanced || AI_BLOCK.subs.some((s) => scrollKey === s.key);
+              const aiOpen =
+                !enhanced || scrollKey === "ai" || AI_BLOCK.subs.some((s) => scrollKey === s.key);
               return (
                 <div
                   data-open={aiOpen}
                   className="group/blk rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
                 >
-                  {/* Click en la barra de NEAR AI = saltar a su primera
-                      parada (IronClaw); desde ahí el scroll recorre las tres. */}
+                  {/* Click en la barra de NEAR AI = saltar a SU parada (el
+                      anillo entero encendido); el scroll sigue a los tres. */}
                   <button
                     type="button"
-                    onClick={() => goTo("ironclaw")}
+                    onClick={() => goTo("ai")}
                     aria-expanded={aiOpen}
                     className="w-full cursor-pointer rounded-2xl px-4 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint"
                   >
