@@ -25,7 +25,8 @@ function SitepingMount() {
     // alguien abre el link en el teléfono, no ve nada y reporta que está roto.
     forceShow: true,
     minViewportWidth: 0,
-    locale: "es",
+    // Inglés en toda la UI, igual que el admin y que el propio sitio.
+    locale: "en",
     enableScreenshot: true,
     // Next navega sin recargar; sin esto el widget se quedaría anclado a la
     // primera URL y los comentarios de la página siguiente no aparecerían.

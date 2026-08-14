@@ -13,7 +13,7 @@ import { SITEPING_PROJECT } from "@/lib/siteping-config";
 // El acceso ya lo cubre `proxy.ts`, que redirige a /admin/login cualquier ruta
 // bajo /admin sin sesión.
 export const metadata: Metadata = {
-  title: "Feedback de revisión",
+  title: "Site Feedback",
 };
 
 export const dynamic = "force-dynamic";
@@ -32,10 +32,10 @@ export default async function AdminFeedbackPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Feedback de revisión</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Site Feedback</h1>
         <p className="text-sm text-muted-foreground">
-          Comentarios que el equipo dejó sobre el sitio, anclados al elemento
-          exacto de cada página.
+          Comments the team left on the site, pinned to the exact element on
+          each page.
         </p>
       </div>
 

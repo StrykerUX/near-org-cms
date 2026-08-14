@@ -1,0 +1,100 @@
+/* Tema del inbox de SitePing, alineado al design system del admin.
+ *
+ * SitePing trae su propio tema oscuro con la paleta slate de Tailwind
+ * (#0b1120, #0f172a, #334155): azulada, mientras que el admin usa grises
+ * NEUTROS (#0B0B0B, #1a1a1a, #3a3a3a). La diferencia es sutil por separado y
+ * evidente cuando conviven — el inbox se lee como un widget pegado de otro
+ * producto. Casi todo esto es remapear sus variables a tokens que ya existen.
+ *
+ * El dashboard NO usa Shadow DOM (a diferencia del widget), así que basta con
+ * CSS normal.
+ *
+ * ── Por qué la clase va repetida ─────────────────────────────────────────────
+ * `.spd-root.spd-root` no es un typo. El paquete inyecta su CSS con un
+ * `<style>` creado en runtime, o sea DESPUÉS de esta hoja, y sus reglas de tema
+ * son `.spd-root[data-theme="dark"]` (especificidad 0,2,0) contra un
+ * `.spd-root` normal (0,1,0). Sin repetir la clase, cada variable de acá pierde
+ * —por especificidad las de tema, por orden de aparición las de base— y el
+ * archivo entero no hace absolutamente nada. Repetirla sube a 0,3,0 y gana.
+ *
+ * El tema se selecciona por `data-theme` y no por la clase `.dark` del admin
+ * porque ese atributo lo escribe el propio inbox a partir del prop `theme`, que
+ * `FeedbackInbox` ya alimenta con `useAdminTheme()`. Una sola fuente de verdad.
+ *
+ * Si al actualizar el paquete algo se ve raro, comparar contra `.spd-root` en
+ * su bundle: pueden haber añadido variables que acá no se están mapeando. */
+
+.spd-root.spd-root {
+  /* ── Superficies y texto: salen de los tokens del DS, así que siguen solos
+        el toggle claro/oscuro del admin ──────────────────────────────────── */
+  --spd-bg: var(--background);
+  --spd-surface: var(--card);
+  --spd-raised: var(--muted);
+  --spd-border: var(--border);
+  --spd-text: var(--foreground);
+
+  /* ── Acento: el verde de marca ───────────────────────────────────────── */
+  --spd-accent: var(--near-green);
+  /* Su default es `color-mix(accent 65%, white)`. Sobre un verde ya claro eso
+     da un pastel lavado; acercarlo al original mantiene el brillo de marca. */
+  --spd-accent-bright: color-mix(in srgb, var(--near-green) 88%, #ffffff);
+
+  /* Los tipos (question/change/bug/other) se quedan con su paleta: son cuatro
+     categorías que hay que distinguir de un vistazo, y para eso el matiz es la
+     única herramienta disponible. */
+
+  /* ── Forma y tipografía ──────────────────────────────────────────────── */
+  --spd-font: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Los radios del admin salen de --radius (shadcn). Alinearlos evita que las
+     esquinas del inbox se lean más redondas que las de la tarjeta que lo
+     contiene. */
+  --spd-radius: calc(var(--radius) + 2px);
+  --spd-radius-sm: var(--radius);
+  --spd-radius-xs: calc(var(--radius) - 2px);
+}
+
+/* Lo que NO puede salir de un token: el admin no tiene escalones de gris para
+ * texto secundario (su `--muted-foreground` en oscuro es casi blanco, y como
+ * texto de apoyo no crearía ninguna jerarquía) ni un "borde fuerte". Se
+ * declaran por tema porque un gris que funciona sobre #0B0B0B no funciona sobre
+ * blanco. Los cuatro pasan AA sobre su fondo. */
+.spd-root.spd-root[data-theme="light"] {
+  --spd-border-strong: #c9c9c9;
+  --spd-text-2: #5a5a5a;
+  --spd-text-3: #767676;
+
+  --spd-st-open: #6b6b6b;
+  --spd-st-progress: #b45309;
+  --spd-st-resolved: #047857;
+  --spd-st-wontfix: #8a8a8a;
+}
+
+.spd-root.spd-root[data-theme="dark"] {
+  /* #4d4d4d es el escalón siguiente de la rampa del admin, entre --border
+     (#3a3a3a) y el texto. */
+  --spd-border-strong: #4d4d4d;
+  --spd-text-2: #a3a3a3;
+  --spd-text-3: #7d7d7d;
+
+  /* Sobre fondo oscuro los estados suben luminosidad: los tonos saturados del
+     modo claro se apagan contra #0B0B0B.
+
+     `open` va en neutro y no en el acento (que es su default): el acento ahora
+     es verde, y verde para "abierto" chocaría de frente con "resuelto". Un
+     comentario recién llegado no tiene por qué gritar — lo que tiene que
+     destacar es el que YA se resolvió. */
+  --spd-st-open: #b4b4b4;
+  --spd-st-progress: #fbbf24;
+  --spd-st-resolved: var(--near-green);
+  --spd-st-wontfix: #6f6f6f;
+}
+
+/* El botón primario trae `color: #ffffff` fijo en el bundle. Con su acento azul
+ * eso funcionaba; sobre el verde de marca da ~1.8:1, ilegible. Forzando el
+ * texto al fondo del tema sube a ~13:1.
+ *
+ * Es la única regla que pisa una declaración suya en vez de alimentar una
+ * variable, y existe solo porque ese color no es configurable. */
+.spd-root.spd-root .spd-btn-primary {
+  color: var(--background);
+}

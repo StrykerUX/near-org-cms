@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { SitepingInbox } from "@siteping/dashboard";
 import { Check, Copy } from "lucide-react";
+import { useAdminTheme } from "@near/cms-core/components/admin/ThemeProvider";
 import { REVIEW_UI_COOKIE_NAME } from "@/lib/review-cookies";
+import "./feedback-inbox.css";
 
 // Inbox de comentarios de revisión + el link que se le manda al equipo.
 //
@@ -35,11 +37,11 @@ function ReviewLink({ reviewUrl }: { reviewUrl: string }) {
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
       <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-medium text-foreground">Link de revisión</h2>
+        <h2 className="text-sm font-medium text-foreground">Review link</h2>
         <p className="text-sm text-muted-foreground">
-          Mandá este link a quien tenga que comentar. Se abre una vez y el modo
-          revisión queda activo 30 días en ese navegador — sin cuenta, sin
-          instalar nada.
+          Send this to anyone who needs to comment. They open it once and review
+          mode stays on for 30 days in that browser — no account, nothing to
+          install.
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -55,13 +57,13 @@ function ReviewLink({ reviewUrl }: { reviewUrl: string }) {
           className="flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
         >
           {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-          {copied ? "Copiado" : "Copiar"}
+          {copied ? "Copied" : "Copy"}
         </button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Cada vez que recargás esta página se genera un link nuevo. Los
-        anteriores siguen sirviendo hasta que caduquen; para invalidarlos todos
-        de golpe hay que rotar <code className="font-mono">REVIEW_ACCESS_SECRET</code>.
+        A new link is generated every time this page reloads. Earlier ones keep
+        working until they expire; to invalidate all of them at once, rotate{" "}
+        <code className="font-mono">REVIEW_ACCESS_SECRET</code>.
       </p>
     </div>
   );
@@ -93,6 +95,13 @@ function useAdminReviewSession() {
 export default function FeedbackInbox({ reviewUrl, projectName }: FeedbackInboxProps) {
   useAdminReviewSession();
 
+  // El tema se toma del toggle del admin y no se fija en "dark". El CSS de
+  // `feedback-inbox.css` remapea las superficies a los tokens del DS, que ya
+  // cambian solos con la clase `.dark`; si el inbox se quedara clavado en
+  // oscuro, en modo claro pintaría su texto para fondo oscuro sobre esas
+  // superficies claras y quedaría ilegible.
+  const { theme } = useAdminTheme();
+
   return (
     <div className="flex flex-col gap-6">
       <ReviewLink reviewUrl={reviewUrl} />
@@ -103,8 +112,9 @@ export default function FeedbackInbox({ reviewUrl, projectName }: FeedbackInboxP
       <SitepingInbox
         endpoint="/api/admin/siteping"
         projects={projectName}
-        theme="dark"
-        locale="es"
+        theme={theme}
+        locale="en"
+        density="compact"
         pageSize={25}
       />
     </div>
