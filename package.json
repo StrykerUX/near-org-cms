@@ -26,6 +26,9 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@near/cms-core": "workspace:*",
+    "@siteping/adapter-prisma": "0.6.4",
+    "@siteping/dashboard": "0.2.5",
+    "@siteping/widget": "0.10.7",
     "feed": "^4.2.2",
     "geist": "^1.7.2",
     "gsap": "^3.15.0",

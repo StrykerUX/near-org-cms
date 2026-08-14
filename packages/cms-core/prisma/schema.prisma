@@ -344,3 +344,72 @@ enum LinktreeAvatarShape {
   CIRCLE
   LOGO
 }
+
+// ── SitePing ─────────────────────────────────────────────────────────────────
+// Anotaciones de revisión del sitio (feedback visual del equipo sobre staging o
+// producción). Los define @siteping/adapter-prisma y su forma NO es negociable:
+// el handler consulta estos campos por nombre. Si se actualiza el paquete, hay
+// que revisar su changelog antes de migrar.
+//
+// Viven acá y no en un schema aparte porque Prisma genera un solo cliente por
+// datasource, y partirlo obligaría a un segundo PrismaClient con su propio pool
+// de conexiones — caro para dos tablas. Son autónomas: no tienen ninguna
+// relación con User ni con nada del CMS, así que se pueden borrar de una pieza
+// el día que se retire la herramienta.
+model SitepingFeedback {
+  id               String               @id @default(cuid())
+  projectName      String
+  type             String
+  message          String               @db.Text
+  status           String               @default("open")
+  url              String
+  urlPattern       String?
+  screenshotUrl    String?              @db.Text
+  screenshotRegion Json?
+  diagnostics      Json?
+  viewport         String
+  userAgent        String
+  authorName       String
+  authorEmail      String
+  clientId         String               @unique
+  resolvedAt       DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  annotations      SitepingAnnotation[]
+
+  @@index([projectName])
+  @@index([projectName, status, createdAt])
+  @@index([projectName, url])
+}
+
+// El ancla de cada comentario. Guarda la MISMA posición de cinco formas
+// (selector, xpath, texto y vecinos, huella, porcentajes) a propósito: si el
+// layout cambia y el selector deja de resolver, el widget reancla por texto o
+// por porcentaje en vez de perder el comentario.
+model SitepingAnnotation {
+  id               String           @id @default(cuid())
+  feedbackId       String
+  feedback         SitepingFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  cssSelector      String           @db.Text
+  xpath            String           @db.Text
+  textSnippet      String           @db.Text
+  elementTag       String
+  elementId        String?
+  textPrefix       String           @db.Text
+  textSuffix       String           @db.Text
+  fingerprint      String
+  neighborText     String           @db.Text
+  anchorKey        String?
+  xPct             Float
+  yPct             Float
+  wPct             Float
+  hPct             Float
+  scrollX          Float
+  scrollY          Float
+  viewportW        Int
+  viewportH        Int
+  devicePixelRatio Float            @default(1)
+  createdAt        DateTime         @default(now())
+
+  @@index([feedbackId])
+}
