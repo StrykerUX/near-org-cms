@@ -120,35 +120,39 @@ const HIDE_LOWER_CUBES =
   '[&_[data-stack-cube="3"]]:hidden [&_[data-stack-cube="4"]]:hidden [&_[data-stack-cube="5"]]:hidden';
 
 export default function NearStack() {
-  // El objetivo de scroll (bloque activo del rail). Solo manda cuando no hay
-  // hover y el modo enhanced está armado.
-  const [scrollKey, setScrollKey] = useState<StackKey>("protocol");
+  // La parada activa del recorrido pineado: -1 = todavía no lockeó (los seis
+  // colapsados y solo la columna en escena), 0..5 = STAGE_ORDER.
+  const [scrollIdx, setScrollIdx] = useState(-1);
   const [hover, setHover] = useState<Hover>(null);
   // false = fallback (SSR, mobile, reduced-motion): todo verde, todo
-  // expandido. true = scroll-scene de desktop.
+  // expandido. true = scroll-scene pineada de desktop.
   const [enhanced, setEnhanced] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
 
-  // Reading line: cada slot del rail activa su key al cruzar el 60% del
-  // viewport. Solo desktop + motion — el hook revierte solo al salir de esas
-  // condiciones y el cleanup nos devuelve al fallback.
-  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
+  // Sticky track (nunca pin:true — regla del repo): la sección es un tramo
+  // alto con un viewport sticky adentro. Al llegar el tope de la sección al
+  // tope del frame, la pantalla "lockea" y el progreso del tramo se reparte
+  // en seis rebanadas — una por caja del rail. Volver por encima del start
+  // colapsa todo de nuevo.
+  const rootRef = useMotionScope<HTMLElement>(({ scope, motionOk, isDesktop }) => {
     if (!motionOk || !isDesktop) return;
     setEnhanced(true);
-    const slots = q("[data-stack-slot]");
-    slots.forEach((slot) => {
-      const key = slot.dataset.stackSlot as StackKey;
-      ScrollTrigger.create({
-        trigger: slot,
-        start: "top 60%",
-        end: "bottom 60%",
-        onToggle: (self) => {
-          if (self.isActive) setScrollKey(key);
-        },
-      });
+    scope.dataset.mode = "track";
+    ScrollTrigger.create({
+      trigger: scope,
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate: (self) =>
+        setScrollIdx(Math.min(STAGE_ORDER.length - 1, Math.floor(self.progress * STAGE_ORDER.length))),
+      onLeaveBack: () => setScrollIdx(-1),
     });
-    return () => setEnhanced(false);
+    return () => {
+      setEnhanced(false);
+      delete scope.dataset.mode;
+    };
   });
+
+  const scrollKey: StackKey | null = scrollIdx >= 0 ? STAGE_ORDER[scrollIdx] : null;
 
   const hoverTarget: StackKey | null = hover
     ? hover.kind === "cube"
@@ -158,9 +162,9 @@ export default function NearStack() {
 
   // La escena es un BUILD-UP: cada parada del rail AGREGA su capa y las
   // anteriores se quedan; las capas que todavía no llegaron están OCULTAS del
-  // todo — no wireframe. En fallback (mobile/reduced-motion) está el ensamble
-  // completo desde el arranque.
-  const stage = enhanced ? STAGE_ORDER.indexOf(scrollKey) : STAGE_ORDER.length - 1;
+  // todo — no wireframe. Antes del lock (scrollIdx -1) solo está la columna.
+  // En fallback (mobile/reduced-motion) está el ensamble completo.
+  const stage = enhanced ? scrollIdx : STAGE_ORDER.length - 1;
   const showIntents = stage >= 1;
   const showAi = stage >= 2;
   const showNearcom = stage >= 5;
@@ -267,8 +271,18 @@ export default function NearStack() {
   const expanded = (key: StackKey) => !enhanced || scrollKey === key;
 
   return (
-    <section ref={rootRef} className="bg-ink text-cream">
-      <Container className="flex flex-col gap-14 pb-32 pt-32 lg:gap-20">
+    // El track: en modo pineado la sección mide 100svh de viewport + una
+    // rebanada de scroll por caja. Sin overflow-hidden en ningún ancestro —
+    // mataría el sticky (misma trampa de siempre).
+    <section
+      ref={rootRef}
+      className="group/stack bg-ink text-cream data-[mode=track]:h-[400svh]"
+    >
+      {/* El viewport sticky: lockea cuando el tope de la sección toca el tope
+          del frame, con TODO adentro (título, arte y rail) centrado y entero
+          en pantalla — nada se recorta en ningún punto del recorrido. */}
+      <div className="group-data-[mode=track]/stack:sticky group-data-[mode=track]/stack:top-0 group-data-[mode=track]/stack:flex group-data-[mode=track]/stack:h-svh group-data-[mode=track]/stack:flex-col group-data-[mode=track]/stack:justify-center">
+        <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-0 lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
         <div className="flex flex-col items-center gap-3 text-center">
           <h2 className="text-h1 text-pretty">
             The NEAR <Accent>Stack</Accent>
@@ -292,17 +306,17 @@ export default function NearStack() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-          {/* El arte, sticky en desktop: acompaña todo el recorrido del rail.
-              En lg el stage se dimensiona POR ALTURA (80svh, con el aspect
-              dando el ancho): así el ensamble entero queda siempre en
-              pantalla, sin recortes en ningún punto del scroll. */}
-          <div className="lg:sticky lg:top-[10svh] lg:self-start">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+          {/* El arte. En lg el stage se dimensiona POR ALTURA (64svh — un 20%
+              menos que la pasada anterior — con el aspect dando el ancho):
+              como vive dentro del viewport pineado, el ensamble entero queda
+              siempre en pantalla, de punta a punta. */}
+          <div>
             <div
               ref={stageRef}
               onPointerOver={onOver}
               onPointerLeave={onLeave}
-              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:h-[80svh] lg:w-auto lg:max-w-full"
+              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:h-[64svh] lg:w-auto lg:max-w-full"
             >
               {/* Apilado: mitad BAJA de la columna (cubos 3–5) al fondo,
                   anillos encima (sus máscaras recortan el canal de la
@@ -368,22 +382,22 @@ export default function NearStack() {
           {/* El rail. Cada slot con data-stack-slot es una parada de la
               reading line; los min-h le dan aire al recorrido para que el
               scroll tenga dónde contar la secuencia. */}
-          <div className="flex w-full flex-col gap-3">
+          <div className="flex w-full flex-col gap-2">
             <RailBlock block={PROTOCOL_BLOCK} index="01" expanded={expanded("protocol")} />
             <RailBlock block={INTENTS_BLOCK} index="02" expanded={expanded("intents")} />
 
             {/* NEAR AI: heading + intro siempre visibles, y un sub-bloque
                 expandible por producto — cada uno es su propia parada de
                 scroll y enciende su segmento del anillo. */}
-            <div className="rounded-2xl border border-cream/12 px-6 pb-4 pt-5">
+            <div className="rounded-2xl border border-cream/12 px-4 pb-3 pt-3">
               <p className="text-h4 text-cream">
                 <sup className="mr-2 align-super text-caption text-cream/30">03</sup>
                 {AI_BLOCK.name}
               </p>
-              <p className="mt-3 max-w-[46ch] text-body-sm text-cream/60 text-pretty">
+              <p className="mt-2 max-w-[46ch] text-body-sm text-cream/60 text-pretty">
                 {AI_BLOCK.intro}
               </p>
-              <div className="mt-4 flex flex-col gap-2">
+              <div className="mt-3 flex flex-col gap-1.5">
                 {AI_BLOCK.subs.map((sub) => (
                   <RailBlock key={sub.key} block={sub} nested expanded={expanded(sub.key)} />
                 ))}
@@ -392,7 +406,7 @@ export default function NearStack() {
                 href={AI_BLOCK.link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-block pb-1 text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+                className="mt-3 inline-block text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
               >
                 {AI_BLOCK.link.label} <span aria-hidden="true">→</span>
               </a>
@@ -401,7 +415,8 @@ export default function NearStack() {
             <RailBlock block={NEARCOM_BLOCK} index="04" expanded={expanded("nearcom")} />
           </div>
         </div>
-      </Container>
+        </Container>
+      </div>
     </section>
   );
 }
@@ -420,22 +435,16 @@ function RailBlock({
   expanded: boolean;
 }) {
   return (
-    // El slot (invisible) es el que da el recorrido de scroll; la CAJA visible
-    // es compacta: colapsada queda como una barra de título con borde, y solo
-    // la activa se expande. Sin esto el min-h inflaba el borde de cada caja.
+    // Caja compacta: colapsada es SOLO la barra de título con su borde,
+    // pegada a sus vecinas (el gap del rail es el único aire). El recorrido
+    // de scroll ya no vive acá — lo da el track pineado de la sección.
     <div
-      data-stack-slot={block.key}
-      className={`${
-        nested ? "lg:min-h-[16svh]" : "lg:min-h-[22svh]"
-      } lg:flex lg:flex-col lg:justify-center`}
+      data-open={expanded}
+      className={`group/blk ${
+        nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
+      } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none`}
     >
-      <div
-        data-open={expanded}
-        className={`group/blk ${
-          nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
-        } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none`}
-      >
-      <div className={nested ? "px-4 pb-2 pt-3" : "px-6 pb-3 pt-5"}>
+      <div className={nested ? "px-3.5 py-2" : "px-4 py-2.5"}>
         <p className={nested ? "text-body text-cream/80" : "text-h4 text-cream/45"}>
           {index && (
             <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
@@ -448,11 +457,9 @@ function RailBlock({
         </p>
       </div>
       {/* grid-rows 0fr↔1fr: el navegador interpola la altura sin medir nada. */}
-      <div
-        className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none"
-      >
+      <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none">
         <div className="overflow-hidden">
-          <div className={`flex flex-col gap-3 ${nested ? "px-4 pb-3" : "px-6 pb-5"}`}>
+          <div className={`flex flex-col gap-2 ${nested ? "px-3.5 pb-2.5" : "px-4 pb-3"}`}>
             <p className="max-w-[46ch] text-body-sm text-cream/60 text-pretty">{block.body}</p>
             {block.link && (
               <a
@@ -467,7 +474,6 @@ function RailBlock({
             )}
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
