@@ -52,17 +52,19 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-v2/homeV
 // y la primera se leía como si no participara. Ahora el rango va de 119 a 270px
 // (a 900px de alto de ventana): la relación baja a 2,3× y ninguna queda ni
 // estática ni disparada.
-const SPEEDS = [0.78, 1.38, 1.44, 1.5] as const;
+const SPEEDS = [0.33, 1.4, 1, 1.5] as const;
 
 // Amplitud del desvío, en svh. Es cuánto se separa de su posición de layout la
-// card más rápida en el punto medio del recorrido.
+// card más rápida al FINAL del recorrido.
 //
-// El desvío SALE DE CERO Y VUELVE A CERO. No es un capricho: los transforms no
-// afectan al layout, así que el grid reserva sitio para las posiciones sin
-// desplazar. Si la coreografía terminara con las cards desplazadas hacia arriba,
-// ese hueco reaparecería al final de la sección — que es exactamente el vacío
-// que había antes contra "The NEAR Stack".
-const DRIFT_VH = 60;
+// El desvío SALE DE CERO Y SE QUEDA: las rápidas terminan adelantadas y la
+// lenta atrasada, sin devolver la diferencia. Ojo con el tradeoff que esto
+// reabre: los transforms no afectan al layout, así que el grid reserva sitio
+// para las posiciones sin desplazar y las cards terminan fuera de su celda —
+// las rápidas dejan hueco por abajo y la lenta invade hacia la sección
+// siguiente. Si ese borde se ve mal, el ajuste es bajar esta amplitud o el
+// `pb` de la sección, no volver a la ida-y-vuelta.
+const DRIFT_VH = 120;
 
 // Posición de cada card en el grid y su tinte, en el MISMO orden que
 // `OWN_YOUR_OWN_CARDS`. Se queda acá y no en el módulo de contenido porque es
@@ -75,7 +77,7 @@ const DRIFT_VH = 60;
 // que tocar para reespaciarlas. Los valores salen del original.
 const CARD_LAYOUT = [
   {
-    place: "lg:col-start-3 lg:col-span-3 lg:row-start-1 lg:-ml-[100px] lg:mr-[100px]",
+    place: "lg:col-start-3 lg:col-span-3 lg:row-start-1 lg:mt-[150px] lg:-ml-[100px] lg:mr-[100px]",
     tint: "bg-white/50",
   },
   {
@@ -83,11 +85,11 @@ const CARD_LAYOUT = [
     tint: "bg-card-tint/50",
   },
   {
-    place: "lg:col-start-3 lg:col-span-3 lg:row-start-3 lg:mt-[152px]",
+    place: "lg:col-start-3 lg:col-span-3 lg:row-start-3 lg:mt-[152px] lg:ml-[150px] lg:-mr-[150px]",
     tint: "bg-white/50",
   },
   {
-    place: "lg:col-start-9 lg:col-span-3 lg:row-start-4 lg:mt-[150px]",
+    place: "lg:col-start-9 lg:col-span-3 lg:row-start-4 lg:mt-[230px] lg:-ml-[30px] lg:mr-[30px]",
     tint: "bg-card-tint/50",
   },
 ] as const;
@@ -96,7 +98,8 @@ export default function OwnYourOwn() {
   const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
     const cards = q("[data-own-card]");
     const stage = q("[data-own-stage]")[0];
-    if (cards.length !== SPEEDS.length || !stage) return;
+    const title = q("[data-own-title]")[0];
+    if (cards.length !== SPEEDS.length || !stage || !title) return;
 
     // Con reduced-motion no se anima nada: el JSX ya renderiza el estado
     // legible, y sin transforms las cards quedan exactamente donde el layout
@@ -122,8 +125,6 @@ export default function OwnYourOwn() {
     // queda atrás. Es la única lectura del entorno, y no toca el DOM.
     const drift = (i: number) => (1 - SPEEDS[i]) * window.innerHeight * (DRIFT_VH / 100);
 
-    // Ida y vuelta sobre el recorrido del grid.
-    //
     // ── El start ────────────────────────────────────────────────────────
     // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
     // lo que había, la coreografía no empezaba hasta que el grid tocaba el
@@ -131,28 +132,45 @@ export default function OwnYourOwn() {
     // pantalla y completamente quietas, y al cruzar ese umbral el desvío
     // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
     //
-    // El end, en cambio, NO puede ser `bottom top`, que sería el simétrico
-    // natural: el desvío tiene que valer cero cuando se ve el fondo del grid,
-    // y con `bottom top` la última card seguiría ~105px por encima de su sitio
-    // en ese momento. Como los transforms no afectan al layout, ahí reaparece
-    // el hueco contra "The NEAR Stack" — el mismo que ya se arregló una vez.
-    // `bottom bottom` hace que el retorno a cero caiga exactamente ahí.
+    // ── El end ──────────────────────────────────────────────────────────
+    // La regla: el scrub termina exactamente cuando el borde VISUAL superior
+    // de la última card (Agents) — layout + transform — alcanza el borde
+    // inferior del título pegado. Ahí las cards se congelan en su desvío
+    // final y el scroll normal se lleva todo; el `sine.inOut` ya pone la
+    // velocidad del desvío en cero en ese borde, así que la salida del
+    // scroll lock es una rampa, no un corte.
     //
-    // De paso el recorrido pasa de ~1300px de scroll a ~2200px, y como el
-    // desvío es el mismo repartido en más distancia, la velocidad máxima cae
-    // a la mitad. Buena parte de la fluidez sale de eso.
+    // La cuenta cierra sola sea cual sea la velocidad o la posición de
+    // partida, y no es iterativa: en el frame final la curva vale 1 por
+    // definición, o sea que el desvío es exactamente `drift()` completo.
+    // Basta con resolver
+    //     layoutTop(Agents) − scroll + drift = titleBottom
+    // para el scroll del end. Que el cruce cae justo ahí (y no antes) está
+    // garantizado porque el top visual de la card baja monótonamente en
+    // viewport mientras el scrub avanza.
     //
-    // ── Las curvas ──────────────────────────────────────────────────────
-    // `sine.in` en la ida y `sine.out` en la vuelta, en ese orden. Es lo que
-    // pone la velocidad en cero en los dos bordes y el máximo en el medio del
-    // recorrido, donde las cards cruzan el título. Al revés —que era lo que
-    // había— el perfil es 0 → MAX → 0 → MAX → 0: arranca y corta en seco, y
-    // encima se frena justo en el cruce, que es lo que hay que mirar.
+    // ── La curva ────────────────────────────────────────────────────────
+    // Un solo tramo, sin vuelta: las rápidas se mantienen rápidas y la lenta
+    // lenta durante todo el recorrido. `sine.inOut` pone la velocidad del
+    // desvío en cero en los dos bordes — la entrada suave es el "asentarse"
+    // del título en su sticky, y la salida suave evita el corte en seco al
+    // terminar la sección aunque las cards queden desplazadas.
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: stage,
         start: "top bottom",
-        end: "bottom bottom",
+        end: () => {
+          const agents = cards[cards.length - 1];
+          // Top de layout en coordenadas de documento. Se resta el transform
+          // vigente por si el refresh corre con el tween a medio aplicar.
+          const layoutTop =
+            agents.getBoundingClientRect().top +
+            window.scrollY -
+            Number(gsap.getProperty(agents, "y"));
+          const titleBottom =
+            parseFloat(getComputedStyle(title).top) + title.offsetHeight;
+          return layoutTop + drift(cards.length - 1) - titleBottom;
+        },
         scrub: true,
         invalidateOnRefresh: true,
         markers: DEBUG_MARKERS,
@@ -167,8 +185,7 @@ export default function OwnYourOwn() {
       },
     });
 
-    tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.in", duration: 1 })
-      .to(cards, { y: 0, ease: "sine.out", duration: 1 });
+    tl.fromTo(cards, { y: 0 }, { y: drift, ease: "sine.inOut", duration: 1 });
 
     return () => {
       gsap.killTweensOf(cards);
@@ -256,10 +273,13 @@ export default function OwnYourOwn() {
               Ambos en px, como los `mt` de las cards y por lo mismo: `svh`
               escala con el alto de la ventana y las cards con el ancho. */}
           <div
+            data-own-title
             className="z-[1] hidden lg:mt-[150px] lg:mb-[200px] lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
-            style={{ top: "calc(50svh - var(--text-statement) / 2)" }}
+            style={{ top: "calc(50svh - var(--text-display) / 2)" }}
           >
-            <h3 className="whitespace-nowrap text-center text-statement">Own Your Own</h3>
+            <h3 className="whitespace-nowrap text-center text-display">
+              Own Your <Accent display>Own</Accent>
+            </h3>
           </div>
 
           {CARDS.map((card, i) => (
@@ -295,8 +315,8 @@ export default function OwnYourOwn() {
 
         {/* En mobile el título va después de las cards: sin el cruce no es un
             elemento de fondo, es el cierre de la sección. */}
-        <h3 className="whitespace-nowrap text-center text-statement lg:hidden">
-          Own Your Own
+        <h3 className="whitespace-nowrap text-center text-display lg:hidden">
+          Own Your <Accent display>Own</Accent>
         </h3>
       </Container>
     </section>

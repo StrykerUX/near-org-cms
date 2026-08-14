@@ -57,3 +57,6 @@ Thumbs.db
 # NO es público — next/font/local las procesa y las sirve con hash.
 public/fonts/
 _fonts/
+
+# Worktrees temporales de agentes
+.claude/worktrees/

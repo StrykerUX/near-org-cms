@@ -1,4 +1,4 @@
-import NavPillV2 from "@/components/sections/home-v2/NavPillV2";
+import NavPillQuantum from "@/components/sections/quantum/NavPillQuantum";
 import HeroVideo from "@/components/sections/home-v2/HeroVideo";
 import QuantumBars from "@/components/sections/home-v2/QuantumBars";
 import OwnYourOwn from "@/components/sections/home-v2/OwnYourOwn";
@@ -14,13 +14,13 @@ import CustomerStories from "@/components/sections/home-v2/CustomerStories";
 import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
 import LatestUpdates from "@/components/sections/LatestUpdates";
 import UpdatesList from "@/components/sections/UpdatesList";
-import PrototypeFooter from "@/components/sections/PrototypeFooter";
+import FooterV2 from "@/components/sections/home-v2/FooterV2";
 
 export default function HomepageV2View() {
   return (
     <>
       {/* Fuera del <main>: es fixed, no participa del flujo. */}
-      <NavPillV2 />
+      <NavPillQuantum />
 
       <main className="flex flex-col bg-cream">
         <HeroVideo />
@@ -33,7 +33,7 @@ export default function HomepageV2View() {
         <TestimonialMarquee />
         <LatestUpdates />
         <UpdatesList />
-        <PrototypeFooter />
+        <FooterV2 />
       </main>
     </>
   );

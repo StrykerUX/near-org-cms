@@ -1,445 +1,474 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
-import { enableScene, trackTimeline } from "@/components/primitives/motion/stickyScene";
-import { gsap } from "@/components/primitives/motion/gsapClient";
-import { LAYERS, VIEW_BOX, AI_SEGMENT_IDS } from "./nearStackGeometry";
-import { TIERS, POPOVERS, FOUNDATION } from "./nearStackContent";
+import { ScrollTrigger } from "@/components/primitives/motion/gsapClient";
+import {
+  ColumnGreen,
+  ColumnWire,
+  AiRingGreen,
+  AiRingWire,
+  IntentsGreen,
+  IntentsWire,
+  NearcomGreen,
+  NearcomWire,
+} from "./stackArt.generated";
+import {
+  PROTOCOL_BLOCK,
+  INTENTS_BLOCK,
+  AI_BLOCK,
+  NEARCOM_BLOCK,
+  PROTOCOL_FEATURES,
+  type StackKey,
+  type StackLeaf,
+} from "./nearStackContent";
 
-// 4 tiers + una fase final que colapsa el rail y sube la banda de foundation.
-const PHASES = 5;
-// svh de scroll pegado por fase. Es el `PER` del original.
-const STEP_VH = "65svh";
+// ── NearStack: los SVG de marca ensamblados + scroll e iluminación por capa ──
+//
+// Tercera forma de la sección, ahora sobre los EXPORTS reales de brand
+// (SLIDE_10–13): cuatro capas — columna (Protocol), anillo interior (Intents),
+// anillo de tres segmentos (NEAR AI) y cáscara exterior (near.com) — cada una
+// con su gemela wireframe. Los archivos salen de una misma composición madre:
+// cada anillo trae una MÁSCARA con el canal de la columna recortado, así que
+// el tejido delante/detrás está horneado y el apilado es por orden de capas.
+//
+// La alineación horizontal es EXACTA, derivada de esas máscaras (el canal de
+// la columna aparece en x=275.81 en la exterior, 221.07 en la de AI y 133.44
+// en la de Intents — mismo ancho 103u en todas ⇒ escala 1:1). Las verticales
+// NO son derivables de los archivos y están estimadas contra los stills de
+// referencia: son las constantes *_Y de abajo, pensadas para ajuste visual.
+//
+// Interacción (decidida con Lawrence):
+//   · La escena es un BUILD-UP por scroll: en Protocol solo existe la
+//     columna; cada parada del rail hace ANIMAR SU CAPA a escena y las
+//     anteriores se quedan verdes. Dentro de NEAR AI solo el producto activo
+//     va verde y sus hermanos quedan wireframe; near.com entra como elemento
+//     verde completo y deja el ensamble entero encendido.
+//   · El arte es hoverable; el hover GANA sobre el estado de scroll (solo lo
+//     hovereado verde, el resto de lo visible en wireframe) y al salir el
+//     puntero se vuelve a él. El texto NO se mueve por hover.
+//   · La columna es sólida y al hover se PARTE en sus seis cubos — cada cubo
+//     es un feature del protocolo, hoverable individualmente.
+//   · Cada pieza encendida por hover lleva su bubble tag (pill), como en los
+//     stills.
+//   · Mobile / reduced-motion: sin scroll-scene — todo expandido y el arte
+//     completo en verde (el look ensamblado del still final).
 
-// Ancho del popover flotante. Se usa en el clamp de posición, así que vive acá
-// y no solo en la clase.
-const POP_W = 280;
+/* ── Geometría del ensamble (espacio de la capa exterior, 695 de ancho) ──── */
 
-const GRADIENT_BY_ROLE = {
-  top: "url(#ns-core-top)",
-  right: "url(#ns-core-right)",
-  left: "url(#ns-core-left)",
+const STAGE_W = 695;
+const STAGE_H = 650;
+// x exactas (máscaras); y estimadas de los stills — TUNEAR EN BROWSER.
+const POS = {
+  column: { x: 275.81, y: 0, w: 104 },
+  intents: { x: 142.37, y: 206, w: 371 },
+  ai: { x: 54.74, y: 127, w: 546 },
+  nearcom: { x: 0, y: 40, w: 695 },
 } as const;
 
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(2)}%`;
+
+/* ── Bubble tags: ancla en % del stage por pieza encendida ────────────────── */
+
+const SEG_NAMES: Record<string, string> = {
+  ironclaw: "IronClaw",
+  cloud: "NEAR AI Cloud",
+  market: "Agent Market",
+};
+
+const TAG_ANCHORS: Record<string, { x: number; y: number }> = {
+  protocol: { x: 57, y: 14 },
+  intents: { x: 68, y: 44 },
+  ironclaw: { x: 20, y: 30 },
+  cloud: { x: 82, y: 48 },
+  market: { x: 40, y: 78 },
+  nearcom: { x: 7, y: 52 },
+};
+// Centro vertical de cada cubo (top→bottom) en unidades de columna: el ápice
+// mide 62 y cada cubo ~95 de paso. El tag va a la derecha de la columna.
+const cubeAnchor = (i: number) => ({ x: 57, y: ((78 + i * 95) / STAGE_H) * 100 });
+
+type Hover =
+  | { kind: "layer"; key: "protocol" | "intents" | "nearcom" }
+  | { kind: "seg"; key: "ironclaw" | "cloud" | "market" }
+  | { kind: "cube"; index: number }
+  | null;
+
+const SEG_KEYS = ["ironclaw", "cloud", "market"] as const;
+
+// El orden narrativo del build-up = el orden de las paradas del rail.
+const STAGE_ORDER: readonly StackKey[] = [
+  "protocol",
+  "intents",
+  "ironclaw",
+  "cloud",
+  "market",
+  "nearcom",
+];
+
+// El z-layering de la columna: el cubo de ARRIBA es la capa más alta de todo
+// el ensamble y el de ABAJO la más baja. La columna se pinta DOS veces — los
+// cubos 3–5 debajo de los anillos, los 0–2 encima — y las máscaras de los
+// anillos (que ya recortan el canal de la columna) hacen que las dos mitades
+// calcen con la comp madre. Los ids duplicados de gradientes no molestan:
+// las dos instancias definen exactamente lo mismo.
+const HIDE_UPPER_CUBES =
+  '[&_[data-stack-cube="0"]]:hidden [&_[data-stack-cube="1"]]:hidden [&_[data-stack-cube="2"]]:hidden';
+const HIDE_LOWER_CUBES =
+  '[&_[data-stack-cube="3"]]:hidden [&_[data-stack-cube="4"]]:hidden [&_[data-stack-cube="5"]]:hidden';
+
 export default function NearStack() {
-  // `active` es estado de React y no una variable del closure: acá lo consumen
-  // cuatro cosas del JSX —el body abierto, el color
-  // del label, el gate del hover y el estado de cada pieza del SVG—, y
-  // mantenerlo imperativo obligaría a duplicar toda esa lógica en tweens.
-  // Cambia 5 veces por pasada de scroll, así que el costo es irrelevante.
-  const [active, setActive] = useState(0);
-  const [hovered, setHovered] = useState(-1);
-  const [hoveredSeg, setHoveredSeg] = useState<string | null>(null);
-  const [sceneOn, setSceneOn] = useState(false);
-  const [popKey, setPopKey] = useState<string | null>(null);
+  // El objetivo de scroll (bloque activo del rail). Solo manda cuando no hay
+  // hover y el modo enhanced está armado.
+  const [scrollKey, setScrollKey] = useState<StackKey>("protocol");
+  const [hover, setHover] = useState<Hover>(null);
+  // false = fallback (SSR, mobile, reduced-motion): todo verde, todo
+  // expandido. true = scroll-scene de desktop.
+  const [enhanced, setEnhanced] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
 
-  const popRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<HTMLDivElement>(null);
-
-  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
-    // Las dos ramas estáticas ya están renderizadas por el JSX y no necesitan
-    // código: sin `sceneOn` no hay track ni sticky, la escena se ve en su
-    // estado final (que es el `buildScene(true)` del original) y los cuatro
-    // bodies quedan abiertos. En mobile además la escena se oculta por CSS.
+  // Reading line: cada slot del rail activa su key al cruzar el 60% del
+  // viewport. Solo desktop + motion — el hook revierte solo al salir de esas
+  // condiciones y el cleanup nos devuelve al fallback.
+  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
     if (!motionOk || !isDesktop) return;
-
-    const track = q("[data-stack-track]")[0];
-    const stage = q("[data-stack-stage]")[0];
-    const head = q("[data-stack-head]")[0];
-    const foundation = q("[data-stack-foundation]")[0];
-    if (!track) return;
-
-    // El interruptor del layout se escribe en el dataset (ver `enableScene`) y NO
-    // se declara en el JSX: así React nunca lo pisa al re-renderizar por un cambio
-    // de `active`, y sobre todo se aplica de forma SÍNCRONA — el trackTimeline de
-    // abajo mide el track con su altura real en vez de con la del contenido.
-    // `sceneOn` es el mismo hecho, pero para lo que sí depende de React.
-    //
-    // Va DESPUÉS del guard: si el markup no trae el track, encenderlo dejaría la
-    // sección con la altura del recorrido y sin nada que la anime.
-    const sceneOff = enableScene(scope, "scene");
-    setSceneOn(true);
-
-    // El estado inicial se aplica acá y NO por CSS: preesconder en la hoja de
-    // estilos significa que un fallo del bundle deja la escena invisible para
-    // siempre. Mismo criterio que el `.from()` de useScrollReveal.
-    gsap.set(q("[data-tier-group]"), { opacity: 0, y: -110 });
-    gsap.set(foundation, { yPercent: 140 });
-
-    const tl = trackTimeline(track, {
-      scrollTrigger: {
-        onUpdate: (self) => {
-          const i = Math.floor(self.progress * PHASES);
-          // Pasada la última fase: se cierra el rail entero (-1) y la banda
-          // de foundation toma la escena.
-          setActive(i > TIERS.length - 1 ? -1 : i);
+    setEnhanced(true);
+    const slots = q("[data-stack-slot]");
+    slots.forEach((slot) => {
+      const key = slot.dataset.stackSlot as StackKey;
+      ScrollTrigger.create({
+        trigger: slot,
+        start: "top 60%",
+        end: "bottom 60%",
+        onToggle: (self) => {
+          if (self.isActive) setScrollKey(key);
         },
-      },
+      });
     });
-
-    // Cada anillo aterriza justo cuando su item del rail se abre. `y` va en
-    // unidades del viewBox, no en px: en SVG, GSAP escribe el atributo
-    // transform, que vive en el sistema de coordenadas del propio SVG.
-    TIERS.forEach((_, i) => {
-      const at = Math.max(0, i * 0.2 - 0.08);
-      tl.fromTo(
-        q(`[data-tier-group="${i}"]`),
-        { opacity: 0, y: -110 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: Math.max(0.07, i * 0.2 + 0.015 - at),
-          ease: "power1.out",
-          immediateRender: false,
-        },
-        at
-      );
-    });
-
-    // Fase final: el bloque sube para dejarle sitio a la banda de foundation.
-    //
-    // Suben el HEADER Y EL STAGE juntos. El original mueve solo el stage, y
-    // eso lo mete por debajo del titular —que está quieto dentro del sticky—
-    // hasta superponer el subtítulo con la primera fila del rail. Moviendo los
-    // dos, la distancia entre ellos no cambia y el conjunto sale por arriba
-    // como una pieza.
-    tl.to([head, stage].filter(Boolean), {
-      y: () => -Math.round(window.innerHeight * 0.2),
-      duration: 0.16,
-      ease: "power1.inOut",
-    }, 0.8);
-    tl.to(foundation, { yPercent: 0, duration: 0.16, ease: "power1.out" }, 0.81);
-
-    // Estira el timeline a duración 1 para que su tiempo sea literalmente el
-    // progress del scroll. Sin esto, las fases se comprimen contra el final.
-    tl.to({}, { duration: 1 }, 0);
-
-    return () => {
-      sceneOff();
-      // Los dos setState son necesarios y NO son un `setState` sobre un
-      // componente desmontado: este cleanup corre en dos situaciones, y en la
-      // segunda el componente sigue vivo. Si el lector cruza los 1024px o cambia
-      // `prefers-reduced-motion`, matchMedia revierte esta rama y `sceneOn` tiene
-      // que volver a false para que `isOpen()` abra los cuatro bodies y la sección
-      // se lea en flujo normal. En el desmontaje real son no-ops que React ignora.
-      setSceneOn(false);
-      setActive(0);
-      const all = [...q("[data-tier-group]"), stage, head, foundation].filter(Boolean);
-      gsap.killTweensOf(all);
-      gsap.set(all, { clearProps: "opacity,transform" });
-    };
+    return () => setEnhanced(false);
   });
 
-  // Sin el recorrido de scroll, los cuatro bodies quedan abiertos: es la única
-  // forma de que la sección se lea entera sin JS, en mobile y con reduced-motion.
-  const isOpen = (i: number) => !sceneOn || i === active;
+  const hoverTarget: StackKey | null = hover
+    ? hover.kind === "cube"
+      ? "protocol"
+      : hover.key
+    : null;
 
-  /** Trazo de cada pieza: el verde solo en el segmento de AI bajo el puntero.
-   *
-   *  Esto se aplica como `style` inline a cada pieza, así que un cambio de
-   *  `hovered`/`hoveredSeg` re-renderiza el árbol de ~35 grupos × 4-8 paths
-   *  (~200 nodos). Evaluado y NO cambiado a CSS, a propósito:
-   *
-   *  · Ocurre una vez por `pointerenter` de un grupo, no una vez por frame — el
-   *    caso que sí era por frame (la posición del popover) es el que se arregló.
-   *  · Pasarlo a `:hover` puro requiere marcar las piezas con data-attrs y
-   *    reescribir el markup de los 200 nodos, y `tier >= active` no se expresa en
-   *    CSS sin generar una clase por tier.
-   *
-   *  Si el hover llega a sentirse pesado al barrer el puntero por el stack, el
-   *  camino es sacar `hovered`/`hoveredSeg` del estado (a `:hover` + un
-   *  `data-ai-seg`) y dejar solo `active`, que cambia 5 veces por pasada. Antes
-   *  de eso, medirlo. */
-  const strokeOf = (tier: number, id: string) => {
-    if (hoveredSeg === id) return { color: "var(--near-green-accent)", strokeOpacity: 1 };
-    // El núcleo verde nunca se atenúa: es el eje de la escena, no un anillo.
-    if (tier === 0) return { color: "#fff", strokeOpacity: 0.9 };
-    // Un tier que todavía no voló conserva el trazo pleno (está en opacity 0
-    // igual, así que solo importa el frame en que entra).
-    const bright = tier >= active || tier === hovered;
-    return { color: "#fff", strokeOpacity: bright ? 0.85 : 0.3 };
-  };
+  // La escena es un BUILD-UP: cada parada del rail AGREGA su capa y las
+  // anteriores se quedan; las capas que todavía no llegaron están OCULTAS del
+  // todo — no wireframe. En fallback (mobile/reduced-motion) está el ensamble
+  // completo desde el arranque.
+  const stage = enhanced ? STAGE_ORDER.indexOf(scrollKey) : STAGE_ORDER.length - 1;
+  const showIntents = stage >= 1;
+  const showAi = stage >= 2;
+  const showNearcom = stage >= 5;
 
-  const popBox = useRef({ left: 0, top: 0, pageTop: 0, width: 0, height: 0, popH: 0 });
+  // Con hover, SOLO lo hovereado va verde y el resto de lo visible cae a
+  // wireframe. Sin hover, lo acumulado va verde — salvo el anillo de AI
+  // mientras se recorren sus tres productos: ahí solo el activo va verde y
+  // sus dos hermanos quedan en wireframe (los stills de referencia). Recién
+  // en near.com el anillo completo queda verde.
+  const litColumn = hover ? hoverTarget === "protocol" : true;
+  const litIntents = showIntents && (hover ? hoverTarget === "intents" : true);
+  const litNearcom = showNearcom && (hover ? hoverTarget === "nearcom" : true);
+  const litSeg: string | null = !showAi
+    ? null
+    : hover
+      ? (SEG_KEYS.find((k) => k === hoverTarget) ?? null)
+      : stage >= 5
+        ? "all"
+        : (SEG_KEYS.find((k) => k === scrollKey) ?? "all");
 
-  const measurePopBox = () => {
-    const host = sceneRef.current;
-    if (!host) return;
-    const r = host.getBoundingClientRect();
-    popBox.current = {
-      left: r.left,
-      top: r.top,
-      // La escena no es fixed: su `top` de viewport se mueve con el scroll. Se
-      // guarda la posición de PÁGINA y el `top` se deriva restando `scrollY`, que
-      // es un valor cacheado por el navegador y no una lectura de layout.
-      pageTop: r.top + window.scrollY,
-      width: r.width,
-      height: r.height,
-      // El popover ya está montado cuando esto corre en `pointerenter`? No: su
-      // contenido depende de `popKey`, que se setea en el mismo handler. Se lee
-      // el alto que tenga ahora y se corrige en el primer movimiento — que es
-      // exactamente lo que hacía antes, solo que una vez en lugar de siempre.
-      popH: popRef.current?.offsetHeight ?? 0,
-    };
-  };
+  // Los grupos internos del arte (segmentos de AI, cubos de la columna) no son
+  // props de los componentes generados: se manejan imperativo sobre los hooks
+  // data-* con transiciones inline. Es la mitad "no declarativa" del estado y
+  // vive toda en este efecto.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    stage.querySelectorAll<SVGGElement>("[data-ai-green] [data-stack-seg]").forEach((g) => {
+      g.style.transition = "opacity 300ms";
+      g.style.opacity = litSeg === "all" || g.dataset.stackSeg === litSeg ? "1" : "0";
+    });
+    // El split: hover sobre la columna la parte en sus seis cubos (verde y
+    // wireframe a la vez — comparten geometría y orden de grupos).
+    const split = hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
+    stage.querySelectorAll<SVGGElement>("[data-stack-cube]").forEach((g) => {
+      const i = Number(g.dataset.stackCube);
+      g.style.transform = split ? `translateY(${((i - 2.5) * 16).toFixed(0)}px)` : "translateY(0px)";
+    });
+  }, [litSeg, hover]);
 
-  const onPieceEnter = (tier: number, id: string) => {
-    if (active >= 0 && tier > active) return; // todavía no voló
-    // Se miden acá las dos cosas que `onPieceMove` necesita, una sola vez por
-    // entrada del puntero en vez de una vez por movimiento. Ver el comentario de
-    // `onPieceMove`.
-    measurePopBox();
-    setHovered(tier);
-    if (AI_SEGMENT_IDS.includes(id)) {
-      setHoveredSeg(id);
-      setPopKey(id);
+  /* ── Hover por delegación: un solo par de handlers sobre el stage ──────── */
+
+  const onOver = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    const t = e.target as Element;
+    const layerEl = t.closest("[data-stack-layer]");
+    const layer = layerEl?.getAttribute("data-stack-layer");
+    const cube = t.closest("[data-stack-cube]");
+    const seg = t.closest("[data-stack-seg]");
+    if (layer === "protocol" && cube) {
+      setHover({ kind: "cube", index: Number(cube.getAttribute("data-stack-cube")) });
+    } else if (layer === "ai" && seg) {
+      setHover({
+        kind: "seg",
+        key: seg.getAttribute("data-stack-seg") as "ironclaw" | "cloud" | "market",
+      });
+    } else if (layer === "protocol" || layer === "intents" || layer === "nearcom") {
+      setHover({ kind: "layer", key: layer });
     } else {
-      setHoveredSeg(null);
-      setPopKey(POPOVERS[String(tier)] ? String(tier) : null);
+      // El puntero está sobre el fondo entre piezas.
+      setHover(null);
     }
   };
-
-  const onPieceLeave = () => {
-    setHovered(-1);
-    setHoveredSeg(null);
-    setPopKey(null);
+  const onLeave = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") setHover(null);
   };
 
-  // La posición del popover se escribe IMPERATIVAMENTE. Un setState por
-  // mousemove serían ~60 renders por segundo del árbol entero — es el error
-  // clásico al portar esto. El contenido sí es estado; la posición no.
-  //
-  // Pero escribir imperativamente no alcanzaba: el handler LEÍA
-  // `host.getBoundingClientRect()` y `pop.offsetHeight` en cada evento, o sea dos
-  // reflows forzados por cada píxel que se mueve el puntero sobre cualquiera de
-  // los ~35 grupos del SVG. Ninguno de los dos valores cambia mientras el puntero
-  // se mueve: el de la escena solo con scroll o resize, y el alto del popover
-  // solo cuando cambia su contenido. Ahora se miden en `pointerenter` —una vez
-  // por hover en vez de una por píxel— y el handler solo hace aritmética y una
-  // escritura. Un resize a mitad de un hover deja el encuadre desfasado hasta la
-  // siguiente entrada del puntero, que es un caso que no vale la pena cubrir.
-  const onPieceMove = (e: React.MouseEvent) => {
-    const pop = popRef.current;
-    if (!pop) return;
-    const box = popBox.current;
-    if (box.width === 0) return; // sin medición previa no hay dónde encuadrar
+  // El tag visible: solo con hover, pegado a la pieza encendida.
+  const tag = hover
+    ? hover.kind === "cube"
+      ? { label: PROTOCOL_FEATURES[hover.index], ...cubeAnchor(hover.index) }
+      : hover.kind === "seg"
+        ? { label: SEG_NAMES[hover.key], ...TAG_ANCHORS[hover.key] }
+        : {
+            label:
+              hover.key === "protocol"
+                ? "NEAR Protocol"
+                : hover.key === "intents"
+                  ? "NEAR Intents"
+                  : "near.com",
+            ...TAG_ANCHORS[hover.key],
+          }
+    : null;
 
-    // El alto del popover se completa en el primer movimiento tras el enter: en
-    // el `pointerenter` su contenido todavía no está renderizado.
-    if (box.popH === 0) box.popH = pop.offsetHeight;
+  /* ── Capas: wrapper posicionado + wireframe debajo + verde encima ──────── */
 
-    const top = box.pageTop - window.scrollY;
-    const x = Math.max(0, Math.min(e.clientX - box.left + 18, box.width - POP_W - 12));
-    const y = Math.max(0, Math.min(e.clientY - top + 18, box.height - box.popH - 12));
-    // translate3d y no left/top: compone en la GPU en vez de disparar layout.
-    pop.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  };
+  const layerStyle = (k: keyof typeof POS) => ({
+    left: pct(POS[k].x, STAGE_W),
+    top: pct(POS[k].y, STAGE_H),
+    width: pct(POS[k].w, STAGE_W),
+  });
+  // Los paths son el área de hit, no la caja del wrapper: sin esto la cáscara
+  // exterior (que abarca todo el stage) se tragaría el hover de todo lo demás.
+  // Una capa que todavía no llegó al build-up está oculta Y sin hit-area.
+  const layerClass = (visible: boolean) =>
+    `pointer-events-none absolute transition-[opacity,transform] duration-500 motion-reduce:transition-none ${
+      visible
+        ? "translate-y-0 opacity-100 [&_path]:pointer-events-auto"
+        : "translate-y-4 opacity-0"
+    }`;
+  const greenClass = (lit: boolean) =>
+    `absolute left-0 top-0 w-full transition-opacity duration-300 motion-reduce:transition-none ${lit ? "opacity-100" : "opacity-0"}`;
 
-  const popover = popKey ? POPOVERS[popKey] : null;
+  const expanded = (key: StackKey) => !enhanced || scrollKey === key;
 
   return (
-    // `data-scene` NO se declara acá a propósito: lo escribe el efecto en el
-    // dataset. Ver el comentario en el bloque de motion.
-    <section
-      ref={rootRef}
-      style={{ "--phases": PHASES, "--step-vh": STEP_VH } as React.CSSProperties}
-      className="group/stack relative bg-ink text-white"
-    >
-      <div
-        data-stack-track
-        className="group-data-[scene=on]/stack:h-[calc(var(--phases)*var(--step-vh)+100svh)]"
-      >
-        {/* El hijo sticky ES el `root.style.height=100vh; overflow:hidden` del
-            original, pero sin mutar estilos y sin pin-spacer. El overflow acá es
-            legal —y necesario, es lo que esconde la banda de foundation bajo el
-            fold—: la regla del repo prohíbe overflow en los ANCESTROS de un
-            sticky, no en el sticky mismo.
+    <section ref={rootRef} className="bg-ink text-cream">
+      <Container className="flex flex-col gap-14 pb-32 pt-32 lg:gap-20">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <h2 className="text-h1 text-pretty">
+            The NEAR <Accent>Stack</Accent>
+          </h2>
+          <p className="max-w-[26ch] text-h3 text-cream/70 text-balance">
+            Open infrastructure{" "}
+            <span
+              aria-hidden="true"
+              className="inline-block size-[0.78em] translate-y-[0.06em] rounded-full"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to bottom right, var(--near-teal), var(--near-green-accent), var(--near-teal))",
+              }}
+            />{" "}
+            powering the{" "}
+            <span
+              aria-hidden="true"
+              className="inline-block size-[0.72em] translate-y-[0.04em] rotate-45 rounded-[0.12em] bg-near-green-accent"
+            />{" "}
+            agent economy
+          </p>
+        </div>
 
-            De paso desaparece el motivo del `height` fijo del original: abrir y
-            cerrar los bodies del rail ya no puede cambiar la altura del
-            documento, porque la manda el track y no el contenido. */}
-        <div className="relative group-data-[scene=on]/stack:sticky group-data-[scene=on]/stack:top-0 group-data-[scene=on]/stack:h-svh group-data-[scene=on]/stack:overflow-hidden">
-          {/* `pt-32` iguala el `pb-32` con que cierra OwnYourOwn: el corte entre
-              las dos secciones es a sangre, así que el aire a cada lado tiene
-              que coincidir o la juntura se lee descentrada. */}
-          <Container className="flex flex-col gap-6 pb-12 pt-32">
-            {/* Sube junto con el stage en la fase final — ver el bloque de
-                motion. Si se queda quieto, el stage se le mete debajo. */}
-            <div data-stack-head className="flex flex-col items-center gap-3 text-center">
-              <h2 className="text-h1 text-pretty">The NEAR Stack</h2>
-              <p className="max-w-[26ch] text-h3 text-white/70 text-balance">
-                Open infrastructure{" "}
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-[0.78em] translate-y-[0.06em] rounded-full"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to bottom right, var(--near-teal), var(--near-green-accent), var(--near-teal))",
-                  }}
-                />{" "}
-                powering the{" "}
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-[0.72em] translate-y-[0.04em] rotate-45 rounded-[0.12em] bg-near-green-accent"
-                />{" "}
-                agent economy
-              </p>
-            </div>
-
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+          {/* El arte, sticky en desktop: acompaña todo el recorrido del rail.
+              En lg el stage se dimensiona POR ALTURA (80svh, con el aspect
+              dando el ancho): así el ensamble entero queda siempre en
+              pantalla, sin recortes en ningún punto del scroll. */}
+          <div className="lg:sticky lg:top-[10svh] lg:self-start">
             <div
-              data-stack-stage
-              className="grid grid-cols-1 items-center gap-16 lg:grid-cols-[1.15fr_1fr]"
+              ref={stageRef}
+              onPointerOver={onOver}
+              onPointerLeave={onLeave}
+              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:h-[80svh] lg:w-auto lg:max-w-full"
             >
-              {/* La escena se OCULTA en mobile y el rail toma el ancho completo:
-                  el objeto isométrico a 360px de ancho no se lee. */}
-              <div ref={sceneRef} className="relative hidden lg:block">
-                <svg
-                  viewBox={VIEW_BOX}
-                  aria-hidden="true"
-                  className="mx-auto block max-h-[56svh] w-full max-w-[640px]"
-                >
-                  <defs>
-                    <linearGradient id="ns-core-top" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#ecfdb0" />
-                      <stop offset="100%" stopColor="#b9f34e" />
-                    </linearGradient>
-                    <linearGradient id="ns-core-right" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8bf29c" />
-                      <stop offset="100%" stopColor="#049d4e" />
-                    </linearGradient>
-                    <linearGradient id="ns-core-left" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#d8f2d0" />
-                      <stop offset="100%" stopColor="#54ca80" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* El orden de LAYERS ES el z-order y no se puede reordenar:
-                      cada anillo tiene una parte por detrás del eje y otra por
-                      delante, y ese cruce es todo el efecto de profundidad.
-
-                      GSAP escribe SOLO opacity e y en estos grupos; el trazo lo
-                      maneja React vía style. Propiedades distintas, sin pelea. */}
-                  {LAYERS.map((layer, li) => (
-                    <g key={li} data-tier-group={layer.tier}>
-                      {layer.pieces.map((p) => (
-                        <g
-                          key={p.id}
-                          data-piece={p.id}
-                          style={strokeOf(layer.tier, p.id)}
-                          className="cursor-pointer transition-[stroke-opacity,color] duration-300"
-                          onMouseEnter={() => onPieceEnter(layer.tier, p.id)}
-                          onMouseMove={onPieceMove}
-                          onMouseLeave={onPieceLeave}
-                        >
-                          {p.faces.map((f, fi) => (
-                            <path
-                              key={fi}
-                              d={f.d}
-                              // El fill de las caras "shell" tiene que ser
-                              // EXACTAMENTE el fondo de la sección: el back-face
-                              // culling solo se lee como oclusión sólida si
-                              // coinciden. Por eso los dos salen de --ink.
-                              fill={p.kind === "core" ? GRADIENT_BY_ROLE[f.role] : "var(--ink)"}
-                              stroke="currentColor"
-                              strokeWidth={1}
-                              strokeLinejoin="round"
-                              vectorEffect="non-scaling-stroke"
-                            />
-                          ))}
-                        </g>
-                      ))}
-                    </g>
-                  ))}
-                </svg>
-
-                {/* Vive dentro del contenedor de la escena porque su posición se
-                    mide contra él. `left/top: 0` fijos + transform: el
-                    movimiento no toca layout. */}
-                <div
-                  ref={popRef}
-                  aria-hidden="true"
-                  data-on={popover !== null}
-                  style={{ width: POP_W }}
-                  className="pointer-events-none absolute left-0 top-0 z-[5] rounded-xl border border-white/[0.18] bg-ink/95 px-4 py-3.5 opacity-0 transition-opacity duration-200 data-[on=true]:opacity-100"
-                >
-                  {popover && (
-                    <>
-                      <Eyebrow className="mb-2 text-white/45">{popover.eyebrow}</Eyebrow>
-                      {popover.items.map((item) => (
-                        <p key={item.title} className="mb-1.5 text-body-sm text-white/85 last:mb-0">
-                          <span className="text-label text-white">{item.title}</span> · {item.blurb}
-                        </p>
-                      ))}
-                    </>
-                  )}
+              {/* Apilado: mitad BAJA de la columna (cubos 3–5) al fondo,
+                  anillos encima (sus máscaras recortan el canal de la
+                  columna), y la mitad ALTA (cubos 0–2) por encima de todo —
+                  el cubo de arriba es la capa más alta del ensamble. */}
+              <div
+                data-stack-layer="protocol"
+                className={`${layerClass(true)} ${HIDE_UPPER_CUBES}`}
+                style={layerStyle("column")}
+              >
+                <ColumnWire className="w-full" />
+                <ColumnGreen className={greenClass(litColumn)} />
+              </div>
+              <div
+                data-stack-layer="intents"
+                className={layerClass(showIntents)}
+                style={layerStyle("intents")}
+              >
+                <IntentsWire className="w-full" />
+                <IntentsGreen className={greenClass(litIntents)} />
+              </div>
+              <div data-stack-layer="ai" className={layerClass(showAi)} style={layerStyle("ai")}>
+                <AiRingWire className="w-full" />
+                {/* La verde de AI queda siempre montada y visible a nivel svg:
+                    la iluminación por segmento la maneja el efecto de arriba
+                    grupo por grupo. */}
+                <div data-ai-green>
+                  <AiRingGreen className="absolute left-0 top-0 w-full" />
                 </div>
               </div>
-
-              <div className="flex flex-col">
-                {TIERS.map((tier, i) => (
-                  <div
-                    key={tier.name}
-                    data-open={isOpen(i)}
-                    // El hover del rail ilumina la geometría, pero solo de los
-                    // tiers que ya volaron: encender uno que todavía no está en
-                    // pantalla no comunica nada.
-                    onMouseEnter={() => {
-                      if (active < 0 || i <= active) setHovered(i);
-                    }}
-                    onMouseLeave={() => setHovered(-1)}
-                    className="group/tier border-t border-white/15 pb-3.5 pt-4.5 last:border-b"
-                  >
-                    <h3 className="text-h4 text-white/35 transition-colors duration-300 group-data-[open=true]/tier:text-white">
-                      <sup className="index-marker mr-2 align-super text-white/30">
-                        0{i + 1}
-                      </sup>
-                      {tier.name}
-                    </h3>
-
-                    {/* grid-template-rows 0fr ↔ 1fr es la sustitución moderna de
-                        animar height contra scrollHeight: el navegador interpola
-                        sin que nadie mida, y no queda un `height:auto` diferido
-                        que pueda colgarse si el tween se mata a mitad.
-                        El overflow-hidden va en el hijo interno para que el
-                        margen superior del <p> quede DENTRO de la caja que se
-                        recorta. */}
-                    <div className="grid transition-[grid-template-rows] duration-500 ease-out motion-reduce:transition-none group-data-[open=true]/tier:grid-rows-[1fr] grid-rows-[0fr]">
-                      <div className="overflow-hidden">
-                        <p className="mt-3.5 max-w-[38ch] text-body-sm text-white/55 text-pretty">
-                          {tier.body}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div
+                data-stack-layer="nearcom"
+                className={layerClass(showNearcom)}
+                style={layerStyle("nearcom")}
+              >
+                <NearcomWire className="w-full" />
+                <NearcomGreen className={greenClass(litNearcom)} />
               </div>
+              <div
+                data-stack-layer="protocol"
+                className={`${layerClass(true)} ${HIDE_LOWER_CUBES}`}
+                style={layerStyle("column")}
+              >
+                <ColumnWire className="w-full" />
+                <ColumnGreen className={greenClass(litColumn)} />
+              </div>
+
+              {/* El bubble tag de la pieza hovereada. Decorativo: el nombre
+                  accesible vive en el rail. */}
+              {tag && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute z-10 flex -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-cream/25 bg-ink/85 px-2.5 py-1 backdrop-blur-sm"
+                  style={{ left: `${tag.x}%`, top: `${tag.y}%` }}
+                >
+                  <span className="size-2 rounded-full bg-cta-mint" />
+                  <span className="text-caption text-cream">{tag.label}</span>
+                </div>
+              )}
             </div>
-          </Container>
+          </div>
 
-          {/* Espera bajo el fold y sube en la fase final. En estático (mobile /
-              reduced-motion) queda en flujo normal al pie de la sección. */}
-          <div
-            data-stack-foundation
-            className="group-data-[scene=on]/stack:absolute group-data-[scene=on]/stack:inset-x-0 group-data-[scene=on]/stack:bottom-0"
-          >
-            <Container className="pb-12 pt-8">
-              <div className="mx-auto grid max-w-[1120px] gap-16 border-t border-white/15 pt-8 lg:grid-cols-2">
-                {FOUNDATION.map((block) => (
-                  <div key={block.title} className="flex flex-col gap-3">
-                    <Eyebrow className="text-white/40">{block.title}</Eyebrow>
-                    <p className="max-w-[40ch] text-body-sm text-white/55 text-pretty">
-                      {block.body}
-                    </p>
-                  </div>
+          {/* El rail. Cada slot con data-stack-slot es una parada de la
+              reading line; los min-h le dan aire al recorrido para que el
+              scroll tenga dónde contar la secuencia. */}
+          <div className="flex w-full flex-col gap-3">
+            <RailBlock block={PROTOCOL_BLOCK} index="01" expanded={expanded("protocol")} />
+            <RailBlock block={INTENTS_BLOCK} index="02" expanded={expanded("intents")} />
+
+            {/* NEAR AI: heading + intro siempre visibles, y un sub-bloque
+                expandible por producto — cada uno es su propia parada de
+                scroll y enciende su segmento del anillo. */}
+            <div className="rounded-2xl border border-cream/12 px-6 pb-4 pt-5">
+              <p className="text-h4 text-cream">
+                <sup className="mr-2 align-super text-caption text-cream/30">03</sup>
+                {AI_BLOCK.name}
+              </p>
+              <p className="mt-3 max-w-[46ch] text-body-sm text-cream/60 text-pretty">
+                {AI_BLOCK.intro}
+              </p>
+              <div className="mt-4 flex flex-col gap-2">
+                {AI_BLOCK.subs.map((sub) => (
+                  <RailBlock key={sub.key} block={sub} nested expanded={expanded(sub.key)} />
                 ))}
               </div>
-            </Container>
+              <a
+                href={AI_BLOCK.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-block pb-1 text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+              >
+                {AI_BLOCK.link.label} <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <RailBlock block={NEARCOM_BLOCK} index="04" expanded={expanded("nearcom")} />
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ── Una parada del rail: fila con panel colapsable ───────────────────────── */
+
+function RailBlock({
+  block,
+  index,
+  nested = false,
+  expanded,
+}: {
+  block: StackLeaf;
+  index?: string;
+  nested?: boolean;
+  expanded: boolean;
+}) {
+  return (
+    // El slot (invisible) es el que da el recorrido de scroll; la CAJA visible
+    // es compacta: colapsada queda como una barra de título con borde, y solo
+    // la activa se expande. Sin esto el min-h inflaba el borde de cada caja.
+    <div
+      data-stack-slot={block.key}
+      className={`${
+        nested ? "lg:min-h-[16svh]" : "lg:min-h-[22svh]"
+      } lg:flex lg:flex-col lg:justify-center`}
+    >
+      <div
+        data-open={expanded}
+        className={`group/blk ${
+          nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
+        } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none`}
+      >
+      <div className={nested ? "px-4 pb-2 pt-3" : "px-6 pb-3 pt-5"}>
+        <p className={nested ? "text-body text-cream/80" : "text-h4 text-cream/45"}>
+          {index && (
+            <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
+              {index}
+            </sup>
+          )}
+          <span className="transition-colors duration-300 group-data-[open=true]/blk:text-cream motion-reduce:transition-none">
+            {block.name}
+          </span>
+        </p>
+      </div>
+      {/* grid-rows 0fr↔1fr: el navegador interpola la altura sin medir nada. */}
+      <div
+        className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none"
+      >
+        <div className="overflow-hidden">
+          <div className={`flex flex-col gap-3 ${nested ? "px-4 pb-3" : "px-6 pb-5"}`}>
+            <p className="max-w-[46ch] text-body-sm text-cream/60 text-pretty">{block.body}</p>
+            {block.link && (
+              <a
+                href={block.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                tabIndex={expanded ? 0 : -1}
+                className="text-caption text-cta-mint transition-colors duration-200 hover:text-cta-lime motion-reduce:transition-none"
+              >
+                {block.link.label} <span aria-hidden="true">→</span>
+              </a>
+            )}
           </div>
         </div>
       </div>
-    </section>
+      </div>
+    </div>
   );
 }

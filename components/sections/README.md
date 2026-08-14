@@ -65,8 +65,8 @@ dar por terminado un cambio.
 
 ## Sección pegada: `position: sticky`, nunca `pin: true`
 
-Cuatro secciones usan **sección pegada**: en `home-v2/`, `ProofStepper`,
-`NearStack` y `OwnYourOwn`; y en `quantum/`, `ThreatSequence`. Todas con
+Tres secciones usan **sección pegada**: en `home-v2/`, `ProofStepper` y
+`OwnYourOwn`; y en `quantum/`, `ThreatSequence`. Todas con
 `position: sticky` de CSS y un ScrollTrigger que solo LEE el progreso.
 
 **Por qué, en largo** (esta es la copia canónica del razonamiento; vivía en
@@ -82,8 +82,7 @@ sin JS la sección sigue siendo legible.
 
 Consecuencia a recordar si alguien las edita: **ningún ancestro del elemento
 pegado puede tener `overflow` distinto de `visible`**, o el sticky deja de
-pegarse sin ningún error. (Sí puede tenerlo el elemento pegado en sí: es lo que
-usa `NearStack` para esconder su banda de foundation bajo el fold.)
+pegarse sin ningún error. (Sí puede tenerlo el elemento pegado en sí.)
 
 El patrón es siempre el mismo: un track cuya altura sale de CSS vars, un hijo
 `sticky top-0 h-svh`, y un atributo `data-*` en la raíz que enciende el layout

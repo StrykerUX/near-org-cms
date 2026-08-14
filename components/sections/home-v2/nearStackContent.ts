@@ -1,86 +1,80 @@
 // Copy de NearStack, separada del componente para que el JSX quede legible.
 // Data plana y serializable — nada de JSX ni funciones acá.
 //
-// En el original esto vivía como <div style="display:none"> que el JS copiaba
-// con innerHTML al popover flotante. Acá es data y React la renderiza.
+// COPY BORRADOR (2026-08-14): redactada nueva a pedido de Lawrence, pendiente
+// de su revisión — el doc fuente del stack no llegó al hilo. La estructura
+// narrativa es la que él fijó: el Protocol es la columna central y todo se
+// construye alrededor, de adentro hacia afuera: Intents → NEAR AI (con sus
+// tres productos) → near.com como cáscara exterior.
 
-export type Tier = {
-  /** clave del popover; coincide con el índice del array */
+export type StackKey =
+  | "protocol"
+  | "intents"
+  | "ironclaw"
+  | "cloud"
+  | "market"
+  | "nearcom";
+
+export type StackLeaf = {
+  readonly key: StackKey;
   readonly name: string;
   readonly body: string;
+  readonly link?: { readonly label: string; readonly href: string };
 };
 
-export const TIERS: readonly Tier[] = [
-  {
-    name: "NEAR Protocol",
-    body: "NEAR Protocol is a fully sharded, quantum-resistant blockchain that has operated on mainnet for over five years with 100% uptime, built to support the agent economy at scale.",
-  },
-  {
-    name: "NEAR Intents",
-    body: "The universal liquidity protocol. NEAR Intents uses a novel transaction architecture to abstract away cross-chain complexity and maximize performance, security, and efficiency for DeFi apps, AI agents, and end users.",
-  },
-  {
-    name: "NEAR AI",
-    body: "NEAR AI runs sensitive workloads for enterprises, governments, and AI applications. Inference and agents execute inside encrypted enclaves where requests are confidential by design and outputs are independently verifiable.",
-  },
-  {
-    name: "near.com",
-    body: "The only onchain account you need. Fully confidential swaps, transfers, deposits, and withdrawals. Trade perps, earn yield, and hold RWAs across 30+ chains, all from one account, your assets in your control. The way crypto should work.",
-  },
-];
-
-export type Popover = {
-  readonly eyebrow: string;
-  readonly items: readonly { readonly title: string; readonly blurb: string }[];
+export const PROTOCOL_BLOCK: StackLeaf = {
+  key: "protocol",
+  name: "NEAR Protocol",
+  body: "The settlement layer at the center of the stack — everything else is built around it. Fully sharded and quantum-resistant, with five years on mainnet at 100% uptime, built to clear the agent economy at scale.",
+  link: { label: "Visit nearprotocol.com", href: "https://nearprotocol.com" },
 };
 
-/**
- * Clave → popover. Las numéricas son índices de tier; las de texto, segmentos
- * del anillo de NEAR AI (que se resaltan uno por uno, no como bloque).
- *
- * Falta el tier 3 (near.com) A PROPÓSITO: el original tampoco lo tiene. Su
- * geometría se ilumina al hover pero no abre popover. No se inventa copy para
- * tapar el hueco; si hace falta, se agrega la clave "3" acá y aparece solo.
- */
-export const POPOVERS: Record<string, Popover> = {
-  "0": {
-    eyebrow: "NEAR Protocol",
-    items: [
-      { title: "Dynamic Resharding", blurb: "Shards split and merge with demand" },
-      { title: "Post-Quantum Signing", blurb: "FIPS-204 / ML-DSA, live on mainnet" },
-      { title: "Chain Signatures", blurb: "Threshold MPC across chains, no bridges" },
-      { title: "Private Shard", blurb: "Restricted-visibility execution environment" },
-      { title: "Top-Level Accounts", blurb: "Programmable keys, governed by House of Stake" },
-    ],
-  },
-  "1": {
-    eyebrow: "NEAR Intents",
-    items: [
-      { title: "Confidential Intents", blurb: "Trades execute inside a NEAR private shard" },
-    ],
-  },
-  "ai-cloud": {
-    eyebrow: "NEAR AI · 1 of 3",
-    items: [{ title: "NEAR AI Cloud", blurb: "Scalable and verifiable confidential inference" }],
-  },
-  "ai-ironclaw": {
-    eyebrow: "NEAR AI · 2 of 3",
-    items: [{ title: "IronClaw", blurb: "Always-on agents inside encrypted enclaves" }],
-  },
-  "ai-market": {
-    eyebrow: "NEAR AI · 3 of 3",
-    items: [{ title: "Agent Market", blurb: "Directory of agents you can hire by the job" }],
-  },
+export const INTENTS_BLOCK: StackLeaf = {
+  key: "intents",
+  name: "NEAR Intents",
+  body: "The first ring out from the protocol. Intents deal in outcomes, not transactions: say what should happen — a swap, a transfer, a settlement across 30+ chains — and a network of solvers competes to make it true. No bridges, no juggling gas.",
+  link: { label: "Visit near-intents.org", href: "https://near-intents.org" },
 };
 
-/** La banda que sube en la fase final, debajo del objeto. */
-export const FOUNDATION: readonly { readonly title: string; readonly body: string }[] = [
-  {
-    title: "Governance",
-    body: "NEAR’s House of Stake gives participants who generate value a proportional say in how the system runs. Live on mainnet, with binding proposals already passed.",
-  },
-  {
-    title: "Economics",
-    body: "NEAR is the coordination asset of the agent economy. As usage grows, product revenue feeds buybacks that offset emissions, accelerating NEAR’s deflationary trajectory and strengthening the network as activity scales.",
-  },
+export const AI_BLOCK = {
+  name: "NEAR AI",
+  intro:
+    "Confidential AI infrastructure, wrapped around the core. Inference and agents run inside encrypted enclaves: requests stay private by design, and every output can be independently verified.",
+  link: { label: "Visit nearai.com", href: "https://nearai.com" },
+  subs: [
+    {
+      key: "ironclaw",
+      name: "IronClaw",
+      body: "The private AI assistant. Conversations and data live inside the enclave — verifiably out of reach of everyone, including the people running the hardware.",
+    },
+    {
+      key: "cloud",
+      name: "NEAR AI Cloud",
+      body: "Confidential inference for enterprises and governments. Sensitive workloads run encrypted end to end, with attestation that proves exactly what code touched them.",
+    },
+    {
+      key: "market",
+      name: "Agent Market",
+      body: "Where always-on agents live: published, discovered, and paid onchain, running around the clock inside secure enclaves.",
+    },
+  ] as readonly StackLeaf[],
+} as const;
+
+export const NEARCOM_BLOCK: StackLeaf = {
+  key: "nearcom",
+  name: "near.com",
+  body: "The outer shell — one onchain account for everything. Confidential swaps, transfers, perps, yield, and RWAs across 30+ chains, with your assets in your control the whole way. The way crypto should work.",
+  link: { label: "Visit near.com", href: "https://near.com" },
+};
+
+// Los seis features del protocolo, UNO POR CUBO de la columna, en el orden de
+// los cubos de arriba hacia abajo (data-stack-cube 0…5). Son los seis claims
+// de /prototype/protocol — misma lista, mismo orden.
+export const PROTOCOL_FEATURES: readonly string[] = [
+  "Nightshade 3.0",
+  "Dynamic resharding",
+  "Speed. Scale. Access.",
+  "Private Shard",
+  "Quantum-safe accounts",
+  "Chain Signatures",
 ];
