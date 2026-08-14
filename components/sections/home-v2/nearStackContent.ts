@@ -69,33 +69,38 @@ export const NEARCOM_BLOCK: StackLeaf = {
 };
 
 // Los seis features del protocolo, UNO POR CUBO de la columna, en el orden de
-// los cubos de arriba hacia abajo (data-stack-cube 0…5). Son los seis claims
-// de /prototype/protocol; los `desc` son resúmenes de una línea de esos
-// claims — BORRADOR: el doc fuente que los origina no llegó al hilo, así que
-// salen de la copy de la página de protocol, pendientes de revisión.
-export const PROTOCOL_FEATURES: readonly { name: string; desc: string }[] = [
+// los cubos de arriba hacia abajo (data-stack-cube 0…5). Copy VERBATIM del
+// doc "near.org - sitemap" (tab Protocol, secciones 4–9): `sub` es el
+// subhead del doc y `desc` el body. "Speed. Scale. Access." no tiene subhead
+// en el doc, así que solo lleva body.
+export const PROTOCOL_FEATURES: readonly { name: string; sub?: string; desc: string }[] = [
   {
     name: "Nightshade 3.0",
-    desc: "Consensus decoupled from execution, with atomic multi-contract interactions.",
+    sub: "Stateless validation is here",
+    desc: "The newest protocol upgrade decouples consensus from execution, adds multi-contract atomic interactions, and introduces a private shard for confidential transactions.",
   },
   {
     name: "Dynamic resharding",
-    desc: "Shards split automatically at their state-size threshold — no vote, no downtime.",
+    sub: "Capacity is a property of the network, not a governance decision.",
+    desc: "A shard now splits automatically when it hits its state-size threshold, validated by state witnesses, with no vote and no human intervention.",
   },
   {
     name: "Speed. Scale. Access.",
-    desc: "600ms blocks, 1.2s finality, global contracts running network-wide.",
+    desc: "600ms blocks and 1.2s finality. Global contracts deploy once and run network-wide. In-memory state removes database latency.",
   },
   {
     name: "Private Shard",
-    desc: "Shielded transactions with selective disclosure — confidential by default.",
+    sub: "Confidential execution, directly at the protocol layer",
+    desc: "Transactions are shielded from public view, with selective disclosure for compliance-readiness. The foundation for Confidential Intents.",
   },
   {
-    name: "Quantum-safe accounts",
-    desc: "One key rotation to NIST-approved quantum-safe signing (FIPS-204).",
+    name: "Quantum security",
+    sub: "Post-quantum signing is live on mainnet",
+    desc: "NEAR accounts are decoupled from cryptography, so upgrading to quantum-safe keys takes a single key rotation. NEAR supports FIPS-204 (ML-DSA), a NIST-approved post-quantum signing scheme.",
   },
   {
     name: "Chain Signatures",
-    desc: "One account signs natively across 30+ chains, with no bridges.",
+    sub: "Native transactions across the multi-chain ecosystem",
+    desc: "Through threshold MPC, a single NEAR account signs and triggers native transactions across 30+ chains, including Bitcoin, Ethereum, Solana, and more, with no bridge contracts. Support spans both ECDSA and EdDSA signature schemes.",
   },
 ];

@@ -260,6 +260,7 @@ export default function NearStack() {
     ? hover.kind === "cube"
       ? {
           label: PROTOCOL_FEATURES[hover.index].name,
+          sub: PROTOCOL_FEATURES[hover.index].sub,
           desc: PROTOCOL_FEATURES[hover.index].desc,
         }
       : {
@@ -430,8 +431,13 @@ export default function NearStack() {
                   <span className="size-3 shrink-0 rounded-full bg-cta-mint" />
                   <span className="text-body text-cream">{tag?.label}</span>
                 </span>
+                {"sub" in (tag ?? {}) && tag?.sub && (
+                  <span className="mt-1.5 block text-caption text-cta-mint/90 text-pretty">
+                    {tag.sub}
+                  </span>
+                )}
                 {tag?.desc && (
-                  <span className="mt-1.5 block text-caption text-cream/65 text-pretty">
+                  <span className="mt-1 block text-caption text-cream/65 text-pretty">
                     {tag.desc}
                   </span>
                 )}
