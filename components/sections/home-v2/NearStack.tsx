@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
-import { ScrollTrigger } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import {
   ColumnGreen,
   ColumnWire,
@@ -153,6 +153,24 @@ export default function NearStack() {
   });
 
   const scrollKey: StackKey | null = scrollIdx >= 0 ? STAGE_ORDER[scrollIdx] : null;
+
+  // Click = saltar a la parada: como el estado activo DERIVA del scroll, el
+  // click no setea nada — scrollea la página al centro de la rebanada de esa
+  // caja dentro del track, y el mecanismo de siempre hace el resto (abre la
+  // clickeada, colapsa la anterior). Scroll y click son el mismo camino.
+  const goTo = (key: StackKey) => {
+    const section = rootRef.current;
+    if (!section || !enhanced) return;
+    const i = STAGE_ORDER.indexOf(key);
+    const top = section.getBoundingClientRect().top + window.scrollY;
+    const span = section.offsetHeight - window.innerHeight;
+    gsap.to(document.scrollingElement ?? document.documentElement, {
+      scrollTop: top + ((i + 0.5) / STAGE_ORDER.length) * span,
+      duration: 0.6,
+      ease: "power2.inOut",
+      overwrite: "auto",
+    });
+  };
 
   const hoverTarget: StackKey | null = hover
     ? hover.kind === "cube"
@@ -382,8 +400,18 @@ export default function NearStack() {
           {/* El rail: cuatro cajas iguales — colapsadas son la MISMA barra de
               título compacta, apretadas entre sí. */}
           <div className="flex w-full flex-col gap-2">
-            <RailBlock block={PROTOCOL_BLOCK} index="01" expanded={expanded("protocol")} />
-            <RailBlock block={INTENTS_BLOCK} index="02" expanded={expanded("intents")} />
+            <RailBlock
+              block={PROTOCOL_BLOCK}
+              index="01"
+              expanded={expanded("protocol")}
+              onSelect={goTo}
+            />
+            <RailBlock
+              block={INTENTS_BLOCK}
+              index="02"
+              expanded={expanded("intents")}
+              onSelect={goTo}
+            />
 
             {/* NEAR AI: colapsada es una barra de título idéntica a las otras
                 tres. Abierta (cualquiera de sus tres paradas) revela el intro
@@ -396,16 +424,23 @@ export default function NearStack() {
                   data-open={aiOpen}
                   className="group/blk rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
                 >
-                  <div className="px-4 py-2.5">
-                    <p className="text-h4 text-cream/45">
+                  {/* Click en la barra de NEAR AI = saltar a su primera
+                      parada (IronClaw); desde ahí el scroll recorre las tres. */}
+                  <button
+                    type="button"
+                    onClick={() => goTo("ironclaw")}
+                    aria-expanded={aiOpen}
+                    className="w-full cursor-pointer rounded-2xl px-4 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint"
+                  >
+                    <span className="block text-h4 text-cream/45">
                       <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
                         03
                       </sup>
                       <span className="transition-colors duration-300 group-data-[open=true]/blk:text-cream motion-reduce:transition-none">
                         {AI_BLOCK.name}
                       </span>
-                    </p>
-                  </div>
+                    </span>
+                  </button>
                   <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none">
                     <div className="overflow-hidden">
                       <div className="flex flex-col gap-2 px-4 pb-3">
@@ -414,7 +449,13 @@ export default function NearStack() {
                         </p>
                         <div className="flex flex-col gap-1.5">
                           {AI_BLOCK.subs.map((sub) => (
-                            <RailBlock key={sub.key} block={sub} nested expanded={expanded(sub.key)} />
+                            <RailBlock
+                              key={sub.key}
+                              block={sub}
+                              nested
+                              expanded={expanded(sub.key)}
+                              onSelect={goTo}
+                            />
                           ))}
                         </div>
                         <a
@@ -433,7 +474,12 @@ export default function NearStack() {
               );
             })()}
 
-            <RailBlock block={NEARCOM_BLOCK} index="04" expanded={expanded("nearcom")} />
+            <RailBlock
+              block={NEARCOM_BLOCK}
+              index="04"
+              expanded={expanded("nearcom")}
+              onSelect={goTo}
+            />
           </div>
         </div>
         </Container>
@@ -449,11 +495,13 @@ function RailBlock({
   index,
   nested = false,
   expanded,
+  onSelect,
 }: {
   block: StackLeaf;
   index?: string;
   nested?: boolean;
   expanded: boolean;
+  onSelect?: (key: StackLeaf["key"]) => void;
 }) {
   return (
     // Caja compacta: colapsada es SOLO la barra de título con su borde,
@@ -465,8 +513,18 @@ function RailBlock({
         nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
       } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none`}
     >
-      <div className={nested ? "px-3.5 py-2" : "px-4 py-2.5"}>
-        <p className={nested ? "text-body text-cream/80" : "text-h4 text-cream/45"}>
+      {/* La barra de título es un botón: click = saltar a la parada de esta
+          caja en el track (goTo). Scroll y click, el mismo mecanismo. */}
+      <button
+        type="button"
+        onClick={() => onSelect?.(block.key)}
+        aria-expanded={expanded}
+        className={`w-full cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint ${
+          nested ? "rounded-xl px-3.5 py-2" : "rounded-2xl px-4 py-2.5"
+        }`}
+      >
+        {/* span y no <p>: un botón solo admite phrasing content. */}
+        <span className={`block ${nested ? "text-body text-cream/80" : "text-h4 text-cream/45"}`}>
           {index && (
             <sup className="mr-2 align-super text-caption text-cream/30 transition-colors duration-300 group-data-[open=true]/blk:text-cta-mint motion-reduce:transition-none">
               {index}
@@ -475,8 +533,8 @@ function RailBlock({
           <span className="transition-colors duration-300 group-data-[open=true]/blk:text-cream motion-reduce:transition-none">
             {block.name}
           </span>
-        </p>
-      </div>
+        </span>
+      </button>
       {/* grid-rows 0fr↔1fr: el navegador interpola la altura sin medir nada. */}
       <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[open=true]/blk:grid-rows-[1fr] motion-reduce:transition-none">
         <div className="overflow-hidden">
