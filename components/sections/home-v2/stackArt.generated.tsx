@@ -171,10 +171,10 @@ export function AiRingGreen(props: React.SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 546 443" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>
 <pattern id="ag-pattern0_11_498" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlinkHref="#image0_11_498" transform="scale(0.00275482 0.00297619)"/>
+<use xlinkHref="#ag-image0_11_498" transform="scale(0.00275482 0.00297619)"/>
 </pattern>
 <pattern id="ag-pattern1_11_498" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlinkHref="#image1_11_498" transform="scale(0.00250627 0.00289017)"/>
+<use xlinkHref="#ag-image1_11_498" transform="scale(0.00250627 0.00289017)"/>
 </pattern>
 <linearGradient id="ag-paint0_linear_11_498" x1="144.53" y1="339.9" x2="221.17" y2="208.56" gradientUnits="userSpaceOnUse">
 <stop stopColor="#BBEF7F"/>
@@ -290,13 +290,13 @@ export function IntentsGreen(props: React.SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 371 248" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>
 <pattern id="ig-pattern0_11_549" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlinkHref="#image0_11_549" transform="scale(0.00438596 0.00348432)"/>
+<use xlinkHref="#ig-image0_11_549" transform="scale(0.00438596 0.00348432)"/>
 </pattern>
 <pattern id="ig-pattern1_11_549" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlinkHref="#image1_11_549" transform="scale(0.00438596 0.00348432)"/>
+<use xlinkHref="#ig-image1_11_549" transform="scale(0.00438596 0.00348432)"/>
 </pattern>
 <pattern id="ig-pattern2_11_549" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlinkHref="#image2_11_549" transform="scale(0.00252525 0.00296736)"/>
+<use xlinkHref="#ig-image2_11_549" transform="scale(0.00252525 0.00296736)"/>
 </pattern>
 <linearGradient id="ig-paint0_linear_11_549" x1="309.2" y1="45.8601" x2="67.24" y2="37.4901" gradientUnits="userSpaceOnUse">
 <stop stopColor="#BBEF7F"/>
@@ -355,10 +355,10 @@ export function NearcomGreen(props: React.SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 695 604" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>
 <pattern id="ng-pattern0_11_436" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlinkHref="#image0_11_436" transform="scale(0.00273973 0.00295858)"/>
+<use xlinkHref="#ng-image0_11_436" transform="scale(0.00273973 0.00295858)"/>
 </pattern>
 <pattern id="ng-pattern1_11_436" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlinkHref="#image1_11_436" transform="scale(0.00250627 0.00274725)"/>
+<use xlinkHref="#ng-image1_11_436" transform="scale(0.00250627 0.00274725)"/>
 </pattern>
 <linearGradient id="ng-paint0_linear_11_436" x1="449.95" y1="422.68" x2="-12.3" y2="-135.09" gradientUnits="userSpaceOnUse">
 <stop stopColor="#BBEF7F"/>

@@ -324,22 +324,8 @@ export default function NearStack() {
           <h2 className="text-h1 text-pretty">
             The NEAR <Accent>Stack</Accent>
           </h2>
-          <p className="max-w-[26ch] text-h3 text-cream/70 text-balance">
-            Open infrastructure{" "}
-            <span
-              aria-hidden="true"
-              className="inline-block size-[0.78em] translate-y-[0.06em] rounded-full"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to bottom right, var(--near-teal), var(--near-green-accent), var(--near-teal))",
-              }}
-            />{" "}
-            powering the{" "}
-            <span
-              aria-hidden="true"
-              className="inline-block size-[0.72em] translate-y-[0.04em] rotate-45 rounded-[0.12em] bg-near-green-accent"
-            />{" "}
-            agent economy
+          <p className="max-w-[34ch] text-body-lg text-cream/70 text-balance">
+            Open infrastructure powering the agent economy
           </p>
         </div>
 
@@ -458,7 +444,7 @@ export default function NearStack() {
                 // productos se expandían juntos apenas abría la caja de AI.
                 <div
                   data-open={aiOpen}
-                  className="group/ai rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none"
+                  className="group/ai rounded-2xl border border-cream/12 transition-colors duration-300 data-[open=true]:border-cta-mint/70 motion-reduce:transition-none"
                 >
                   {/* Click en la barra de NEAR AI = saltar a SU parada (el
                       anillo entero encendido); el scroll sigue a los tres. */}
@@ -547,7 +533,7 @@ function RailBlock({
       data-open={expanded}
       className={`group/blk ${
         nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
-      } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none`}
+      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 motion-reduce:transition-none`}
     >
       {/* La barra de título es un botón: click = saltar a la parada de esta
           caja en el track (goTo). Scroll y click, el mismo mecanismo. */}
