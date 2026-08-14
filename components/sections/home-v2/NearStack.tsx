@@ -406,7 +406,10 @@ export default function NearStack() {
           cajas abren hacia ABAJO — nada de lo que se expande puede empujar
           al título. */}
       <div className="group-data-[mode=track]/stack:sticky group-data-[mode=track]/stack:top-0 group-data-[mode=track]/stack:flex group-data-[mode=track]/stack:h-svh group-data-[mode=track]/stack:flex-col group-data-[mode=track]/stack:justify-start">
-        <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-[5svh] lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
+        {/* h-full en modo track: sin altura definida acá, el flex-1 de la
+            grilla y el 1fr de su fila no resuelven contra nada y todo vuelve
+            a medirse por contenido — el arte se movía con cada panel. */}
+        <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:h-full group-data-[mode=track]/stack:min-h-0 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-[5svh] lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
         {/* En modo track el bloque de título sube respecto del centro del
             viewport pineado — pedido de Lawrence. */}
         <div className="flex flex-col items-center gap-3 text-center">
