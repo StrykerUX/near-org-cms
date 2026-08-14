@@ -294,14 +294,15 @@ export default function NearStack() {
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
           {/* El arte, sticky en desktop: acompaña todo el recorrido del rail.
-              El stage mantiene la proporción del ensamble y las capas van en
-              % de esa caja, así que escala entero. */}
-          <div className="lg:sticky lg:top-[8svh] lg:self-start">
+              En lg el stage se dimensiona POR ALTURA (80svh, con el aspect
+              dando el ancho): así el ensamble entero queda siempre en
+              pantalla, sin recortes en ningún punto del scroll. */}
+          <div className="lg:sticky lg:top-[10svh] lg:self-start">
             <div
               ref={stageRef}
               onPointerOver={onOver}
               onPointerLeave={onLeave}
-              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:max-w-[620px]"
+              className="relative mx-auto aspect-[695/650] w-full max-w-[420px] lg:h-[80svh] lg:w-auto lg:max-w-full"
             >
               {/* Apilado: mitad BAJA de la columna (cubos 3–5) al fondo,
                   anillos encima (sus máscaras recortan el canal de la
@@ -419,15 +420,21 @@ function RailBlock({
   expanded: boolean;
 }) {
   return (
+    // El slot (invisible) es el que da el recorrido de scroll; la CAJA visible
+    // es compacta: colapsada queda como una barra de título con borde, y solo
+    // la activa se expande. Sin esto el min-h inflaba el borde de cada caja.
     <div
       data-stack-slot={block.key}
-      data-open={expanded}
-      className={`group/blk ${
-        nested
-          ? "rounded-xl border border-cream/10 lg:min-h-[16svh]"
-          : "rounded-2xl border border-cream/12 lg:min-h-[22svh]"
-      } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none lg:flex lg:flex-col lg:justify-center`}
+      className={`${
+        nested ? "lg:min-h-[16svh]" : "lg:min-h-[22svh]"
+      } lg:flex lg:flex-col lg:justify-center`}
     >
+      <div
+        data-open={expanded}
+        className={`group/blk ${
+          nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream/12"
+        } transition-colors duration-300 data-[open=true]:border-cream/30 motion-reduce:transition-none`}
+      >
       <div className={nested ? "px-4 pb-2 pt-3" : "px-6 pb-3 pt-5"}>
         <p className={nested ? "text-body text-cream/80" : "text-h4 text-cream/45"}>
           {index && (
@@ -460,6 +467,7 @@ function RailBlock({
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
