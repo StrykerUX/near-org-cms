@@ -422,7 +422,7 @@ export default function NearStack() {
             self-start (top-justificado bajo el heading, crece hacia abajo);
             la celda del arte se estira y CENTRA el ensamble en vertical entre
             el fondo del texto de arriba y el fondo del frame. */}
-        <div className="grid grid-cols-1 gap-12 group-data-[mode=track]/stack:min-h-0 group-data-[mode=track]/stack:flex-1 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+        <div className="grid grid-cols-1 gap-12 group-data-[mode=track]/stack:min-h-0 group-data-[mode=track]/stack:flex-1 group-data-[mode=track]/stack:grid-rows-[minmax(0,1fr)] lg:grid-cols-[1.15fr_1fr] lg:gap-16">
           {/* El arte. En lg el stage se dimensiona POR ALTURA (64svh — un 20%
               menos que la pasada anterior — con el aspect dando el ancho):
               como vive dentro del viewport pineado, el ensamble entero queda
