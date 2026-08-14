@@ -211,11 +211,17 @@ export default function NearStack() {
       g.style.opacity = litSeg === "all" || g.dataset.stackSeg === litSeg ? "1" : "0";
     });
     // El split: hover sobre la columna la parte en sus seis cubos (verde y
-    // wireframe a la vez — comparten geometría y orden de grupos).
+    // wireframe a la vez — comparten geometría y orden de grupos). Con un
+    // cubo específico hovereado, sus cinco hermanos se ATENÚAN — el foco es
+    // el feature bajo el cursor. La transición va inline porque también
+    // gobierna opacity, que la clase generada no cubre.
     const split = hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
+    const hoveredCube = hover?.kind === "cube" ? hover.index : null;
     stage.querySelectorAll<SVGGElement>("[data-stack-cube]").forEach((g) => {
       const i = Number(g.dataset.stackCube);
+      g.style.transition = "transform .38s cubic-bezier(.65,0,.35,1), opacity .25s";
       g.style.transform = split ? `translateY(${((i - 2.5) * 32).toFixed(0)}px)` : "translateY(0px)";
+      g.style.opacity = hoveredCube !== null && i !== hoveredCube ? "0.3" : "1";
     });
   }, [litSeg, hover]);
 
