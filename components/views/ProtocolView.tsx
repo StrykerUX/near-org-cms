@@ -1,5 +1,4 @@
 import { GridOverlay } from "@/components/primitives/Grid";
-import NavPillQuantum from "@/components/sections/quantum/NavPillQuantum";
 import FooterV2 from "@/components/sections/FooterV2";
 import ProtocolHero from "@/components/sections/protocol/ProtocolHero";
 import AiScale from "@/components/sections/protocol/AiScale";
@@ -9,7 +8,8 @@ import EcosystemStretch from "@/components/sections/protocol/EcosystemStretch";
 import ContentGallery from "@/components/sections/protocol/ContentGallery";
 import ClosingCta from "@/components/sections/protocol/ClosingCta";
 
-// Composition for /prototype/protocol. Content from the sitemap doc's Protocol
+// Composition for /blockchain (was /prototype/protocol until the sitemap gave
+// it its real URL). Content from the sitemap doc's Protocol
 // tab; direction in docs/protocol-page-brief.md.
 //
 // The order below is the doc's, with one regrouping: sections 4/7/9 are pulled
@@ -34,7 +34,6 @@ import ClosingCta from "@/components/sections/protocol/ClosingCta";
 export default function ProtocolView() {
   return (
     <>
-      <NavPillQuantum />
       <main>
         <ProtocolHero />
         <AiScale />

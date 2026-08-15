@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import SiteHeader from "@/components/site/SiteHeader";
 import BlogCategoryView from "@/components/views/BlogCategoryView";
 import { getPostsByCategory } from "@/lib/queries/posts";
 import { getCategoryBySlug } from "@/lib/queries/taxonomy";
@@ -29,7 +28,6 @@ export default async function CategoryPage({ params, searchParams }: {
 
   return (
     <BlogCategoryView
-      nav={<SiteHeader />}
       categoryName={category.name}
       posts={posts}
       total={total}

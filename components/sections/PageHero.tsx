@@ -20,25 +20,30 @@ export type PageHeroProps = {
   // misma prop reutilizada. Ver docs/fase0-divergencias-blog.md #3.
   stat?: ReactNode;
   size?: keyof typeof SIZE;
-  // Slot para el header del sitio. No es una variante de esta sección — es
-  // contenido que la página/vista compone, para no obligar a esta sección a
-  // importar components/site/SiteHeader (fuera del allowlist de imports de
-  // components/sections/**, ver README.md).
-  nav?: ReactNode;
 };
 
+// `data-nav-dark` no es decorativo: el header del sitio es una barra flotante
+// casi negra (#0a0a0a) y este hero es #101010, así que sin el atributo la barra
+// desaparece sobre él. El atributo la pasa a `--q-nav-bg-over-dark` mientras lo
+// cruza — el mismo mecanismo que usan las secciones oscuras de /prototype.
+//
+// La prop `nav` que esta sección tenía desapareció: el header ya no lo compone
+// cada página, lo monta `app/(site)/layout.tsx` una sola vez. Como es `fixed`,
+// el hero tiene que despejarlo él mismo con `--site-header-block`, que antes le
+// daba el propio nav al estar en flujo.
 export default function PageHero({
   eyebrow,
   title,
   description,
   stat,
   size = "md",
-  nav,
 }: PageHeroProps) {
   return (
-    <section className={`relative bg-[#101010] ${SIZE[size].minH} flex flex-col`}>
+    <section
+      data-nav-dark
+      className={`relative bg-[#101010] ${SIZE[size].minH} flex flex-col pt-[var(--site-header-block)]`}
+    >
       <Container width="wide" className="relative z-10 flex flex-col flex-1">
-        {nav}
         <div className={`flex flex-col flex-1 justify-end ${SIZE[size].pb}`}>
           <span className="font-mono text-[0.7rem] uppercase tracking-[0.3em] text-white/50 mb-4">
             {eyebrow}

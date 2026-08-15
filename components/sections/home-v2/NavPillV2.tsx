@@ -47,7 +47,7 @@ export default function NavPillV2() {
       // scroll crudo: ya viene batcheado en el ticker compartido —así que esta
       // escritura cae en la misma ranura del frame que el resto de las de GSAP
       // en lugar de intercalarse con ellas— y ya sabe la posición de scroll sin
-      // preguntarle al layout. Misma decisión que en `quantum/NavPillQuantum`.
+      // preguntarle al layout. Misma decisión que en `site/SiteHeader`.
       const st = ScrollTrigger.create({
         start: 0,
         end: "max",

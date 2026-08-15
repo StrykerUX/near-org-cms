@@ -37,7 +37,9 @@ if (!/^[a-z][a-z0-9-]*$/.test(slugArg)) {
   process.exit(1);
 }
 
-const RESERVED = new Set(["api", "admin", "blog", "brand", "prototype", "downloads", "preview"]);
+// `brand` salió de la lista: la ruta se liberó cuando la página de tipografía se
+// mudó a `/design-system`, y ahora la ocupa la página de marca del sitemap.
+const RESERVED = new Set(["api", "admin", "blog", "prototype", "downloads", "preview"]);
 if (RESERVED.has(slugArg)) {
   console.error(`✗ "${slugArg}" es una ruta reservada del sistema. Elegí otro nombre.`);
   process.exit(1);

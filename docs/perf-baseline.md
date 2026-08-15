@@ -52,7 +52,7 @@ una vez por entrypoint que lo importa estáticamente: `sections/LatestUpdates.ts
 | `quantum/quantumLattice.ts:130-153` | doble bucle O(n²) sobre ~208 nodos, **2 378 `Math.exp()`** y **357 `stroke()`** — ver corrección abajo |
 | `home-v2/QuantumBars.tsx:113-149` | ~340 spans de `SplitText`, ~170 tweens animando `color` (propiedad de paint) |
 | `quantum/ThreatSequence.tsx:466-491` | `borderColor` animado en 7 elementos de hasta 112 vw × 112 vw |
-| `quantum/NavPillQuantum.tsx:59-62` | `querySelectorAll` + 1 `getBoundingClientRect()` por sección oscura, por rAF de scroll |
+| `site/SiteHeader.tsx` | `querySelectorAll` + 1 `getBoundingClientRect()` por sección oscura, por rAF de scroll |
 | `home-v2/NearStack.tsx:186-188` | 2 forced reflows por `mousemove` (`getBoundingClientRect` + `offsetHeight`) |
 | `quantum/wordField.ts:323-347` | 90–210 timelines nuevas por tanda, cada una con 3 tweens de `color` |
 

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import PageHero from "@/components/sections/PageHero";
 import SearchField from "@/components/sections/SearchField";
 import FilterPills from "@/components/sections/FilterPills";
@@ -9,7 +8,6 @@ import Container from "@/components/primitives/Container";
 import type { PostCardData, PillItem } from "@/components/sections/types";
 
 export type BlogIndexViewProps = {
-  nav: ReactNode;
   posts: PostCardData[];
   total: number;
   page: number;
@@ -20,7 +18,6 @@ export type BlogIndexViewProps = {
 };
 
 export default function BlogIndexView({
-  nav,
   posts,
   total,
   page,
@@ -32,7 +29,6 @@ export default function BlogIndexView({
   return (
     <>
       <PageHero
-        nav={nav}
         size="lg"
         eyebrow="NEAR AI BLOG"
         title={

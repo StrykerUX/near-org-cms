@@ -24,11 +24,32 @@ export default function PrototypeMotionProvider({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    // Si se recarga a mitad de página, el navegador restaura el scroll ANTES
-    // de que existan los triggers — el pin mediría contra un offset viejo.
-    const prevRestoration = history.scrollRestoration;
-    history.scrollRestoration = "manual";
-    window.scrollTo(0, 0);
+    // ── La recarga conserva la posición ────────────────────────────────────
+    //
+    // Acá había un `scrollRestoration = "manual"` + `scrollTo(0, 0)` que mandaba
+    // al hero en cada recarga. Su motivo escrito era "el navegador restaura el
+    // scroll ANTES de que existan los triggers — el pin mediría contra un offset
+    // viejo", y ese motivo ya no aplica: **en este repo no hay un solo
+    // `pin: true`**. Está prohibido por regla (ver `motion/stickyScene.ts`), las
+    // escenas pegadas usan `position: sticky` de CSS y sus triggers solo LEEN
+    // progreso, así que el `refresh()` coordinado de más abajo los mide bien en
+    // cualquier posición de scroll.
+    //
+    // Lo que el reset SÍ hacía, sin decirlo: garantizar que todos los triggers se
+    // recorran desde su inicio. Aterrizando a mitad de página, un trigger que
+    // quedó por encima nunca dispara su `onUpdate` —solo corre dentro del rango—
+    // y sus elementos se quedan en el estado que les dejó el `gsap.set` inicial.
+    //
+    // Quien tiene `onRefresh` o una animación con `scrub` se recorrige solo.
+    // `QuantumBars` y `HeroVideo` lo tienen; `ProofStepper`, `NearStack` y
+    // `FooterV4` no, así que son el sitio donde mirar si algo aparece en un
+    // estado raro tras recargar a mitad de página. El arreglo de fondo es que
+    // cada uno se recorrija en `onRefresh`, no volver a mandar al lector al
+    // principio.
+    //
+    // `clearScrollMemory` se queda: borra las posiciones que ScrollTrigger
+    // recuerda por su cuenta, que si no pelearían con la restauración del
+    // navegador.
     ScrollTrigger.clearScrollMemory();
 
     let lenis: Lenis | null = null;
@@ -128,7 +149,6 @@ export default function PrototypeMotionProvider({
       ro.disconnect();
       window.removeEventListener("load", onLoad);
       mm.revert(); // destruye Lenis y saca su callback del ticker
-      history.scrollRestoration = prevRestoration;
       ScrollTrigger.clearScrollMemory();
     };
   }, []);

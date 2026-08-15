@@ -24,10 +24,12 @@ function navLinks(slot: "header" | "footer"): NavLink[] {
     .map((r) => ({ href: r.route, label: navObject(r.nav)?.label ?? r.title }));
 }
 
-export function headerNav(): NavLink[] {
-  return navLinks("header");
-}
-
+// `headerNav()` vivía acá y se fue con el header viejo: `SiteHeader` ya no
+// deriva su menú del manifiesto de rutas, lleva su propia copy (cuatro menús
+// con iconos y descripciones, transcritos del sitemap). `navLinks` sigue
+// tomando el slot por parámetro porque `PageMeta` todavía distingue
+// `nav.header` de `nav.footer` — si el header nunca vuelve a leer el
+// manifiesto, ese campo es lo próximo que sobra.
 export function footerNav(): NavLink[] {
   return navLinks("footer");
 }

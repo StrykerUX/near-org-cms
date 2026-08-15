@@ -1,4 +1,3 @@
-import NavPillQuantum from "@/components/sections/quantum/NavPillQuantum";
 import QuantumHero from "@/components/sections/quantum/QuantumHero";
 import ProofMarquee from "@/components/sections/quantum/ProofMarquee";
 import StatementWipe from "@/components/sections/quantum/StatementWipe";
@@ -22,26 +21,21 @@ import PrototypeFooter from "@/components/sections/PrototypeFooter";
 
 export default function QuantumSecurityView() {
   return (
-    <>
-      {/* Outside <main>: it is fixed, so it takes no part in the flow. */}
-      <NavPillQuantum />
-
-      <main className="flex flex-col bg-cream">
-        <QuantumHero />
-        <ProofMarquee />
-        <StatementWipe />
-        <ThreatSequence />
-        <MathStatement />
-        <LiveToday />
-        <FieldBreak />
-        <BeyondAccounts />
-        <Comparison />
-        <Roadmap />
-        <InTheNews />
-        <QuantumFaq />
-        <ClosingRing />
-        <PrototypeFooter />
-      </main>
-    </>
+    <main className="flex flex-col bg-cream">
+      <QuantumHero />
+      <ProofMarquee />
+      <StatementWipe />
+      <ThreatSequence />
+      <MathStatement />
+      <LiveToday />
+      <FieldBreak />
+      <BeyondAccounts />
+      <Comparison />
+      <Roadmap />
+      <InTheNews />
+      <QuantumFaq />
+      <ClosingRing />
+      <PrototypeFooter />
+    </main>
   );
 }

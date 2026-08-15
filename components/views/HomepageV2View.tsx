@@ -1,4 +1,3 @@
-import NavPillQuantum from "@/components/sections/quantum/NavPillQuantum";
 import HeroVideo from "@/components/sections/home-v2/HeroVideo";
 import QuantumBars from "@/components/sections/home-v2/QuantumBars";
 import OwnYourOwn from "@/components/sections/home-v2/OwnYourOwn";
@@ -18,23 +17,18 @@ import FooterV2 from "@/components/sections/home-v2/FooterV2";
 
 export default function HomepageV2View() {
   return (
-    <>
-      {/* Fuera del <main>: es fixed, no participa del flujo. */}
-      <NavPillQuantum />
-
-      <main className="flex flex-col bg-cream">
-        <HeroVideo />
-        <QuantumBars />
-        <OwnYourOwn />
-        <NearStack />
-        <ProofStepper />
-        <BelongsNewsletter />
-        <CustomerStories />
-        <TestimonialMarquee />
-        <LatestUpdates />
-        <UpdatesList />
-        <FooterV2 />
-      </main>
-    </>
+    <main className="flex flex-col bg-cream">
+      <HeroVideo />
+      <QuantumBars />
+      <OwnYourOwn />
+      <NearStack />
+      <ProofStepper />
+      <BelongsNewsletter />
+      <CustomerStories />
+      <TestimonialMarquee />
+      <LatestUpdates />
+      <UpdatesList />
+      <FooterV2 />
+    </main>
   );
 }

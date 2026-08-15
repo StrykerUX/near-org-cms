@@ -66,7 +66,7 @@
   --ink-deep: #0e4a30;
   --sweep: #f4ff7a;
 
-  /* ── extension for /prototype/quantum-security ───────────────────────────
+  /* ── extension for /quantum-security ─────────────────────────────────────
      (Comments below are in English by request; the rest of this file is still
      in Spanish. See docs note in components/sections/quantum/README.md.)
 
@@ -534,7 +534,7 @@ button:hover .lucide-plus {
   transform: rotate(270deg);
 }
 
-/* ── /prototype/quantum-security: hover micro-interactions ──────────────────
+/* ── /quantum-security: hover micro-interactions ────────────────────────────
    CSS and not GSAP on purpose: these are :hover states, not scroll animations.
    Putting them in the motion toolkit would mean a listener per button and every
    CTA becoming a client component just to change colour.
@@ -756,6 +756,20 @@ button:hover .lucide-plus {
   --q-nav-bg-over-dark: #16191a;
 }
 
+/* Cuánto espacio ocupa el header desde el borde de arriba: 24px de aire
+   (`pt-6` del Container) + 64px de barra (`h-16`).
+
+   Va en `:root` y no en `[data-q-nav]` porque quien lo consume NO es el header
+   —que es `fixed` y no empuja nada— sino las páginas que necesitan despejarlo.
+   Declarado dentro del header, ninguna de ellas podría leerlo.
+
+   Es opt-in a propósito: las páginas animadas de `/prototype` pasan sus heroes
+   por DEBAJO de la barra a propósito, así que un padding automático en el
+   layout les rompería la composición. */
+:root {
+  --site-header-block: 88px;
+}
+
 /* The bar and every dropdown panel are ONE surface treatment — same colour,
    same transparency, same blur — so they read as parts of the same object
    rather than two dark rectangles that happen to be near each other. Anything
@@ -764,7 +778,7 @@ button:hover .lucide-plus {
   background-color: var(--q-nav-bg);
   /* No backdrop-filter: the surface is opaque, so a blur would cost a
      compositing layer and change nothing. If transparency ever comes back, the
-     blur must come back WITH the `top`-based retract in NavPillQuantum — a
+     blur must come back WITH the `top`-based retract in site/SiteHeader — a
      transform on the nav root makes it a backdrop root and silently kills it. */
 }
 /* The bar lightens while it crosses a dark section. Declared here rather than

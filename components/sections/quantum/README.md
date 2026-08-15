@@ -145,7 +145,7 @@ logo filter, per-link colours, a scroll handler that computes `isDark` — and t
 its `apply()` writes the **light** values down both branches. The flip never
 happens in the source.
 
-`NavPillQuantum` restores it, because an attribute with no effect is a bug rather
+`site/SiteHeader` restores it, because an attribute with no effect is a bug rather
 than a decision. It is the one place this port deliberately does not match the
 reference's rendered behaviour. Reverting is a two-line change: drop the
 `data-[tone=dark]:*` classes.

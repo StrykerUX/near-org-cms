@@ -174,15 +174,22 @@ sin tocar la base de datos. El fetching vive en `page.tsx`/`lib/queries/*`,
 nunca en un `view` o una `section`.
 
 **Manifiesto de rutas:** cada página con `page.meta.ts` entra automáticamente
-al nav (header/footer) y al sitemap. Al crear o editar uno, correr
+al nav del footer y al sitemap. Al crear o editar uno, correr
 `pnpm gen:routes` — `lib/routes.generated.ts` es un cache commiteado, no la
 fuente de verdad (`predev`/`prebuild` lo regeneran solos).
 
 **Única regla que el build hace cumplir:** `page.meta.ts` solo puede
-`import type { PageMeta } from "@/lib/page-meta"` — nada más. `SiteHeader.tsx`
-es `"use client"` y arrastra todo lo que un `page.meta.ts` importe al bundle
-de cliente; un import de servidor ahí revienta con un error de bundle confuso.
+`import type { PageMeta } from "@/lib/page-meta"` — nada más. Un import de
+servidor colado ahí llega al bundle de cliente por cualquier consumidor
+`"use client"` del manifiesto, y revienta con un error de bundle confuso.
 Se verifica con `pnpm lint:page-meta` (corre en `prebuild` y en CI).
+
+**Header del sitio:** hay UNO — `components/site/SiteHeader.tsx` — y lo montan
+`app/(site)/layout.tsx` y `app/prototype/layout.tsx`. **Ninguna página ni view
+lo importa.** Es `fixed`, así que las páginas que no quieran que su contenido
+le pase por debajo despejan con `pt-[var(--site-header-block)]`; las de
+`/prototype` animadas no lo hacen a propósito. Su menú es copy hardcodeada, no
+sale del manifiesto de rutas.
 
 **Página nueva:** la skill `/new-page <slug> "<Título>"` (o
 `node scripts/new-page.mjs <slug> "<Título>"` a mano) es un atajo — genera

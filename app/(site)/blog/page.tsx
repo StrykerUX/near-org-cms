@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import SiteHeader from "@/components/site/SiteHeader";
 import BlogIndexView from "@/components/views/BlogIndexView";
 import { getPublishedPosts, getCategoryPills } from "@/lib/queries/posts";
 import { toMetadata } from "@/lib/seo";
@@ -24,7 +23,6 @@ export default async function BlogIndex({
 
   return (
     <BlogIndexView
-      nav={<SiteHeader />}
       posts={posts}
       total={total}
       page={page}

@@ -228,7 +228,7 @@ export const ROADMAP_STAGES: RoadmapStage[] = [
 // `NAV_LINKS` vivía acá: la lista plana de cuatro etiquetas del nav viejo. Se fue al
 // integrar el menú real, cuyas entradas llevan un `icon` que es un componente de React —
 // y este módulo es de datos puros, sin JSX, para que la forma no cambie el día que la
-// copy venga de la base de datos. El menú se declara en `NavPillQuantum.tsx`, con la
+// copy venga de la base de datos. El menú se declara en `components/site/SiteHeader.tsx`, con la
 // excepción anotada ahí.
 
 // ── de StatementWipe.tsx ──

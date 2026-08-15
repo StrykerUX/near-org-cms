@@ -30,23 +30,11 @@ export default function PrototypeLandingView() {
   return (
     <main className="flex flex-col">
       {/* 1. Nav + Hero */}
-      <section className="relative flex min-h-[90vh] flex-col bg-muted pt-6 pb-16">
-        <Container as="nav" className="flex items-center justify-between rounded-full bg-secondary px-2 py-2 pl-6 text-secondary-foreground">
-          <span className="font-sans text-h4 font-medium lowercase">near</span>
-          <div className="hidden items-center gap-8 md:flex">
-            <a href="#" className="text-eyebrow uppercase text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
-              Founders
-            </a>
-            <a href="#" className="text-eyebrow uppercase text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
-              Developers
-            </a>
-            <a href="#" className="text-eyebrow uppercase text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
-              Tech stack
-            </a>
-          </div>
-          <Button href="#">Get started</Button>
-        </Container>
-
+      {/* El nav propio de esta página —una píldora blanca con Founders /
+          Developers / Tech stack— se fue: ahora la cubre el `SiteHeader` que
+          monta `app/prototype/layout.tsx`. El `pt` pasó de `pt-6` (el aire
+          sobre aquel nav en flujo) a despejar la barra flotante. */}
+      <section className="relative flex min-h-[90vh] flex-col bg-muted pt-[var(--site-header-block)] pb-16">
         <Container className="flex flex-1 flex-col items-center justify-center text-center">
           <h1 className="text-display font-medium text-foreground text-pretty">
             Own your

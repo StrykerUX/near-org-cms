@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import SiteHeader from "@/components/site/SiteHeader";
 import BlogTagView from "@/components/views/BlogTagView";
 import { getPostsByTag } from "@/lib/queries/posts";
 import { getTagBySlug } from "@/lib/queries/taxonomy";
@@ -27,7 +26,6 @@ export default async function TagPage({ params, searchParams }: {
 
   return (
     <BlogTagView
-      nav={<SiteHeader />}
       tagName={tag.name}
       posts={posts}
       total={total}

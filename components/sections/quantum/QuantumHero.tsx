@@ -14,7 +14,7 @@ import {
   type LatticeHandle,
 } from "@/components/sections/quantum/quantumLattice";
 
-// Hero for /prototype/quantum-security: the node field along the bottom, the
+// Hero for /quantum-security: the node field along the bottom, the
 // centred headline, and a CTA that drops to the roadmap.
 //
 // The top gradient is not decoration: the field reaches all the way up and

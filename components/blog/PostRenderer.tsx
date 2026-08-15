@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { renderBlocks, RenderComponents } from "@near/cms-core/lib/tiptap-renderer";
 import { readingTime } from "@near/cms-core/lib/readingTime";
-import SiteHeader from "@/components/site/SiteHeader";
 
 interface PostRendererProps {
   post: {
@@ -38,15 +37,22 @@ export default function PostRenderer({ post, layout = "public" }: PostRendererPr
   return (
     <>
       {/* HERO */}
-      <div style={heroStyle} className="relative">
+      {/* El header del sitio ya no se compone acá: lo monta
+          `app/(site)/layout.tsx` una sola vez. Como es `fixed`, el hero lo
+          despeja con `--site-header-block` — pero solo en `layout="public"`,
+          porque la vista previa del admin renderiza esto SIN ese layout y ahí
+          no hay ninguna barra que despejar.
+
+          Sin `data-nav-dark`, a diferencia de PageHero: el fondo de este hero
+          lo elige quien escribe el post (`heroBgColor`/`heroBgImage`, y gris
+          claro por defecto), así que no se puede afirmar estáticamente que sea
+          oscuro. */}
+      <div
+        style={heroStyle}
+        className={`relative ${layout === "public" ? "pt-[var(--site-header-block)]" : ""}`}
+      >
         {post.heroBgImage && (
           <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
-        )}
-
-        {layout === "public" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1920px] px-5 sm:px-10 lg:px-20">
-            <SiteHeader />
-          </div>
         )}
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 pt-8 pb-12">

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import PageHero from "@/components/sections/PageHero";
 import PostGrid from "@/components/sections/PostGrid";
 import EmptyState from "@/components/sections/EmptyState";
@@ -7,7 +6,6 @@ import Container from "@/components/primitives/Container";
 import type { PostCardData } from "@/components/sections/types";
 
 export type BlogTagViewProps = {
-  nav: ReactNode;
   tagName: string;
   posts: PostCardData[];
   total: number;
@@ -17,7 +15,6 @@ export type BlogTagViewProps = {
 };
 
 export default function BlogTagView({
-  nav,
   tagName,
   posts,
   total,
@@ -28,7 +25,6 @@ export default function BlogTagView({
   return (
     <>
       <PageHero
-        nav={nav}
         size="md"
         eyebrow="Tag"
         title={`#${tagName}`}

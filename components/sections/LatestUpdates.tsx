@@ -1,54 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
+import { useCallback, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import type { UnicornStudioScene } from "unicornstudio-react/next";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { onViewportToggle } from "@/components/primitives/motion/pauseOffscreen";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+// El SDK de Unicorn, su precarga ociosa y el gateo del mouse viven en el toolkit
+// de motion desde que las cards del índice del repo los necesitan también. Las
+// decisiones de por qué se cargan así están documentadas allá.
+import {
+  UnicornScene,
+  UNICORN_COVERS,
+  useIdlePreload,
+  useMouseOnlyOnHover,
+} from "@/components/primitives/motion/unicornScene";
 
-// ── El SDK de Unicorn entra en su propio chunk, y solo si se llega a usar ─────
+// ── Cuándo se montan las escenas EN ESTA SECCIÓN ─────────────────────────────
 //
-// `unicornstudio-react/next` embute el runtime completo de Unicorn Studio: 912KB
-// en disco. Con el import estático, ese peso entraba en el bundle de cliente de
-// TODA página que renderizara esta sección, replicado una vez por entrypoint
-// (llegaron a ser tres chunks idénticos de 879KB).
-//
-// `next/dynamic` con `ssr: false` lo saca a un chunk aparte que se pide cuando el
-// componente se monta. Y el componente no se monta hasta que la sección se acerca
-// al viewport (ver `nearViewport` más abajo), así que en una visita que no llega
-// a scrollear hasta acá, no se descarga nunca.
-//
-// El `lazyLoad` del propio wrapper NO cubría esto: difiere la INICIALIZACIÓN de la
-// escena, no la descarga del SDK que la inicializa.
-const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
-  ssr: false,
-});
-
-// ── Cuándo se montan las escenas ─────────────────────────────────────────────
-//
-// Montar el componente es lo que ARRANCA todo el trabajo caro, y eso no es obvio:
-// el `lazyLoad` del SDK no espera a que la sección se acerque para empezar. Al
-// registrar una escena hace `!lazyLoad || isInView ? initializePlanes() : Mt(m)`,
-// y ese `Mt` es un prewarm que se encola en el acto. Los 100px de margen del SDK
-// solo gobiernan el paso a "en vista", no el arranque.
-//
-// Y el trabajo es del orden de SEGUNDOS, sin que la red tenga nada que ver: medido
-// en localhost, donde el chunk se sirve al instante, las dos primeras cards
-// tardaban ~5s en pintar. Se va en la cola del SDK, que inicializa las escenas DE
-// UNA EN UNA (tres acá, cada una con 5 capas y un blur de 4 pases), planifica cada
-// paso con `requestIdleCallback({timeout: 500})`, y POSPONE la cola mientras
-// detecta scroll reintentando cada 80ms — y con Lenis el scroll sigue emitiendo un
-// rato después de soltar la rueda.
-//
-// De ahí las dos vías de abajo, en orden de preferencia:
-//
-//  1. `useIdlePreload` — tras `window.load` y con el hilo libre. Es la buena: el
-//     lector todavía está en el hero, así que esos segundos no los ve nadie.
-//  2. El gate por scroll (`SCENE_LEAD`) — red de seguridad para cuando (1) no
-//     corre: conexión limitada, o un navegador sin `requestIdleCallback`.
+// `useIdlePreload` es la vía preferida (ver el toolkit). El gate por scroll de
+// acá es la red de seguridad para cuando esa no corre —conexión limitada, o un
+// navegador sin `requestIdleCallback`—: esta sección está al fondo de una página
+// larga, así que en ese caso alcanza con montarlas al acercarse.
 //
 // Las dos escriben el mismo `ready`, y encender un booleano que ya está encendido
 // no re-renderiza nada, así que no hace falta coordinarlas.
@@ -56,168 +29,34 @@ const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
 /** Viewports de anticipación del gate por scroll, cuando es el que decide. */
 const SCENE_LEAD = 3;
 
-/**
- * Tope de espera del idle callback. Sin él, en una pestaña que nunca queda ociosa
- * la precarga no ocurriría y todo caería en el gate por scroll.
- */
-const IDLE_TIMEOUT = 2000;
-
-/** La parte de la Network Information API que se usa acá. No está en lib.dom. */
-type Connection = { saveData?: boolean; effectiveType?: string };
-
-/**
- * `true` si el visitante pidió ahorrar datos o su conexión es mala. En ese caso NO
- * se precarga: 877KB de SDK para un cover decorativo no es un intercambio que
- * corresponda hacer en nombre de alguien con datos contados. Queda el gate por
- * scroll, que solo los descarga si de verdad baja hasta la sección.
- *
- * La API es solo de Chromium; donde no existe, se precarga (que es el default
- * razonable: no hay señal de que la red sea un problema).
- */
-function prefersLessData(): boolean {
-  const conn = (navigator as Navigator & { connection?: Connection }).connection;
-  if (!conn) return false;
-  if (conn.saveData) return true;
-  return conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.effectiveType === "3g";
-}
-
-/**
- * Llama a `onReady` cuando la página terminó de cargar lo necesario para verse Y el
- * hilo principal está libre.
- *
- * Las dos condiciones importan y son distintas: `load` dice que no queda nada
- * crítico compitiendo por la RED (el LCP ya pasó, por definición, antes de `load`),
- * y el idle callback dice que no queda nada compitiendo por la CPU — que es lo que
- * protege al INP del parse de 877KB de JavaScript.
- *
- * Consecuencia buscada para SEO: los dos Core Web Vitals que son señal de ranking
- * quedan fuera del camino de esto por construcción. Y como Googlebot normalmente no
- * llega a ejecutar un idle callback, tampoco gasta presupuesto de rastreo en un SDK
- * que solo pinta un canvas decorativo — el HTML indexable (títulos, bylines, links)
- * sale del servidor y no depende de nada de esto.
- */
-function useIdlePreload(onReady: () => void) {
-  useEffect(() => {
-    if (prefersLessData()) return;
-    if (typeof window.requestIdleCallback !== "function") return;
-
-    let handle = 0;
-    const schedule = () => {
-      handle = window.requestIdleCallback(onReady, { timeout: IDLE_TIMEOUT });
-    };
-
-    if (document.readyState === "complete") schedule();
-    else window.addEventListener("load", schedule, { once: true });
-
-    return () => {
-      if (handle) window.cancelIdleCallback(handle);
-      window.removeEventListener("load", schedule);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-}
-
 // Sin datos reales (fuera de alcance de este draft): copy fijo. Si esta sección
 // se conecta al CMS más adelante, migra a PostCard/PostGrid
 // (components/sections/types.ts) en vez de duplicar esta lista.
 //
-// `scene` es la escena de Unicorn Studio que pinta el cover. `fallback` es el
-// gradiente CSS que se ve si la escena no carga — el cover ES el contenido
-// visual de la card, no un adorno, así que no puede quedar en blanco.
-//
-// Hay una escena por color y no una sola parametrizada porque la escena no
-// expone ninguna variable: el color sale del JPG de su capa `image`. Y las tres
-// no son la misma escena con distinta imagen — cada export trae sus propios
-// shaders (spread del flujo, y la aberración cromática de las franjas, que solo
-// tiene la verde). Los genera scripts/unicorn-scenes.mjs a partir de los
-// exports de assets/unicorn/ — ver docs/unicorn.md.
+// El `cover` sale de `UNICORN_COVERS` y no se declara acá: el JSON de la escena y
+// su gradiente de respaldo van pareados, y con los literales sueltos regenerar
+// una escena dejaba el gradiente viejo mintiendo. Ver el toolkit.
 const POSTS = [
   {
     title: "Sharding the world computer",
     byline: "with Alexander Skidanov",
     cta: "Read the full story",
-    scene: "/unicorn-scene-green.json",
-    fallback:
-      "linear-gradient(118deg, #7fe0d0 0%, #4de88f 30%, #e8e888 60%, #a8a8a0 100%)",
+    cover: UNICORN_COVERS.green,
   },
   {
     title: "Lorem Ipsum Dolar Enet",
     byline: "with Alexander Skidanov",
     cta: "View the interview",
-    scene: "/unicorn-scene-blue.json",
-    fallback:
-      "linear-gradient(118deg, #7fd0f5 0%, #5fb8f5 30%, #a5dcf9 60%, #cdd0da 100%)",
+    cover: UNICORN_COVERS.blue,
   },
   {
     title: "Sharding the world computer",
     byline: "with Alexander Skidanov",
     cta: "Read the full story",
-    scene: "/unicorn-scene-red.json",
-    fallback:
-      "linear-gradient(118deg, #eebb80 0%, #fa9351 30%, #faebdf 60%, #dfd8e6 100%)",
+    cover: UNICORN_COVERS.red,
   },
 ] as const;
 
-/**
- * El mouse de la escena, encendido SOLO mientras el puntero está sobre la card.
- *
- * El SDK de Unicorn engancha un único `mousemove` en `window`, compartido por
- * todas las escenas de la página — por eso, sin esto, las tres cards reaccionan
- * al mouse esté donde esté.
- *
- * La palanca es una bandera que el loop de render consulta EN CADA FRAME:
- *
- *     if (…interactivity?.mouse?.disabled) { }        // no propaga nada
- *     else { scene.mouse.pos = scene.mouse.movePos }  // acá es donde llega al shader
- *
- * Como se lee por frame, darla vuelta en vivo alcanza y no hay que recrear la
- * escena. Todo lo demás —el flujo, el blur, las franjas— sigue animando: lo
- * único que se congela es el aporte del puntero.
- *
- * Por qué NO `setProp("flow_field", "trackMouse", 0)`, que era el candidato
- * obvio: `trackMouse` también lo lee `isAnimating()`, así que tocarlo puede
- * afectar si la capa se considera animada. Esta bandera es quirúrgica.
- *
- * `interactivity` no está en los tipos públicos del wrapper (solo expone
- * `disableMobile`), de ahí el acceso defensivo: si el SDK cambia de forma, el
- * mouse deja de responder pero nada revienta.
- */
-type SceneWithMouse = UnicornStudioScene & {
-  interactivity?: { mouse?: { disabled?: boolean } };
-};
-
-function gateMouse(scene: SceneWithMouse | null, on: boolean) {
-  const mouse = scene?.interactivity?.mouse;
-  if (mouse) mouse.disabled = !on;
-}
-
-function useMouseOnlyOnHover(hovered: boolean) {
-  const scene = useRef<SceneWithMouse | null>(null);
-
-  // El hover en una ref además del estado: el callback de abajo se crea una
-  // sola vez y necesita leer el valor ACTUAL, no el que había al montar.
-  //
-  // La ref se escribe DENTRO del efecto y no durante el render: escribirla en el
-  // cuerpo del componente rompe con rendering concurrente, donde React puede
-  // renderizar sin llegar a commitear.
-  const hoveredRef = useRef(hovered);
-
-  useEffect(() => {
-    hoveredRef.current = hovered;
-    gateMouse(scene.current, hovered);
-  }, [hovered]);
-
-  // Callback ref y no una ref-objeto: la escena llega DESPUÉS del primer render
-  // (el SDK la carga async, y con lazyLoad recién cuando la sección se acerca al
-  // viewport) y sin provocar un render nuevo. Con una ref-objeto el efecto de
-  // arriba no se enteraría hasta el primer hover, y hasta entonces el mouse
-  // quedaría vivo — justo lo que esto viene a evitar. Así se aplica en el
-  // instante en que el SDK la entrega.
-  return useCallback((s: UnicornStudioScene | null) => {
-    scene.current = s as SceneWithMouse | null;
-    gateMouse(scene.current, hoveredRef.current);
-  }, []);
-}
 
 function PostCard({ post, ready }: { post: (typeof POSTS)[number]; ready: boolean }) {
   const [hovered, setHovered] = useState(false);
@@ -247,14 +86,14 @@ function PostCard({ post, ready }: { post: (typeof POSTS)[number]; ready: boolea
           empujar a su padre. */}
       <div
         className="absolute inset-2.5 overflow-hidden rounded-[1.4rem]"
-        style={{ backgroundImage: post.fallback }}
+        style={{ backgroundImage: post.cover.fallback }}
       >
         {/* Hasta que `ready` no se enciende, lo que se ve es el gradiente de
             `fallback` del contenedor de arriba — que es el mismo fallback que ya
             cubría el caso "la escena no carga". */}
         <div className="absolute inset-0" aria-hidden="true">
           {ready && <UnicornScene
-            jsonFilePath={post.scene}
+            jsonFilePath={post.cover.scene}
             width="100%"
             height="100%"
             dpi={1.5}

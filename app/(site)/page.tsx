@@ -17,18 +17,23 @@ export const metadata: Metadata = toMetadata(meta);
 // llenarlo en cada `page.meta.ts` para repetir lo que la ruta ya dice.
 function kindOf(route: string) {
   if (route.startsWith("/prototype")) return "Prototype";
-  if (route === "/brand") return "Design system";
+  if (route === "/design-system") return "Design system";
   return "Site";
 }
 
-// Las tres páginas que son el trabajo en curso. Van primero y con más peso
-// visual; el resto es referencia. Es una lista a mano a propósito: "cuál
-// importa ahora" es una decisión editorial que cambia sola con el proyecto, y
-// no se puede derivar de la ruta ni del `page.meta.ts`.
+// Las páginas que son el trabajo en curso. Van primero y con más peso visual;
+// el resto es referencia. Es una lista a mano a propósito: "cuál importa ahora"
+// es una decisión editorial que cambia sola con el proyecto, y no se puede
+// derivar de la ruta ni del `page.meta.ts`.
+//
+// El orden acá ES el orden en pantalla — `homepage-v4` primero porque es donde
+// está el rediseño activo, y `homepage-v2` justo detrás porque es su referencia
+// (v4 nació como fork suyo: se miran de a pares).
 const FEATURED = [
+  "/prototype/homepage-v4",
   "/prototype/homepage-v2",
-  "/prototype/protocol",
-  "/prototype/quantum-security",
+  "/blockchain",
+  "/quantum-security",
 ];
 
 const PAGES = ROUTES.filter((r) => r.route !== "/")

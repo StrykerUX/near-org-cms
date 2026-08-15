@@ -15,7 +15,7 @@ const REFERENCE = [
 
 export default function ComponentsShowcaseView() {
   return (
-    <main className="mx-auto flex w-full max-w-[1780px] flex-col gap-24 px-[60px] py-16">
+    <main className="mx-auto flex w-full max-w-[1780px] flex-col gap-24 px-[60px] pt-[calc(var(--site-header-block)+4rem)] pb-16">
       <Link
         href="/prototype"
         className="text-body-sm text-muted-foreground hover:text-foreground transition-colors text-pretty"
