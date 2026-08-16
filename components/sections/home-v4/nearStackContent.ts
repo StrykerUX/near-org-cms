@@ -10,6 +10,7 @@
 export type StackKey =
   | "protocol"
   | "intents"
+  | "ai"
   | "ironclaw"
   | "cloud"
   | "market"
@@ -26,6 +27,9 @@ export const PROTOCOL_BLOCK: StackLeaf = {
   key: "protocol",
   name: "NEAR Protocol",
   body: "The settlement layer at the center of the stack — everything else is built around it. Fully sharded and quantum-resistant, with five years on mainnet at 100% uptime, built to clear the agent economy at scale.",
+  // Destinos confirmados: intents.near.org, near.ai y near.com. No salen ni de
+  // `main` ni de la rama del rediseño tal cual — la rama apuntaba este a
+  // `/prototype/protocol`, ruta que ya no existe.
   link: { label: "Visit nearprotocol.com", href: "https://nearprotocol.com" },
 };
 
@@ -33,14 +37,14 @@ export const INTENTS_BLOCK: StackLeaf = {
   key: "intents",
   name: "NEAR Intents",
   body: "The first ring out from the protocol. Intents deal in outcomes, not transactions: say what should happen — a swap, a transfer, a settlement across 30+ chains — and a network of solvers competes to make it true. No bridges, no juggling gas.",
-  link: { label: "Visit near-intents.org", href: "https://near-intents.org" },
+  link: { label: "Visit intents.near.org", href: "https://intents.near.org" },
 };
 
 export const AI_BLOCK = {
   name: "NEAR AI",
   intro:
     "Confidential AI infrastructure, wrapped around the core. Inference and agents run inside encrypted enclaves: requests stay private by design, and every output can be independently verified.",
-  link: { label: "Visit nearai.com", href: "https://nearai.com" },
+  link: { label: "Visit near.ai", href: "https://near.ai" },
   subs: [
     {
       key: "ironclaw",
@@ -68,13 +72,38 @@ export const NEARCOM_BLOCK: StackLeaf = {
 };
 
 // Los seis features del protocolo, UNO POR CUBO de la columna, en el orden de
-// los cubos de arriba hacia abajo (data-stack-cube 0…5). Son los seis claims
-// de /blockchain — misma lista, mismo orden.
-export const PROTOCOL_FEATURES: readonly string[] = [
-  "Nightshade 3.0",
-  "Dynamic resharding",
-  "Speed. Scale. Access.",
-  "Private Shard",
-  "Quantum-safe accounts",
-  "Chain Signatures",
+// los cubos de arriba hacia abajo (data-stack-cube 0…5). Copy VERBATIM del
+// doc "near.org - sitemap" (tab Protocol, secciones 4–9): `sub` es el
+// subhead del doc y `desc` el body. "Speed. Scale. Access." no tiene subhead
+// en el doc, así que solo lleva body.
+export const PROTOCOL_FEATURES: readonly { name: string; sub?: string; desc: string }[] = [
+  {
+    name: "Nightshade 3.0",
+    sub: "Stateless validation is here",
+    desc: "The newest protocol upgrade decouples consensus from execution, adds multi-contract atomic interactions, and introduces a private shard for confidential transactions.",
+  },
+  {
+    name: "Dynamic resharding",
+    sub: "Capacity is a property of the network, not a governance decision.",
+    desc: "A shard now splits automatically when it hits its state-size threshold, validated by state witnesses, with no vote and no human intervention.",
+  },
+  {
+    name: "Speed. Scale. Access.",
+    desc: "600ms blocks and 1.2s finality. Global contracts deploy once and run network-wide. In-memory state removes database latency.",
+  },
+  {
+    name: "Private Shard",
+    sub: "Confidential execution, directly at the protocol layer",
+    desc: "Transactions are shielded from public view, with selective disclosure for compliance-readiness. The foundation for Confidential Intents.",
+  },
+  {
+    name: "Quantum security",
+    sub: "Post-quantum signing is live on mainnet",
+    desc: "NEAR accounts are decoupled from cryptography, so upgrading to quantum-safe keys takes a single key rotation. NEAR supports FIPS-204 (ML-DSA), a NIST-approved post-quantum signing scheme.",
+  },
+  {
+    name: "Chain Signatures",
+    sub: "Native transactions across the multi-chain ecosystem",
+    desc: "Through threshold MPC, a single NEAR account signs and triggers native transactions across 30+ chains, including Bitcoin, Ethereum, Solana, and more, with no bridge contracts. Support spans both ECDSA and EdDSA signature schemes.",
+  },
 ];

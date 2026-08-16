@@ -37,19 +37,40 @@ siquiera en v2. Su `NAV_LINKS` se quitó de `homeV4Content.ts` con él.
 
 ## Lo que se decidió distinto del original
 
-### `NearStack`: escena de scroll → acordeón por hover (rediseño 2026-08)
+### `NearStack`: track sticky sobre los SVG de marca (rediseño 2026-08)
 
-`NearStack` ya no es un port del original: se rediseñó sobre los frames WIP de
-brand ("The NEAR Stack", 2026-08-13). La escena de scroll pegada, el popover
-flotante y la banda de foundation se retiraron; en su lugar un estado `active`
-único mapea las cuatro capas del objeto isométrico (que conserva
-`nearStackGeometry.ts` tal cual) contra un rail de cuatro cajas redondeadas.
-Hover/focus/tap encienden la capa en los verdes CTA (lime/mint/deep por cara,
-el vocabulario de `protocol/spineDiagrams`) y expanden el panel del item con su
-copy y su link "Visit …". Todo por transición CSS — GSAP no participa. Con eso,
-las notas históricas de esta sección sobre el rail de NearStack (click para
-saltar de fase, popovers 1-3, `attr: { stroke }` → `stroke-opacity`) quedaron
-obsoletas y se quitaron de este archivo.
+`NearStack` no es un port del original. Pasó por dos rediseños:
+
+1. Primero, la escena de scroll del original se cambió por un **acordeón por
+   hover**: un estado `active` único contra un rail de cuatro cajas, todo por
+   transición CSS, con la geometría isométrica calculada en un módulo propio
+   (`nearStackGeometry.ts`).
+2. Ahora vale la versión que trae la rama `homepage_LN_v03`: **arte isométrico
+   de cubos exportado de los SVG de marca** (`stackArt.generated.tsx`, ver
+   abajo) con z-layering real de la columna, y **build-up por scroll** sobre un
+   track sticky. `nearStackGeometry.ts` se retiró — el arte ya no se calcula,
+   viene dibujado.
+
+Lo que hace hoy, en corto:
+
+- **Track sticky de `460svh`** con un viewport `h-svh` adentro, encendido por
+  `data-mode=track`. Nunca `pin: true` — la regla del repo sigue en pie, y el
+  archivo lo dice en su propio comentario.
+- **Rail de cajas colapsables**, sin numeración y con strokes cream que pasan a
+  verde mint al abrir. Click en cualquier barra salta a su parada del track.
+- **Hover por pieza**: la columna atenúa a los hermanos, y un *sheen* recorre el
+  contorno de la pieza hovereada, cubo por cubo, con las puntas suavizadas.
+- **Bubbles de producto ancladas al cursor** para los tres segmentos del anillo
+  de AI (IronClaw, NEAR AI Cloud, Agent Market).
+- `PROTOCOL_FEATURES` pasó de una lista de strings a `{ name, sub?, desc }` con
+  copy verbatim del doc de sitemap (tab Protocol, secciones 4–9).
+
+Los destinos de los links son los confirmados para el sitio —intents.near.org,
+near.ai, near.com— y no los que traía la rama, que apuntaba Protocol a
+`/prototype/protocol`, una ruta que ya no existe.
+
+Esta sección vive **solo en `home-v4`**: `home-v2` se quedó a propósito con el
+acordeón del punto 1, como registro de esa iteración.
 
 ### `pin: true` → `position: sticky` (`OwnYourOwn`)
 
@@ -93,25 +114,27 @@ el video deja de ser seekable y hay que reponer ese rodeo.
 - **`image-slot.js`.** Web component de placeholder del canvas de diseño. Su
   reemplazo es `next/image`.
 
-## `nearStackGeometry.ts`
+## `stackArt.generated.tsx`
 
-Módulo puro (sin `"use client"`, sin DOM) que porta el renderer de prismas
-isométricos con back-face culling. Se evalúa una vez al importar —también en el
-servidor— y exporta 30 paths ya formateados.
+Reemplaza a `nearStackGeometry.ts`, que calculaba los prismas isométricos con
+back-face culling y ya no existe. Acá el arte **no se calcula**: son los SVG de
+marca exportados a componentes por un script de una sola vez.
 
-Dos cosas que no se pueden tocar:
+**No editar el path data a mano.** Ocho componentes, en pares verde/wire:
+`ColumnGreen`/`ColumnWire`, `AiRingGreen`/`AiRingWire`,
+`IntentsGreen`/`IntentsWire`, `NearcomGreen`/`NearcomWire`.
 
-- **El `toFixed(1)` de cada coordenada.** Los `d` se calculan en el servidor y se
-  comparan al hidratar; sin redondeo fijo, cualquier diferencia de formateo de
-  float da un warning de mismatch por path.
-- **El orden de `LAYERS`.** Es el z-order del SVG. Cada anillo tiene una parte
-  por detrás del eje y otra por delante, y ese cruce es todo el efecto de
-  profundidad.
+Lo que el componente engancha por atributo:
 
-El port se verificó comparando los 30 `d` y sus roles de cara contra una
-reimplementación literal del `prism()` original: coinciden carácter por carácter.
-Ese script no quedó en el repo — el módulo es determinista y no tiene entradas
-externas, así que no hay nada que pueda derivar.
+- **`data-stack-cube="0"…"5"`** en la columna (Protocol), de arriba hacia abajo.
+  Es el índice que mapea contra `PROTOCOL_FEATURES`.
+- **`data-stack-seg="ironclaw" | "cloud" | "market"`** en el anillo de AI,
+  estampado por región (derecha / arriba-izquierda / abajo). Si una cara se
+  enciende con el segmento equivocado, se re-ajusta en el generador, no acá.
+
+Los anillos y las carcasas se emiten **verbatim** —grupos de blend anidados,
+máscaras y orden de dibujo intactos—: re-parsear su estructura pierde caras sin
+avisar.
 
 También: el `fill` de las caras opacas sale de `--ink`, el mismo token que el
 fondo de la sección. El culling solo se lee como oclusión sólida si coinciden
