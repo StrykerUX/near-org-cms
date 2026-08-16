@@ -4,7 +4,7 @@ const meta = {
   route: "/prototype/hover-lab",
   title: "Hover lab",
   description:
-    "Estudio de interacción: 27 tratamientos de hover para el CTA del header y 16 para los links del footer.",
+    "Interaction study: 39 hover treatments for the header CTA and 28 for the footer links, from a single CSS rule to a fragment shader.",
   // Es una demo interna, igual que /prototype/components: ni en el nav, ni en
   // el sitemap, ni indexable.
   nav: false,

@@ -32,7 +32,9 @@ import "./hoverLabPlus.css";
 
 const LAYERS: Layer[] = ["CSS", "JS", "GSAP", "WebGL"];
 
-type Filter = "Todo" | Layer;
+// La copy de la página va en INGLÉS, como todo el frontend público — los
+// comentarios del código siguen en español, como el resto del repo.
+type Filter = "All" | Layer;
 type Ground = "cream" | "ink";
 
 // Las 27 + 12 y las 16 + 12, en un solo catálogo cada una. La numeración de las
@@ -233,11 +235,11 @@ function sourceOf(v: CtaVariant | LinkVariant, isCta: boolean, isPlus: boolean) 
 }
 
 export default function HoverLabView() {
-  const [filter, setFilter] = useState<Filter>("Todo");
+  const [filter, setFilter] = useState<Filter>("All");
   const [ground, setGround] = useState<Ground>("cream");
 
   const dark = ground === "ink";
-  const keep = (v: CtaVariant | LinkVariant) => filter === "Todo" || v.stack.includes(filter);
+  const keep = (v: CtaVariant | LinkVariant) => filter === "All" || v.stack.includes(filter);
   const ctas = ALL_CTA.filter(keep);
   const links = ALL_LINKS.filter(keep);
 
@@ -265,19 +267,18 @@ export default function HoverLabView() {
           <p className="text-eyebrow uppercase opacity-60">Demo · Interaction study</p>
           <h1 className="text-h1 text-pretty">Hover lab</h1>
           <p className="text-body-lg text-pretty opacity-80">
-            {ALL_CTA.length} tratamientos de hover para el CTA del header y{" "}
-            {ALL_LINKS.length} para los links del footer, cada uno en su contexto
-            real: la barra negra con sus tabs, y la columna del footer en sus dos
-            paletas. Van de una regla de CSS a un fragment shader, y cada tarjeta
-            dice cuándo vale la pena subir un escalón.
+            {ALL_CTA.length} hover treatments for the header CTA and{" "}
+            {ALL_LINKS.length} for the footer links, each one in its real
+            context: the black bar with its tabs, and the footer column in both
+            of its palettes. They run from a single CSS rule to a fragment
+            shader, and every card says when it is worth climbing a step.
           </p>
           <p className={`text-body-sm text-pretty ${dark ? "text-cream/55" : "text-gray-600"}`}>
-            Es una demo aislada.{" "}
-            <code className="font-mono text-caption">SiteHeader</code> y{" "}
-            <code className="font-mono text-caption">SiteFooter</code> siguen
-            exactamente como estaban — el header y el footer que se ven arriba y
-            abajo de esta página son los de producción, sin tocar. Todo lo de
-            acá vive en{" "}
+            This is a sandbox.{" "}
+            <code className="font-mono text-caption">SiteHeader</code> and{" "}
+            <code className="font-mono text-caption">SiteFooter</code> are
+            untouched — the header and footer you see above and below this page
+            are the production ones. Everything here lives in{" "}
             <code className="font-mono text-caption">components/views/hover-lab/</code>.
           </p>
         </header>
@@ -291,16 +292,16 @@ export default function HoverLabView() {
           }`}
         >
           <div className="flex items-center gap-3">
-            <span className="text-caption uppercase opacity-50">Capa</span>
+            <span className="text-caption uppercase opacity-50">Layer</span>
             <Toggle
-              options={["Todo", ...LAYERS] as const}
+              options={["All", ...LAYERS] as const}
               value={filter}
               onChange={setFilter}
               ground={ground}
             />
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-caption uppercase opacity-50">Fondo</span>
+            <span className="text-caption uppercase opacity-50">Ground</span>
             <Toggle
               options={["cream", "ink"] as const}
               value={ground}
@@ -309,20 +310,20 @@ export default function HoverLabView() {
             />
           </div>
           <p className={`text-caption ${dark ? "text-cream/45" : "text-gray-500"}`}>
-            {ctas.length + links.length} variantes visibles
+            {ctas.length + links.length} variants shown
           </p>
         </div>
 
         {/* ── CTA ───────────────────────────────────────────────────────── */}
         <section className="mt-16">
           <div className="flex flex-col gap-3">
-            <h2 className="text-h2 text-pretty">CTA del header</h2>
+            <h2 className="text-h2 text-pretty">Header CTA</h2>
             <p className={`max-w-3xl text-body text-pretty ${dark ? "text-cream/70" : "text-gray-700"}`}>
-              El botón vive en una barra de 64px, pegado a los tabs y a la
-              hamburguesa. Los tres criterios para elegir: que se lea en los dos
-              tonos de barra, que no compita con los tabs, y que el ancho no
-              cambie — la barra es un layout flex y cualquier variación de ancho
-              corre a la hamburguesa de al lado.
+              The button lives in a 64px bar, right next to the tabs and the
+              hamburger. Three criteria to pick one: it has to read in both bar
+              tones, it must not compete with the tabs, and its width must not
+              change — the bar is a flex layout, so any change in width shoves
+              the hamburger sideways.
             </p>
           </div>
 
@@ -350,17 +351,17 @@ export default function HoverLabView() {
         {/* ── Footer links ──────────────────────────────────────────────── */}
         <section className="mt-24">
           <div className="flex flex-col gap-3">
-            <h2 className="text-h2 text-pretty">Links del footer</h2>
+            <h2 className="text-h2 text-pretty">Footer links</h2>
             <p className={`max-w-3xl text-body text-pretty ${dark ? "text-cream/70" : "text-gray-700"}`}>
-              Otro problema: no hay que llamar la atención, hay que dejarse
-              elegir entre nueve iguales. Todo lo que mueva la caja hace temblar
-              la columna cuando el puntero la recorre en diagonal, y el footer
-              real existe en dos paletas — cream sobre negro en el takeover de
-              desktop, tinta sobre cream en mobile — así que ninguna variante
-              puede depender de un color fijo. Todas leen{" "}
+              A different problem: the job is not to draw attention, it is to be
+              picked out of nine identical siblings. Anything that moves the box
+              makes the column shudder as the pointer cuts across it, and the
+              real footer exists in two palettes — cream on black in the desktop
+              takeover, ink on cream on mobile — so no variant can depend on a
+              fixed colour. They all read{" "}
               <code className="font-mono text-caption">--hv-fg</code> /{" "}
-              <code className="font-mono text-caption">--hv-dim</code>: el
-              switch de fondo cambia el ground, no las variantes.
+              <code className="font-mono text-caption">--hv-dim</code>: the
+              ground switch changes the ground, not the variants.
             </p>
           </div>
 
@@ -390,35 +391,34 @@ export default function HoverLabView() {
               dark ? "border-white/10 bg-white/[0.035]" : "border-black/[0.08] bg-white"
             }`}
           >
-            <h2 className="text-h3 text-pretty">Las diez con shader comparten un contexto</h2>
+            <h2 className="text-h3 text-pretty">The ten shader variants share one context</h2>
             <div
               className={`mt-5 flex flex-col gap-3 text-body-sm text-pretty ${
                 dark ? "text-cream/70" : "text-gray-700"
               }`}
             >
               <p>
-                Los navegadores permiten 16 contextos WebGL por navegador y{" "}
-                <strong>8 por origen</strong> en desktop (8 en Android). Al
-                pasarse no falla de forma visible: el navegador mata el contexto
-                más viejo, así que la página se degrada al azar según por dónde
-                hayas scrolleado.
+                Browsers allow 16 live WebGL contexts per browser and{" "}
+                <strong>8 per origin</strong> on desktop (8 on Android). Going
+                over doesn&rsquo;t fail visibly: the browser kills the oldest
+                context, so the page degrades at random depending on where
+                you&rsquo;ve scrolled.
               </p>
               <p>
-                La salida no es administrar diez contextos mejor, es no
-                necesitarlos. Hay <strong>un</strong> puntero, así que hay como
-                mucho un efecto corriendo:{" "}
+                The fix isn&rsquo;t managing ten contexts better, it&rsquo;s not
+                needing them. There is <strong>one</strong> pointer, so there is
+                at most one effect running:{" "}
                 <code className="font-mono text-caption">gl/sharedGL.ts</code>{" "}
-                mantiene un solo canvas y lo reparenta al elemento hovereado,
-                cambiando de programa. Los shaders quedan compilados y
-                cacheados; en reposo no hay canvas en el DOM ni callback en el
-                ticker.
+                keeps a single canvas and reparents it to the hovered element,
+                switching programs. Shaders stay compiled and cached; at rest
+                there is no canvas in the DOM and no callback on the ticker.
               </p>
               <p>
-                Los colores tampoco están en el GLSL: salen de{" "}
-                <code className="font-mono text-caption">--cta-lime</code> y
-                compañía leídos del <code className="font-mono text-caption">:root</code>.
-                Un hex copiado en un shader sería una segunda fuente de verdad
-                para la paleta.
+                The colours aren&rsquo;t in the GLSL either: they come from{" "}
+                <code className="font-mono text-caption">--cta-lime</code> and
+                friends, read off <code className="font-mono text-caption">:root</code>.
+                A hex pasted into a shader would be a second source of truth for
+                the palette.
               </p>
             </div>
           </div>
@@ -428,47 +428,50 @@ export default function HoverLabView() {
               dark ? "border-white/10 bg-white/[0.035]" : "border-black/[0.08] bg-white"
             }`}
           >
-            <h2 className="text-h3 text-pretty">Cuando una gane</h2>
+            <h2 className="text-h3 text-pretty">When one wins</h2>
             <ol
               className={`mt-5 flex list-decimal flex-col gap-3 pl-5 text-body-sm text-pretty ${
                 dark ? "text-cream/70" : "text-gray-700"
               }`}
             >
               <li>
-                Si es sólo CSS, su regla se muda a{" "}
+                If it&rsquo;s CSS only, its rule moves to{" "}
                 <code className="font-mono text-caption">app/globals.css</code>{" "}
-                junto a las otras{" "}
-                <code className="font-mono text-caption">[data-q-cta-*]</code> y
-                el botón de{" "}
+                next to the other{" "}
+                <code className="font-mono text-caption">[data-q-cta-*]</code>{" "}
+                and the button in{" "}
                 <code className="font-mono text-caption">SiteHeader</code>{" "}
-                cambia de atributo. Nada más.
+                swaps one attribute. That&rsquo;s the whole port.
               </li>
               <li>
-                Con JS o GSAP, el CTA deja de ser un{" "}
-                <code className="font-mono text-caption">{"<a>"}</code> suelto y
-                pasa a ser un componente en{" "}
+                With JS or GSAP, the CTA stops being a bare{" "}
+                <code className="font-mono text-caption">{"<a>"}</code> and
+                becomes a component in{" "}
                 <code className="font-mono text-caption">components/site/</code>
-                . El header ya es cliente, así que eso no cambia.
+                . The header is already a client component, so nothing changes
+                there.
               </li>
               <li>
-                Con WebGL hay que decidir además <em>quién</em> es dueño del
-                contexto. En el sitio real el header está en todas las páginas:
-                el runtime tendría que vivir en el layout, no en el botón.
+                With WebGL there&rsquo;s one more decision: <em>who</em> owns
+                the context. On the real site the header is on every page, so
+                the runtime would have to live in the layout, not in the button.
               </li>
               <li>
-                Reduced motion no es opcional: el estado final tiene que llegar
-                igual, sin recorrido. CSS lo resuelve con la media query del
-                final de cada hoja, GSAP con{" "}
-                <code className="font-mono text-caption">gsap.matchMedia()</code>{" "}
-                y el shader congelando{" "}
+                Reduced motion isn&rsquo;t optional: the end state still has to
+                arrive, just without the journey. CSS handles it with the media
+                query at the bottom of each sheet, GSAP with{" "}
+                <code className="font-mono text-caption">gsap.matchMedia()</code>
+                , and the shader by freezing{" "}
                 <code className="font-mono text-caption">uTime</code>.
               </li>
               <li>
-                Los links del footer se aplican en{" "}
-                <code className="font-mono text-caption">LinkColumns</code>, que
-                ya recibe <code className="font-mono text-caption">dark</code> y
-                es el único lugar donde se define{" "}
-                <code className="font-mono text-caption">linkClass</code>.
+                Footer links get applied in{" "}
+                <code className="font-mono text-caption">LinkColumns</code>,
+                which already takes{" "}
+                <code className="font-mono text-caption">dark</code> and is the
+                one place{" "}
+                <code className="font-mono text-caption">linkClass</code> is
+                defined.
               </li>
             </ol>
           </div>
