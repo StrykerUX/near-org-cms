@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { MQ } from "@/components/primitives/motion/motionTokens";
-import type { Tech } from "./CtaVariants";
+import type { Layer } from "./CtaVariants";
 
 // Las 16 variantes de hover para los links del footer.
 //
@@ -27,7 +27,7 @@ import type { Tech } from "./CtaVariants";
 export type LinkVariant = {
   id: string;
   name: string;
-  tech: Tech;
+  stack: Layer[];
   note: string;
   Comp: () => ReactNode;
 };
@@ -335,112 +335,112 @@ export const LINK_VARIANTS: LinkVariant[] = [
   {
     id: "underline",
     name: "Underline",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "La regla crece desde la izquierda. El default correcto: nadie tiene que aprenderlo y funciona en las dos paletas del footer.",
     Comp: () => <LinkList v="underline" />,
   },
   {
     id: "pass",
     name: "Underline pass",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "La regla sale por la derecha y vuelve a entrar por la izquierda. Cuesta 240ms más y a cambio el link se siente recorrido, no sólo marcado.",
     Comp: () => <LinkList v="pass" />,
   },
   {
     id: "roll",
     name: "Line roll",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "La línea rueda y entra su copia. El más editorial de la tanda; obliga a un line-height fijo, así que la columna crece un poco.",
     Comp: LinksRoll,
   },
   {
     id: "arrow",
     name: "Arrow push",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "La flecha entra y empuja al label 18px. Ojo: es de los que mueven la caja, y en una columna de nueve se nota al recorrerla en diagonal.",
     Comp: () => <LinkList v="arrow" />,
   },
   {
     id: "ramp",
     name: "Brand ramp",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "El verde de marca barre el propio texto con background-clip. Mismo mecanismo que el sheen del hero: footer y hero hablarían el mismo idioma.",
     Comp: () => <LinkList v="ramp" />,
   },
   {
     id: "chars",
     name: "Char lift",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Cada letra sube con 18ms de retardo. El índice lo pone el JSX en --i; la animación sigue siendo CSS puro.",
     Comp: LinksChars,
   },
   {
     id: "dim",
     name: "Dim siblings",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "No ilumina el link: apaga a los hermanos. Lo que más rápido dirige la mirada en una columna larga, y es una sola regla.",
     Comp: () => <LinksGroup host="hv-dim-host" v="dim" />,
   },
   {
     id: "bracket",
     name: "Brackets",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Corchetes que entran desde afuera. Vocabulario técnico, coherente con un sitio de protocolo; el ancho no cambia porque son absolutos.",
     Comp: () => <LinkList v="bracket" />,
   },
   {
     id: "pill",
     name: "Pill",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Un chip crece detrás del texto. El único que da un área de click evidente, a costa de hacer la columna visualmente más pesada.",
     Comp: () => <LinkList v="pill" />,
   },
   {
     id: "strike",
     name: "Strike to underline",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "La línea nace tachando el texto y baja a subrayado. Más memorable que un subrayado limpio; también más lento (440ms de recorrido).",
     Comp: () => <LinkList v="strike" />,
   },
   {
     id: "glitch",
     name: "RGB glitch",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Dos copias en cian y magenta con steps(). El extremo ruidoso del rango — está para marcar el límite, no para el footer real.",
     Comp: () => <LinkList v="glitch" />,
   },
   {
     id: "focus",
     name: "Blur focus",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Como dim, pero con desenfoque. Más cinematográfico y más caro: un filtro por hermano, cada uno rasterizado aparte.",
     Comp: () => <LinksGroup host="hv-focus-host" v="focus" />,
   },
   {
     id: "rail",
     name: "Shared rail",
-    tech: "CSS + JS",
+    stack: ["CSS", "JS"],
     note: "Un indicador único que se desliza entre los links. El que mejor comunica que la columna es un grupo y no nueve cosas sueltas.",
     Comp: LinksRail,
   },
   {
     id: "torch",
     name: "Torch",
-    tech: "CSS + JS",
+    stack: ["CSS", "JS"],
     note: "Un halo que ilumina lo que pasa por debajo, con una copia enmascarada de la lista. Espectacular y el más caro de los 16.",
     Comp: LinksTorch,
   },
   {
     id: "gsap-chars",
     name: "Char stagger",
-    tech: "GSAP",
+    stack: ["GSAP"],
     note: "SplitText: sube con power3 y vuelve con elastic. La ida y la vuelta pueden tener curvas distintas, que es lo que CSS no da.",
     Comp: LinksGsapChars,
   },
   {
     id: "gsap-magnet",
     name: "Magnet + elastic rule",
-    tech: "GSAP",
+    stack: ["GSAP"],
     note: "El label se imanta en X y el subrayado se dibuja con un elastic. Sólo en X: en Y el link invadiría la fila de arriba.",
     Comp: LinksGsapMagnet,
   },

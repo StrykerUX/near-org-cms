@@ -13,25 +13,28 @@ import { useReducedMotion } from "./useReducedMotion";
 // Acá cada variante es lo más chica posible — un botón, un gesto — para que la
 // comparación sea entre gestos y no entre implementaciones.
 //
-// El reparto de tecnología es el punto de la demo:
+// El reparto por CAPAS es el punto de la demo. Cada variante declara las que
+// usa, y la lista se lee como una escalera de costo — se sube un escalón sólo
+// cuando el de abajo no alcanza:
 //
-//   CSS       — el hover entero cabe en una regla. Si el gesto se puede hacer
-//               así, se hace así: cero JS, cero riesgo de quedar pegado, y
-//               `prefers-reduced-motion` se atiende con una media query.
-//   CSS + JS  — el CSS anima, el JS sólo dice DÓNDE está el puntero (custom
-//               properties). Sigue sin haber un rAF corriendo.
-//   JS        — hace falta un loop o tocar el contenido (imán, ripple,
-//               scramble). Web Animations API o rAF, sin librería.
-//   GSAP      — hace falta una curva, un stagger o una timeline reversible que
-//               CSS no puede expresar. Es el escalón más caro; entra sólo
-//               cuando el gesto lo justifica.
+//   CSS    — el hover entero cabe en una regla. Cero JS, nada que pueda quedar
+//            pegado, y `prefers-reduced-motion` se atiende con una media query.
+//   JS     — hace falta saber dónde está el puntero (y entonces el JS sólo
+//            escribe custom properties) o correr un loop / tocar el contenido.
+//   GSAP   — hace falta una curva, un stagger o una timeline reversible que
+//            CSS no puede expresar.
+//   WebGL  — hace falta pintar por píxel: ruido, distorsión, luz. Es el
+//            escalón caro de verdad; ver `gl/sharedGL.ts` para lo que cuesta.
+//
+// Una variante `["CSS", "JS", "GSAP", "WebGL"]` no es "mejor" que una `["CSS"]`:
+// es más cara. La tarjeta de cada una dice cuándo vale la pena.
 
-export type Tech = "CSS" | "CSS + JS" | "JS" | "GSAP";
+export type Layer = "CSS" | "JS" | "GSAP" | "WebGL";
 
 export type CtaVariant = {
   id: string;
   name: string;
-  tech: Tech;
+  stack: Layer[];
   /** Qué hace y, sobre todo, cuándo elegirlo. */
   note: string;
   Comp: () => ReactNode;
@@ -688,189 +691,189 @@ export const CTA_VARIANTS: CtaVariant[] = [
   {
     id: "sweep",
     name: "Sweep",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Lo que hay hoy en producción. Gradiente desde el reposo; el hover mueve la luz en vez de revelar algo. Línea de base para comparar todo lo demás.",
     Comp: () => <Cta v="sweep" />,
   },
   {
     id: "wipe",
     name: "Wipe",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "El relleno entra desde la izquierda y el label cambia de color al mismo ritmo (dos capas clipeadas). El gesto del CTA de las secciones, a escala de nav.",
     Comp: CtaWipe,
   },
   {
     id: "diagonal",
     name: "Diagonal",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Mismo wipe con el corte inclinado 18°. Más rápido de leer que el recto porque el ojo sigue la punta de la diagonal.",
     Comp: () => <Cta v="diagonal" />,
   },
   {
     id: "iris",
     name: "Iris",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Crece desde el centro, donde estaría el click. El más 'botón' de todos, y el más lento en llegar a las esquinas.",
     Comp: () => <Cta v="iris" />,
   },
   {
     id: "roll",
     name: "Label roll",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "El texto rueda y entra su copia. Sin color de por medio: sirve cuando el verde ya se usa en otro lado de la barra.",
     Comp: CtaRoll,
   },
   {
     id: "conic",
     name: "Conic ring",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Un anillo de gradiente que gira. Necesita @property para poder interpolar el ángulo; sin eso sería un salto.",
     Comp: () => <Cta v="conic" />,
   },
   {
     id: "glow",
     name: "Lift + glow",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "1.5px de elevación y un halo. La opción conservadora: no compite con los cuatro tabs, la hamburguesa y el wordmark que ya viven en la barra.",
     Comp: () => <Cta v="glow" />,
   },
   {
     id: "press",
     name: "Press",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Hover mínimo, :active protagonista. La única de la tanda que dice algo en pantallas táctiles, donde :hover no existe.",
     Comp: () => <Cta v="press" />,
   },
   {
     id: "shine",
     name: "Shine",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Banda especular que cruza una vez. En loop sería un anuncio; disparada por el hover es una respuesta.",
     Comp: () => <Cta v="shine" />,
   },
   {
     id: "stripes",
     name: "Stripes",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Barras de la rampa que barren el botón. La única con textura — aguanta porque la barra es negra y lisa.",
     Comp: () => <Cta v="stripes" />,
   },
   {
     id: "shutter",
     name: "Shutter",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Dos mitades que cierran sobre el centro. Lectura mecánica, del mismo vocabulario que el arte isométrico de la home.",
     Comp: () => <Cta v="shutter" />,
   },
   {
     id: "rise",
     name: "Underline rise",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Una regla de 2px que crece hasta ser el botón entero. Un link disfrazado de botón: reposo discreto, hover explícito.",
     Comp: () => <Cta v="rise" />,
   },
   {
     id: "corner",
     name: "Corner + tracking",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Reacciona la caja, no el color: el radio se cierra y el tracking se abre. El padding compensa para que el nav no se reacomode.",
     Comp: () => <Cta v="corner" />,
   },
   {
     id: "arrow",
     name: "Arrow reveal",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "El único que agrega información (hacia dónde lleva) en vez de sólo confirmar que hay un botón. El hueco de la flecha ya está reservado.",
     Comp: CtaArrow,
   },
   {
     id: "dots",
     name: "Dither dots",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "El relleno aparece tramado y se cierra. Máscara de puntos con el radio animado vía @property.",
     Comp: () => <Cta v="dots" />,
   },
   {
     id: "inset",
     name: "Inset close",
-    tech: "CSS",
+    stack: ["CSS"],
     note: "Entra por los cuatro bordes a la vez, con un solo clip-path animado. Simétrico, y por eso más quieto de lo que parece.",
     Comp: () => <Cta v="inset" />,
   },
   {
     id: "spotlight",
     name: "Spotlight",
-    tech: "CSS + JS",
+    stack: ["CSS", "JS"],
     note: "Un halo que sigue al cursor. El JS escribe --mx/--my y nada más; el resto es CSS. Cero rAF.",
     Comp: CtaSpotlight,
   },
   {
     id: "direction",
     name: "Directional fill",
-    tech: "CSS + JS",
+    stack: ["CSS", "JS"],
     note: "El relleno entra y sale POR DONDE pasó el puntero. La que mejor respeta la trayectoria del gesto; cuesta 12 líneas de JS.",
     Comp: CtaDirection,
   },
   {
     id: "tilt",
     name: "3D tilt",
-    tech: "CSS + JS",
+    stack: ["CSS", "JS"],
     note: "Perspectiva real con brillo contrario a la inclinación. Máximo 7°: más que eso y el texto de 14px se ve borroso.",
     Comp: CtaTilt,
   },
   {
     id: "magnetic",
     name: "Magnetic (rAF)",
-    tech: "JS",
+    stack: ["JS"],
     note: "Lerp a mano que se apaga solo al llegar. Mide sobre el wrapper, no sobre el botón, o el imán se persigue a sí mismo.",
     Comp: CtaMagnetic,
   },
   {
     id: "ripple",
     name: "Ripple (WAAPI)",
-    tech: "JS",
+    stack: ["JS"],
     note: "Material Design, pero disparado por el hover y no por el click. El radio se calcula hasta la esquina más lejana del punto de entrada.",
     Comp: CtaRipple,
   },
   {
     id: "scramble",
     name: "Scramble",
-    tech: "JS",
+    stack: ["JS"],
     note: "El label se resuelve de izquierda a derecha. Ancho fijo y espacios intactos: sin eso es el efecto que peor envejece.",
     Comp: CtaScramble,
   },
   {
     id: "gsap-magnet",
     name: "Magnetic + parallax",
-    tech: "GSAP",
+    stack: ["GSAP"],
     note: "quickTo para el botón y para el label a media velocidad, con vuelta elástica. El paralaje es lo que le da masa.",
     Comp: CtaGsapMagnet,
   },
   {
     id: "gsap-chars",
     name: "Char roll",
-    tech: "GSAP",
+    stack: ["GSAP"],
     note: "SplitText: la línea sale letra por letra mientras la nueva entra. Timeline pausada con play/reverse — entrar y salir rápido no encola nada.",
     Comp: CtaGsapChars,
   },
   {
     id: "gsap-squash",
     name: "Squash & stretch",
-    tech: "GSAP",
+    stack: ["GSAP"],
     note: "1.06 × 0.94: el volumen se conserva, que es lo que lo separa de un scale. El elastic sólo en la vuelta.",
     Comp: CtaGsapSquash,
   },
   {
     id: "gsap-sparks",
     name: "Sparks",
-    tech: "GSAP",
+    stack: ["GSAP"],
     note: "El extremo celebratorio del rango. Sirve para un Claim o un Mint; casi seguro no para el CTA permanente de un header.",
     Comp: CtaGsapSparks,
   },
   {
     id: "gsap-draw",
     name: "Outline draw",
-    tech: "GSAP",
+    stack: ["GSAP"],
     note: "El contorno se dibuja con stroke-dasharray sobre un rect SVG. El largo se mide con getTotalLength(): un rect redondeado no es 2(w+h).",
     Comp: CtaGsapDraw,
   },

@@ -3,12 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
-import { CTA_VARIANTS, type Tech } from "./CtaVariants";
-import { LINK_VARIANTS } from "./FooterLinkVariants";
+import { CTA_VARIANTS, type CtaVariant, type Layer } from "./CtaVariants";
+import { CTA_VARIANTS_PLUS, HoverLabDefs } from "./CtaVariantsPlus";
+import { LINK_VARIANTS, type LinkVariant } from "./FooterLinkVariants";
+import { LINK_VARIANTS_PLUS } from "./FooterLinkVariantsPlus";
 import "./hoverLab.css";
+import "./hoverLabPlus.css";
 
-// La página del hover lab: 27 tratamientos para el CTA del header y 16 para
-// los links del footer, cada uno en su contexto real y comparables lado a lado.
+// La página del hover lab: 39 tratamientos para el CTA del header y 28 para los
+// links del footer, cada uno en su contexto real y comparables lado a lado.
 //
 // ── Por qué está montado así ────────────────────────────────────────────────
 //
@@ -21,75 +24,99 @@ import "./hoverLab.css";
 // sección oscura (`data-nav-dark`), y varias variantes se caen en uno de los
 // dos estados.
 //
+// El filtro es por CAPA y no por "tipo de efecto" porque la pregunta que hay
+// que poder contestar mirando esto es cuánta maquinaria estamos dispuestos a
+// mantener por un hover — no qué tan lindo se ve.
+//
 // Nada de acá toca los componentes del sitio. Ver la cabecera de hoverLab.css.
 
-const TECHS: Tech[] = ["CSS", "CSS + JS", "JS", "GSAP"];
+const LAYERS: Layer[] = ["CSS", "JS", "GSAP", "WebGL"];
 
-type Filter = "Todo" | Tech;
+type Filter = "Todo" | Layer;
 type Ground = "cream" | "ink";
 
-/** El chip de tecnología. El color no es decorativo: ordena de más barato
- *  (CSS) a más caro (GSAP), que es el eje con el que hay que elegir cuando dos
- *  variantes se ven parecido. */
-const TECH_STYLE: Record<Tech, string> = {
-  CSS: "bg-cta-lime/20 text-cta-deep ring-cta-deep/25",
-  "CSS + JS": "bg-cta-mint/20 text-cta-deep ring-cta-deep/25",
-  JS: "bg-amber-400/15 text-amber-700 ring-amber-600/25",
-  GSAP: "bg-fuchsia-400/15 text-fuchsia-700 ring-fuchsia-600/25",
+// Las 27 + 12 y las 16 + 12, en un solo catálogo cada una. La numeración de las
+// tarjetas sale de estos arrays, así que la 28 es la 28 con cualquier filtro
+// puesto.
+const ALL_CTA = [...CTA_VARIANTS, ...CTA_VARIANTS_PLUS];
+const ALL_LINKS = [...LINK_VARIANTS, ...LINK_VARIANTS_PLUS];
+
+/** El color de cada capa ordena de más barato a más caro. No es decoración: es
+ *  el eje con el que hay que desempatar cuando dos variantes se ven parecido. */
+const LAYER_STYLE: Record<Layer, { light: string; dark: string }> = {
+  CSS: {
+    light: "bg-cta-deep/10 text-cta-deep ring-cta-deep/25",
+    dark: "bg-cta-lime/15 text-cta-lime ring-cta-lime/25",
+  },
+  JS: {
+    light: "bg-amber-400/15 text-amber-700 ring-amber-600/25",
+    dark: "bg-amber-400/15 text-amber-300 ring-amber-300/25",
+  },
+  GSAP: {
+    light: "bg-fuchsia-400/15 text-fuchsia-700 ring-fuchsia-600/25",
+    dark: "bg-fuchsia-400/15 text-fuchsia-300 ring-fuchsia-300/25",
+  },
+  WebGL: {
+    light: "bg-sky-400/15 text-sky-700 ring-sky-600/25",
+    dark: "bg-sky-400/15 text-sky-300 ring-sky-300/25",
+  },
 };
 
-const TECH_STYLE_DARK: Record<Tech, string> = {
-  CSS: "bg-cta-lime/15 text-cta-lime ring-cta-lime/25",
-  "CSS + JS": "bg-cta-mint/15 text-cta-mint ring-cta-mint/25",
-  JS: "bg-amber-400/15 text-amber-300 ring-amber-300/25",
-  GSAP: "bg-fuchsia-400/15 text-fuchsia-300 ring-fuchsia-300/25",
-};
-
-function TechChip({ tech, ground }: { tech: Tech; ground: Ground }) {
-  const style = ground === "ink" ? TECH_STYLE_DARK[tech] : TECH_STYLE[tech];
+function StackChips({ stack, ground }: { stack: Layer[]; ground: Ground }) {
   return (
-    <span className={`rounded-full px-2 py-0.5 text-caption ring-1 ring-inset ${style}`}>
-      {tech}
+    <span className="flex flex-wrap items-center gap-1">
+      {stack.map((layer) => (
+        <span
+          key={layer}
+          className={`rounded-full px-2 py-0.5 text-caption ring-1 ring-inset ${
+            LAYER_STYLE[layer][ground === "ink" ? "dark" : "light"]
+          }`}
+        >
+          {layer}
+        </span>
+      ))}
     </span>
   );
 }
 
-/** La tarjeta común a las dos secciones: número, nombre, chip, el ejemplo en su
- *  contexto, la nota de criterio y el selector con el que encontrarlo en el
- *  código. El selector es literal a propósito — es la única forma de que la
- *  demo no se desincronice de los archivos. */
+/** La tarjeta común a las dos secciones: número, nombre, capas, el ejemplo en
+ *  su contexto, la nota de criterio y dónde está el código. La referencia al
+ *  archivo es literal a propósito — es lo que evita que la demo se
+ *  desincronice de las fuentes. */
 function Card({
   n,
   name,
-  tech,
+  stack,
   note,
-  selector,
+  source,
   ground,
   children,
 }: {
   n: number;
   name: string;
-  tech: Tech;
+  stack: Layer[];
   note: string;
-  selector: string;
+  source: string;
   ground: Ground;
   children: ReactNode;
 }) {
   const surface =
-    ground === "ink"
-      ? "border-white/10 bg-white/[0.035]"
-      : "border-black/[0.08] bg-white";
+    ground === "ink" ? "border-white/10 bg-white/[0.035]" : "border-black/[0.08] bg-white";
   const muted = ground === "ink" ? "text-cream/55" : "text-gray-600";
 
   return (
     <article className={`flex flex-col overflow-hidden rounded-2xl border ${surface}`}>
+      {/* `items-center` y no `items-start`: con cuatro chips de capa el grupo
+          de la derecha puede pasar a dos líneas, y centrarlo mantiene el
+          número y el nombre en la misma línea óptica que en las tarjetas de
+          una sola capa. */}
       <header className="flex items-center gap-3 px-5 pt-4">
         <span className={`text-caption tabular-nums ${muted}`}>
           {String(n).padStart(2, "0")}
         </span>
         <h3 className="text-label">{name}</h3>
         <span className="ml-auto">
-          <TechChip tech={tech} ground={ground} />
+          <StackChips stack={stack} ground={ground} />
         </span>
       </header>
 
@@ -98,7 +125,7 @@ function Card({
       <div className="mt-auto flex flex-col gap-2 px-5 pb-5">
         <p className={`text-body-sm text-pretty ${muted}`}>{note}</p>
         <code className={`font-mono text-caption ${ground === "ink" ? "text-cream/35" : "text-gray-400"}`}>
-          {selector}
+          {source}
         </code>
       </div>
     </article>
@@ -109,6 +136,7 @@ function Card({
  *  la que un hover demasiado grande en el CTA no funciona — hay cuatro
  *  etiquetas compitiendo a diez píxeles de distancia. */
 function NavBar({ ground, children }: { ground: Ground; children: ReactNode }) {
+  const bg = ground === "ink" ? "#16191a" : "#0a0a0a";
   return (
     <div
       // Los dos tonos reales del header: #0a0a0a sobre página clara y #16191a
@@ -117,12 +145,7 @@ function NavBar({ ground, children }: { ground: Ground; children: ReactNode }) {
       // El mismo valor va a `--hv-nav-bg`, que es lo que el anillo cónico (06)
       // usa para tapar el centro del gradiente. Sin esto, con la barra en su
       // tono claro el anillo dejaría un recuadro casi negro adentro.
-      style={
-        {
-          backgroundColor: ground === "ink" ? "#16191a" : "#0a0a0a",
-          "--hv-nav-bg": ground === "ink" ? "#16191a" : "#0a0a0a",
-        } as React.CSSProperties
-      }
+      style={{ backgroundColor: bg, "--hv-nav-bg": bg } as React.CSSProperties}
       className="flex h-16 items-center justify-between gap-4 rounded-[20px] pl-5 pr-3"
     >
       <Image
@@ -173,8 +196,7 @@ function Toggle<T extends string>({
     <div className={`inline-flex rounded-full p-1 ${shell}`}>
       {options.map((opt) => {
         const on = opt === value;
-        const active =
-          ground === "ink" ? "bg-cream text-ink" : "bg-ink text-cream";
+        const active = ground === "ink" ? "bg-cream text-ink" : "bg-ink text-cream";
         const idle = ground === "ink" ? "text-cream/65" : "text-gray-600";
         return (
           <button
@@ -192,13 +214,32 @@ function Toggle<T extends string>({
   );
 }
 
+/** Dónde vive cada variante. Las de CSS puro están enteras en su hoja; el resto
+ *  reparte entre la hoja (el reposo) y el TSX (el gesto), y las de shader suman
+ *  el fragment shader. */
+function sourceOf(v: CtaVariant | LinkVariant, isCta: boolean, isPlus: boolean) {
+  const sheet = isPlus ? "hoverLabPlus.css" : "hoverLab.css";
+  const tsx = isCta
+    ? isPlus
+      ? "CtaVariantsPlus.tsx"
+      : "CtaVariants.tsx"
+    : isPlus
+      ? "FooterLinkVariantsPlus.tsx"
+      : "FooterLinkVariants.tsx";
+
+  if (v.stack.includes("WebGL")) return `[data-v="${v.id}"] · ${tsx} + gl/shaders.ts`;
+  if (v.stack.length === 1 && v.stack[0] === "CSS") return `[data-v="${v.id}"] · ${sheet}`;
+  return `[data-v="${v.id}"] · ${tsx}`;
+}
+
 export default function HoverLabView() {
   const [filter, setFilter] = useState<Filter>("Todo");
   const [ground, setGround] = useState<Ground>("cream");
 
   const dark = ground === "ink";
-  const ctas = CTA_VARIANTS.filter((v) => filter === "Todo" || v.tech === filter);
-  const links = LINK_VARIANTS.filter((v) => filter === "Todo" || v.tech === filter);
+  const keep = (v: CtaVariant | LinkVariant) => filter === "Todo" || v.stack.includes(filter);
+  const ctas = ALL_CTA.filter(keep);
+  const links = ALL_LINKS.filter(keep);
 
   return (
     <main
@@ -206,6 +247,9 @@ export default function HoverLabView() {
         dark ? "bg-ink text-cream" : "bg-cream text-ink"
       }`}
     >
+      {/* El filtro gooey y el gradiente SVG, una sola vez para toda la página. */}
+      <HoverLabDefs />
+
       <div className="mx-auto w-full max-w-[1400px] px-6 pb-32 pt-[calc(var(--site-header-block)+3rem)] lg:px-12">
         <Link
           href="/prototype"
@@ -221,10 +265,11 @@ export default function HoverLabView() {
           <p className="text-eyebrow uppercase opacity-60">Demo · Interaction study</p>
           <h1 className="text-h1 text-pretty">Hover lab</h1>
           <p className="text-body-lg text-pretty opacity-80">
-            {CTA_VARIANTS.length} tratamientos de hover para el CTA del header y{" "}
-            {LINK_VARIANTS.length} para los links del footer, cada uno en su
-            contexto real: la barra negra con sus tabs, y la columna del footer
-            en sus dos paletas.
+            {ALL_CTA.length} tratamientos de hover para el CTA del header y{" "}
+            {ALL_LINKS.length} para los links del footer, cada uno en su contexto
+            real: la barra negra con sus tabs, y la columna del footer en sus dos
+            paletas. Van de una regla de CSS a un fragment shader, y cada tarjeta
+            dice cuándo vale la pena subir un escalón.
           </p>
           <p className={`text-body-sm text-pretty ${dark ? "text-cream/55" : "text-gray-600"}`}>
             Es una demo aislada.{" "}
@@ -246,9 +291,9 @@ export default function HoverLabView() {
           }`}
         >
           <div className="flex items-center gap-3">
-            <span className="text-caption uppercase opacity-50">Técnica</span>
+            <span className="text-caption uppercase opacity-50">Capa</span>
             <Toggle
-              options={["Todo", ...TECHS] as const}
+              options={["Todo", ...LAYERS] as const}
               value={filter}
               onChange={setFilter}
               ground={ground}
@@ -285,19 +330,15 @@ export default function HoverLabView() {
             {ctas.map((v) => (
               <Card
                 key={v.id}
-                n={CTA_VARIANTS.indexOf(v) + 1}
+                // El número sale del catálogo y no del índice del map:
+                // filtrando por capa, la 34 sigue siendo la 34.
+                n={ALL_CTA.indexOf(v) + 1}
                 name={v.name}
-                tech={v.tech}
+                stack={v.stack}
                 note={v.note}
-                selector={
-                  v.tech === "CSS"
-                    ? `[data-v="${v.id}"] · hoverLab.css`
-                    : `[data-v="${v.id}"] · CtaVariants.tsx`
-                }
+                source={sourceOf(v, true, CTA_VARIANTS_PLUS.includes(v))}
                 ground={ground}
               >
-                {/* El número de la tarjeta sale del catálogo y no del índice
-                    del map: filtrando por técnica, la 23 sigue siendo la 23. */}
                 <NavBar ground={ground}>
                   <v.Comp />
                 </NavBar>
@@ -327,15 +368,11 @@ export default function HoverLabView() {
             {links.map((v) => (
               <Card
                 key={v.id}
-                n={LINK_VARIANTS.indexOf(v) + 1}
+                n={ALL_LINKS.indexOf(v) + 1}
                 name={v.name}
-                tech={v.tech}
+                stack={v.stack}
                 note={v.note}
-                selector={
-                  v.tech === "CSS"
-                    ? `[data-v="${v.id}"] · hoverLab.css`
-                    : `[data-v="${v.id}"] · FooterLinkVariants.tsx`
-                }
+                source={sourceOf(v, false, LINK_VARIANTS_PLUS.includes(v))}
                 ground={ground}
               >
                 <FooterPlate ground={ground}>
@@ -346,50 +383,95 @@ export default function HoverLabView() {
           </div>
         </section>
 
-        {/* ── Cómo portar la que gane ───────────────────────────────────── */}
-        <section
-          className={`mt-24 rounded-2xl border p-8 ${
-            dark ? "border-white/10 bg-white/[0.035]" : "border-black/[0.08] bg-white"
-          }`}
-        >
-          <h2 className="text-h3 text-pretty">Cuando una gane</h2>
-          <ol
-            className={`mt-5 flex list-decimal flex-col gap-3 pl-5 text-body-sm text-pretty ${
-              dark ? "text-cream/70" : "text-gray-700"
+        {/* ── Las notas que no caben en una tarjeta ─────────────────────── */}
+        <section className="mt-24 grid gap-6 lg:grid-cols-2">
+          <div
+            className={`rounded-2xl border p-8 ${
+              dark ? "border-white/10 bg-white/[0.035]" : "border-black/[0.08] bg-white"
             }`}
           >
-            <li>
-              Si es CSS puro, su regla se muda a{" "}
-              <code className="font-mono text-caption">app/globals.css</code>{" "}
-              junto a las otras{" "}
-              <code className="font-mono text-caption">[data-q-cta-*]</code>, y
-              el botón de{" "}
-              <code className="font-mono text-caption">SiteHeader</code> cambia
-              de atributo. Nada más.
-            </li>
-            <li>
-              Si trae JS o GSAP, el CTA deja de ser un{" "}
-              <code className="font-mono text-caption">{"<a>"}</code> suelto y
-              pasa a ser un componente propio en{" "}
-              <code className="font-mono text-caption">components/site/</code>.
-              El header ya es cliente, así que no cambia nada de eso.
-            </li>
-            <li>
-              Reduced motion no es opcional: el estado final tiene que llegar
-              igual, sin recorrido. Las de CSS lo resuelven con la media query
-              del final de{" "}
-              <code className="font-mono text-caption">hoverLab.css</code>, las
-              de GSAP con{" "}
-              <code className="font-mono text-caption">gsap.matchMedia()</code>.
-            </li>
-            <li>
-              Los links del footer se aplican en{" "}
-              <code className="font-mono text-caption">LinkColumns</code>, que
-              ya recibe <code className="font-mono text-caption">dark</code> y
-              es el único lugar donde se define{" "}
-              <code className="font-mono text-caption">linkClass</code>.
-            </li>
-          </ol>
+            <h2 className="text-h3 text-pretty">Las diez con shader comparten un contexto</h2>
+            <div
+              className={`mt-5 flex flex-col gap-3 text-body-sm text-pretty ${
+                dark ? "text-cream/70" : "text-gray-700"
+              }`}
+            >
+              <p>
+                Los navegadores permiten 16 contextos WebGL por navegador y{" "}
+                <strong>8 por origen</strong> en desktop (8 en Android). Al
+                pasarse no falla de forma visible: el navegador mata el contexto
+                más viejo, así que la página se degrada al azar según por dónde
+                hayas scrolleado.
+              </p>
+              <p>
+                La salida no es administrar diez contextos mejor, es no
+                necesitarlos. Hay <strong>un</strong> puntero, así que hay como
+                mucho un efecto corriendo:{" "}
+                <code className="font-mono text-caption">gl/sharedGL.ts</code>{" "}
+                mantiene un solo canvas y lo reparenta al elemento hovereado,
+                cambiando de programa. Los shaders quedan compilados y
+                cacheados; en reposo no hay canvas en el DOM ni callback en el
+                ticker.
+              </p>
+              <p>
+                Los colores tampoco están en el GLSL: salen de{" "}
+                <code className="font-mono text-caption">--cta-lime</code> y
+                compañía leídos del <code className="font-mono text-caption">:root</code>.
+                Un hex copiado en un shader sería una segunda fuente de verdad
+                para la paleta.
+              </p>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-2xl border p-8 ${
+              dark ? "border-white/10 bg-white/[0.035]" : "border-black/[0.08] bg-white"
+            }`}
+          >
+            <h2 className="text-h3 text-pretty">Cuando una gane</h2>
+            <ol
+              className={`mt-5 flex list-decimal flex-col gap-3 pl-5 text-body-sm text-pretty ${
+                dark ? "text-cream/70" : "text-gray-700"
+              }`}
+            >
+              <li>
+                Si es sólo CSS, su regla se muda a{" "}
+                <code className="font-mono text-caption">app/globals.css</code>{" "}
+                junto a las otras{" "}
+                <code className="font-mono text-caption">[data-q-cta-*]</code> y
+                el botón de{" "}
+                <code className="font-mono text-caption">SiteHeader</code>{" "}
+                cambia de atributo. Nada más.
+              </li>
+              <li>
+                Con JS o GSAP, el CTA deja de ser un{" "}
+                <code className="font-mono text-caption">{"<a>"}</code> suelto y
+                pasa a ser un componente en{" "}
+                <code className="font-mono text-caption">components/site/</code>
+                . El header ya es cliente, así que eso no cambia.
+              </li>
+              <li>
+                Con WebGL hay que decidir además <em>quién</em> es dueño del
+                contexto. En el sitio real el header está en todas las páginas:
+                el runtime tendría que vivir en el layout, no en el botón.
+              </li>
+              <li>
+                Reduced motion no es opcional: el estado final tiene que llegar
+                igual, sin recorrido. CSS lo resuelve con la media query del
+                final de cada hoja, GSAP con{" "}
+                <code className="font-mono text-caption">gsap.matchMedia()</code>{" "}
+                y el shader congelando{" "}
+                <code className="font-mono text-caption">uTime</code>.
+              </li>
+              <li>
+                Los links del footer se aplican en{" "}
+                <code className="font-mono text-caption">LinkColumns</code>, que
+                ya recibe <code className="font-mono text-caption">dark</code> y
+                es el único lugar donde se define{" "}
+                <code className="font-mono text-caption">linkClass</code>.
+              </li>
+            </ol>
+          </div>
         </section>
       </div>
     </main>
