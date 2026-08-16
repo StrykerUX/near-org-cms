@@ -80,8 +80,9 @@ export default function ClosingRing() {
     // outer ring, which bleeds past this section's own box and was meeting the
     // footer's top edge. It is a MARGIN rather than extra bottom padding because
     // the gap belongs between the two sections, not inside this one; and it goes
-    // here rather than on PrototypeFooter because that footer is shared with
-    // three other prototype pages that have no ring to clear.
+    // here rather than on the footer because `components/site/SiteFooter` is
+    // now mounted by every frontend layout, and no other page has a ring to
+    // clear.
     // Invisible as a gap: the page and the footer are both `--cream`.
     <section ref={rootRef} className="relative z-10 mb-2.5 bg-cream text-foreground">
       <Container className="flex justify-center pb-32 pt-30">

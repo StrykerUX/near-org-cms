@@ -13,7 +13,6 @@ import CustomerStories from "@/components/sections/home-v2/CustomerStories";
 import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
 import LatestUpdates from "@/components/sections/LatestUpdates";
 import UpdatesList from "@/components/sections/UpdatesList";
-import FooterV2 from "@/components/sections/home-v2/FooterV2";
 
 export default function HomepageV2View() {
   return (
@@ -28,7 +27,6 @@ export default function HomepageV2View() {
       <TestimonialMarquee />
       <LatestUpdates />
       <UpdatesList />
-      <FooterV2 />
     </main>
   );
 }

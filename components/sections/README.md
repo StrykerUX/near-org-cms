@@ -59,9 +59,21 @@ dar por terminado un cambio.
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
-| `TestimonialMarquee`, `LatestUpdates`, `UpdatesList`, `PrototypeFooter` | `HomepageV2View` (`PrototypeFooter` también `QuantumSecurityView`) | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado; sobrevivieron porque el port de home-v2 las reusa tal cual. |
-| `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` y `PrototypeFooter` tal cual. |
-| `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). Reusa `PrototypeFooter` tal cual. |
+| `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` | `HomepageV2View` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado; sobrevivieron porque el port de home-v2 las reusa tal cual. |
+| `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` tal cual. |
+| `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
+
+## El footer NO está acá
+
+`components/site/SiteFooter.tsx` — es chrome, lo montan los tres layouts del
+frontend (`(site)`, `(motion)`, `prototype`) y **ninguna view lo importa**,
+igual que `SiteHeader`.
+
+Estuvo en esta carpeta y el resultado fue cuatro copias divergentes del mismo
+archivo (`FooterV2`, `home-v2/FooterV2`, `home-v4/FooterV4`,
+`PrototypeFooter`) más el footer gris que montaba `(site)`. Repartir chrome
+como si fuera una sección es exactamente lo que produce eso. Además necesita
+`@/lib/*` y `next/navigation`, que el contrato de arriba prohíbe.
 
 ## Sección pegada: `position: sticky`, nunca `pin: true`
 

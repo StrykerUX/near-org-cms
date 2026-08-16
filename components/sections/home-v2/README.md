@@ -16,11 +16,16 @@ que la vista las importa de `components/sections/` en vez de duplicarlas:
 | Quotes (marquee) | `TestimonialMarquee` |
 | The latest from NEAR | `LatestUpdates` |
 | Latest updates | `UpdatesList` |
-| Footer | `PrototypeFooter` |
 
 **Si alguna diverge, se copia a `home-v2/` en ese momento** — no antes. Dos
 archivos idénticos en dos carpetas divergen en silencio, que es exactamente lo
 que la separación por carpeta viene a evitar.
+
+El **footer** ya no figura en esa tabla: dejó de ser una sección que esta view
+compone. Es chrome del sitio (`components/site/SiteFooter.tsx`) y lo monta
+`app/prototype/layout.tsx`. Nació acá como `home-v2/FooterV2` y la regla de
+arriba se le aplicó al revés — se copió a `sections/`, a `home-v4/` y a
+`quantum/` sin haber divergido, y terminaron siendo cuatro archivos iguales.
 
 ## Lo que se decidió distinto del original
 

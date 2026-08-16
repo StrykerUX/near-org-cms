@@ -2,37 +2,29 @@ import type { MetadataRoute } from "next";
 import { ROUTES } from "@/lib/routes.generated";
 import { SITE_URL } from "@/lib/site-config";
 
-type NavLink = { href: string; label: string };
-
 // `false` no es "nullish" — el operador `?.` no protege contra él (solo
 // contra null/undefined), así que hay que descartarlo explícitamente antes
 // de leer cualquier campo del objeto.
-function navObject(nav: (typeof ROUTES)[number]["nav"]) {
-  return nav && typeof nav === "object" ? nav : undefined;
-}
-
 function sitemapObject(sitemap: (typeof ROUTES)[number]["sitemap"]) {
   return sitemap && typeof sitemap === "object" ? sitemap : undefined;
 }
 
-function navLinks(slot: "header" | "footer"): NavLink[] {
-  return ROUTES.filter((r) => r.nav !== false && navObject(r.nav)?.[slot] !== false)
-    .sort((a, b) => {
-      const orderDiff = (navObject(a.nav)?.order ?? 999) - (navObject(b.nav)?.order ?? 999);
-      return orderDiff || a.route.localeCompare(b.route);
-    })
-    .map((r) => ({ href: r.route, label: navObject(r.nav)?.label ?? r.title }));
-}
-
-// `headerNav()` vivía acá y se fue con el header viejo: `SiteHeader` ya no
-// deriva su menú del manifiesto de rutas, lleva su propia copy (cuatro menús
-// con iconos y descripciones, transcritos del sitemap). `navLinks` sigue
-// tomando el slot por parámetro porque `PageMeta` todavía distingue
-// `nav.header` de `nav.footer` — si el header nunca vuelve a leer el
-// manifiesto, ese campo es lo próximo que sobra.
-export function footerNav(): NavLink[] {
-  return navLinks("footer");
-}
+// ── Acá vivían `headerNav()` y `footerNav()` ────────────────────────────────
+//
+// Las dos se fueron con el chrome que las consumía. `SiteHeader` dejó de
+// derivar su menú del manifiesto cuando pasó a llevar su propia copy (cuatro
+// menús con iconos y descripciones, transcritos del sitemap), y `SiteFooter`
+// hizo lo mismo al reemplazar al footer gris: su jerarquía son cuatro columnas
+// con sub-grupos, y eso no es expresable sobre una lista plana de rutas.
+//
+// Consecuencia a tener presente: **una página nueva ya no aparece sola en el
+// nav**. Sigue entrando automáticamente al sitemap (`sitemapEntries`), que es
+// lo que lee `app/sitemap.ts`, pero para que se vea en el menú hay que sumarla
+// a mano a `GROUPS` en `components/site/SiteFooter.tsx` y/o al header.
+//
+// El campo `nav` de `PageMeta` queda entonces con un solo consumidor —
+// `app/(site)/page.tsx`, que lo usa para el índice del repo en cards, con su
+// propio filtro inline. `nav.header` y `nav.footer` ya no los lee nadie.
 
 export function sitemapEntries(): MetadataRoute.Sitemap {
   const now = new Date();

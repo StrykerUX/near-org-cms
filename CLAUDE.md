@@ -174,9 +174,15 @@ sin tocar la base de datos. El fetching vive en `page.tsx`/`lib/queries/*`,
 nunca en un `view` o una `section`.
 
 **Manifiesto de rutas:** cada página con `page.meta.ts` entra automáticamente
-al nav del footer y al sitemap. Al crear o editar uno, correr
-`pnpm gen:routes` — `lib/routes.generated.ts` es un cache commiteado, no la
-fuente de verdad (`predev`/`prebuild` lo regeneran solos).
+al **sitemap**. Al crear o editar uno, correr `pnpm gen:routes` —
+`lib/routes.generated.ts` es un cache commiteado, no la fuente de verdad
+(`predev`/`prebuild` lo regeneran solos).
+
+Al **nav no entra sola**: ni el header ni el footer leen el manifiesto, los dos
+llevan su propia copy transcrita del sitemap doc (jerarquía de columnas y
+sub-grupos, que una lista plana de rutas no puede expresar). Una página nueva
+que deba verse en el menú se agrega a mano a `GROUPS` en
+`components/site/SiteFooter.tsx` y/o a `SiteHeader`.
 
 **Única regla que el build hace cumplir:** `page.meta.ts` solo puede
 `import type { PageMeta } from "@/lib/page-meta"` — nada más. Un import de
@@ -184,12 +190,24 @@ servidor colado ahí llega al bundle de cliente por cualquier consumidor
 `"use client"` del manifiesto, y revienta con un error de bundle confuso.
 Se verifica con `pnpm lint:page-meta` (corre en `prebuild` y en CI).
 
-**Header del sitio:** hay UNO — `components/site/SiteHeader.tsx` — y lo montan
-`app/(site)/layout.tsx` y `app/prototype/layout.tsx`. **Ninguna página ni view
-lo importa.** Es `fixed`, así que las páginas que no quieran que su contenido
-le pase por debajo despejan con `pt-[var(--site-header-block)]`; las de
-`/prototype` animadas no lo hacen a propósito. Su menú es copy hardcodeada, no
-sale del manifiesto de rutas.
+**Header y footer del sitio:** hay UNO de cada uno —
+`components/site/SiteHeader.tsx` y `components/site/SiteFooter.tsx` — y los
+montan los tres layouts del frontend: `app/(site)/layout.tsx`,
+`app/(motion)/layout.tsx` y `app/prototype/layout.tsx`. **Ninguna página ni
+view los importa**; son chrome, no secciones (por eso viven en
+`components/site/` y no en `components/sections/`, cuyo contrato además les
+prohibiría importar `@/lib/*`). En el CMS/admin no van.
+
+El header es `fixed`, así que las páginas que no quieran que su contenido le
+pase por debajo despejan con `pt-[var(--site-header-block)]`; las de
+`/prototype` animadas no lo hacen a propósito.
+
+El footer es el del takeover (wipe negro + wordmark con bote, GSAP). En mobile
+y con `prefers-reduced-motion` cae solo a una versión estática en cream. Como
+vive en el layout y no se remonta al navegar, su ScrollTrigger se reconstruye
+con `pathname` y se re-mide con un `ResizeObserver` propio — el detalle está
+comentado en el archivo, junto con por qué usa `st.refresh()` de la instancia y
+nunca el `ScrollTrigger.refresh()` global (congela Lenis).
 
 **Página nueva:** la skill `/new-page <slug> "<Título>"` (o
 `node scripts/new-page.mjs <slug> "<Título>"` a mano) es un atajo — genera

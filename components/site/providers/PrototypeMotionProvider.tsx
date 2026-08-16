@@ -42,7 +42,7 @@ export default function PrototypeMotionProvider({
     //
     // Quien tiene `onRefresh` o una animación con `scrub` se recorrige solo.
     // `QuantumBars` y `HeroVideo` lo tienen; `ProofStepper`, `NearStack` y
-    // `FooterV4` no, así que son el sitio donde mirar si algo aparece en un
+    // `SiteFooter` no, así que son el sitio donde mirar si algo aparece en un
     // estado raro tras recargar a mitad de página. El arreglo de fondo es que
     // cada uno se recorrija en `onRefresh`, no volver a mandar al lector al
     // principio.

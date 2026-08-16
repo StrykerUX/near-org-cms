@@ -1,4 +1,5 @@
 import ReviewWidget from "@/components/site/ReviewWidget";
+import SiteFooter from "@/components/site/SiteFooter";
 import SiteHeader from "@/components/site/SiteHeader";
 
 // Páginas de marketing con coreografía de scroll.
@@ -20,8 +21,14 @@ import SiteHeader from "@/components/site/SiteHeader";
 // Un grupo entre paréntesis no aparece en la URL, así que `/blockchain` sale
 // igual desde acá que desde cualquier otro sitio.
 //
-// Tampoco monta `SiteFooter`: estas páginas traen su propio footer dentro de la
-// view (`PrototypeFooter`), que es parte de su composición y no chrome.
+// El `SiteFooter` SÍ se monta acá, igual que en `(site)` y en `/prototype`.
+// Antes no: cada view traía el suyo (`PrototypeFooter`), y esa decisión es la
+// que terminó en cinco footers divergentes. Es chrome, no composición.
+//
+// Queda FUERA del `PrototypeMotionProvider`, que se monta un nivel más abajo, y
+// eso no lo afecta — por el mismo motivo que al header: usa ScrollTrigger, que
+// es global y no un contexto de React. De hecho le conviene, porque el
+// `refresh()` coordinado del provider re-mide también su umbral.
 //
 // Converger los dos providers en uno sigue siendo trabajo pendiente y anotado en
 // los dos archivos. El día que pase, este grupo puede desaparecer.
@@ -30,6 +37,7 @@ export default function MotionLayout({ children }: { children: React.ReactNode }
     <>
       <SiteHeader />
       {children}
+      <SiteFooter />
       <ReviewWidget />
     </>
   );

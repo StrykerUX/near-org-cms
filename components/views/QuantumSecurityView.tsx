@@ -12,13 +12,10 @@ import InTheNews from "@/components/sections/quantum/InTheNews";
 import QuantumFaq from "@/components/sections/quantum/QuantumFaq";
 import ClosingRing from "@/components/sections/quantum/ClosingRing";
 
-// The footer is shared with /prototype/homepage-v2
-// rather than copied: the reference file's footer variant A is identical to the
-// one already in the repo, down to the link groups and the legal row. If it ever
-// diverges it gets copied into quantum/ AT THAT MOMENT — see the rule in
-// components/sections/home-v2/README.md.
-import PrototypeFooter from "@/components/sections/PrototypeFooter";
-
+// El footer NO se compone acá: lo monta `app/(motion)/layout.tsx` para todas
+// las páginas de este grupo. Esta view tenía su propio `PrototypeFooter`, y esa
+// forma de repartirlo es la que produjo cuatro copias divergentes del mismo
+// archivo — ahora hay uno solo, `components/site/SiteFooter.tsx`.
 export default function QuantumSecurityView() {
   return (
     <main className="flex flex-col bg-cream">
@@ -35,7 +32,6 @@ export default function QuantumSecurityView() {
       <InTheNews />
       <QuantumFaq />
       <ClosingRing />
-      <PrototypeFooter />
     </main>
   );
 }

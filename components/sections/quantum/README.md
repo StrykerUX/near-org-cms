@@ -103,15 +103,15 @@ section, so `MathStatement` outlives the treatment it arrived with.
 
 ## What is shared with the other prototypes
 
-| Rebuild section | Component used |
-|---|---|
-| Footer (variant A) | `../PrototypeFooter` |
+The **footer** used to be listed here as a shared section (`../PrototypeFooter`,
+variant A of the source file). It no longer is: it is site chrome now —
+`components/site/SiteFooter.tsx`, mounted by `app/(motion)/layout.tsx` for this
+route — and no view imports it.
 
-Variant A of the source footer is identical to the one already in the repo, down
-to the link groups and the legal row, so it is imported rather than copied.
-**If it ever diverges it gets copied into `quantum/` at that moment** — not
-before. Two identical files in two folders diverge in silence, which is exactly
-what the per-folder split exists to prevent.
+The rule this table used to state ("if it ever diverges it gets copied into
+`quantum/` at that moment, not before — two identical files in two folders
+diverge in silence") still holds for everything else. The footer is the case
+that proves it: it got copied four times without ever diverging.
 
 The nav pill is **not** shared. `home-v2/NavPillV2` is a solid black
 shrink-to-fit pill; this one is full width, frosted light, and flips its ink over

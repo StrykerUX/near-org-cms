@@ -1,5 +1,4 @@
 import { GridOverlay } from "@/components/primitives/Grid";
-import FooterV2 from "@/components/sections/FooterV2";
 import ProtocolHero from "@/components/sections/protocol/ProtocolHero";
 import AiScale from "@/components/sections/protocol/AiScale";
 import ProtocolSpine from "@/components/sections/protocol/ProtocolSpine";
@@ -43,7 +42,6 @@ export default function ProtocolView() {
         <ContentGallery />
         <ClosingCta />
       </main>
-      <FooterV2 />
       <GridOverlay />
     </>
   );
