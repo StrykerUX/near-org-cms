@@ -904,3 +904,22 @@ html[data-grid="on"] [data-grid-overlay] > div > span {
   background: color-mix(in srgb, var(--near-green) 14%, transparent);
   outline: 1px solid color-mix(in srgb, var(--near-green) 22%, transparent);
 }
+
+/* La luz que recorre el contorno de la pieza hovereada del NEAR Stack
+   (home-v4). El -900 son 3 períodos exactos del dash (300), así el loop no
+   tiene costura. --sheen-phase desfasa las tres pasadas del feather (cola,
+   media y núcleo) para que queden centradas entre sí. Consumida por los
+   paths data-sheen-path de stackArt.generated.tsx.
+
+   Va en el CSS global y no junto a la sección porque los paths la piden por
+   NOMBRE desde un style inline. Un `animation` que apunta a un keyframe
+   inexistente no falla: el navegador lo ignora en silencio, así que la falta
+   de este bloque no rompe el build — solo apaga el efecto. */
+@keyframes stack-sheen-run {
+  from {
+    stroke-dashoffset: var(--sheen-phase, 0px);
+  }
+  to {
+    stroke-dashoffset: calc(var(--sheen-phase, 0px) - 900px);
+  }
+}
