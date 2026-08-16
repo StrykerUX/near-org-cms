@@ -1,0 +1,1334 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Hover Lab — estilos de las variantes de hover del CTA del header y de los
+   links del footer.
+
+   ES UN LABORATORIO, NO EL SISTEMA. Nada de acá lo consume el sitio: los
+   componentes reales (`components/site/SiteHeader.tsx`,
+   `components/site/SiteFooter.tsx`) siguen usando `[data-q-cta-sweep]` y sus
+   utilidades de Tailwind, definidas en `app/globals.css`. Este archivo existe
+   para poder comparar 27 tratamientos lado a lado antes de elegir uno.
+
+   Cuando una variante gane, lo que se PORTA es su regla, no este archivo.
+
+   ── Convenciones ──────────────────────────────────────────────────────────
+   · Todo lleva prefijo `.hv-` y vive bajo `.hv-root`. Es CSS global (lo
+     importa la view), así que el prefijo es lo único que evita colisiones.
+   · Las variantes se aplican con `data-v="<id>"` sobre `.hv-cta` /
+     `.hv-link`, no con clases: así el id que se ve en la tarjeta de la demo
+     es literalmente el selector que hay que buscar acá.
+   · Los colores salen de los tokens de marca de globals.css
+     (`--cta-lime`, `--cta-mint`, `--cta-deep`, `--cream`, `--ink`) — ninguna
+     variante inventa un color, o la comparación mediría paletas y no gestos.
+   · Nada de `@apply`: este archivo no pasa por el pipeline de Tailwind.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.hv-root {
+  /* Geometría heredada del header real: la barra es `--q-nav-radius` (20px)
+     con `--q-nav-pad` (12px) de inset, así que el botón concéntrico queda en
+     20 − 12/2 = 14px. Se copia el número en vez de leer `--q-nav-radius`
+     porque acá no hay `[data-q-nav]` que lo declare. */
+  --hv-radius: 14px;
+  --hv-h: 40px;
+  --hv-ramp: linear-gradient(105deg, var(--cta-lime) 0%, var(--cta-mint) 45%, var(--cta-deep) 100%);
+  /* La rampa espejada del sweep: cada mitad es un degradado completo, que es
+     lo que permite viajar con background-position sin que la banda se salga
+     (ver el comentario largo de `[data-q-cta-sweep]` en globals.css). */
+  --hv-ramp-mirror: linear-gradient(
+    105deg,
+    var(--cta-deep) 0%, var(--cta-mint) 25%, var(--cta-lime) 50%, var(--cta-mint) 75%, var(--cta-deep) 100%
+  );
+  --hv-nav-bg: #0a0a0a;
+}
+
+/* ── Base del CTA ──────────────────────────────────────────────────────────
+   Todas las variantes comparten caja: mismo alto, mismo padding, mismo tipo.
+   Lo único que cambia entre tarjetas es el gesto — si además cambiara el
+   tamaño, la comparación no serviría de nada. */
+.hv-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: var(--hv-h);
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--hv-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+  transform: translateZ(0);
+}
+/* El label siempre por encima de cualquier capa de relleno. */
+.hv-cta > .hv-t {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Reposos reutilizables. El hover no se diseña sin su reposo: el mismo relleno
+   lee como "confirmación" saliendo de un chip translúcido y como "cambio de
+   estado" saliendo de un botón ya verde. */
+.hv-rest-glass {
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+}
+.hv-rest-outline {
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.hv-rest-ramp {
+  background-image: var(--hv-ramp);
+  color: var(--ink);
+}
+.hv-rest-cream {
+  background-color: var(--cream);
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   01 · sweep — LO QUE HAY HOY EN EL SITIO. Va primero como línea de base.
+   Gradiente desde el reposo; el hover no revela nada, MUEVE la luz.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="sweep"] {
+  background-image: var(--hv-ramp-mirror);
+  background-size: 200% 100%;
+  background-position: 100% center;
+  background-repeat: no-repeat;
+  color: var(--ink);
+  transition: background-position 0.28s cubic-bezier(0.33, 0, 0.67, 1);
+}
+.hv-cta[data-v="sweep"]:hover {
+  background-position: 0% center;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   02 · wipe — el relleno entra desde la izquierda y el label cambia de color
+   AL RITMO del relleno, no de golpe: dos capas de texto, la de arriba negra y
+   recortada con el mismo clip que avanza. Es el gesto del CTA de las
+   secciones (`qCtaFill`), traído a la escala del nav.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="wipe"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background-image: var(--hv-ramp);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.34s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-cta[data-v="wipe"]:hover::before {
+  clip-path: inset(0 0 0 0);
+}
+/* La capa negra del label, recortada en sincronía exacta con el relleno. */
+.hv-cta[data-v="wipe"] .hv-t-top {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.34s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-cta[data-v="wipe"]:hover .hv-t-top {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   03 · diagonal — la misma entrada pero en diagonal. El corte inclinado
+   necesita sobresalir del botón (de ahí el `-20%` y el ancho de 140%), o el
+   vértice del skew dejaría una esquina sin pintar.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="diagonal"] {
+  overflow: hidden;
+  transition: color 0.24s ease 0.06s;
+}
+.hv-cta[data-v="diagonal"]::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -20%;
+  width: 140%;
+  z-index: 1;
+  background-image: var(--hv-ramp);
+  transform: skewX(-18deg) scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hv-cta[data-v="diagonal"]:hover::before {
+  transform: skewX(-18deg) scaleX(1);
+}
+.hv-cta[data-v="diagonal"]:hover {
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   04 · iris — el relleno crece desde el centro. Es el gesto más "botón" de
+   todos (nace donde estaría el click), pero también el más lento en percibir:
+   el borde del círculo tarda en llegar a las esquinas.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="iris"] {
+  overflow: hidden;
+  transition: color 0.2s ease 0.08s;
+}
+.hv-cta[data-v="iris"]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  /* Un cuadrado del ancho del botón, redondeado a círculo: al escalar 1.6
+     cubre las esquinas sin tener que medir la diagonal en JS. */
+  width: 120%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-image: var(--hv-ramp);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-cta[data-v="iris"]:hover::before {
+  transform: translate(-50%, -50%) scale(1.6);
+}
+.hv-cta[data-v="iris"]:hover {
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   05 · roll — el label rueda hacia arriba y su copia entra desde abajo. El
+   truco: la segunda copia está posicionada 100% abajo y las dos se mueven
+   juntas, así el reemplazo es continuo y no un cross-fade.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="roll"] {
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+.hv-cta[data-v="roll"] .hv-roll {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  /* line-height fijo: el desplazamiento es exactamente una línea, así que la
+     altura de la caja tiene que ser predecible y no depender del glifo. 1.3 y
+     no 1: a una altura de 1em el recorte pasa por el borde superior de la "G"
+     y la mayúscula queda decapitada. */
+  height: 1.3em;
+  line-height: 1.3em;
+}
+.hv-cta[data-v="roll"] .hv-roll span {
+  display: block;
+  transition: transform 0.38s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-cta[data-v="roll"] .hv-roll span + span {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+}
+.hv-cta[data-v="roll"]:hover .hv-roll span {
+  transform: translateY(-100%);
+}
+.hv-cta[data-v="roll"]:hover .hv-roll span + span {
+  transform: translateY(0);
+}
+.hv-cta[data-v="roll"]:hover {
+  background-color: var(--cta-lime);
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   06 · conic — un anillo de gradiente que GIRA. `@property` es lo que lo hace
+   posible: sin registrar `--hv-angle` con tipo `<angle>`, el navegador no
+   sabe interpolar entre dos valores de un conic-gradient y el giro sería un
+   salto. El anillo se dibuja con la técnica de doble background:
+   border-box para el conic, padding-box para el relleno negro que lo tapa
+   por dentro y deja ver sólo 1px.
+   ───────────────────────────────────────────────────────────────────────── */
+@property --hv-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.hv-cta[data-v="conic"] {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--hv-nav-bg), var(--hv-nav-bg)),
+    conic-gradient(
+      from var(--hv-angle),
+      var(--cta-deep), var(--cta-mint), var(--cta-lime), var(--cta-mint), var(--cta-deep)
+    );
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+.hv-cta[data-v="conic"]:hover {
+  color: var(--cta-lime);
+  animation: hvSpin 1.6s linear infinite;
+}
+@keyframes hvSpin {
+  to { --hv-angle: 360deg; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   07 · glow — el más discreto de todos: 1px de elevación y un halo verde. Es
+   la variante que mejor aguanta un header que ya tiene cuatro tabs, un
+   wordmark y una hamburguesa compitiendo por atención.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="glow"] {
+  background-image: var(--hv-ramp);
+  color: var(--ink);
+  box-shadow: 0 0 0 0 rgba(139, 242, 156, 0);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.32s ease,
+              filter 0.24s ease;
+}
+.hv-cta[data-v="glow"]:hover {
+  transform: translateY(-1.5px);
+  filter: saturate(1.15) brightness(1.04);
+  box-shadow:
+    0 0 0 1px rgba(236, 253, 176, 0.5),
+    0 6px 22px -6px rgba(139, 242, 156, 0.65),
+    0 2px 8px -2px rgba(0, 185, 111, 0.5);
+}
+.hv-cta[data-v="glow"]:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 1px rgba(236, 253, 176, 0.35);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   08 · press — hover casi nulo, `:active` protagonista. Traduce a un header
+   de escritorio lo que en móvil hace el tap: el botón se hunde. Es la única
+   variante de la tanda que dice algo en pantallas táctiles, donde `:hover`
+   no existe.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="press"] {
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.4);
+  transition: transform 0.12s ease, background-color 0.2s ease, box-shadow 0.16s ease;
+}
+.hv-cta[data-v="press"]:hover {
+  background-color: rgba(236, 253, 176, 0.92);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.hv-cta[data-v="press"]:active {
+  transform: scale(0.965);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.28);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   09 · shine — la banda especular que cruza el botón una vez. NO va en loop
+   a propósito: en loop es un anuncio, disparada por el hover es una
+   respuesta. El `left` animado en vez de un transform es deliberado — con
+   `overflow:hidden` y un padre de radio, el transform arrastraba el
+   antialias del borde.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="shine"] {
+  overflow: hidden;
+  background-image: var(--hv-ramp);
+  color: var(--ink);
+}
+.hv-cta[data-v="shine"]::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: -60%;
+  width: 40%;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0s;
+}
+.hv-cta[data-v="shine"]:hover::after {
+  left: 120%;
+  transition: left 0.62s cubic-bezier(0.33, 0, 0.67, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   10 · stripes — barras de la rampa que barren el botón. El único de la
+   tanda con textura: funciona porque el nav es liso y negro, y se caería
+   inmediatamente sobre cualquier fondo con ruido.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="stripes"] {
+  overflow: hidden;
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  transition: color 0.26s ease 0.1s;
+}
+.hv-cta[data-v="stripes"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: repeating-linear-gradient(
+    100deg,
+    var(--cta-lime) 0 10px,
+    var(--cta-mint) 10px 20px
+  );
+  /* Se revela con clip-path para que las barras no se deformen al entrar:
+     un scaleX las haría más gruesas mientras avanzan. */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-cta[data-v="stripes"]:hover::before {
+  clip-path: inset(0 0 0 0);
+}
+.hv-cta[data-v="stripes"]:hover {
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   11 · shutter — dos mitades que se cierran sobre el centro. La lectura es
+   mecánica, casi de obturador; encaja con el vocabulario isométrico de la
+   home mejor que un fade.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="shutter"] {
+  overflow: hidden;
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  transition: color 0.22s ease 0.12s, border-color 0.3s ease;
+}
+.hv-cta[data-v="shutter"]::before,
+.hv-cta[data-v="shutter"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 51%; /* 51 y no 50: medio píxel de solape evita la línea del centro */
+  z-index: 1;
+  background-image: var(--hv-ramp);
+  transition: transform 0.34s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-cta[data-v="shutter"]::before {
+  top: 0;
+  transform: translateY(-100%);
+}
+.hv-cta[data-v="shutter"]::after {
+  bottom: 0;
+  transform: translateY(100%);
+}
+.hv-cta[data-v="shutter"]:hover::before,
+.hv-cta[data-v="shutter"]:hover::after {
+  transform: translateY(0);
+}
+.hv-cta[data-v="shutter"]:hover {
+  color: var(--ink);
+  border-color: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   12 · rise — una regla de 2px al pie que crece hasta ser el botón entero.
+   Es el hover de un link disfrazado de botón: barato de leer, y el estado de
+   reposo no grita.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="rise"] {
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  transition: color 0.24s ease 0.08s;
+}
+.hv-cta[data-v="rise"]::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  height: 2px;
+  background-image: var(--hv-ramp);
+  transition: height 0.34s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-cta[data-v="rise"]:hover::before {
+  height: 100%;
+}
+.hv-cta[data-v="rise"]:hover {
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   13 · corner — la caja misma reacciona: el radio se cierra, el tracking se
+   abre. Sin color de por medio. Es la opción para un header que ya usa el
+   verde en otro lado y no quiere dos acentos compitiendo.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="corner"] {
+  background-color: var(--cream);
+  color: var(--ink);
+  transition: border-radius 0.32s cubic-bezier(0.65, 0, 0.35, 1),
+              letter-spacing 0.32s cubic-bezier(0.65, 0, 0.35, 1),
+              padding 0.32s cubic-bezier(0.65, 0, 0.35, 1),
+              background-color 0.32s ease;
+}
+.hv-cta[data-v="corner"]:hover {
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  /* El padding compensa el tracking: sin esto el texto crece hacia afuera y
+     el botón empuja a la hamburguesa de al lado. */
+  padding: 0 18px;
+  background-color: var(--cta-lime);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   14 · arrow — el label se corre a la izquierda y aparece la flecha. Es el
+   único gesto de la tanda que agrega INFORMACIÓN (hacia dónde lleva) en vez
+   de sólo confirmar que hay un botón. El ancho no cambia: la flecha ya tenía
+   su hueco reservado, o el nav entero se reacomodaría en cada hover.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="arrow"] {
+  background-image: var(--hv-ramp);
+  color: var(--ink);
+  padding-right: 38px;
+  overflow: hidden;
+}
+.hv-cta[data-v="arrow"] .hv-arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  z-index: 2;
+  display: block;
+  translate: -6px -50%;
+  opacity: 0;
+  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease;
+}
+.hv-cta[data-v="arrow"] .hv-t {
+  transition: translate 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-cta[data-v="arrow"]:hover .hv-t {
+  translate: -5px 0;
+}
+.hv-cta[data-v="arrow"]:hover .hv-arrow {
+  translate: 0 -50%;
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   15 · dots — el relleno aparece tramado, como un dither. Una máscara de
+   puntos cuyo radio crece: al principio se ven puntos sueltos de la rampa y
+   al final la máscara es sólida. Guiño al arte isométrico de la home.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="dots"] {
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  transition: color 0.24s ease 0.14s;
+}
+.hv-cta[data-v="dots"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background-image: var(--hv-ramp);
+  /* El tamaño del punto vive en una custom property para poder animarlo en
+     un solo lugar; la máscara se repite cada 6px. */
+  --hv-dot: 0px;
+  -webkit-mask-image: radial-gradient(circle at center, #000 var(--hv-dot), transparent calc(var(--hv-dot) + 0.5px));
+  mask-image: radial-gradient(circle at center, #000 var(--hv-dot), transparent calc(var(--hv-dot) + 0.5px));
+  -webkit-mask-size: 6px 6px;
+  mask-size: 6px 6px;
+  transition: --hv-dot 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+@property --hv-dot {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+.hv-cta[data-v="dots"]:hover::before {
+  --hv-dot: 4.5px;
+}
+.hv-cta[data-v="dots"]:hover {
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   16 · inset — el relleno entra por los CUATRO bordes a la vez. Con un solo
+   `clip-path: inset()` animado de 50% a 0: nadie tiene que sincronizar
+   cuatro capas.
+   ───────────────────────────────────────────────────────────────────────── */
+.hv-cta[data-v="inset"] {
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  transition: color 0.2s ease 0.1s, border-color 0.3s ease;
+}
+.hv-cta[data-v="inset"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background-image: var(--hv-ramp);
+  clip-path: inset(50% 50% 50% 50% round var(--hv-radius));
+  transition: clip-path 0.38s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-cta[data-v="inset"]:hover::before {
+  clip-path: inset(0 0 0 0 round var(--hv-radius));
+}
+.hv-cta[data-v="inset"]:hover {
+  color: var(--ink);
+  border-color: transparent;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CSS + JS — el CSS hace la animación, el JS sólo escribe custom properties.
+   Es el reparto correcto: ninguna de estas tres necesita un rAF, necesitan
+   saber DÓNDE está el puntero. Los handlers viven en CtaVariants.tsx.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* 17 · spotlight — un halo que sigue al cursor dentro del botón. `--mx/--my`
+   las escribe el pointermove; todo lo demás es CSS. */
+.hv-cta[data-v="spotlight"] {
+  --mx: 50%;
+  --my: 50%;
+  overflow: hidden;
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+.hv-cta[data-v="spotlight"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    120px circle at var(--mx) var(--my),
+    var(--cta-lime) 0%,
+    var(--cta-mint) 35%,
+    rgba(0, 185, 111, 0) 70%
+  );
+  opacity: 0;
+  transition: opacity 0.26s ease;
+}
+.hv-cta[data-v="spotlight"]:hover::before {
+  opacity: 1;
+}
+.hv-cta[data-v="spotlight"]:hover {
+  color: var(--ink);
+}
+
+/* 18 · direction — el relleno entra POR DONDE entró el puntero. `--dx/--dy`
+   son el vector de entrada normalizado (−1..1) que el JS calcula al
+   `pointerenter`, y `--sx/--sy` el desplazamiento inicial de la capa. El
+   mismo par se reusa al salir, así que el relleno se retira por el lado por
+   el que el puntero se fue: es la única variante que respeta la trayectoria
+   completa del gesto. */
+.hv-cta[data-v="direction"] {
+  --sx: -100%;
+  --sy: 0%;
+  overflow: hidden;
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  transition: color 0.24s ease;
+}
+.hv-cta[data-v="direction"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: var(--hv-ramp);
+  transform: translate(var(--sx), var(--sy));
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hv-cta[data-v="direction"]:hover::before {
+  transform: translate(0, 0);
+}
+/* El frame en que el JS reposiciona la capa al borde de entrada. Ver el
+   comentario de `place()` en CtaVariants.tsx: sin cortar la transición, el
+   relleno interpolaría desde el lado del hover anterior. */
+.hv-cta[data-v="direction"][data-nt]::before {
+  transition: none;
+}
+.hv-cta[data-v="direction"]:hover {
+  color: var(--ink);
+}
+
+/* 19 · tilt — 3D real, con perspectiva. El brillo se mueve en contra de la
+   inclinación, que es lo que vende la superficie como física. La perspectiva
+   la pone el contenedor y no el botón: aplicada al propio elemento, el punto
+   de fuga viaja con él y el escorzo se ve plano. */
+.hv-tilt-host {
+  display: inline-block;
+  perspective: 600px;
+}
+.hv-cta[data-v="tilt"] {
+  --rx: 0deg;
+  --ry: 0deg;
+  background-image: var(--hv-ramp);
+  color: var(--ink);
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.12s ease-out, box-shadow 0.3s ease;
+}
+.hv-cta[data-v="tilt"]:hover {
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.7);
+}
+.hv-cta[data-v="tilt"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(
+    calc(90deg + var(--ry) * 4),
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0) 60%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.hv-cta[data-v="tilt"]:hover::after {
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   JS puro y GSAP — acá el CSS sólo define el reposo; el gesto lo escribe el
+   componente. Están en este archivo igual para que el reposo de las 27
+   variantes se lea en un solo lugar.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* El área de captura de las dos variantes magnéticas. Un imán que sólo
+   escucha DENTRO del botón no se siente: para cuando el puntero entró, ya no
+   hay hacia dónde atraerlo.
+   El campo es un pseudo-elemento ABSOLUTO y no padding en el host: la barra es
+   un flex, y un host más grande que su botón lo correría respecto del resto de
+   las variantes — con el margin negativo que lo compensa, se saldría del
+   padding de la barra. Así el campo existe sin ocupar layout.
+   Va antes del botón en orden de pintado (los dos están posicionados y el
+   botón viene después en el DOM), así que el botón sigue recibiendo sus
+   propios eventos y el anillo exterior los del host. */
+.hv-magnet-host {
+  position: relative;
+  display: inline-block;
+}
+.hv-magnet-host::before {
+  content: "";
+  position: absolute;
+  inset: -16px -28px;
+}
+
+/* 20 · magnetic (rAF) */
+.hv-cta[data-v="magnetic"] {
+  background-image: var(--hv-ramp);
+  color: var(--ink);
+  will-change: transform;
+}
+
+/* 21 · ripple (Web Animations API) */
+.hv-cta[data-v="ripple"] {
+  overflow: hidden;
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  transition: color 0.3s ease 0.1s;
+}
+.hv-cta[data-v="ripple"]:hover {
+  color: var(--ink);
+}
+.hv-ripple {
+  position: absolute;
+  z-index: 1;
+  border-radius: 50%;
+  background-image: var(--hv-ramp);
+  pointer-events: none;
+}
+
+/* 22 · scramble (rAF sobre el textContent) */
+.hv-cta[data-v="scramble"] {
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+.hv-cta[data-v="scramble"]:hover {
+  border-color: transparent;
+  background-color: var(--cta-lime);
+  color: var(--ink);
+}
+/* Ancho fijo por carácter: sin esto el botón late mientras los glifos
+   aleatorios cambian de avance. Es LA razón por la que un scramble se ve
+   barato en la mayoría de los sitios. */
+.hv-cta[data-v="scramble"] .hv-t {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* 23 · gsap-magnet */
+.hv-cta[data-v="gsap-magnet"] {
+  background-image: var(--hv-ramp);
+  color: var(--ink);
+  will-change: transform;
+}
+
+/* 24 · gsap-chars (SplitText) */
+.hv-cta[data-v="gsap-chars"] {
+  overflow: hidden;
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  transition: background-color 0.34s ease, color 0.34s ease;
+}
+.hv-cta[data-v="gsap-chars"]:hover {
+  background-color: var(--cta-mint);
+  color: var(--ink);
+}
+/* Lo que recorta es la caja de LÍNEA, no el botón. Parece un detalle y es el
+   efecto entero: con el `overflow:hidden` sólo en el botón (40px de alto para
+   un texto de 14px) las letras suben una altura de línea y siguen adentro —
+   se ven flotando en el aire de arriba en vez de desaparecer. */
+.hv-cta[data-v="gsap-chars"] .hv-rollbox {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  height: 1.3em;
+  line-height: 1.3em;
+}
+.hv-cta[data-v="gsap-chars"] .hv-t {
+  display: block;
+  line-height: 1.3em;
+}
+/* La segunda línea espera justo debajo, apilada sobre la primera. Absoluta y
+   no en flujo: si ocupara alto, la caja mediría el doble. */
+.hv-cta[data-v="gsap-chars"] .hv-t-clone {
+  position: absolute;
+  inset: 0;
+}
+
+/* 25 · gsap-squash */
+.hv-cta[data-v="gsap-squash"] {
+  background-image: var(--hv-ramp-mirror);
+  background-size: 200% 100%;
+  background-position: 100% center;
+  color: var(--ink);
+  will-change: transform;
+}
+
+/* 26 · gsap-sparks */
+.hv-cta[data-v="gsap-sparks"] {
+  background-color: rgba(217, 217, 217, 0.2);
+  color: #fff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.hv-cta[data-v="gsap-sparks"]:hover {
+  background-color: rgba(236, 253, 176, 0.95);
+  color: var(--ink);
+}
+.hv-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--cta-lime);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* 27 · gsap-draw — el contorno se dibuja con un SVG encima. Va en SVG y no en
+   bordes porque un `stroke-dasharray` es la única forma de dibujar un
+   perímetro redondeado desde un punto; con cuatro pseudo-elementos las
+   esquinas quedan a 90°. */
+.hv-cta[data-v="gsap-draw"] {
+  background-color: transparent;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+.hv-cta[data-v="gsap-draw"]:hover {
+  color: var(--cta-lime);
+}
+.hv-draw {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.hv-draw rect {
+  fill: rgba(255, 255, 255, 0.05);
+  stroke: url(#hv-draw-ramp);
+  stroke-width: 1.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LINKS DEL FOOTER
+   ──────────────────────────────────────────────────────────────────────────
+   El footer real vive en dos paletas: el panel del takeover (cream sobre
+   negro) y la versión estática de mobile (tinta sobre cream). Toda variante
+   de acá tiene que funcionar en las DOS, así que ninguna nombra un color:
+   todas leen `--hv-fg`, `--hv-dim` y `--hv-accent`, que el ground define.
+   El switch de la demo cambia el ground, no las variantes.
+   ══════════════════════════════════════════════════════════════════════════ */
+.hv-links {
+  --hv-fg: var(--cream);
+  --hv-dim: rgba(245, 244, 241, 0.7);
+  --hv-accent: var(--cta-mint);
+  --hv-plate: var(--ink);
+  --hv-hair: rgba(245, 244, 241, 0.25);
+}
+.hv-links[data-ground="cream"] {
+  --hv-fg: var(--ink);
+  --hv-dim: #6b6b6b;
+  --hv-accent: var(--cta-deep);
+  --hv-plate: var(--cream);
+  --hv-hair: rgba(16, 16, 16, 0.2);
+}
+
+.hv-link {
+  position: relative;
+  display: inline-block;
+  color: var(--hv-dim);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* F01 · underline — la regla crece desde la izquierda. El default correcto:
+   nadie tiene que aprenderlo. */
+.hv-link[data-v="underline"] {
+  transition: color 0.2s ease;
+}
+.hv-link[data-v="underline"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-link[data-v="underline"]:hover {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="underline"]:hover::after {
+  transform: scaleX(1);
+}
+
+/* F02 · pass — la regla ENTRA por la izquierda y SALE por la derecha, en vez
+   de retraerse por donde vino. Todo el efecto está en cambiar el
+   `transform-origin` entre los dos estados: en hover crece desde la izquierda,
+   y al soltar el origin vuelve a la derecha, así que el mismo scaleX(0) que
+   antes la retraía ahora la despide hacia adelante.
+   El link se siente recorrido, no sólo marcado. */
+.hv-link[data-v="pass"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  /* Reposo = origin derecha: es el estado al que se vuelve al salir. */
+  transform-origin: right center;
+  transition: transform 0.26s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-link[data-v="pass"]:hover::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+.hv-link[data-v="pass"] {
+  transition: color 0.2s ease;
+}
+.hv-link[data-v="pass"]:hover {
+  color: var(--hv-fg);
+}
+
+/* F03 · roll — la línea de texto rueda y entra su copia. En una columna de
+   links es el gesto más "editorial" de la tanda; también el más caro en
+   altura de caja, porque necesita line-height fijo. */
+.hv-link[data-v="roll"] {
+  overflow: hidden;
+  height: 1.4em;
+  line-height: 1.4em;
+}
+.hv-link[data-v="roll"] span {
+  display: block;
+  transition: transform 0.36s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hv-link[data-v="roll"] span + span {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="roll"]:hover span {
+  transform: translateY(-100%);
+}
+
+/* F04 · arrow — la flecha aparece y empuja al label. El desplazamiento es de
+   apenas 6px: más que eso y en una columna de nueve links todo el bloque
+   parece temblar. */
+.hv-link[data-v="arrow"] {
+  padding-left: 0;
+  transition: color 0.22s ease, padding-left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-link[data-v="arrow"]::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-link[data-v="arrow"]:hover {
+  color: var(--hv-fg);
+  padding-left: 18px;
+}
+.hv-link[data-v="arrow"]:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* F05 · ramp — el color de marca barre el propio texto con
+   `background-clip: text`. Es el mismo mecanismo del sheen del hero, así que
+   footer y hero hablarían el mismo idioma. */
+.hv-link[data-v="ramp"] {
+  background-image: linear-gradient(
+    100deg,
+    var(--cta-lime) 0%,
+    var(--cta-mint) 35%,
+    var(--hv-dim) 50%,
+    var(--hv-dim) 100%
+  );
+  background-size: 220% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-position 0.45s cubic-bezier(0.33, 0, 0.67, 1);
+}
+.hv-link[data-v="ramp"]:hover {
+  background-position: 0% 0;
+}
+
+/* F06 · chars — cada letra sube con un retardo escalonado. El delay lo pone
+   el JSX por índice (`--i`), que es la única parte que CSS no puede resolver
+   solo; la animación entera sigue siendo CSS. */
+.hv-link[data-v="chars"] {
+  transition: color 0.2s ease;
+}
+.hv-link[data-v="chars"] .hv-char {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i) * 18ms);
+  /* Los espacios colapsan si el span es inline-block y está vacío. */
+  white-space: pre;
+}
+.hv-link[data-v="chars"]:hover {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="chars"]:hover .hv-char {
+  transform: translateY(-3px);
+}
+
+/* F07 · dim — el hover no ilumina el link, APAGA a los hermanos. En una
+   columna de nueve destinos es lo que más rápido dirige la mirada, y es
+   gratis: una sola regla sobre el contenedor. */
+.hv-dim-host:hover .hv-link[data-v="dim"] {
+  color: color-mix(in srgb, var(--hv-dim) 45%, transparent);
+}
+.hv-dim-host .hv-link[data-v="dim"] {
+  transition: color 0.24s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-dim-host:hover .hv-link[data-v="dim"]:hover {
+  color: var(--hv-fg);
+  transform: translateX(3px);
+}
+
+/* F08 · bracket — corchetes que entran desde afuera. Vocabulario técnico,
+   consistente con un sitio de protocolo; el ancho no cambia porque los
+   corchetes son absolutos. */
+.hv-link[data-v="bracket"] {
+  transition: color 0.2s ease;
+}
+.hv-link[data-v="bracket"]::before,
+.hv-link[data-v="bracket"]::after {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  color: var(--hv-accent);
+  transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-link[data-v="bracket"]::before {
+  content: "[";
+  left: -12px;
+  transform: translateX(6px);
+}
+.hv-link[data-v="bracket"]::after {
+  content: "]";
+  right: -12px;
+  transform: translateX(-6px);
+}
+.hv-link[data-v="bracket"]:hover {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="bracket"]:hover::before,
+.hv-link[data-v="bracket"]:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* F09 · pill — un chip de fondo que crece detrás del texto. El único de la
+   tanda que da un área de click evidente, a costa de volver la columna más
+   pesada visualmente. */
+.hv-link[data-v="pill"] {
+  padding: 2px 10px;
+  margin-left: -10px;
+  border-radius: 999px;
+  transition: color 0.22s ease;
+  /* Sin esto el `z-index: -1` del chip lo manda DETRÁS del fondo de la
+     tarjeta —los z negativos se resuelven contra el stacking context más
+     cercano, y un link sin contexto propio no es uno— y el chip
+     desaparecería en vez de quedar detrás del texto. */
+  isolation: isolate;
+}
+.hv-link[data-v="pill"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--hv-fg) 12%, transparent);
+  transform: scale(0.82);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+.hv-link[data-v="pill"]:hover {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="pill"]:hover::before {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* F10 · strike — la línea nace en el medio del texto y baja a subrayado. Una
+   sola caja animando `top` y `opacity`; la lectura es de "tachado que se
+   corrige", que resulta más memorable que un subrayado limpio. */
+.hv-link[data-v="strike"] {
+  transition: color 0.24s ease;
+}
+.hv-link[data-v="strike"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.22s cubic-bezier(0.65, 0, 0.35, 1),
+              top 0.26s cubic-bezier(0.65, 0, 0.35, 1) 0.18s;
+}
+.hv-link[data-v="strike"]:hover {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="strike"]:hover::after {
+  transform: scaleX(1);
+  top: calc(100% + 1px);
+}
+
+/* F11 · glitch — dos copias desplazadas en cian y magenta. Es el gesto más
+   ruidoso de la tanda y está acá para tener el extremo del rango; en un
+   footer de nueve links por columna, sería demasiado. `steps()` en vez de una
+   curva suave: un glitch interpolado se ve como un temblor, no como un
+   error. */
+.hv-link[data-v="glitch"] {
+  transition: color 0.16s ease;
+}
+.hv-link[data-v="glitch"]::before,
+.hv-link[data-v="glitch"]::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.hv-link[data-v="glitch"]::before {
+  color: #00e5ff;
+  transform: translateX(0);
+}
+.hv-link[data-v="glitch"]::after {
+  color: #ff2d95;
+  transform: translateX(0);
+}
+.hv-link[data-v="glitch"]:hover {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="glitch"]:hover::before {
+  opacity: 0.85;
+  animation: hvGlitchA 0.3s steps(2, end) 2;
+}
+.hv-link[data-v="glitch"]:hover::after {
+  opacity: 0.85;
+  animation: hvGlitchB 0.3s steps(2, end) 2;
+}
+@keyframes hvGlitchA {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-2px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes hvGlitchB {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* F12 · focus — los hermanos se desenfocan. Mismo principio que `dim` pero
+   con blur: más cinematográfico y más caro (un filtro por hermano, y el
+   navegador rasteriza cada uno). Medir antes de mandarlo a producción. */
+.hv-focus-host .hv-link[data-v="focus"] {
+  transition: filter 0.28s ease, color 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-focus-host:hover .hv-link[data-v="focus"] {
+  filter: blur(1.6px);
+  opacity: 0.75;
+}
+.hv-focus-host:hover .hv-link[data-v="focus"]:hover {
+  filter: blur(0);
+  opacity: 1;
+  color: var(--hv-fg);
+  transform: scale(1.04);
+}
+
+/* F13 · rail — un indicador COMPARTIDO que se desliza de un link al otro. El
+   JS sólo mide y escribe `--y` y `--h`; el movimiento es una transition. Es
+   el gesto que mejor comunica que los links son un GRUPO y no nueve cosas
+   sueltas. */
+.hv-rail-host {
+  position: relative;
+  padding-left: 14px;
+}
+.hv-rail-host .hv-rail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: var(--h, 0px);
+  border-radius: 2px;
+  background: var(--hv-accent);
+  transform: translateY(var(--y, 0px));
+  opacity: 0;
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              height 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.2s ease;
+}
+.hv-rail-host[data-active="1"] .hv-rail {
+  opacity: 1;
+}
+.hv-rail-host .hv-link[data-v="rail"] {
+  transition: color 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hv-rail-host .hv-link[data-v="rail"]:hover {
+  color: var(--hv-fg);
+  transform: translateX(4px);
+}
+
+/* F14 · torch — un halo que sigue al cursor sobre TODA la columna e ilumina
+   lo que pasa por debajo. La capa iluminada es una copia de la lista recortada
+   con una máscara radial centrada en el puntero: el texto no cambia de color,
+   se revela otro texto. Caro pero espectacular. */
+.hv-torch-host {
+  position: relative;
+  --mx: -999px;
+  --my: -999px;
+}
+/* El link de esta variante no cambia de color por sí mismo: lo que cambia es
+   cuál de las dos capas se ve. La regla existe para que buscar
+   `[data-v="torch"]` encuentre algo, y para dejarlo dicho. */
+.hv-link[data-v="torch"] {
+  transition: none;
+}
+.hv-torch-host .hv-torch-layer {
+  position: absolute;
+  inset: 0;
+  color: var(--hv-fg);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(90px circle at var(--mx) var(--my), #000 0%, transparent 70%);
+  mask-image: radial-gradient(90px circle at var(--mx) var(--my), #000 0%, transparent 70%);
+}
+
+/* F15 · gsap-chars — SplitText + stagger. Mismo gesto que F06 pero con
+   overlap y una curva que CSS no puede expresar por letra sin 12 delays. */
+.hv-link[data-v="gsap-chars"] {
+  transition: color 0.24s ease;
+}
+.hv-link[data-v="gsap-chars"]:hover {
+  color: var(--hv-fg);
+}
+/* Sin `overflow:hidden`, al revés que su primo del CTA: acá las letras suben
+   sólo un 18% de su alto y tienen que verse ENTERAS arriba. Recortarlas sería
+   el bug, no el efecto. */
+.hv-link[data-v="gsap-chars"] {
+  display: inline-block;
+  padding-top: 3px;
+}
+
+/* F16 · gsap-magnet — el label se imanta al cursor y el subrayado se dibuja
+   con un `elastic`. La combinación es lo que lo hace: sólo el imán se siente
+   flojo, sólo el elástico se siente decorativo. */
+.hv-link[data-v="gsap-magnet"] {
+  display: inline-block;
+  transition: color 0.24s ease;
+}
+.hv-link[data-v="gsap-magnet"]:hover {
+  color: var(--hv-fg);
+}
+.hv-link[data-v="gsap-magnet"] .hv-underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: var(--hv-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Reduced motion — el lab no es la excepción. Se conservan los estados
+   FINALES (color, relleno) y se cancela todo desplazamiento y toda duración:
+   quien pidió menos movimiento igual tiene que poder ver qué hace cada
+   variante. Las de JS/GSAP consultan la misma media query en el componente.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .hv-root *,
+  .hv-root *::before,
+  .hv-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+  }
+  .hv-cta[data-v="glow"]:hover,
+  .hv-cta[data-v="press"]:active,
+  .hv-cta[data-v="corner"]:hover,
+  .hv-focus-host:hover .hv-link[data-v="focus"]:hover,
+  .hv-dim-host:hover .hv-link[data-v="dim"]:hover,
+  .hv-rail-host .hv-link[data-v="rail"]:hover {
+    transform: none;
+  }
+  .hv-focus-host:hover .hv-link[data-v="focus"] {
+    filter: none;
+  }
+  .hv-link[data-v="chars"]:hover .hv-char {
+    transform: none;
+  }
+}
