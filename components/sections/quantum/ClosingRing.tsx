@@ -74,8 +74,13 @@ export default function ClosingRing() {
 
   return (
     // z-10 and no overflow clipping: the ring is wider than the copy block and
-    // has to be allowed to bleed past it, and it must stack above the footer
-    // that follows.
+    // has to be allowed to bleed past it.
+    //
+    // That z-10 used to also mean "stack above the footer that follows", and it
+    // no longer does — `SiteFooter` now carries an explicit `z-30` so its
+    // takeover cannot be painted over by the last section of a page (the reason
+    // is spelled out there). The ring does not need to win that one: the 10px
+    // margin below already keeps the two from overlapping at all.
     // The 10px margin pushes the footer — and everything after it — clear of the
     // outer ring, which bleeds past this section's own box and was meeting the
     // footer's top edge. It is a MARGIN rather than extra bottom padding because

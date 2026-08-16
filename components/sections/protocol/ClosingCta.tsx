@@ -43,11 +43,17 @@ export default function ClosingCta() {
     return () => mm.revert();
   }, []);
 
+  // `isolate` contiene los z-index de adentro (field 0, scrim 10, copy 20), que
+  // están para ordenar las capas DE ESTA sección. Sin él, `relative` sin
+  // z-index propio no crea stacking context y los tres se promueven al contexto
+  // raíz, donde compiten con el resto de la página: al ser esta la última
+  // sección, el scrim terminaba atenuando el panel del footer y el copy
+  // dibujándose por encima del takeover.
   return (
     <section
       ref={rootRef}
       data-nav-dark
-      className="relative overflow-hidden bg-ink-slate text-cream"
+      className="relative isolate overflow-hidden bg-ink-slate text-cream"
     >
       <div ref={fieldRef} aria-hidden="true" className="absolute inset-0 z-0 opacity-70" />
       {/* Same scrim idea as the hero, inverted for the dark ground. */}

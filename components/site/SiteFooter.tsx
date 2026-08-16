@@ -380,7 +380,21 @@ export default function SiteFooter() {
     // Sin overflow-hidden en el root, a propósito: tanto el wipe (100svh)
     // como el panel (bottom-full) viven por ENCIMA del borde superior del
     // footer — recortarlos mataría el takeover en silencio.
-    <footer ref={rootRef} className="relative isolate bg-cream text-foreground lg:pt-40">
+    //
+    // `z-30` NO es decorativo: sin él el takeover se dibuja DEBAJO de la última
+    // sección de la página. Estar después en el DOM no alcanza. Una sección
+    // `relative` sin z-index propio no crea stacking context, así que sus hijos
+    // con z positivo (en `ClosingCta`: el scrim `z-10` y el copy `z-20`) se
+    // promueven al contexto RAÍZ — y ahí se pintan en el paso de "z-index
+    // positivo", que va después del de "posicionados sin z-index", donde caía
+    // este footer con su `z-index: auto`. Resultado: el scrim atenuaba el panel
+    // y el headline le quedaba encima.
+    //
+    // 30 y no más: `SiteHeader` es `fixed z-50` y tiene que seguir por encima,
+    // igual que el nav de los prototipos. Las secciones no pasan de `z-20`.
+    // `isolate` se queda para que el wipe/panel/legal de adentro (z-1..3) no se
+    // filtren a su vez hacia afuera.
+    <footer ref={rootRef} className="relative isolate z-30 bg-cream text-foreground lg:pt-40">
       {/* El wipe: una caja negra anclada al FONDO del footer que crece en
           ALTURA (no scaleY: el contenido de adentro no se puede deformar) y
           recorta con overflow-hidden. Como el fondo del footer es el fondo
