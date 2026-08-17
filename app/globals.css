@@ -247,7 +247,7 @@
   --color-cta-lime: var(--cta-lime);
 
   --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, Menlo, monospace;
+  --font-mono: var(--font-montreal-mono), ui-monospace, Menlo, monospace;
   /* Kepler self-hosteada vía next/font/local (ver lib/fonts.ts). Las vars
      --font-kepler* las expone el className del <html> en app/layout.tsx. */
   --font-serif: var(--font-kepler), ui-serif, Georgia, "Times New Roman", serif;
@@ -369,6 +369,19 @@
      embebido en un heading sans (ver components/primitives/Accent.tsx). */
   --text-serif--optical-scale: 1.18;
 
+  /* ── Mono overrides de la escala ─────────────────────────────────────────
+     Misma idea que los tres de arriba: la escala está calibrada para la sans y
+     trae tracking negativo, que en una monoespaciada sobra — el avance ya es
+     uniforme y apretarlo pelea contra la grilla que es su razón de ser.
+
+     NO hay `--text-mono--optical-scale`, y es un dato medido, no un olvido:
+     PP Neue Montreal Mono comparte x-height (510) y cap-height (715) EXACTAS
+     con la sans, porque es la misma familia. Lo único que cambia es el avance
+     (467 → 600, un 28% más ancha), y eso no se corrige escalando. Copiar el
+     1.18 de la serif por simetría rompería la alineación en vez de arreglarla. */
+  --text-mono--letter-spacing: 0em;
+  --text-mono--font-weight: 400;
+
   /* ── Wordmark ────────────────────────────────────────────────────────────
      Vive fuera de la escala de texto a propósito: es más grande que
      --text-display (8rem) porque es un elemento gráfico, no un heading.
@@ -489,15 +502,62 @@
   font-weight: var(--text-serif--font-weight);
 }
 
+/* ── Escalas mono ───────────────────────────────────────────────────────────
+   Mismo contrato que las serif de arriba, y por el mismo motivo estructural:
+   un token del @theme no puede aportar `font-family`, así que el rol "esto va
+   en monoespaciada" no puede vivir como `--text-*`.
+
+   Reemplazan a `font-mono text-caption`, que es la forma en que este rol
+   existía de hecho en ~45 lugares — dos clases donde una sola describe la
+   intención, y ninguna de las dos anulaba el tracking negativo que la escala
+   sans le pasaba a la mono sin querer.
+
+   Fijan el font-size igual que las serif, por la misma razón determinista: dos
+   utilidades declarando `letter-spacing` dejan la precedencia al orden del CSS
+   generado y no al del atributo class.
+
+   El tamaño sale del MISMO token que la sans, así que mover `--text-caption`
+   mueve las dos. */
+@utility text-body-sm-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-sm--line-height);
+  letter-spacing: var(--text-mono--letter-spacing);
+  font-weight: var(--text-mono--font-weight);
+}
+
+@utility text-caption-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: var(--text-mono--letter-spacing);
+  font-weight: var(--text-mono--font-weight);
+}
+
+/* El eyebrow mono es la excepción a `--text-mono--letter-spacing`: acá el
+   tracking ancho ES el rol —una etiqueta en versalitas espaciadas— y sale del
+   token de eyebrow, igual que en su versión sans. El weight también: eyebrow
+   es 500 en la escala, que es la razón por la que lib/fonts.ts sirve una
+   segunda face de la mono. */
+@utility text-eyebrow-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  font-weight: var(--text-eyebrow--font-weight);
+}
+
 /* Ojo: `text-wordmark` y `text-label` NO necesitan @utility. Al declarar
    `--text-wordmark` con sus `--line-height/--letter-spacing/--font-weight` en
    el @theme, Tailwind ya genera la utilidad completa, igual que con text-h1.
    Un @utility con el mismo nombre crea DOS reglas `.text-wordmark` y gana la
    última — un conflicto silencioso.
 
-   Las escalas serif sí necesitan @utility, pero por un motivo concreto: los
-   tokens del @theme no pueden aportar `font-family`, y ahí está justamente la
-   mitad del problema que resuelven. */
+   Las escalas serif y mono sí necesitan @utility, pero por un motivo concreto:
+   los tokens del @theme no pueden aportar `font-family`, y ahí está justamente
+   la mitad del problema que resuelven. Esa es la regla para decidir cuál de las
+   dos formas usar — si el rol cambia de familia, va @utility; si solo cambia
+   tamaño/peso/tracking dentro de la sans, alcanza el token. */
 
 /* Geist font scoped to admin only */
 .admin-wrapper {

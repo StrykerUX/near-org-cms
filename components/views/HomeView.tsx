@@ -151,7 +151,7 @@ function FeaturedCard({
           {/* `min-w-0` es lo que habilita el `truncate`: sin él este span es un
               ítem flex y su ancho mínimo es el del contenido, así que la ruta
               larga ensancharía el panel en vez de recortarse. */}
-          <span className="min-w-0 truncate font-mono text-caption text-muted-foreground">
+          <span className="min-w-0 truncate text-caption-mono text-muted-foreground">
             {page.href}
           </span>
         </span>
@@ -212,7 +212,7 @@ function PlainCard({ page }: { page: HomeViewPage }) {
           carácter por carácter solo alarga cada elemento de la lista. */}
       <span
         aria-hidden
-        className="mt-auto pt-4 font-mono text-caption text-gray-intermediate"
+        className="mt-auto pt-4 text-caption-mono text-gray-intermediate"
       >
         {page.href}
       </span>

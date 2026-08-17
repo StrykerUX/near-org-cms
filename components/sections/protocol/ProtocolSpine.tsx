@@ -405,7 +405,7 @@ export default function ProtocolSpine() {
                           </a>
                         )}
                       </div>
-                      <span className="whitespace-nowrap font-mono text-caption text-cream/45">
+                      <span className="whitespace-nowrap text-caption-mono text-cream/45">
                         {item.fact}
                       </span>
                     </div>

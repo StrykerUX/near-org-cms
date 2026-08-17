@@ -82,7 +82,7 @@ export default function DeveloperBlock() {
             <span className="size-2.5 rounded-full bg-[color:var(--near-green-accent)]/70" />
           </div>
           {/* ds-exempt: code, sized in its own monospace rhythm */}
-          <pre className="overflow-x-auto font-mono text-caption leading-[1.85]">
+          <pre className="overflow-x-auto text-caption-mono leading-[1.85]">
             <code>
               {CODE.map((line, i) => (
                 <span key={i} className="block">

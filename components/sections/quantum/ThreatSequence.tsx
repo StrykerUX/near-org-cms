@@ -121,7 +121,7 @@ const RINGS = [11.9, 19.3, R_IN, R_OUT, 41.4, 48.7, 56.1];
 // The sector has to be narrow enough to hide COMPLETELY outside the visible arc,
 // because that is how it is kept off screen for the first two beats rather than
 // by fading it. Because the centre sits CENTRE_OFFSET past the right edge, a
-// point on a ring is only in frame while `sin θ < −CENTRE_OFFSET / R_OUT` —
+// point on a ring is only in frame while `sin(theta) < −CENTRE_OFFSET / R_OUT` —
 // about 194°–346°, or 153° of arc. That leaves a 207° blind spot, so a 140°
 // sector has a 67° window of rotations where none of it is visible.
 //

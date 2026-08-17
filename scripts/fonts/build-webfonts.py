@@ -139,6 +139,44 @@ PROFILES = {
         # verifica contra el texto real del repo en vez de confiar en el rango.
         "verify_repo": True,
     },
+    # La mono de la misma familia. Mismo origen woff2 del vendor y mismo rango
+    # unicode que la sans, por una razón concreta: parte de lo que se dibuja en
+    # mono son los TAGS del blog, que los escriben los editores en el CMS. Un
+    # rango más chico sería apostar a que nadie escriba un tag con acento.
+    #
+    # ── Regular y no Book ──────────────────────────────────────────────────
+    #
+    # Ojo con esto si se comparan los dos perfiles: la sans sirve `Book`, que es
+    # usWeightClass 350 declarado como 400 (ver la nota en lib/fonts.ts). La
+    # mono trae AMBAS —Book a 350 y Regular a 400— así que acá el 400 nominal
+    # existe de verdad y no hace falta repetir esa rareza. Cambiar esto a Book
+    # por simetría con la sans daría un mono más liviano que su propio peso
+    # declarado.
+    #
+    # ── Por qué dos faces y no una ─────────────────────────────────────────
+    #
+    # Casi todos los usos de `font-mono` van en peso normal, pero un par se
+    # combinan con `text-eyebrow`, que es weight 500. Sin la face Medium el
+    # navegador sintetiza ese peso, que en una monoespaciada se nota más que en
+    # una proporcional porque engorda el trazo sin poder ensanchar el avance.
+    # No van itálicas: no hay un solo uso en el repo.
+    "montreal-mono": {
+        "src": ROOT / "assets" / "fonts" / "_originals" / "pp-neue-montreal-mono",
+        "out": ROOT / "assets" / "fonts" / "montreal-mono",
+        "ext": ".woff2",
+        "full_family": False,
+        "unicodes": MONTREAL_UNICODES,
+        "faces": [
+            ("PPNeueMontrealMono-Regular", "--font-mono · 400"),
+            ("PPNeueMontrealMono-Medium", "--font-mono · 500"),
+        ],
+        # A diferencia de la sans, este chequeo es una cota MUY por lo alto: el
+        # verificador junta todos los caracteres del repo, y la mono solo dibuja
+        # una fracción de ellos. Se deja activado igual porque compara contra lo
+        # que la fuente de origen sí traía, así que no puede dar un falso
+        # positivo — solo avisa de más.
+        "verify_repo": True,
+    },
 }
 
 

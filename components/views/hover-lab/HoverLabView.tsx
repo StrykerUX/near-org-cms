@@ -126,7 +126,7 @@ function Card({
 
       <div className="mt-auto flex flex-col gap-2 px-5 pb-5">
         <p className={`text-body-sm text-pretty ${muted}`}>{note}</p>
-        <code className={`font-mono text-caption ${ground === "ink" ? "text-cream/35" : "text-gray-400"}`}>
+        <code className={`text-caption-mono ${ground === "ink" ? "text-cream/35" : "text-gray-400"}`}>
           {source}
         </code>
       </div>
@@ -275,11 +275,11 @@ export default function HoverLabView() {
           </p>
           <p className={`text-body-sm text-pretty ${dark ? "text-cream/55" : "text-gray-600"}`}>
             This is a sandbox.{" "}
-            <code className="font-mono text-caption">SiteHeader</code> and{" "}
-            <code className="font-mono text-caption">SiteFooter</code> are
+            <code className="text-caption-mono">SiteHeader</code> and{" "}
+            <code className="text-caption-mono">SiteFooter</code> are
             untouched — the header and footer you see above and below this page
             are the production ones. Everything here lives in{" "}
-            <code className="font-mono text-caption">components/views/hover-lab/</code>.
+            <code className="text-caption-mono">components/views/hover-lab/</code>.
           </p>
         </header>
 
@@ -359,8 +359,8 @@ export default function HoverLabView() {
               real footer exists in two palettes — cream on black in the desktop
               takeover, ink on cream on mobile — so no variant can depend on a
               fixed colour. They all read{" "}
-              <code className="font-mono text-caption">--hv-fg</code> /{" "}
-              <code className="font-mono text-caption">--hv-dim</code>: the
+              <code className="text-caption-mono">--hv-fg</code> /{" "}
+              <code className="text-caption-mono">--hv-dim</code>: the
               ground switch changes the ground, not the variants.
             </p>
           </div>
@@ -408,15 +408,15 @@ export default function HoverLabView() {
                 The fix isn&rsquo;t managing ten contexts better, it&rsquo;s not
                 needing them. There is <strong>one</strong> pointer, so there is
                 at most one effect running:{" "}
-                <code className="font-mono text-caption">gl/sharedGL.ts</code>{" "}
+                <code className="text-caption-mono">gl/sharedGL.ts</code>{" "}
                 keeps a single canvas and reparents it to the hovered element,
                 switching programs. Shaders stay compiled and cached; at rest
                 there is no canvas in the DOM and no callback on the ticker.
               </p>
               <p>
                 The colours aren&rsquo;t in the GLSL either: they come from{" "}
-                <code className="font-mono text-caption">--cta-lime</code> and
-                friends, read off <code className="font-mono text-caption">:root</code>.
+                <code className="text-caption-mono">--cta-lime</code> and
+                friends, read off <code className="text-caption-mono">:root</code>.
                 A hex pasted into a shader would be a second source of truth for
                 the palette.
               </p>
@@ -436,18 +436,18 @@ export default function HoverLabView() {
             >
               <li>
                 If it&rsquo;s CSS only, its rule moves to{" "}
-                <code className="font-mono text-caption">app/globals.css</code>{" "}
+                <code className="text-caption-mono">app/globals.css</code>{" "}
                 next to the other{" "}
-                <code className="font-mono text-caption">[data-q-cta-*]</code>{" "}
+                <code className="text-caption-mono">[data-q-cta-*]</code>{" "}
                 and the button in{" "}
-                <code className="font-mono text-caption">SiteHeader</code>{" "}
+                <code className="text-caption-mono">SiteHeader</code>{" "}
                 swaps one attribute. That&rsquo;s the whole port.
               </li>
               <li>
                 With JS or GSAP, the CTA stops being a bare{" "}
-                <code className="font-mono text-caption">{"<a>"}</code> and
+                <code className="text-caption-mono">{"<a>"}</code> and
                 becomes a component in{" "}
-                <code className="font-mono text-caption">components/site/</code>
+                <code className="text-caption-mono">components/site/</code>
                 . The header is already a client component, so nothing changes
                 there.
               </li>
@@ -460,17 +460,17 @@ export default function HoverLabView() {
                 Reduced motion isn&rsquo;t optional: the end state still has to
                 arrive, just without the journey. CSS handles it with the media
                 query at the bottom of each sheet, GSAP with{" "}
-                <code className="font-mono text-caption">gsap.matchMedia()</code>
+                <code className="text-caption-mono">gsap.matchMedia()</code>
                 , and the shader by freezing{" "}
-                <code className="font-mono text-caption">uTime</code>.
+                <code className="text-caption-mono">uTime</code>.
               </li>
               <li>
                 Footer links get applied in{" "}
-                <code className="font-mono text-caption">LinkColumns</code>,
+                <code className="text-caption-mono">LinkColumns</code>,
                 which already takes{" "}
-                <code className="font-mono text-caption">dark</code> and is the
+                <code className="text-caption-mono">dark</code> and is the
                 one place{" "}
-                <code className="font-mono text-caption">linkClass</code> is
+                <code className="text-caption-mono">linkClass</code> is
                 defined.
               </li>
             </ol>

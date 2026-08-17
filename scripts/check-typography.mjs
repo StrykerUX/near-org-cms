@@ -18,7 +18,16 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-const ROOTS = ["components/sections", "components/views", "components/primitives"];
+// `app/(site)` entra junto con las escalas mono. Hasta entonces el chequeo solo
+// miraba `components/`, así que las páginas del sitio podían escribir
+// `text-[0.75rem]` sin que nadie se enterara — y lo hacían. Lo que destapó al
+// sumarlo está declarado abajo en LEGACY, no silenciado acá.
+const ROOTS = [
+  "components/sections",
+  "components/views",
+  "components/primitives",
+  "app/(site)",
+];
 
 const RULES = [
   {
@@ -43,6 +52,21 @@ const RULES = [
     re: /style=\{\{[^}]*fontSize/g,
     msg: "fontSize inline: nada del DS puede alcanzarlo — agregá un token (ej. --text-wordmark)",
   },
+  {
+    // `font-mono` suelto. A diferencia de las reglas de arriba no es un parche
+    // sobre el token: es MEDIO rol. Cambia la familia y deja el resto de la
+    // escala sans intacto, incluido su tracking negativo, que en una
+    // monoespaciada pelea contra el avance uniforme que es su razón de ser.
+    //
+    // Las escalas mono viven en app/globals.css como @utility y no como token,
+    // porque un `--text-*` del @theme no puede aportar font-family.
+    // El lookbehind descarta `--font-mono`, que es el TOKEN de familia y un uso
+    // legítimo: es lo que las @utility de globals.css consumen, y lo que la
+    // página del DS nombra al documentarlas. Sin él, definir la escala mono
+    // reportaría a la escala mono.
+    re: /(?<!-)\bfont-mono\b/g,
+    msg: "usá un rol mono (text-caption-mono, text-body-sm-mono, text-eyebrow-mono) en vez de font-mono + un token sans",
+  },
 ];
 
 // Los archivos que el DS todavía no gobierna. NO es una lista de excepciones
@@ -57,6 +81,10 @@ const LEGACY = new Set([
   "components/sections/PageHero.tsx",
   "components/sections/PostCard.tsx",
   "components/sections/EmptyState.tsx",
+  // Misma deuda que los tres de arriba, y de la misma página. No estaba
+  // declarado porque `app/(site)` no se escaneaba; entra a la lista al sumarlo
+  // a ROOTS, no porque haya empeorado.
+  "app/(site)/blog/[slug]/page.tsx",
   // /prototype y /prototype/components (la landing anterior al homepage)
   "components/sections/CompanyGrid.tsx",
   "components/sections/ProductStage.tsx",

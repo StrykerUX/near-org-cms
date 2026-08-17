@@ -64,6 +64,39 @@ export const montreal = localFont({
   display: "swap",
 });
 
+// ── PP Neue Montreal Mono, la monoespaciada ───────────────────────────────────
+// Antes `--font-mono` no apuntaba a ninguna fuente propia: caía en
+// `ui-monospace, Menlo` del sistema, así que los eyebrows, las fechas y los tags
+// del blog rendían distinto en macOS, Windows y Linux. Los originales ya estaban
+// en el repo desde el fork, sin usar.
+//
+// Solo DOS faces, contra las cuatro de la sans. Casi todos los usos de
+// `font-mono` van en peso normal; los que no, se combinan con `text-eyebrow`,
+// que es weight 500. Sin esa segunda face el navegador sintetiza el peso, y en
+// una monoespaciada eso se nota más que en una proporcional porque engorda el
+// trazo sin poder ensanchar el avance. Itálicas no van: no hay un solo uso.
+//
+// Ojo con lo de abajo si se compara con la sans: acá va `Regular`, no `Book`.
+// No es una inconsistencia — es que en esta familia el 400 nominal existe de
+// verdad, así que no hay por qué repetir el 350-declarado-400 de la sans.
+// "Corregirlo" a Book por simetría daría un mono más liviano que su propio peso.
+export const montrealMono = localFont({
+  src: [
+    {
+      path: "../assets/fonts/montreal-mono/PPNeueMontrealMono-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/montreal-mono/PPNeueMontrealMono-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+  variable: "--font-montreal-mono",
+  display: "swap",
+});
+
 // ── Kepler Std, la serif de acento ─────────────────────────────────────────────
 // Antes venía de un kit de Typekit cargado con un <link> en el <head>, que la
 // servía con `font-display: auto` — o sea bloqueando el paint hasta ~3s, y con un

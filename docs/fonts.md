@@ -7,9 +7,9 @@
 | `--font-sans` | PP Neue Montreal | Book (400), BookItalic, Medium (500), Bold (700) |
 | `--font-serif` | Kepler Std **Condensed Subhead** | CnSubh (400), CnItSubh |
 | `--font-display` | Kepler Std **Condensed Display** | CnDisp (400), CnItDisp |
-| `--font-mono` | *ninguna* | Cae en `ui-monospace, Menlo` del sistema |
+| `--font-mono` | PP Neue Montreal Mono | Regular (400), Medium (500) |
 
-Las tres primeras se registran con `next/font/local` en `lib/fonts.ts`, leyendo
+Las cuatro se registran con `next/font/local` en `lib/fonts.ts`, leyendo
 de `assets/fonts/<familia>/`. Sus CSS vars se exponen en el `className` del
 `<html>` en `app/layout.tsx` y `app/globals.css` las consume en el `@theme
 inline`.
@@ -50,11 +50,12 @@ la vez.
 
 ```
 assets/fonts/
-  montreal/     ← los 4 subsets que sirve el sitio      (195KB, commiteados)
-  kepler/       ← ídem                                   (156KB, commiteados)
+  montreal/       ← los 4 subsets que sirve el sitio    (195KB, commiteados)
+  montreal-mono/  ← ídem, 2 faces                        (53KB, commiteados)
+  kepler/         ← ídem                                (156KB, commiteados)
   _originals/
     pp-neue-montreal/       ← familia completa del vendor (commiteada)
-    pp-neue-montreal-mono/  ← ídem, hoy sin uso
+    pp-neue-montreal-mono/  ← ídem
 
 public/fonts/
   kepler-font/  ← los 168 OTF de escritorio     (GITIGNORADO, no está en el repo)
@@ -105,6 +106,19 @@ suyo:
 - **Montreal** no tiene nada en el PUA: sus 1352 glifos son cobertura de idiomas
   real (434 de latín, 173 de latin ext additional, 124 de cirílico, 77 de
   griego). Acá la palanca es el rango unicode. Resultado: 324KB → **195KB**.
+- **Montreal Mono** usa el MISMO rango que la sans, y por el mismo motivo: parte
+  de lo que se dibuja en mono son los tags del blog, que los escriben los
+  editores en el CMS. Trae 2320 glifos —más que la sans— así que el recorte pega
+  más fuerte: 138KB → **53KB** en dos faces.
+
+  Dos faces y no cuatro porque casi todos los usos de `font-mono` van en peso
+  normal; los que no, se combinan con `text-eyebrow`, que es weight 500. Sin esa
+  segunda face el navegador sintetiza el peso, y en una monoespaciada se nota más
+  que en una proporcional: engorda el trazo sin poder ensanchar el avance.
+
+  Y sirve `Regular`, no `Book`. No es una inconsistencia con la sans — es que en
+  esta familia el 400 nominal existe de verdad (Book es 350, igual que en la
+  sans), así que no hay por qué repetir el 350-declarado-400.
 
 De Montreal se descartan **cirílico y griego**, 204 codepoints para los que el
 sitio no tiene ni contenido ni plan. Si alguna vez aparecen, caen a la fuente de
@@ -152,10 +166,12 @@ subset y salir de `public/`.
 
 ## Pendientes
 
-- `--font-mono` es del sistema y `font-mono` se usa en ~25 lugares (eyebrows,
-  fechas y tags del blog, más los bloques de código de `/brand`), así que hoy
-  rinde distinto en macOS, Windows y Linux. `assets/fonts/_originals/pp-neue-montreal-mono/`
-  está listo para cuando se decida.
+- El chequeo de regresión junta los caracteres del CÓDIGO FUENTE, sin distinguir
+  comentario de JSX. Un `π` o un `θ` escrito en un comentario para explicar una
+  fórmula lo hace fallar, aunque no se dibuje en ninguna parte. La respuesta
+  correcta es escribirlo en ASCII, no ampliar el rango: el subset se elige por lo
+  que el sitio RENDERIZA. Pasó dos veces; si vuelve a pasar seguido, conviene que
+  el verificador ignore comentarios.
 - `assets/fonts/_originals/pp-neue-montreal/` no trae documento de licencia, a
   diferencia de Kepler. Las licencias de Pangram Pangram normalmente permiten
   self-host y subsetting, pero no hay nada contra qué verificarlo en el repo.

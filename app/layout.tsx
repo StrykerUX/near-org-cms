@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { geistSans, kepler, keplerDisplay, montreal } from "@/lib/fonts";
+import { geistSans, kepler, keplerDisplay, montreal, montrealMono } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montreal.variable} ${kepler.variable} ${keplerDisplay.variable} ${geistSans.variable} h-full antialiased`}
+      className={`${montreal.variable} ${montrealMono.variable} ${kepler.variable} ${keplerDisplay.variable} ${geistSans.variable} h-full antialiased`}
     >
       {/* Sin <head> propio: sus dos únicos hijos eran el preconnect y el
           stylesheet de Typekit, que servía Kepler. Ahora la serif es

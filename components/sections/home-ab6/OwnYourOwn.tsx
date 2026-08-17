@@ -107,7 +107,7 @@ const SPEEDS = [0.6, 1.5, 1.4, 0.5] as const;
 // Lo que se percibe no es el desvío sino su DERIVADA respecto del scroll: qué
 // tan distinta es la velocidad de una card de la de la página. A 1.2 los
 // desvíos son ±160 y ±200px sobre un scrub de ~1.300px, y como `sine.inOut`
-// concentra el movimiento en el medio (pico ≈ π/2 × la media), en el tramo
+// concentra el movimiento en el medio (pico ≈ pi/2 × la media), en el tramo
 // central las cards van entre ~76% y ~124% de la velocidad del scroll. Ahí es
 // donde se lee el destiempo, y es justo cuando están centradas en pantalla.
 //
@@ -355,7 +355,7 @@ export default function OwnYourOwn() {
     // del título en su sticky, y la salida suave evita el corte en seco al
     // terminar la sección aunque las cards queden desplazadas.
     //
-    // Y además concentra: la velocidad pico del desvío es π/2 veces la media,
+    // Y además concentra: la velocidad pico del desvío es pi/2 veces la media,
     // y cae en el medio del scrub, que es donde las cards están centradas en
     // pantalla. Una curva lineal repartiría el mismo desvío parejo y el
     // destiempo se notaría MENOS justo donde se mira. No cambiarla por `none`

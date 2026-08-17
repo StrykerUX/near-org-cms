@@ -44,7 +44,7 @@ export default function BlogIndexView({
         <FilterPills items={categoryPills.items} allItem={categoryPills.allItem} />
 
         {(query || activeCategory) && (
-          <p className="text-sm font-mono text-[#5A5A5A] mb-6">
+          <p className="text-body-sm-mono text-[#5A5A5A] mb-6">
             {total} result{total !== 1 ? "s" : ""}
             {query && ` for "${query}"`}
           </p>

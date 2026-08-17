@@ -76,10 +76,11 @@ export default function MathStatement() {
           here is safe.
           The mask is inline for the usual reason: the `;` inside the gradient
           would break a shorthand declaration list. */}
-      {/* ds-exempt: decorative monospace weave, its metrics are geometry */}
       <div
         ref={fieldRef}
         aria-hidden="true"
+        // Los roles mono fijan un font-size, y el de acá se mide, no se lee.
+        // ds-exempt: decorative monospace weave, its metrics are geometry
         className="absolute inset-x-0 bottom-0 h-[70%] overflow-hidden font-mono whitespace-pre text-black/15"
         style={{
           fontSize: "clamp(10px, 0.72vw, 17px)",
