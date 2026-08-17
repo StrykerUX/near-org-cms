@@ -4,13 +4,11 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { enableScene, trackTimeline } from "@/components/primitives/motion/stickyScene";
-import { staggerChars } from "@/components/primitives/motion/staggerChars";
-import { CTA_RAMP, CTA_RAMP_HEAD } from "@/components/primitives/motion/motionColors";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
 import { hermiteRamp } from "@/components/primitives/motion/velocityRamp";
 import CtaPill from "@/components/sections/quantum/CtaPill";
-import { SEQUENCE_HEAD as HEAD, SEQUENCE_TAIL as TAIL, SEQUENCE_BEATS as BEATS, EXTERNAL_LINKS } from "@/components/sections/quantum/quantumContent";
+import { SEQUENCE_BEATS as BEATS } from "@/components/sections/quantum/quantumContent";
 
 // §3 + §4 of the copy deck, as ONE pinned composition.
 //
@@ -101,9 +99,6 @@ const LINE_STAGGER = 0.013;
 const SUB_OFFSET = 0.09; // after a beat starts
 const SUB_DUR = 0.035;
 const OUT_DUR = 0.06;
-/** Beat three's answer starts writing once its headline lines have settled. */
-const WRITE_AT = CUT[1] + 0.14;
-const WRITE_SPAN = 0.15;
 
 // The soft release out of the lock: how much of the timeline it takes and how far
 // the content lifts, as a fraction of the viewport. Small on purpose — the point is
@@ -279,11 +274,6 @@ const RISE_SHARE = 0.36;
 // and where the eye stops; the animation resolves there rather than running the
 // whole line up to lime.
 //
-// The ramp itself lives in `primitives/motion/motionColors` — it is the page's
-// CTA gradient and two other scenes animate through it. Sampling a point in it is
-// `gsap.utils.interpolate(CTA_RAMP, t)`; there used to be a hand-written hex
-// mixer here doing exactly that with parseInt and string slices.
-const RAMP_SAMPLE = gsap.utils.interpolate([...CTA_RAMP]);
 
 export default function ThreatSequence() {
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
@@ -340,8 +330,7 @@ export default function ThreatSequence() {
     if (!motionOk || !isDesktop) return;
 
     const panels = q("[data-beat]");
-    const tail = q("[data-tail]")[0];
-    if (panels.length !== BEATS.length || !tail) return;
+    if (panels.length !== BEATS.length) return;
 
     const sceneOff = enableScene(scope, "seq");
     const tl = trackTimeline(scope, { scrub: 0.3 });
@@ -402,24 +391,9 @@ export default function ThreatSequence() {
       }
     });
 
-    // ── the answer arrives, inside beat three ───────────────────────────
-    const tailSplit = SplitText.create(tail, {
-      type: "chars",
-      smartWrap: true,
-      aria: "none",
-    });
-    gsap.set(tailSplit.chars, { autoAlpha: 0 });
-
-    staggerChars(tl, tailSplit.chars, { at: WRITE_AT, span: WRITE_SPAN }, (_i, t) => ({
-      keyframes: [
-        // Arrives at the bright end of the ramp…
-        { autoAlpha: 1, color: CTA_RAMP_HEAD, duration: 0.05, ease: "none" },
-        // …then settles to its own position in it. The final letter's position IS
-        // the bright end, so it does not settle at all — which is what leaves the
-        // brightest point on the full stop.
-        { color: RAMP_SAMPLE(t), duration: 0.1, ease: "none" },
-      ],
-    }));
+    // (La pieza de "the answer arrives" — el tail escrito letra a letra sobre
+    // el ramp del CTA — se retiró junto con el markup especial del beat final:
+    // los tres beats comparten la misma entrada de líneas + sub.)
 
     // ── easing out of the lock ──────────────────────────────────────────
     // A sticky element releases instantly: one frame it is held, the next it
@@ -507,7 +481,6 @@ export default function ThreatSequence() {
     return () => {
       sceneOff();
       splits.forEach((s) => s.revert());
-      tailSplit.revert();
       gsap.set(panels, { clearProps: "opacity,visibility" });
       if (stuck) gsap.set(stuck, { clearProps: "transform" });
       gsap.set(rings, { clearProps: "borderColor" });
@@ -629,7 +602,12 @@ export default function ThreatSequence() {
           className="relative flex flex-col py-20 group-data-[seq=on]/seq:h-full group-data-[seq=on]/seq:pb-[7svh] group-data-[seq=on]/seq:pt-[15svh]"
         >
           <div className="grid min-h-0 flex-1 lg:max-w-[62%]">
-            {BEATS.map((beat, i) => (
+            {/* Los tres beats comparten ahora UNA misma anatomía (pedido de
+                Lawrence, 2026-08-17): H2 en dos líneas (la segunda en Accent),
+                body, y el link DEL beat — ya no hay meta row compartida al pie
+                ni pieza especial de "rotating one key." en el beat final. El
+                link vive dentro del wrapper data-sub para fundir con el body. */}
+            {BEATS.map((beat) => (
               <div
                 key={beat.key}
                 data-beat
@@ -637,44 +615,11 @@ export default function ThreatSequence() {
                 // With the sequence disarmed they fall back into normal flow.
                 className="flex flex-col justify-start gap-7 group-data-[seq=on]/seq:[grid-area:1/1]"
               >
-                {i === BEATS.length - 1 ? (
-                  <p className="max-w-[24ch] text-h1 text-balance">
-                    {/* Only the HEAD is line-split — the answer below is split
-                        into characters and animated separately, and one element
-                        cannot be split two ways. */}
-                    <span data-headline className="block">
-                      <span className="block">NEAR&rsquo;s answer to</span>
-                      {HEAD}
-                    </span>
-                    {/* `accent-serif` to match the italic accents in beats one
-                        and two — same Kepler, same optical scale. It sets face
-                        and size only, so the per-letter gradient GSAP writes
-                        inline still comes through untouched.
-                        Holds its space from the start: the letters begin at
-                        `autoAlpha: 0`, which hides them without collapsing the
-                        line, so the head never reflows as the answer arrives.
-                        The class colour is the no-JS fallback. */}
-                    <span data-tail className="block accent-serif text-near-green-accent">
-                      {TAIL}
-                    </span>
-                  </p>
-                ) : (
-                  <h2 data-headline className="max-w-[24ch] text-h1 text-balance">
-                    {i === 0 ? (
-                      <>
-                        The quantum threat
-                        <br />
-                        <Accent>to blockchains</Accent>
-                      </>
-                    ) : (
-                      <>
-                        Shor&rsquo;s algorithm
-                        <br />
-                        <Accent>reverses it</Accent>
-                      </>
-                    )}
-                  </h2>
-                )}
+                <h2 data-headline className="max-w-[24ch] text-h1 text-balance">
+                  {beat.heading[0]}
+                  <br />
+                  <Accent>{beat.heading[1]}</Accent>
+                </h2>
 
                 {/* Design change from Figma (NEARORG_CLAUDE_QUANTUM): the beat
                     copy moved up one step of the scale and lost its
@@ -682,36 +627,18 @@ export default function ThreatSequence() {
                     quietest thing in the sequence while carrying the whole
                     explanation; full white at body-lg makes it read as the
                     second voice rather than a footnote. */}
-                <p data-sub className="max-w-[54ch] text-body-lg text-white text-pretty">
-                  {beat.body}
-                </p>
+                <div data-sub className="flex flex-col items-start gap-8">
+                  <p className="max-w-[54ch] text-body-lg text-white text-pretty">
+                    {beat.body}
+                  </p>
+                  {beat.link && (
+                    <CtaPill href={beat.link.href} size="sm" tone="solid" external>
+                      {beat.link.label}
+                    </CtaPill>
+                  )}
+                </div>
               </div>
             ))}
-          </div>
-
-          {/* ── meta row ────────────────────────────────────────────────── */}
-          {/* Bottom-LEFT, on the same gutter as the headline and the body. That
-              gives the section one uninterrupted vertical axis — type at the top
-              of the column, actions at its foot — and hands the whole right of
-              the frame to the ring field. Sitting them bottom-right instead put
-              a second, competing anchor directly under the graphic. */}
-          <div className="mt-10 flex flex-wrap items-center justify-start gap-4">
-              <CtaPill
-                href={EXTERNAL_LINKS.announcement}
-                size="sm"
-                tone="solid"
-                external
-              >
-                How NEAR is preparing for the quantum era
-              </CtaPill>
-              <CtaPill
-                href={EXTERNAL_LINKS.accountModel}
-                size="sm"
-                tone="solid"
-                external
-              >
-                How the NEAR account model works
-              </CtaPill>
           </div>
         </Container>
       </div>

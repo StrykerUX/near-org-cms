@@ -253,29 +253,40 @@ export const WIPE_STATEMENT =
 // is §4, and beat 2 is assembled from §3, §9 and the fourth and fifth answers of
 // the §10 FAQ. Nothing here is sourced from outside the deck — see the README
 // before adding anything that is.
-export const SEQUENCE_HEAD = "Defending against quantum attack means";
+// (SEQUENCE_HEAD/SEQUENCE_TAIL ya no existen: el beat final dejó su pieza
+// especial de "rotating one key." escrita letra a letra y pasó a un H2 normal
+// por pedido de Lawrence, 2026-08-17 — cada beat trae ahora su heading y su
+// link propios.)
 
 // ── de ThreatSequence.tsx ──
-export const SEQUENCE_TAIL = "rotating one key.";
-
-// ── de ThreatSequence.tsx ──
+// Copy de Lawrence (2026-08-17) para los tres beats; solo el heading del
+// primero es provisional (no vino en el pedido). El heading va en dos líneas:
+// la segunda se pinta con <Accent> (serif verde), como el resto de la página.
 export type SequenceBeat = {
   key: string;
+  heading: [string, string];
   body: string;
+  link?: { label: string; href: string };
 };
 
 export const SEQUENCE_BEATS: SequenceBeat[] = [
   {
     key: "mechanism",
-    body: "Most blockchains derive account ownership from elliptic-curve cryptography. The moment an address signs, the key it was derived from is visible onchain.",
+    // PLACEHOLDER de heading — Lawrence dictó solo el body de este beat.
+    heading: ["Prepare for the", "quantum era"],
+    body: "Every blockchain will have to upgrade its cryptography to prepare for the quantum threat. NEAR designed accounts so that becoming quantum-safe is a single transaction, not a full migration.",
   },
   {
-    key: "attack",
-    body: "A quantum computer running Shor’s algorithm could derive a private key from an exposed public key and take the assets it controls. Those keys can be harvested now and attacked later, so the deadline is already behind us.",
+    key: "threat",
+    heading: ["The quantum threat", "to blockchains"],
+    body: "Most blockchains derive account ownership from elliptic-curve cryptography. A quantum computer running Shor’s algorithm could derive a private key from any address with an exposed public key to steal assets. Bloomberg puts as much as $470 billion of Bitcoin at risk to the quantum threat.",
+    link: { label: "How NEAR is preparing for the quantum era", href: EXTERNAL_LINKS.announcement },
   },
   {
     key: "answer",
-    body: "NEAR accounts are decoupled from cryptography, so an account holder rotates to quantum-safe keys in a single transaction and keeps the same account.",
+    heading: ["NEAR defends against quantum attack", "through a single key rotation"],
+    body: "NEAR accounts are decoupled from cryptography, so an account holder can rotate to quantum-safe keys in a single transaction.",
+    link: { label: "How the NEAR account model works", href: EXTERNAL_LINKS.accountModel },
   },
 ];
 
