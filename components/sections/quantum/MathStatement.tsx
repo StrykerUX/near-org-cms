@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
@@ -95,10 +96,23 @@ export default function MathStatement() {
           above would sit over the sentence as soon as anything created a new
           one. */}
       <Container className="relative isolate flex justify-center py-[calc((100vw/7)*1.4)]">
-        <h2 data-statement className="max-w-[24ch] text-center text-h1 text-balance">
-          Every chain faces the same mathematics.{" "}
-          <span className="text-h1-serif-inline italic">Not every chain</span> faces the same
-          migration.
+        {/* Copy de Lawrence (2026-08-17). El acento serif cae en "Only NEAR" —
+            la palabra de contraste, como antes lo era "Not every chain". Va por
+            <Accent> (accent-serif, 1em × 1.18): text-h1-serif-inline fija a
+            Kepler en el tamaño NOMINAL del h1 sin la compensación óptica del
+            sistema y el acento quedaba ~18% chico. */}
+        <h2 data-statement className="max-w-[30ch] text-center text-h1 text-balance">
+          Every blockchain will have to upgrade its cryptography.{" "}
+          {/* leading-[0] en el wrapper: el acento a 1.18em no debe AGRANDAR su
+              línea (es lo que hacía el line-height: 0 de text-h1-serif-inline).
+              Va en un wrapper y no en un selector descendiente del h2 porque
+              SplitText envuelve cada línea en spans y los colapsaría. */}
+          {/* ds-exempt: anula el line-height del wrapper, no ajusta la escala — ver arriba */}
+          <span className="leading-[0]">
+            <Accent>Only NEAR</Accent>
+          </span>{" "}
+          was architected from day one to become quantum-safe in a single transaction,
+          not a full migration.
         </h2>
       </Container>
     </section>

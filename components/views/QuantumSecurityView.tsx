@@ -1,6 +1,5 @@
 import QuantumHero from "@/components/sections/quantum/QuantumHero";
 import ProofMarquee from "@/components/sections/quantum/ProofMarquee";
-import StatementWipe from "@/components/sections/quantum/StatementWipe";
 import ThreatSequence from "@/components/sections/quantum/ThreatSequence";
 import MathStatement from "@/components/sections/quantum/MathStatement";
 import LiveToday from "@/components/sections/quantum/LiveToday";
@@ -21,7 +20,6 @@ export default function QuantumSecurityView() {
     <main className="flex flex-col bg-cream">
       <QuantumHero />
       <ProofMarquee />
-      <StatementWipe />
       <ThreatSequence />
       <MathStatement />
       <LiveToday />

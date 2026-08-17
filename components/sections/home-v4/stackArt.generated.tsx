@@ -227,7 +227,7 @@ export function AiRingGreen(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 546 443" fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" {...props}>
 
-<g style={{ mixBlendMode: "multiply" }} opacity="0.46">
+<g data-stack-shadow style={{ mixBlendMode: "multiply" }} opacity="0.46">
 <rect x="185.14" y="281.23" width="175.2" height="161.28" fill="url(#ag-pattern0_11_498)"/>
 </g>
 <mask id="ag-mask0_11_498" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="546" height="423">
@@ -248,7 +248,7 @@ export function AiRingGreen(props: React.SVGProps<SVGSVGElement>) {
 <path data-stack-seg="market" d="M59.96 213.35L83.01 199.62L106.06 213.35L83.01 227.3L59.96 213.35Z" fill="#37C142" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
 <path data-stack-seg="ironclaw" d="M272.64 44.5701L106.07 146.21V171.23L82.9102 185.56V132.29L272.37 17.3701L272.64 44.5701Z" fill="url(#ag-paint9_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
 <path data-stack-seg="cloud" d="M439.74 232.73V146.21L356.41 95.4199L356.15 67.6699L463.27 132.43L463.51 247.05L439.74 232.73Z" fill="url(#ag-paint10_linear_11_498)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-<g style={{ mixBlendMode: "multiply" }} opacity="0.46">
+<g data-stack-shadow style={{ mixBlendMode: "multiply" }} opacity="0.46">
 <rect x="176.98" y="-49.0098" width="191.52" height="166.56" fill="url(#ag-pattern1_11_498)"/>
 </g>
 </g>
@@ -386,10 +386,10 @@ export function IntentsGreen(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 371 248" fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" {...props}>
 
-<g style={{ mixBlendMode: "multiply" }} opacity="0.42">
+<g data-stack-shadow style={{ mixBlendMode: "multiply" }} opacity="0.42">
 <rect x="97.36" y="109.49" width="108.96" height="137.76" fill="url(#ig-pattern0_11_549)"/>
 </g>
-<g style={{ mixBlendMode: "multiply" }} opacity="0.42">
+<g data-stack-shadow style={{ mixBlendMode: "multiply" }} opacity="0.42">
 <rect x="163.6" y="109.49" width="108.96" height="137.76" fill="url(#ig-pattern1_11_549)"/>
 </g>
 <mask id="ig-mask0_11_549" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="371" height="221">
@@ -402,7 +402,7 @@ export function IntentsGreen(props: React.SVGProps<SVGSVGElement>) {
 <path d="M224.59 196.6L328.16 133.6V75.77L305.04 89.73L304.99 118.44L224.59 167.71V196.6Z" fill="url(#ig-paint2_linear_11_549)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
 <path d="M199.79 181.72L224.59 196.6V167.71L199.79 152.83V181.72Z" fill="#BBEF7F" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
 <path d="M185.05 17.3203L65.41 89.6403V118.24L65.35 118.27L146.24 167.4L170.02 152.83L89.16 103.96L89.2 103.94L184.98 46.0403L281.23 104.11L199.91 152.81L224.59 167.71L304.99 118.44L305.04 89.7903L185.05 17.3203Z" fill="url(#ig-paint3_linear_11_549)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-<g style={{ mixBlendMode: "multiply" }} opacity="0.46">
+<g data-stack-shadow style={{ mixBlendMode: "multiply" }} opacity="0.46">
 <rect x="89.55" y="-44.1899" width="191.04" height="161.76" fill="url(#ig-pattern2_11_549)"/>
 </g>
 </g>
@@ -484,7 +484,7 @@ export function NearcomGreen(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 695 604" fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" {...props}>
 
-<g style={{ mixBlendMode: "multiply" }} opacity="0.46">
+<g data-stack-shadow style={{ mixBlendMode: "multiply" }} opacity="0.46">
 <rect x="239.7" y="442.146" width="175.2" height="161.76" fill="url(#ng-pattern0_11_436)"/>
 </g>
 <mask id="ng-mask0_11_436" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="695" height="589">
@@ -493,7 +493,7 @@ export function NearcomGreen(props: React.SVGProps<SVGSVGElement>) {
 <g mask="url(#ng-mask0_11_436)">
 <path d="M564.61 188.22L327.31 44.8701L90.3801 187.96L90.4001 360.4L67.3 375.4L67.23 173.97L327.37 16.8101L587.53 174.26L587.97 373.93L564.75 359.84L564.61 188.22Z" fill="url(#ng-paint0_linear_11_436)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
 <path d="M587.58 174.3L327.31 16.7202L67.3 174L44.1501 160.01L327.37 -11.3398L610.5 160.34L587.58 174.3Z" fill="url(#ng-paint1_linear_11_436)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>
-<g style={{ mixBlendMode: "multiply" }} opacity="0.46">
+<g data-stack-shadow style={{ mixBlendMode: "multiply" }} opacity="0.46">
 <rect x="231.463" y="-46.0137" width="191.52" height="174.72" fill="url(#ng-pattern1_11_436)"/>
 </g>
 <path d="M564.74 359.8L327.31 503.57L179.62 414.46L156.16 429.34L327.38 532.91L587.97 373.93L564.74 359.8Z" fill="url(#ng-paint2_linear_11_436)" stroke="#F5F4F1" strokeWidth="0.61" strokeLinecap="round" strokeLinejoin="round"/>

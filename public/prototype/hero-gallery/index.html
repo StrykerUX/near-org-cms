@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero Lab — Own Your World</title>
+<style>
+  /* ── Site fonts (same files the real site serves) ──────────────────────── */
+  @font-face {
+    font-family: "PP Neue Montreal";
+    src: url("fonts/PPNeueMontreal-Book.woff2") format("woff2");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Neue Montreal";
+    src: url("fonts/PPNeueMontreal-Medium.woff2") format("woff2");
+    font-weight: 500; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: "Kepler Display";
+    src: url("fonts/KeplerStd-CnItDisp.woff2") format("woff2");
+    font-weight: 400; font-style: italic; font-display: swap;
+  }
+
+  /* ── Site tokens ───────────────────────────────────────────────────────── */
+  :root {
+    --cream: #F5F4F1;
+    --ink: #101010;
+    --ink-deep: #0e4a30;
+    --near-green: #00ec97;
+    --near-green-dark: #00c97f;
+    --cta-lime: #ecfdb0;
+    --green-ink: #00a86b;
+    --muted: #6b6b68;
+    --sans: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
+    --serif: "Kepler Display", ui-serif, Georgia, serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  img { display: block; max-width: 100%; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--green-ink); outline-offset: 2px; }
+
+  /* ══ Page chrome ═══════════════════════════════════════════════════════ */
+  .page { max-width: 1720px; margin: 0 auto; padding: 3.5rem 2rem 6rem; }
+
+  .lab-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1rem 1.5rem; margin-bottom: .75rem; }
+  .lab-head h1 { font-weight: 500; font-size: clamp(2rem, 1.2rem + 2.4vw, 3.4rem); letter-spacing: -0.02em; line-height: 1; }
+  .lab-head h1 em { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.18em; letter-spacing: -0.02em; color: var(--ink-deep); }
+  .lab-count { font-size: .875rem; color: var(--muted); }
+  .lab-sub { max-width: 56ch; color: var(--muted); font-size: .9375rem; margin-bottom: .5rem; }
+  .lab-sub kbd {
+    font: 500 .75rem/1 var(--sans); background: #fff; border: 1px solid #ddd; border-bottom-width: 2px;
+    border-radius: 4px; padding: .15em .45em; color: var(--ink);
+  }
+
+  .family { margin-top: 4rem; }
+  .family-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.25rem; }
+  .family-head .eyebrow {
+    font-size: clamp(.8125rem, .8rem + .06vw, .875rem); letter-spacing: .2em; text-transform: uppercase;
+    font-weight: 500; color: var(--ink);
+  }
+  .family-head .eyebrow::before { content: ""; display: inline-block; width: .55em; height: .55em; border-radius: 50%; background: var(--near-green); margin-right: .7em; }
+  .family-head .note { font-size: .875rem; color: var(--muted); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(560px, 100%), 1fr)); gap: 1.5rem; }
+
+  .card { position: relative; }
+  .card-frame {
+    position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 10px;
+    border: 1px solid rgba(16,16,16,.12); background: var(--cream);
+    width: 100%; text-align: inherit; display: block; padding: 0;
+  }
+  .card-frame:hover { border-color: rgba(16,16,16,.35); }
+  .card-meta { display: flex; align-items: center; gap: .75rem; padding: .6rem .25rem 0; font-size: .8125rem; color: var(--muted); }
+  .card-meta .num { font-weight: 500; color: var(--ink); }
+  .card-meta .model { margin-left: auto; letter-spacing: .05em; text-transform: uppercase; font-size: .6875rem; }
+  .star {
+    line-height: 1; font-size: 1rem; color: rgba(16,16,16,.35); padding: .1rem .2rem; border-radius: 6px;
+  }
+  .star:hover { color: var(--ink); }
+  .star.on { color: var(--green-ink); }
+
+  /* ══ The hero mockup (miniature and fullscreen share ALL of this) ══════ */
+  .hero {
+    position: absolute; inset: 0;
+    container-type: size;
+    background-size: cover; background-position: center bottom;
+    overflow: hidden; color: var(--ink);
+    font-family: var(--sans);
+  }
+  /* Velo del sitio real: el fondo "emerge" del crema de la página. */
+  .hero::before {
+    content: ""; position: absolute; left: 0; top: 0; height: 55%; width: 100%; pointer-events: none;
+    background: linear-gradient(to bottom, var(--cream) 0%, rgba(245,244,241,.65) 30%, transparent 100%);
+  }
+
+  /* Pill nav — réplica a escala del NavPillV2 real. */
+  .nav {
+    position: absolute; left: 50%; top: 3.2cqh; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 2.4cqw;
+    background: var(--ink); color: #fff; border-radius: 999px;
+    padding: .55cqw 0.6cqw .55cqw 1.6cqw; z-index: 3; white-space: nowrap;
+  }
+  .nav .wordmark { height: 1.35cqw; width: auto; filter: brightness(0) invert(1); }
+  .nav .links { display: flex; gap: 1.9cqw; }
+  .nav .links span {
+    font-size: .82cqw; letter-spacing: .2em; text-transform: uppercase; font-weight: 500; color: rgba(255,255,255,.7);
+  }
+  .nav .links span::after { content: " ⌄"; letter-spacing: 0; }
+  .nav .cta {
+    background: var(--near-green); color: #000; border-radius: 999px;
+    font-size: .95cqw; font-weight: 500; padding: .75cqw 1.5cqw;
+  }
+
+  .copy { position: absolute; inset: 0; z-index: 2; }
+  .copy .h { font-weight: 500; letter-spacing: -0.02em; line-height: 1; text-wrap: balance; }
+  .copy .h em { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.18em; }
+  .copy .sub { font-weight: 400; color: rgba(16,16,16,.72); text-wrap: pretty; }
+
+  /* T1 — Site: la composición actual, centrada, gradiente negro→verde bosque. */
+  .t1 .copy { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2.6cqh; padding-top: 6cqh; }
+  .t1 .h {
+    font-size: 7.8cqw;
+    background-image: linear-gradient(135deg, #000 0%, #000 55%, var(--ink-deep) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .t1 .sub { font-size: 1.15cqw; max-width: 36cqw; }
+
+  /* T2 — Vignelli: bloque monumental alineado a la izquierda, sub abajo a la derecha. */
+  .t2 .copy { padding: 0 6cqw; }
+  .t2 .h { position: absolute; left: 6cqw; top: 24cqh; font-size: 9.2cqw; line-height: .98; }
+  .t2 .h em { color: var(--ink-deep); }
+  .t2 .sub { position: absolute; right: 6cqw; bottom: 10cqh; font-size: 1.15cqw; max-width: 24cqw; text-align: right; }
+  .t2 .sub::before { content: ""; display: block; width: 3cqw; height: 1px; background: var(--green-ink); margin: 0 0 1.2cqh auto; }
+
+  /* T3 — Editorial: titular íntegro en Kepler itálica, eyebrow sans arriba. */
+  .t3 .copy { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2.2cqh; padding-top: 5cqh; }
+  .t3 .eyebrow { font-size: .95cqw; letter-spacing: .2em; text-transform: uppercase; font-weight: 500; color: var(--green-ink); }
+  .t3 .h { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 9.6cqw; line-height: .96; color: var(--ink); }
+  .t3 .h em { font-size: 1em; }
+  .t3 .sub { font-size: 1.1cqw; max-width: 32cqw; }
+
+  /* T4 — Rail: tres líneas apiladas a lo ancho, remate serif verde. */
+  .t4 .copy { display: flex; flex-direction: column; justify-content: center; padding: 8cqh 6cqw 0; }
+  .t4 .h { font-size: 12.5cqw; line-height: .92; text-transform: uppercase; }
+  .t4 .h .l { display: block; }
+  .t4 .h .l:nth-child(2) { margin-left: 12cqw; }
+  .t4 .h em { text-transform: none; color: var(--ink-deep); }
+  .t4 .sub { margin: 3cqh 0 0 .4cqw; font-size: 1.15cqw; max-width: 30cqw; }
+
+  /* T5 — Split: arriba-izquierda / abajo-derecha, regla fina que los une. */
+  .t5 .h { position: absolute; left: 7cqw; top: 22cqh; font-size: 6.4cqw; line-height: 1.04; }
+  .t5 .h2 { position: absolute; right: 7cqw; bottom: 14cqh; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 13cqw; line-height: 1; color: var(--ink); }
+  .t5 .rule { position: absolute; left: 24cqw; right: 34cqw; top: 47cqh; height: 1px; background: rgba(16,16,16,.35); }
+  .t5 .rule::after { content: ""; position: absolute; right: -3px; top: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--near-green); }
+  .t5 .sub { position: absolute; left: 7cqw; bottom: 12cqh; font-size: 1.1cqw; max-width: 24cqw; }
+
+  /* T6 — Whisper: pequeño, centrado, aire máximo, un punto verde. */
+  .t6 .copy { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2cqh; padding-top: 4cqh; }
+  .t6 .dot { width: .7cqw; height: .7cqw; border-radius: 50%; background: var(--near-green); }
+  .t6 .h { font-size: 3cqw; letter-spacing: -0.01em; }
+  .t6 .sub { font-size: 1cqw; max-width: 26cqw; color: rgba(16,16,16,.6); }
+
+  /* ══ Fullscreen viewer ═════════════════════════════════════════════════ */
+  .viewer { position: fixed; inset: 0; z-index: 50; display: none; background: var(--cream); }
+  .viewer.open { display: block; }
+  body.locked { overflow: hidden; }
+
+  .viewer .hero { position: absolute; inset: 0; }
+
+  .hud {
+    position: absolute; z-index: 10; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem 1.4rem; pointer-events: none;
+    font-size: .8125rem; color: var(--ink);
+  }
+  .hud > * { pointer-events: auto; }
+  .hud .tag {
+    display: flex; align-items: center; gap: .8rem;
+    background: rgba(245,244,241,.82); backdrop-filter: blur(6px);
+    border: 1px solid rgba(16,16,16,.12); border-radius: 999px; padding: .5rem 1rem;
+  }
+  .hud .tag .num { font-weight: 500; }
+  .hud .tag .sep { color: rgba(16,16,16,.3); }
+  .hud .keys { display: flex; gap: .55rem; align-items: center; background: rgba(245,244,241,.82); backdrop-filter: blur(6px); border: 1px solid rgba(16,16,16,.12); border-radius: 999px; padding: .5rem 1rem; color: var(--muted); }
+  .hud .keys b { font-weight: 500; color: var(--ink); }
+
+  .tstrip { display: flex; gap: .35rem; }
+  .tstrip button {
+    width: 1.7rem; height: 1.7rem; border-radius: 50%; font-size: .75rem; font-weight: 500;
+    border: 1px solid rgba(16,16,16,.25); color: var(--ink); background: transparent;
+  }
+  .tstrip button.on { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+
+  .vbtn {
+    position: absolute; z-index: 10; top: 50%; transform: translateY(-50%);
+    width: 2.6rem; height: 2.6rem; border-radius: 50%;
+    background: rgba(245,244,241,.82); border: 1px solid rgba(16,16,16,.15);
+    font-size: 1.05rem; color: var(--ink); backdrop-filter: blur(6px);
+  }
+  .vbtn:hover { background: var(--ink); color: var(--cream); }
+  .vbtn.prev { left: 1rem; }
+  .vbtn.next { right: 1rem; }
+  .vclose { position: absolute; z-index: 10; top: 1rem; right: 1rem; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: rgba(245,244,241,.82); border: 1px solid rgba(16,16,16,.15); backdrop-filter: blur(6px); font-size: 1rem; }
+  .vclose:hover { background: var(--ink); color: var(--cream); }
+  .vstar { position: absolute; z-index: 10; top: 1rem; left: 1rem; height: 2.6rem; border-radius: 999px; padding: 0 1rem; background: rgba(245,244,241,.82); border: 1px solid rgba(16,16,16,.15); backdrop-filter: blur(6px); font-size: .8125rem; display: flex; align-items: center; gap: .5rem; }
+  .vstar .glyph { color: rgba(16,16,16,.4); }
+  .vstar.on .glyph { color: var(--green-ink); }
+
+  @media (max-width: 720px) {
+    .page { padding: 2.5rem 1rem 4rem; }
+    .hud { flex-direction: column; align-items: stretch; }
+    .hud .keys { display: none; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card-frame .hero { transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+    .card-frame:hover .hero { transform: scale(1.02); }
+  }
+</style>
+</head>
+<body>
+
+<main class="page">
+  <header>
+    <div class="lab-head">
+      <h1>Hero Lab <em>thirty atmospheres.</em></h1>
+      <span class="lab-count" id="count"></span>
+    </div>
+    <p class="lab-sub">
+      One thesis — <strong>Own your <em style="font-family:var(--serif);font-style:italic">world.</em></strong> — over thirty
+      candidate backgrounds, six typographic concepts. Click any card to view it full-bleed;
+      use <kbd>←</kbd> <kbd>→</kbd> to change background, <kbd>1</kbd>–<kbd>6</kbd> to change the text
+      concept, <kbd>S</kbd> to shortlist, <kbd>Esc</kbd> to close. When you've chosen, tell me the
+      number (and concept), e.g. <em>“hero #17, concept 4”.</em>
+    </p>
+  </header>
+
+  <div id="families"></div>
+</main>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Hero preview">
+  <div class="hero" id="vhero"></div>
+  <button class="vclose" id="vclose" aria-label="Close">✕</button>
+  <button class="vstar" id="vstar"><span class="glyph">★</span><span class="vstar-label">Shortlist</span></button>
+  <button class="vbtn prev" id="vprev" aria-label="Previous background">←</button>
+  <button class="vbtn next" id="vnext" aria-label="Next background">→</button>
+  <div class="hud">
+    <div class="tag">
+      <span class="num" id="vnum"></span>
+      <span class="sep">·</span><span id="vfam"></span>
+      <span class="sep">·</span><span id="vmodel"></span>
+      <span class="sep">·</span><span id="vtreat"></span>
+    </div>
+    <div class="tstrip" id="tstrip" aria-label="Text concept"></div>
+    <div class="keys"><span><b>←→</b> background</span><span><b>1–6</b> concept</span><span><b>S</b> shortlist</span><span><b>Esc</b> close</span></div>
+  </div>
+</div>
+
+<script>
+  // ── Data ──────────────────────────────────────────────────────────────────
+  const FAMILIES = [
+    { key: "Contour",       note: "engraved linework — topography, orbits, flow fields",      range: [1, 5],   model: "GPT Image 2" },
+    { key: "Particle",      note: "dot fields and threads — data as landscape",               range: [6, 10],  model: "GPT Image 2" },
+    { key: "Atmosphere",    note: "color fields — light, fog, glass",                          range: [11, 15], model: "GPT Image 2" },
+    { key: "Sculptural",    note: "still-life forms — ceramic, chrome, glass",                 range: [16, 20], model: "Nano Banana" },
+    { key: "Architectural", note: "space and light — stairs, fins, ramps",                     range: [21, 25], model: "Nano Banana" },
+    { key: "Organic",       note: "material macro — silk, ink, shadow, paper",                 range: [26, 30], model: "Nano Banana" },
+  ];
+
+  const HEADLINE = { l1: "Own your", accent: "world." };
+  const SUB = "Move cross-chain, trade perps, hold RWAs, stay confidential, and access all of DeFi from your own wallet.";
+
+  const NAV = `
+    <div class="nav" aria-hidden="true">
+      <img class="wordmark" src="../v2/near-wordmark.svg" alt="">
+      <div class="links"><span>For Founders</span><span>For Developers</span><span>Tech Stack</span></div>
+      <span class="cta">Get started</span>
+    </div>`;
+
+  const TREATMENTS = [
+    { name: "Site", html: `
+        <div class="copy"><h2 class="h">${HEADLINE.l1}<br><em>${HEADLINE.accent}</em></h2>
+        <p class="sub">${SUB}</p></div>` },
+    { name: "Vignelli", html: `
+        <div class="copy"><h2 class="h">Own<br>your<br><em>${HEADLINE.accent}</em></h2>
+        <p class="sub">${SUB}</p></div>` },
+    { name: "Editorial", html: `
+        <div class="copy"><p class="eyebrow">The user-owned internet</p>
+        <h2 class="h">Own your world.</h2>
+        <p class="sub">${SUB}</p></div>` },
+    { name: "Rail", html: `
+        <div class="copy"><h2 class="h"><span class="l">Own</span><span class="l">your</span><span class="l"><em>${HEADLINE.accent}</em></span></h2>
+        <p class="sub">${SUB}</p></div>` },
+    { name: "Split", html: `
+        <h2 class="h">Own<br>your</h2><div class="rule" aria-hidden="true"></div><div class="h2">${HEADLINE.accent}</div>
+        <p class="sub">${SUB}</p>` },
+    { name: "Whisper", html: `
+        <div class="copy"><div class="dot" aria-hidden="true"></div>
+        <h2 class="h">Own your <em style="font-family:var(--serif);font-style:italic;font-size:1.18em">world.</em></h2>
+        <p class="sub">${SUB}</p></div>` },
+  ];
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  const stars = new Set(JSON.parse(localStorage.getItem("heroLab.stars") || "[]"));
+  const treatOverride = JSON.parse(localStorage.getItem("heroLab.treatments") || "{}");
+  const saveStars = () => localStorage.setItem("heroLab.stars", JSON.stringify([...stars]));
+  const saveTreats = () => localStorage.setItem("heroLab.treatments", JSON.stringify(treatOverride));
+
+  const famOf = n => FAMILIES.find(f => n >= f.range[0] && n <= f.range[1]);
+  const defaultTreat = n => (n - 1) % TREATMENTS.length;   // cycles 1..6 across the set
+  const treatOf = n => (n in treatOverride) ? treatOverride[n] : defaultTreat(n);
+  const pad = n => String(n).padStart(2, "0");
+
+  function heroHTML(n, t) {
+    return NAV + TREATMENTS[t].html;
+  }
+  function paintHero(el, n, t) {
+    el.className = "hero t" + (t + 1);
+    el.style.backgroundImage = `url(img/hero-${pad(n)}.jpg)`;
+    el.innerHTML = heroHTML(n, t);
+  }
+
+  // ── Grid ──────────────────────────────────────────────────────────────────
+  const cards = {};  // n → card element, for re-rendering from the viewer
+  const famsRoot = document.getElementById("families");
+  for (const f of FAMILIES) {
+    const section = document.createElement("section");
+    section.className = "family";
+    section.innerHTML = `<div class="family-head"><span class="eyebrow">${f.key}</span><span class="note">${f.note} · ${f.model}</span></div><div class="grid"></div>`;
+    const grid = section.querySelector(".grid");
+    for (let n = f.range[0]; n <= f.range[1]; n++) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <button class="card-frame" aria-label="Open hero ${pad(n)}"><div class="hero"></div></button>
+        <div class="card-meta">
+          <span class="num">${pad(n)}</span>
+          <button class="star" aria-label="Shortlist ${pad(n)}">★</button>
+          <span class="tname"></span>
+          <span class="model">${f.model}</span>
+        </div>`;
+      const heroEl = card.querySelector(".hero");
+      const starEl = card.querySelector(".star");
+      const tnameEl = card.querySelector(".tname");
+      const render = () => {
+        paintHero(heroEl, n, treatOf(n));
+        tnameEl.textContent = TREATMENTS[treatOf(n)].name;
+        starEl.classList.toggle("on", stars.has(n));
+      };
+      render();
+      card.querySelector(".card-frame").addEventListener("click", () => openViewer(n));
+      starEl.addEventListener("click", () => { stars.has(n) ? stars.delete(n) : stars.add(n); saveStars(); render(); });
+      card._render = render;
+      grid.appendChild(card);
+      cards[n] = card;
+    }
+    famsRoot.appendChild(section);
+  }
+  document.getElementById("count").textContent = "30 backgrounds · 6 text concepts · ★ " + stars.size + " shortlisted";
+
+  // ── Viewer ────────────────────────────────────────────────────────────────
+  const viewer = document.getElementById("viewer");
+  const vhero = document.getElementById("vhero");
+  let current = 0;
+
+  const tstrip = document.getElementById("tstrip");
+  TREATMENTS.forEach((t, i) => {
+    const b = document.createElement("button");
+    b.textContent = i + 1;
+    b.title = t.name;
+    b.addEventListener("click", () => setTreat(i));
+    tstrip.appendChild(b);
+  });
+
+  function refreshCount() {
+    document.getElementById("count").textContent = "30 backgrounds · 6 text concepts · ★ " + stars.size + " shortlisted";
+  }
+  function renderViewer() {
+    const n = current, t = treatOf(n), f = famOf(n);
+    paintHero(vhero, n, t);
+    document.getElementById("vnum").textContent = "#" + pad(n);
+    document.getElementById("vfam").textContent = f.key;
+    document.getElementById("vmodel").textContent = f.model;
+    document.getElementById("vtreat").textContent = "Concept " + (t + 1) + " — " + TREATMENTS[t].name;
+    document.getElementById("vstar").classList.toggle("on", stars.has(n));
+    document.querySelector(".vstar-label").textContent = stars.has(n) ? "Shortlisted" : "Shortlist";
+    [...tstrip.children].forEach((b, i) => b.classList.toggle("on", i === t));
+  }
+  function openViewer(n) { current = n; viewer.classList.add("open"); document.body.classList.add("locked"); renderViewer(); }
+  function closeViewer() { viewer.classList.remove("open"); document.body.classList.remove("locked"); }
+  function step(d) { current = ((current - 1 + d + 30) % 30) + 1; renderViewer(); }
+  function setTreat(i) { treatOverride[current] = i; saveTreats(); renderViewer(); cards[current]?._render(); }
+  function toggleStar() {
+    stars.has(current) ? stars.delete(current) : stars.add(current);
+    saveStars(); renderViewer(); cards[current]?._render(); refreshCount();
+  }
+
+  document.getElementById("vclose").addEventListener("click", closeViewer);
+  document.getElementById("vprev").addEventListener("click", () => step(-1));
+  document.getElementById("vnext").addEventListener("click", () => step(1));
+  document.getElementById("vstar").addEventListener("click", toggleStar);
+
+  document.addEventListener("keydown", e => {
+    if (!viewer.classList.contains("open")) return;
+    if (e.key === "Escape") closeViewer();
+    else if (e.key === "ArrowLeft") step(-1);
+    else if (e.key === "ArrowRight") step(1);
+    else if (e.key >= "1" && e.key <= "6") setTreat(+e.key - 1);
+    else if (e.key.toLowerCase() === "s") toggleStar();
+  });
+</script>
+</body>
+</html>

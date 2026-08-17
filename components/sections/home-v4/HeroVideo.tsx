@@ -64,7 +64,10 @@ const CHASE = 0.14;
 // en vez de frenar de golpe.
 const CHASE_DOCKING = 0.09;
 
-export default function HeroVideo() {
+// `subheading`: v5 lo apaga (pedido — sin bajada debajo de "Own your world.");
+// v4 no pasa nada y conserva la suya. Los tweens que apuntan a
+// [data-hero='sub'] toleran el selector vacío (gsap sobre lista vacía es no-op).
+export default function HeroVideo({ subheading = true }: { subheading?: boolean } = {}) {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
     const mm = gsap.matchMedia();
@@ -364,10 +367,12 @@ export default function HeroVideo() {
           <Accent display>world.</Accent>
         </h1>
 
-        <p data-hero="sub" className="max-w-xl text-body-lg text-muted-foreground text-pretty">
-          Move cross-chain, trade perps, hold RWAs, stay confidential, and access
-          all of DeFi from your own wallet.
-        </p>
+        {subheading && (
+          <p data-hero="sub" className="max-w-xl text-body-lg text-muted-foreground text-pretty">
+            Move cross-chain, trade perps, hold RWAs, stay confidential, and access
+            all of DeFi from your own wallet.
+          </p>
+        )}
       </Container>
     </section>
   );

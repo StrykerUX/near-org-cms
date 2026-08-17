@@ -8,6 +8,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import { DIAGRAMS, type DiagramKey } from "@/components/sections/protocol/spineDiagrams";
+import SpeedLottie from "@/components/sections/protocol/SpeedLottie";
 
 /**
  * The protocol, as six equal claims on a horizontal shelf.
@@ -120,10 +121,12 @@ export default function ProtocolSpine() {
 
         // Diagram timelines are built once per card and only played while
         // that card is open — six looping animations at once is exactly what
-        // makes a page feel heavy.
+        // makes a page feel heavy. "speed" es la excepción: su animación es
+        // el Lottie de SpeedLottie, que se gobierna solo por data-open; acá
+        // le corresponde un timeline vacío para no romper el contrato.
         const timelines = cards.map((card) => {
           const key = card.dataset.diagram as DiagramKey;
-          return DIAGRAMS[key].build(card);
+          return key === "speed" ? gsap.timeline({ paused: true }) : DIAGRAMS[key].build(card);
         });
 
         const accordion = motionOk && isDesktop;
@@ -147,10 +150,12 @@ export default function ProtocolSpine() {
         const contents = q("[data-card-content]");
         gsap.set(contents, { autoAlpha: 0 });
 
-        // -1 = shelf closed. The width animation is a flexGrow tween: closed
-        // cards hold their fixed basis (the spine width, set in CSS), the
-        // open one takes every remaining pixel. Tweening the grow factor is
-        // what makes neighbours slide out of the way in the same motion.
+        // SIEMPRE hay exactamente una card abierta — no existe el estado
+        // "estante cerrado": se llega con la primera ya expandida (pedido).
+        // The width animation is a flexGrow tween: closed cards hold their
+        // fixed basis (the spine width, set in CSS), the open one takes
+        // every remaining pixel. Tweening the grow factor is what makes
+        // neighbours slide out of the way in the same motion.
         let active = -1;
         const setActive = (idx: number) => {
           if (idx === active) return;
@@ -158,22 +163,24 @@ export default function ProtocolSpine() {
           cards.forEach((card, i) => {
             const open = i === idx;
             card.dataset.open = open ? "true" : "false";
+            // Duraciones al 80% del original — apertura 20% más rápida,
+            // con los delays escalados igual para no romper la coreografía.
             gsap.to(card, {
               flexGrow: open ? 1 : 0,
-              duration: 0.65,
+              duration: 0.52,
               ease: "power3.inOut",
               overwrite: "auto",
             });
             gsap.to(card.querySelector("[data-spine-label]"), {
               autoAlpha: open ? 0 : 1,
-              duration: 0.3,
-              delay: open ? 0 : 0.3,
+              duration: 0.24,
+              delay: open ? 0 : 0.24,
               overwrite: "auto",
             });
             gsap.to(card.querySelector("[data-card-content]"), {
               autoAlpha: open ? 1 : 0,
-              duration: 0.35,
-              delay: open ? 0.28 : 0,
+              duration: 0.28,
+              delay: open ? 0.22 : 0,
               overwrite: "auto",
             });
             if (open) timelines[i].restart();
@@ -181,19 +188,57 @@ export default function ProtocolSpine() {
           });
         };
 
-        // Track progress → active card. N+1 slices: the first is the closed
-        // shelf (you arrive and SEE the six spines before anything opens),
-        // then one slice per card, then unpin.
+        // Click en cualquier card = saltar a SU rebanada del track. Mismo
+        // patrón que el NearStack de v5: el estado NO viaja con el scroll —
+        // se setea DIRECTO a la card clickeada y el derivado del scroll queda
+        // CONGELADO (guard en onUpdate) mientras el tween aterriza, así el
+        // salto hace UNA transición y no recorre las cards intermedias. El id
+        // (y no un boolean) evita que un segundo click "aterrice" al primero.
+        let jumpId = 0;
+        let jumpSeq = 0;
+        const goTo = (i: number) => {
+          const top = scope.getBoundingClientRect().top + window.scrollY;
+          const span = scope.offsetHeight - window.innerHeight;
+          const id = ++jumpSeq;
+          jumpId = id;
+          setActive(i);
+          const land = () => {
+            if (jumpId === id) jumpId = 0;
+          };
+          gsap.to(document.scrollingElement ?? document.documentElement, {
+            scrollTop: top + ((i + 0.5) / ITEMS.length) * span,
+            duration: 0.6,
+            ease: "power2.inOut",
+            overwrite: "auto",
+            onComplete: land,
+            onInterrupt: land,
+          });
+        };
+        const clickHandlers = cards.map((card, i) => {
+          const h = () => goTo(i);
+          card.addEventListener("click", h);
+          return h;
+        });
+
+        // Track progress → active card. N slices, una por card — la primera
+        // arranca abierta en progress 0, así que al llegar ya hay una
+        // expandida y el scroll solo CAMBIA cuál es.
         ScrollTrigger.create({
           trigger: scope,
           start: "top top",
           end: "bottom bottom",
-          onUpdate: (self) =>
-            setActive(
-              Math.min(ITEMS.length - 1, Math.floor(self.progress * (ITEMS.length + 1)) - 1)
-            ),
-          onLeaveBack: () => setActive(-1),
+          onUpdate: (self) => {
+            if (jumpId) return;
+            setActive(Math.min(ITEMS.length - 1, Math.floor(self.progress * ITEMS.length)));
+          },
+          onLeaveBack: () => {
+            if (!jumpId) setActive(0);
+          },
         });
+        // Estado inicial, antes de que el trigger dispare: la primera abierta
+        // (los tweens corren fuera de pantalla, se llega con el hecho
+        // consumado).
+        setActive(0);
 
         gsap.from(q("[data-spine-head]"), {
           autoAlpha: 0,
@@ -207,7 +252,10 @@ export default function ProtocolSpine() {
         return () => {
           timelines.forEach((tl) => tl.kill());
           delete scope.dataset.mode;
-          cards.forEach((card) => (card.dataset.open = "false"));
+          cards.forEach((card, i) => {
+            card.removeEventListener("click", clickHandlers[i]);
+            card.dataset.open = "false";
+          });
         };
       }
     );
@@ -216,44 +264,46 @@ export default function ProtocolSpine() {
   }, []);
 
   return (
-    // Height ONLY in accordion mode: ~100svh of viewport plus seven scroll
-    // slices. NO overflow-hidden here — an overflow ancestor silently kills
-    // the sticky viewport (same trap as OwnYourOwn's title).
+    // Height ONLY in accordion mode: ~100svh of viewport plus SIX scroll
+    // slices (ya no hay rebanada de estante cerrado — la primera card llega
+    // abierta), mismo ritmo por rebanada que antes. NO overflow-hidden here —
+    // an overflow ancestor silently kills the sticky viewport (same trap as
+    // OwnYourOwn's title).
     <section
       ref={rootRef}
       data-nav-dark
-      className="group/spine relative bg-ink text-cream data-[mode=accordion]:h-[480svh]"
+      className="group/spine relative bg-ink text-cream data-[mode=accordion]:h-[425svh]"
     >
-      {/* Opening backdrop — the wide shot the diagrams are close-ups of. It
-          lives at the top of the TRACK, so it scrolls away naturally while
-          the shelf stays pinned. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[78svh]">
-        <Image
-          src="/prototype/protocol/shard-field.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-right"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(16,16,16,0.15)_0%,rgba(16,16,16,0.5)_46%,var(--ink)_94%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--ink)_0%,rgba(16,16,16,0.82)_26%,rgba(16,16,16,0.2)_62%,transparent_100%)]" />
-      </div>
-
       {/* The sticky viewport. In fallback mode these classes are inert and
           the section is normal flow. */}
       <div className="relative group-data-[mode=accordion]/spine:sticky group-data-[mode=accordion]/spine:top-0 group-data-[mode=accordion]/spine:flex group-data-[mode=accordion]/spine:h-svh group-data-[mode=accordion]/spine:flex-col group-data-[mode=accordion]/spine:justify-center">
-        <Container className="w-full pb-16 pt-28 group-data-[mode=accordion]/spine:pb-0 group-data-[mode=accordion]/spine:pt-24">
+        {/* Backdrop — the wide shot the diagrams are close-ups of. Vive
+            DENTRO del viewport sticky (pedido): queda en cuadro durante todo
+            el recorrido pineado y recién sale de frame cuando la sección
+            entera despina y scrollea. El Container de abajo va `relative`
+            para pintar ENCIMA (un absolute posterior taparía al contenido
+            estático). */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <Image
+            src="/prototype/protocol/shard-field.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-right"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(16,16,16,0.15)_0%,rgba(16,16,16,0.5)_46%,var(--ink)_94%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--ink)_0%,rgba(16,16,16,0.82)_26%,rgba(16,16,16,0.2)_62%,transparent_100%)]" />
+        </div>
+        <Container className="relative w-full pb-16 pt-28 group-data-[mode=accordion]/spine:pb-0 group-data-[mode=accordion]/spine:pt-24">
           {/* Compact header: heading left, lede + proof right — it has to
               share a pinned viewport with the shelf. */}
           <header className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
             <div>
-              <p data-spine-head className="text-eyebrow text-cream/50">
-                The protocol
-              </p>
               {/* El heading retoma la promesa del hero ("The settlement layer
                   for the agent economy") — los diagramas son literalmente los
-                  close-ups del plano general del hero, y el título lo dice. */}
-              <h2 data-spine-head className="mt-4 text-h2 text-balance">
+                  close-ups del plano general del hero, y el título lo dice.
+                  Sin eyebrow — pedido (llevaba "The protocol"). */}
+              <h2 data-spine-head className="text-h2 text-balance">
                 The settlement layer,
                 <br />
                 <Accent>up close</Accent>
@@ -285,38 +335,35 @@ export default function ProtocolSpine() {
           {/* The shelf. Fallback: a vertical stack of open cards. Accordion:
               one row, fixed height, spines + one expanded card. */}
           <div className="flex flex-col gap-5 group-data-[mode=accordion]/spine:h-[56svh] group-data-[mode=accordion]/spine:max-h-[36rem] group-data-[mode=accordion]/spine:flex-row group-data-[mode=accordion]/spine:gap-4">
-            {ITEMS.map((item, i) => {
+            {ITEMS.map((item) => {
               const { Art } = DIAGRAMS[item.key];
-              const nn = String(i + 1).padStart(2, "0");
               return (
                 <article
                   key={item.key}
                   data-card
                   data-diagram={item.key}
                   data-open="false"
-                  // Caja del sistema: rounded-3xl, SIEMPRE oscura (frames del
-                  // NEAR Stack). La separación entre boxes sale de borde + gap,
-                  // no de invertir a claro: cerrada es lomo con hairline,
-                  // abierta es panel más profundo (ink-deep) con borde más
-                  // presente. En accordion la base fija es el ancho del lomo;
-                  // el flexGrow lo tuinea el efecto.
-                  className="group/card relative overflow-hidden rounded-3xl border border-cream/12 bg-cream/[0.02] transition-colors duration-500 data-[open=true]:border-cream/25 data-[open=true]:bg-ink-deep group-data-[mode=accordion]/spine:min-w-0 group-data-[mode=accordion]/spine:[flex:0_0_4.25rem]"
+                  // Caja del sistema: rounded-3xl, SIEMPRE oscura y SÓLIDA
+                  // (bg-ink pleno, sin translucidez — pedido). El trazo copia
+                  // las cajas del rail del NEAR Stack de v5: borde cream
+                  // pleno cerrada, mint al abrir, wash cream al hover.
+                  // En accordion la base fija es el ancho del lomo; el
+                  // flexGrow lo tuinea el efecto. Clickeable: salta a su
+                  // parada del track.
+                  className="group/card relative overflow-hidden rounded-3xl border border-cream bg-ink transition-colors duration-500 data-[open=true]:border-cta-mint/70 data-[open=true]:bg-ink-soft data-[open=false]:hover:bg-ink-soft group-data-[mode=accordion]/spine:min-w-0 group-data-[mode=accordion]/spine:cursor-pointer group-data-[mode=accordion]/spine:[flex:0_0_4.25rem]"
                 >
-                  {/* El lomo (solo accordion): número arriba, título corriendo
-                      en vertical como el lomo de un libro. aria-hidden — el
-                      título accesible vive en el contenido. */}
+                  {/* El lomo (solo accordion): el título corriendo en vertical
+                      como el lomo de un libro, centrado — sin numeración
+                      (pedido). aria-hidden — el título accesible vive en el
+                      contenido. */}
                   <div
                     aria-hidden="true"
                     data-spine-label
-                    className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-between py-6 group-data-[mode=accordion]/spine:flex"
+                    className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-center py-6 group-data-[mode=accordion]/spine:flex"
                   >
-                    <span className="grid size-7 shrink-0 place-items-center rounded-md border border-cream/30 font-mono text-caption text-cream/70">
-                      {nn}
-                    </span>
                     <span className="whitespace-nowrap text-h4 text-cream [writing-mode:vertical-rl]">
                       {item.title}
                     </span>
-                    <span className="size-7" />
                   </div>
 
                   {/* El contenido abierto. `min-w` fija el ancho de composición
@@ -328,15 +375,12 @@ export default function ProtocolSpine() {
                     data-card-content
                     className="flex h-full flex-col p-6 group-data-[mode=accordion]/spine:min-w-[34rem] group-data-[mode=accordion]/spine:opacity-0 lg:p-7"
                   >
-                    <header className="flex items-center gap-4">
-                      <span className="grid size-7 shrink-0 place-items-center rounded-md border border-cream/30 font-mono text-caption text-cream/70">
-                        {nn}
-                      </span>
+                    <header>
                       <h3 className="text-h4 text-cream">{item.title}</h3>
                     </header>
 
                     <div className="min-h-[13rem] flex-1 pt-5">
-                      <Art />
+                      {item.key === "speed" ? <SpeedLottie /> : <Art />}
                     </div>
 
                     <p className="mt-4 max-w-[56ch] text-body-sm text-cream/65 text-pretty">

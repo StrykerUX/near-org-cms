@@ -28,13 +28,18 @@ export default function UpdatesList() {
 
   return (
     <section className="bg-cream text-foreground">
-      <Container className="grid gap-12 py-24 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-20">
+      {/* MISMA grilla de 3 columnas (y mismo gap-7) que las cards de
+          LatestUpdates arriba: el listado arranca EXACTAMENTE donde arranca
+          la segunda card — una sola estructura de columnas guiando la página,
+          no una geometría propia (el sidebar de 22rem quedaba a ~17px de la
+          columna de las cards y se leía como desalineado). */}
+      <Container className="grid gap-12 py-24 lg:grid-cols-3 lg:gap-7">
         <div className="flex flex-col gap-3">
-          <Eyebrow className="text-foreground">Whats new at NEAR</Eyebrow>
-          <h2 className="text-h2 text-pretty">Latest updates</h2>
+          <Eyebrow className="text-foreground">Media</Eyebrow>
+          <h2 className="text-h2 text-pretty">NEAR in the news</h2>
         </div>
 
-        <ul ref={rootRef}>
+        <ul ref={rootRef} className="lg:col-span-2">
           {UPDATES.map((update, i) => (
             // El separador va como `border-b` de cada fila y no entre filas:
             // así hay línea también debajo de la última, como en la referencia.
@@ -53,9 +58,10 @@ export default function UpdatesList() {
                   {update.date}
                 </span>
 
+                {/* Negro SIEMPRE, no solo al hover — pedido. */}
                 <span
                   aria-hidden="true"
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors group-hover:border-foreground group-hover:text-foreground"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground text-foreground"
                 >
                   <Plus className="size-4" strokeWidth={1.5} />
                 </span>

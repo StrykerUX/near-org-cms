@@ -177,8 +177,9 @@ export default function LatestUpdates() {
         <h2 className="text-center text-h1 text-pretty">The latest from NEAR</h2>
 
         <div className="flex flex-col gap-7">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-body-sm">Latest News</span>
+          {/* justify-end: sin el label "Latest News" (removido a pedido), el
+              botón conserva su lugar a la derecha. */}
+          <div className="flex items-center justify-end gap-4">
             {/* near-green-dark y no near-green: el verde puro (#00ec97) con
                 texto blanco queda en ~1.5:1 de contraste. Este es además el
                 tono del botón de la referencia. */}

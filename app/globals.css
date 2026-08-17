@@ -45,6 +45,20 @@
   --cream: #F5F4F1;
   --stone: #d8d6d0;
 
+  /* Cuánto espacio ocupa el header fijo desde el borde de arriba: 24px de
+     aire (`pt-6` del Container) + 64px de barra (`h-16`). Lo consumen las
+     páginas que necesitan despejarlo (es opt-in: los heroes de /prototype
+     pasan por debajo a propósito).
+
+     VIVE EN ESTE `:root` Y NO EN UNO PROPIO. Estuvo declarada en un
+     `:root { }` suelto más abajo (junto al bloque del nav) y el pipeline de
+     CSS de Turbopack/Lightning DROPEABA ese bloque entero del output — la
+     variable llegaba vacía al navegador y todo `calc(var(--site-header-block)
+     + …)` colapsaba a padding 0 (así se rompió dos veces el clearance del
+     título del NEAR Stack). Este bloque de tokens sobrevive; no la muevan a
+     un `:root` propio sin verificar el CSS compilado. */
+  --site-header-block: 88px;
+
   /* ── ampliación para /prototype/homepage-v2 ──────────────────────────────
      Valores transcritos del HTML de referencia (Homepage.dc.html). Mismo
      estatus que los de arriba: paleta draft, no marca definitiva.
@@ -756,19 +770,9 @@ button:hover .lucide-plus {
   --q-nav-bg-over-dark: #16191a;
 }
 
-/* Cuánto espacio ocupa el header desde el borde de arriba: 24px de aire
-   (`pt-6` del Container) + 64px de barra (`h-16`).
-
-   Va en `:root` y no en `[data-q-nav]` porque quien lo consume NO es el header
-   —que es `fixed` y no empuja nada— sino las páginas que necesitan despejarlo.
-   Declarado dentro del header, ninguna de ellas podría leerlo.
-
-   Es opt-in a propósito: las páginas animadas de `/prototype` pasan sus heroes
-   por DEBAJO de la barra a propósito, así que un padding automático en el
-   layout les rompería la composición. */
-:root {
-  --site-header-block: 88px;
-}
+/* `--site-header-block` vivía acá en un `:root` propio y el pipeline de CSS
+   lo dropeaba del output compilado (variable vacía en runtime). Ahora está en
+   el `:root` de tokens del tope del archivo — ver el comentario ahí. */
 
 /* The bar and every dropdown panel are ONE surface treatment — same colour,
    same transparency, same blur — so they read as parts of the same object
@@ -922,4 +926,25 @@ html[data-grid="on"] [data-grid-overlay] > div > span {
   to {
     stroke-dashoffset: calc(var(--sheen-phase, 0px) - 900px);
   }
+}
+
+/* ── NearStackV2: copias de fondo de los anillos, sin máscara ──────────────
+   Los SVG de los anillos traen una máscara horneada que recorta el canal de
+   la columna (la oclusión asume la columna SIEMPRE en su lugar; si un cubo
+   cae, se parte por hover o funde, el recorte queda expuesto como un agujero).
+   Las copias de fondo se pintan DEBAJO de todos los cubos y con la máscara
+   apagada son el anillo continuo que se ve detrás de los bloques en vuelo.
+   CSS y no atributo porque `mask` como propiedad le gana al atributo del svg
+   sin tocar el arte generado. */
+[data-stack-unmask] g[mask] {
+  mask: none;
+}
+
+/* NearStackV2: los 7 parches de sombra de la columna vienen HORNEADOS en los
+   svg verdes de los anillos (g[data-stack-shadow], taggeados en
+   stackArt.generated.tsx). V2 los apaga en TODAS sus instancias — la sombra
+   es un elemento propio de la escena (ColumnShadows en NearStackV2), que
+   funde según el build de la columna: sin bloque encima, sin sombra. */
+[data-stack-noshadow] [data-stack-shadow] {
+  display: none;
 }

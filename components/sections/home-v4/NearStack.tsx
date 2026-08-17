@@ -71,6 +71,33 @@ const POS = {
 
 const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(2)}%`;
 
+/* ── El mark de NEAR, acostado sobre la cara superior del cubo de arriba ─── */
+
+// La cara superior del cubo 0 en el espacio del svg de la columna (104×634)
+// es un rombo: L (izquierda) más la base U = L→T (arista trasera, sube a la
+// derecha) y V = L→B (arista delantera, baja a la derecha). Proyectar el mark
+// con esa base afín — su eje X por U, su eje Y por V — ES apoyarlo en el
+// plano de la cara, con la perspectiva del iso ya horneada en las aristas.
+const FACE_L = { x: 0.305, y: 30.865 };
+const FACE_U = { x: 51.28, y: -30.56 }; // L→T
+const FACE_V = { x: 51.28, y: 31.04 }; // L→B
+// El viewBox del mark (copiado de public/prototype/v2/near-mark.svg) y qué
+// fracción de la cara ocupa, centrado (inset = (1-escala)/2 por lado).
+const MARK_VB = { x: 108, y: 108, size: 351 };
+const MARK_SCALE = 0.56;
+const MARK_TRANSFORM = (() => {
+  const inset = (1 - MARK_SCALE) / 2;
+  const a = (FACE_U.x * MARK_SCALE) / MARK_VB.size;
+  const b = (FACE_U.y * MARK_SCALE) / MARK_VB.size;
+  const c = (FACE_V.x * MARK_SCALE) / MARK_VB.size;
+  const d = (FACE_V.y * MARK_SCALE) / MARK_VB.size;
+  const e = FACE_L.x + (FACE_U.x + FACE_V.x) * inset - a * MARK_VB.x - c * MARK_VB.y;
+  const f = FACE_L.y + (FACE_U.y + FACE_V.y) * inset - b * MARK_VB.x - d * MARK_VB.y;
+  return `matrix(${a} ${b} ${c} ${d} ${e} ${f})`;
+})();
+const NEAR_MARK_D =
+  "m421.61,108c-13,0-25.07,6.74-31.88,17.82l-73.37,108.93c-2.39,3.59-1.42,8.43,2.17,10.82,2.91,1.94,6.76,1.7,9.41-.58l72.22-62.64c1.2-1.08,3.05-.97,4.13.23.49.55.75,1.26.75,1.99v196.12c0,1.62-1.31,2.92-2.93,2.92-.87,0-1.69-.38-2.24-1.05L181.56,121.24c-7.11-8.39-17.55-13.23-28.54-13.24h-7.63c-20.65,0-37.39,16.74-37.39,37.39v276.22c0,20.65,16.74,37.39,37.39,37.39,13,0,25.07-6.74,31.88-17.82l73.37-108.93c2.39-3.59,1.42-8.43-2.17-10.82-2.91-1.94-6.76-1.7-9.41.58l-72.22,62.64c-1.2,1.08-3.05.97-4.13-.23-.49-.55-.75-1.26-.74-1.99v-196.17c0-1.62,1.31-2.92,2.93-2.92.86,0,1.69.38,2.24,1.05l218.28,261.37c7.11,8.39,17.55,13.23,28.54,13.24h7.63c20.65.01,37.4-16.72,37.42-37.37V145.39c0-20.65-16.74-37.39-37.39-37.39Z";
+
 /* ── Bubble tags: ancla en % del stage por pieza encendida ────────────────── */
 
 const SEG_NAMES: Record<string, string> = {
@@ -123,6 +150,17 @@ export default function NearStack() {
   // expandido. true = scroll-scene pineada de desktop.
   const [enhanced, setEnhanced] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
+  // Identidad del salto por click activo: >0 congela el estado derivado del
+  // scroll (guard en onUpdate) hasta que el tween aterriza o lo interrumpen.
+  // Es un id y no un boolean para que un segundo click durante el salto no
+  // pueda "aterrizar" el salto viejo por encima del nuevo.
+  const jumpRef = useRef(0);
+  const jumpSeq = useRef(0);
+  // false MIENTRAS corre el build-in de la columna: el efecto de hover no
+  // escribe sobre los cubos en ese lapso (pisaría el tween de entrada).
+  // Arranca en true para que el fallback sin escena (mobile/reduced-motion)
+  // nunca quede con los cubos sin gobernar.
+  const builtRef = useRef(true);
 
   // Sticky track (nunca pin:true — regla del repo): la sección es un tramo
   // alto con un viewport sticky adentro. Al llegar el tope de la sección al
@@ -137,11 +175,62 @@ export default function NearStack() {
       trigger: scope,
       start: "top top",
       end: "bottom bottom",
-      onUpdate: (self) =>
-        setScrollIdx(Math.min(STAGE_ORDER.length - 1, Math.floor(self.progress * STAGE_ORDER.length))),
-      onLeaveBack: () => setScrollIdx(-1),
+      onUpdate: (self) => {
+        if (jumpRef.current) return;
+        setScrollIdx(Math.min(STAGE_ORDER.length - 1, Math.floor(self.progress * STAGE_ORDER.length)));
+      },
+      onLeaveBack: () => {
+        if (!jumpRef.current) setScrollIdx(-1);
+      },
     });
+    // La columna no ESTÁ al llegar: se CONSTRUYE — los seis cubos suben a
+    // escena de abajo hacia arriba (una sola vez) cuando la sección entra al
+    // viewport. Cada índice agrupa sus 4 instancias (wire+verde × las dos
+    // mitades del z-layering) más el mark, así todo el cubo entra junto.
+    // Al terminar, clearProps deja los inline limpios para que el split y la
+    // atenuación del hover escriban sobre nodos sin residuos del tween.
+    // Cada cubo BAJA a su lugar (y negativa → 0) fundiendo a escena, y una
+    // vez asentado no se vuelve a mover: cada índice tiene UN solo tween y
+    // su y termina exactamente en 0, sin rebote (power2.out, sin back/elastic).
+    builtRef.current = false;
+    const cubes = scope.querySelectorAll<SVGGElement>("[data-stack-cube]");
+    // transition: none INLINE mientras dura el build: los grupos de cubo traen
+    // una transition CSS de transform (la del split por hover) que interceptaba
+    // y RE-EASEABA cada frame que GSAP escribía — la caída lineal llegaba al
+    // ojo emborronada y con un easing que nadie pidió. Se restaura al final
+    // junto con el resto (clearProps).
+    gsap.set(cubes, { autoAlpha: 0, y: -90, transition: "none" });
+    const buildTl = gsap.timeline({
+      // "top 30%" y no antes: al 75% el arte todavía asomaba apenas por el
+      // borde de abajo y el build pasaba fuera de cámara. Acá la escena ya
+      // está bien adentro del frame cuando arranca (y si el usuario llega
+      // rápido al lock, el trigger dispara igual a más tardar en el pin).
+      scrollTrigger: { trigger: scope, start: "top 30%", once: true },
+      onComplete: () => {
+        builtRef.current = true;
+        gsap.set(cubes, { clearProps: "opacity,visibility,transform,transition" });
+      },
+    });
+    // Secuencial DE VERDAD, no ola: cada cubo arranca cuando el anterior va
+    // por ~2/3 de su caída — se lee un aterrizaje por vez, de abajo arriba.
+    // Caída y fundido SIMULTÁNEOS pero con perfiles propios. La caída va en
+    // DOS tweens encadenados porque ninguna ease de fábrica hace lo pedido
+    // (velocidad constante y freno SOLO al final): 72px lineales a 200px/s y
+    // después los últimos 18px en power2.out arrancando exactamente a esos
+    // mismos 200px/s (v₀ = 2·d/T = 2·18/0.18) — un movimiento continuo que
+    // recién desacelera al aterrizar. El fundido corre aparte y más corto:
+    // el cubo ya es visible en plena caída lineal.
+    for (let i = 5; i >= 0; i--) {
+      const nodes = scope.querySelectorAll<SVGGElement>(`[data-stack-cube="${i}"]`);
+      const at = (5 - i) * 0.3;
+      buildTl.to(nodes, { y: -18, duration: 0.36, ease: "none" }, at);
+      buildTl.to(nodes, { y: 0, duration: 0.18, ease: "power2.out" }, at + 0.36);
+      // 0.22s: totalmente visible a menos de la mitad de la caída — el fade
+      // ocurre ARRIBA y el resto del recorrido se ve entero.
+      buildTl.to(nodes, { autoAlpha: 1, duration: 0.22, ease: "sine.inOut" }, at);
+    }
     return () => {
+      builtRef.current = true;
       setEnhanced(false);
       delete scope.dataset.mode;
     };
@@ -149,21 +238,34 @@ export default function NearStack() {
 
   const scrollKey: StackKey | null = scrollIdx >= 0 ? STAGE_ORDER[scrollIdx] : null;
 
-  // Click = saltar a la parada: como el estado activo DERIVA del scroll, el
-  // click no setea nada — scrollea la página al centro de la rebanada de esa
-  // caja dentro del track, y el mecanismo de siempre hace el resto (abre la
-  // clickeada, colapsa la anterior). Scroll y click son el mismo camino.
+  // Click = saltar a la parada: scrollea la página al centro de la rebanada
+  // de esa caja dentro del track, pero el estado NO viaja con el scroll — se
+  // setea DIRECTO a la parada destino y el derivado del scroll queda
+  // CONGELADO (guard en onUpdate) mientras el tween aterriza. Con un solo
+  // cambio de estado, cada elemento hace su propia transición una única vez
+  // (las capas que faltan funden a escena, las que sobran se apagan, el
+  // panel viejo cierra y el nuevo abre) — sin recorrer paradas intermedias.
   const goTo = (key: StackKey) => {
     const section = rootRef.current;
     if (!section || !enhanced) return;
     const i = STAGE_ORDER.indexOf(key);
     const top = section.getBoundingClientRect().top + window.scrollY;
     const span = section.offsetHeight - window.innerHeight;
+    const id = ++jumpSeq.current;
+    jumpRef.current = id;
+    setScrollIdx(i);
+    // land corre también en onInterrupt (otro click u overwrite): devuelve el
+    // control al scroll, pero solo si ESTE salto sigue siendo el activo.
+    const land = () => {
+      if (jumpRef.current === id) jumpRef.current = 0;
+    };
     gsap.to(document.scrollingElement ?? document.documentElement, {
       scrollTop: top + ((i + 0.5) / STAGE_ORDER.length) * span,
       duration: 0.6,
       ease: "power2.inOut",
       overwrite: "auto",
+      onComplete: land,
+      onInterrupt: land,
     });
   };
 
@@ -218,37 +320,21 @@ export default function NearStack() {
     // gobierna opacity, que la clase generada no cubre.
     const split = hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
     const hoveredCube = hover?.kind === "cube" ? hover.index : null;
+    // Con el build-in de la columna en curso, los cubos son del tween de
+    // entrada — escribirles transform/opacity acá lo pisaría a mitad de vuelo.
+    if (!builtRef.current) return;
     stage.querySelectorAll<SVGGElement>("[data-stack-cube]").forEach((g) => {
       const i = Number(g.dataset.stackCube);
       g.style.transition = "transform .38s cubic-bezier(.65,0,.35,1), opacity .25s";
       g.style.transform = split ? `translateY(${((i - 2.5) * 32).toFixed(0)}px)` : "translateY(0px)";
-      g.style.opacity = hoveredCube !== null && i !== hoveredCube ? "0.3" : "1";
+      // El mark de NEAR viaja con el cubo 0 (mismo data-stack-cube) pero NO se
+      // atenúa con él: queda negro pleno mientras sus vecinos caen al 30%.
+      g.style.opacity =
+        hoveredCube !== null && i !== hoveredCube && !("stackLogo" in g.dataset) ? "0.3" : "1";
     });
-    // El sheen: la luz recorre el contorno de SOLO la pieza bajo el cursor.
-    // Unidades: el CUBO individual en la columna, el segmento en el anillo de
-    // AI, la capa entera en intents/near.com.
-    const hoverLayer = hover
-      ? hover.kind === "cube"
-        ? "protocol"
-        : hover.kind === "seg"
-          ? "ai"
-          : hover.key
-      : null;
-    const hoverSegKey = hover?.kind === "seg" ? hover.key : null;
-    stage.querySelectorAll<SVGPathElement>("[data-sheen-path]").forEach((p) => {
-      const layer = p.closest("[data-stack-layer]")?.getAttribute("data-stack-layer");
-      let on = false;
-      if (layer === "ai") {
-        on = p.dataset.sheenSeg != null && p.dataset.sheenSeg === hoverSegKey;
-      } else if (layer === "protocol") {
-        const cube = p.closest("[data-stack-cube]")?.getAttribute("data-stack-cube");
-        on = hoveredCube !== null && cube === String(hoveredCube);
-      } else {
-        on = layer === hoverLayer;
-      }
-      p.style.transition = "opacity 350ms";
-      p.style.opacity = on ? "1" : "0";
-    });
+    // El sheen (la luz recorriendo el contorno de la pieza hovereada) quedó
+    // FUERA — pedido. Sus paths siguen en el arte generado con opacity 0 de
+    // fábrica; si vuelve, el toggle por pieza vivía acá (ver historia git).
   }, [litSeg, hover]);
 
   /* ── Hover por delegación: un solo par de handlers sobre el stage ──────── */
@@ -376,11 +462,16 @@ export default function NearStack() {
   // Los paths son el área de hit, no la caja del wrapper: sin esto la cáscara
   // exterior (que abarca todo el stage) se tragaría el hover de todo lo demás.
   // Una capa que todavía no llegó al build-up está oculta Y sin hit-area.
+  // Las capas SOLO funden, clavadas en su posición — nada de translate. Acá
+  // hubo un bug dos veces: el offset de entrada era `translate-y-4`, que en
+  // Tailwind v4 compila a la propiedad `translate` (NO `transform`), así que
+  // ninguna transition-property lo cubría y el offset se aplicaba en un SNAP:
+  // la capa saltaba 16px hacia abajo al inicio del fade de salida. Y como en
+  // la entrada ese mismo snap la clavaba en 0 antes del fade, el "rise-in"
+  // nunca animó de verdad — el offset solo aportaba el glitch.
   const layerClass = (visible: boolean) =>
-    `pointer-events-none absolute transition-[opacity,transform] duration-500 motion-reduce:transition-none [&_path]:transition-[fill-opacity,stroke-opacity] [&_path]:duration-300 ${
-      visible
-        ? "translate-y-0 opacity-100 [&_path]:pointer-events-auto"
-        : "translate-y-4 opacity-0"
+    `pointer-events-none absolute transition-opacity duration-500 motion-reduce:transition-none [&_path]:transition-[fill-opacity,stroke-opacity] [&_path]:duration-300 ${
+      visible ? "opacity-100 [&_path]:pointer-events-auto" : "opacity-0"
     }`;
   // Atenuación al hoverear la columna: los fills de las demás piezas al 15%
   // de opacidad y sus líneas al 70% — presencia sin competir.
@@ -397,7 +488,7 @@ export default function NearStack() {
     // mataría el sticky (misma trampa de siempre).
     <section
       ref={rootRef}
-      className="group/stack bg-ink text-cream data-[mode=track]:h-[460svh]"
+      className="group/stack bg-ink text-cream data-[mode=track]:h-[320svh]"
     >
       {/* El viewport sticky: lockea cuando el tope de la sección toca el tope
           del frame, con TODO adentro (título, arte y rail) centrado y entero
@@ -409,10 +500,10 @@ export default function NearStack() {
         {/* h-full en modo track: sin altura definida acá, el flex-1 de la
             grilla y el 1fr de su fila no resuelven contra nada y todo vuelve
             a medirse por contenido — el arte se movía con cada panel. */}
-        <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:h-full group-data-[mode=track]/stack:min-h-0 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-[5svh] lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
+        <Container className="flex w-full flex-col gap-14 pb-32 pt-32 group-data-[mode=track]/stack:h-full group-data-[mode=track]/stack:min-h-0 group-data-[mode=track]/stack:gap-8 group-data-[mode=track]/stack:pb-0 group-data-[mode=track]/stack:pt-[calc(var(--site-header-block)+2rem)] lg:gap-20 lg:group-data-[mode=track]/stack:gap-8">
         {/* En modo track el bloque de título sube respecto del centro del
             viewport pineado — pedido de Lawrence. */}
-        <div className="flex flex-col items-center gap-3 text-center">
+        <div className="flex flex-col items-center gap-1 text-center">
           <h2 className="text-h1 text-pretty">
             The NEAR <Accent>Stack</Accent>
           </h2>
@@ -490,6 +581,32 @@ export default function NearStack() {
               >
                 <ColumnWire className="w-full overflow-visible" />
                 <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
+                {/* El mark sobre la cara superior: mismo viewBox que la
+                    columna y un g data-stack-cube="0" para que el split del
+                    efecto lo mueva JUNTO al cubo de arriba. SIEMPRE visible y
+                    negro pleno — no funde con el verde ni se atenúa cuando la
+                    columna cae a wireframe o sus cubos se apagan (pedido).
+                    pointer-events none INLINE (gana al [&_path] del stage):
+                    el hit-area sigue siendo el arte de abajo. */}
+                <svg
+                  viewBox="0 0 104 634"
+                  aria-hidden="true"
+                  className="absolute left-0 top-0 w-full overflow-visible"
+                >
+                  <g
+                    data-stack-cube="0"
+                    data-stack-logo
+                    className="[transition:transform_.38s_cubic-bezier(.65,0,.35,1)]"
+                  >
+                    <path
+                      d={NEAR_MARK_D}
+                      transform={MARK_TRANSFORM}
+                      fill="#101010"
+                      fillOpacity="0.85"
+                      style={{ pointerEvents: "none" }}
+                    />
+                  </g>
+                </svg>
               </div>
 
               {/* El bubble tag de la pieza hovereada, clavado al cursor: el
@@ -556,7 +673,7 @@ export default function NearStack() {
                 // productos se expandían juntos apenas abría la caja de AI.
                 <div
                   data-open={aiOpen}
-                  className="group/ai rounded-2xl border border-cream transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.06] motion-reduce:transition-none"
+                  className="group/ai rounded-2xl border border-cream transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.14] motion-reduce:transition-none"
                 >
                   {/* Click en la barra de NEAR AI = saltar a SU parada (el
                       anillo entero encendido); el scroll sigue a los tres. */}
@@ -634,8 +751,8 @@ function RailBlock({
     <div
       data-open={expanded}
       className={`group/blk ${
-        nested ? "rounded-xl border border-cream/10" : "rounded-2xl border border-cream"
-      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.06] motion-reduce:transition-none`}
+        nested ? "rounded-xl border border-cream/25" : "rounded-2xl border border-cream"
+      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.14] motion-reduce:transition-none`}
     >
       {/* La barra de título es un botón: click = saltar a la parada de esta
           caja en el track (goTo). Scroll y click, el mismo mecanismo. */}

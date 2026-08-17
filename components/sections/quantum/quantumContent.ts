@@ -231,51 +231,40 @@ export const ROADMAP_STAGES: RoadmapStage[] = [
 // copy venga de la base de datos. El menú se declara en `components/site/SiteHeader.tsx`, con la
 // excepción anotada ahí.
 
-// ── de StatementWipe.tsx ──
-// The transition line between the proof ribbon and the dark section. It fills
-// in letter by letter as you scroll, with a lime-to-teal front running half a
-// step ahead of the fill and fading out behind it.
-//
-// Two text layers, not a measured clone: the original duplicates the <h2> with
-// `cloneNode`, positions it absolutely and syncs `left/top/width` with a
-// ResizeObserver. Here both layers live in the SAME grid cell, so they share
-// width and line breaking by layout — which removes the clone, the observer,
-// and the drift when the font swaps or the width changes.
-//
-// Both layers holding the same text is what makes `split.chars` line up index
-// for index between them.
-export const WIPE_STATEMENT =
-  "Every blockchain will have to replace its cryptography. NEAR designed accounts so that day is a single transaction, not a migration.";
-
 // ── de ThreatSequence.tsx ──
 // ── Copy ─────────────────────────────────────────────────────────────────────
 // Every line below is from docs/quantum-security-brief.md. Beat 1 is §3, beat 3
 // is §4, and beat 2 is assembled from §3, §9 and the fourth and fifth answers of
 // the §10 FAQ. Nothing here is sourced from outside the deck — see the README
 // before adding anything that is.
-export const SEQUENCE_HEAD = "Defending against quantum attack means";
+// (SEQUENCE_HEAD/SEQUENCE_TAIL ya no existen: el beat final dejó su pieza
+// especial de "rotating one key." escrita letra a letra y pasó a un H2 normal
+// por pedido de Lawrence, 2026-08-17 — cada beat trae ahora su heading y su
+// link propios.)
 
 // ── de ThreatSequence.tsx ──
-export const SEQUENCE_TAIL = "rotating one key.";
-
-// ── de ThreatSequence.tsx ──
+// Copy de Lawrence (2026-08-17) — secuencia de DOS beats (el introductorio se
+// eliminó a pedido): la amenaza y la respuesta. El heading va en dos líneas:
+// la segunda se pinta con <Accent> (serif verde), como el resto de la página.
 export type SequenceBeat = {
   key: string;
+  heading: [string, string];
   body: string;
+  link?: { label: string; href: string };
 };
 
 export const SEQUENCE_BEATS: SequenceBeat[] = [
   {
-    key: "mechanism",
-    body: "Most blockchains derive account ownership from elliptic-curve cryptography. The moment an address signs, the key it was derived from is visible onchain.",
-  },
-  {
-    key: "attack",
-    body: "A quantum computer running Shor’s algorithm could derive a private key from an exposed public key and take the assets it controls. Those keys can be harvested now and attacked later, so the deadline is already behind us.",
+    key: "threat",
+    heading: ["The quantum threat", "to blockchains"],
+    body: "Most blockchains derive account ownership from elliptic-curve cryptography. A quantum computer running Shor’s algorithm could derive a private key from any address with an exposed public key to steal assets. Bloomberg puts as much as $470 billion of Bitcoin at risk to the quantum threat.",
+    link: { label: "How NEAR is preparing for the quantum era", href: EXTERNAL_LINKS.announcement },
   },
   {
     key: "answer",
-    body: "NEAR accounts are decoupled from cryptography, so an account holder rotates to quantum-safe keys in a single transaction and keeps the same account.",
+    heading: ["NEAR defends against quantum attack", "through a single key rotation"],
+    body: "NEAR accounts are decoupled from cryptography, so an account holder can rotate to quantum-safe keys in a single transaction.",
+    link: { label: "How the NEAR account model works", href: EXTERNAL_LINKS.accountModel },
   },
 ];
 

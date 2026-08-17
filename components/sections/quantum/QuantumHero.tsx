@@ -153,7 +153,7 @@ export default function QuantumHero() {
             `box-decoration-break: slice` the gradient still resolves across
             fragments if the line ever wraps. */}
         <h1 data-hero-heading className="text-display text-pretty">
-          <span data-q-sheen>Quantum-safe blockchain,</span>
+          <span data-q-sheen>Post quantum security,</span>
           <br />
           <Accent display>live on mainnet</Accent>
         </h1>
