@@ -26,10 +26,11 @@ function kindOf(route: string) {
 // es una decisión editorial que cambia sola con el proyecto, y no se puede
 // derivar de la ruta ni del `page.meta.ts`.
 //
-// El orden acá ES el orden en pantalla — `homepage-v4` primero porque es donde
-// está el rediseño activo, y `homepage-v2` justo detrás porque es su referencia
-// (v4 nació como fork suyo: se miran de a pares).
+// El orden acá ES el orden en pantalla — `homepage-ab6` primero porque es donde
+// está el rediseño activo, `homepage-v4` detrás porque es de donde forkeó, y
+// `homepage-v2` al final como referencia del fork original (se miran en cadena).
 const FEATURED = [
+  "/prototype/homepage-ab6",
   "/prototype/homepage-v4",
   "/prototype/homepage-v2",
   "/blockchain",

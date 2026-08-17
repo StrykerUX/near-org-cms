@@ -25,13 +25,15 @@ import m18 from "@/app/(site)/official-rules/page.meta";
 import m19 from "@/app/(site)/privacy/page.meta";
 import m20 from "@/app/prototype/page.meta";
 import m21 from "@/app/prototype/components/page.meta";
-import m22 from "@/app/prototype/homepage-v2/page.meta";
-import m23 from "@/app/prototype/homepage-v4/page.meta";
-import m24 from "@/app/prototype/hover-lab/page.meta";
-import m25 from "@/app/(motion)/quantum-security/page.meta";
-import m26 from "@/app/(site)/research/page.meta";
-import m27 from "@/app/(site)/solutions/page.meta";
-import m28 from "@/app/(site)/terms-of-use/page.meta";
+import m22 from "@/app/prototype/homepage-ab6/page.meta";
+import m23 from "@/app/prototype/homepage-exploration/page.meta";
+import m24 from "@/app/prototype/homepage-v2/page.meta";
+import m25 from "@/app/prototype/homepage-v4/page.meta";
+import m26 from "@/app/prototype/hover-lab/page.meta";
+import m27 from "@/app/(motion)/quantum-security/page.meta";
+import m28 from "@/app/(site)/research/page.meta";
+import m29 from "@/app/(site)/solutions/page.meta";
+import m30 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", file: "app/(site)/page.meta.ts" },
@@ -56,11 +58,13 @@ export const ROUTES: RouteEntry[] = [
   { ...m19, route: "/privacy", file: "app/(site)/privacy/page.meta.ts" },
   { ...m20, route: "/prototype", file: "app/prototype/page.meta.ts" },
   { ...m21, route: "/prototype/components", file: "app/prototype/components/page.meta.ts" },
-  { ...m22, route: "/prototype/homepage-v2", file: "app/prototype/homepage-v2/page.meta.ts" },
-  { ...m23, route: "/prototype/homepage-v4", file: "app/prototype/homepage-v4/page.meta.ts" },
-  { ...m24, route: "/prototype/hover-lab", file: "app/prototype/hover-lab/page.meta.ts" },
-  { ...m25, route: "/quantum-security", file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m26, route: "/research", file: "app/(site)/research/page.meta.ts" },
-  { ...m27, route: "/solutions", file: "app/(site)/solutions/page.meta.ts" },
-  { ...m28, route: "/terms-of-use", file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m22, route: "/prototype/homepage-ab6", file: "app/prototype/homepage-ab6/page.meta.ts" },
+  { ...m23, route: "/prototype/homepage-exploration", file: "app/prototype/homepage-exploration/page.meta.ts" },
+  { ...m24, route: "/prototype/homepage-v2", file: "app/prototype/homepage-v2/page.meta.ts" },
+  { ...m25, route: "/prototype/homepage-v4", file: "app/prototype/homepage-v4/page.meta.ts" },
+  { ...m26, route: "/prototype/hover-lab", file: "app/prototype/hover-lab/page.meta.ts" },
+  { ...m27, route: "/quantum-security", file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m28, route: "/research", file: "app/(site)/research/page.meta.ts" },
+  { ...m29, route: "/solutions", file: "app/(site)/solutions/page.meta.ts" },
+  { ...m30, route: "/terms-of-use", file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
