@@ -58,5 +58,14 @@ Thumbs.db
 public/fonts/
 _fonts/
 
+# Archivos FUENTE del kit de marca — mismo motivo que public/fonts/ de acá
+# arriba: pesan (el zip de Google Fonts solo son 15MB) y todo lo que vive en
+# public/ Next lo publica tal cual en una URL adivinable, así que un .zip de
+# fuentes o el .ai de los gradientes quedarían descargables por cualquiera.
+# Los assets DERIVADOS —los svg/png de logos e iconos— sí entran al repo: son
+# los que el sitio usa.
+public/branding/**/*.zip
+public/branding/**/*.ai
+
 # Worktrees temporales de agentes
 .claude/worktrees/

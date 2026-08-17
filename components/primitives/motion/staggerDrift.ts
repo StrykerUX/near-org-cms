@@ -122,6 +122,22 @@ export function driftAmplitude(
  * Se mira el hueco entre CONSECUTIVOS por posición, sin importar si se cruzan en
  * horizontal: aunque dos elementos de columnas distintas no puedan chocar, su
  * separación sigue siendo la medida correcta de "cuánto espacio hay acá".
+ *
+ * ── Cuando los elementos se SOLAPAN en vertical ─────────────────────────────
+ *
+ * Un layout puede escalonar sus elementos con menos de un alto de separación —
+ * es lo que hace `home-ab6/OwnYourOwn`, donde las cards viven en dos columnas y
+ * las filas se pisan a propósito para que entren tres en pantalla. Ahí el hueco
+ * entre consecutivos es NEGATIVO, y devolver `Infinity` por eso era un fallo
+ * silencioso: si además ningún par se cruza en horizontal, `driftAmplitude`
+ * también da `Infinity`, el mínimo de los dos no es finito y `driftOffsets`
+ * devuelve ceros. El efecto no se rompe: desaparece, sin error.
+ *
+ * Para esos pares la medida correcta de la escala del layout es el PASO entre
+ * bordes superiores, que es lo que separa un elemento del siguiente cuando se
+ * pisan. Con hueco positivo el paso siempre es mayor que el hueco, así que usar
+ * el hueco donde lo hay mantiene el resultado idéntico al de antes para los
+ * layouts que no se solapan.
  */
 export function spacingAmplitude(
   boxes: readonly DriftBox[],
@@ -132,7 +148,9 @@ export function spacingAmplitude(
   const byTop = [...boxes].sort((a, b) => a.top - b.top);
   let closest = Infinity;
   for (let i = 1; i < byTop.length; i++) {
-    closest = Math.min(closest, byTop[i].top - byTop[i - 1].bottom);
+    const gap = byTop[i].top - byTop[i - 1].bottom;
+    const step = byTop[i].top - byTop[i - 1].top;
+    closest = Math.min(closest, gap > 0 ? gap : step);
   }
   if (!Number.isFinite(closest) || closest <= 0) return Infinity;
 

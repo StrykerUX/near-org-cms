@@ -107,6 +107,7 @@ export default function MathStatement() {
               línea (es lo que hacía el line-height: 0 de text-h1-serif-inline).
               Va en un wrapper y no en un selector descendiente del h2 porque
               SplitText envuelve cada línea en spans y los colapsaría. */}
+          {/* ds-exempt: anula el line-height del wrapper, no ajusta la escala — ver arriba */}
           <span className="leading-[0]">
             <Accent>Only NEAR</Accent>
           </span>{" "}
