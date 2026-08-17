@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spine Motion — 18 animated concepts</title>
+<style>
+  :root { --ink:#101010; --cream:#F5F4F1; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--ink); color: var(--cream);
+         font: 15px/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif;
+         padding: 56px 48px 96px; }
+  header.page { max-width: 1500px; margin: 0 auto 44px; }
+  header.page h1 { font-size: 30px; font-weight: 600; }
+  header.page p { color: rgba(245,244,241,.55); max-width: 66ch; margin-top: 8px; }
+  section.card-row { max-width: 1500px; margin: 0 auto 64px; }
+  section.card-row > h2 { font-size: 19px; font-weight: 600; margin-bottom: 20px; }
+  .concept { margin-bottom: 28px; }
+  .concept > .head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .concept > .head b { font-size: 15px; }
+  .concept > .head span { color: rgba(245,244,241,.45); font-size: 13px; }
+  .frames { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px;
+            max-width: 1180px; }
+  .frame { border: 1px solid var(--cream); border-radius: 16px; background: var(--ink);
+           overflow: hidden; }
+  .frame svg { display: block; width: 100%; height: auto; }
+  .frame .cap { padding: 7px 14px 10px; font-family: ui-monospace, Menlo, monospace;
+                font-size: 11px; color: rgba(245,244,241,.45); }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>Spine Motion — 18 concepts × 3 frames</h1>
+  <p>Three animation-first concepts per settlement-layer card. Each triptych is one
+     build-in sequence sampled at three moments — enter, motion, hold — drawn from a
+     single parametric scene, so the frames are honest stills of the same animation.
+     Every concept runs on a different motion mechanism.</p>
+</header>
+<div id="sheet"></div>
+
+<script>
+/* ── Iso kit (30° axonometric, brand palette) ────────────────────────────── */
+const S = 14, CX30 = 0.8660, SIN30 = 0.5;
+const P = (x, y, z) => [ (x - y) * CX30 * S, (x + y) * SIN30 * S - z * S ];
+const HAIR = 'stroke="#F5F4F1" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round"';
+const GREEN = { top:"#B4F7A6", left:"#5ECE62", right:"#2FA047" };
+const MINT  = { top:"#DEFFD2", left:"#8BF29C", right:"#4FBE6B" };
+const DEEP  = { top:"#1E6B38", left:"#14512A", right:"#0E4A30" };
+const WIRE  = { top:"#161616", left:"#131313", right:"#101010" };
+const lerp = (a, b, t) => a + (b - a) * t;
+const dashCream = 'stroke="#F5F4F1" stroke-width="0.9" stroke-dasharray="3 5" opacity="0.55"';
+const dashMint  = 'stroke="#8bf29c" stroke-width="1.1" stroke-dasharray="4 5" opacity="0.9"';
+
+function face(pts, fill, op) {
+  const d = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join("")+"Z";
+  return `<path d="${d}" fill="${fill}" ${HAIR}${op!=null?` opacity="${op}"`:""}/>`;
+}
+function box(x,y,z,dx,dy,dz,C,op) {
+  return face([P(x,y+dy,z),P(x,y+dy,z+dz),P(x+dx,y+dy,z+dz),P(x+dx,y+dy,z)],C.left,op)
+       + face([P(x+dx,y,z),P(x+dx,y,z+dz),P(x+dx,y+dy,z+dz),P(x+dx,y+dy,z)],C.right,op)
+       + face([P(x,y,z+dz),P(x+dx,y,z+dz),P(x+dx,y+dy,z+dz),P(x,y+dy,z+dz)],C.top,op);
+}
+function prism(pts, z, h, C, op) {
+  const sides = pts.map((a,i)=>{ const b=pts[(i+1)%pts.length];
+    const nx=b[1]-a[1], ny=-(b[0]-a[0]);
+    return {vis:nx+ny>1e-4, mid:(a[0]+b[0]+a[1]+b[1])/2, a, b, tone:nx>ny?C.right:C.left};
+  }).sort((p,q)=>p.mid-q.mid);
+  let s = "";
+  for (const f of sides) if (f.vis)
+    s += face([P(f.a[0],f.a[1],z),P(f.a[0],f.a[1],z+h),P(f.b[0],f.b[1],z+h),P(f.b[0],f.b[1],z)],f.tone,op);
+  return s + face(pts.map(p=>P(p[0],p[1],z+h)),C.top,op);
+}
+const rot = (pts, a, cx=0, cy=0) => pts.map(([x,y]) => {
+  const c=Math.cos(a), s=Math.sin(a), dx=x-cx, dy=y-cy;
+  return [cx+dx*c-dy*s, cy+dx*s+dy*c];
+});
+const hexPts = (cx,cy,r,rotA=0) => [...Array(6)].map((_,k)=>{
+  const a=rotA+k*Math.PI/3; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; });
+const hexPrism = (cx,cy,z,r,h,C,rotA=0,op) => prism(hexPts(cx,cy,r,rotA), z, h, C, op);
+function pyramid(x,y,z,dx,dy,h,C,op) {
+  const A = P(x+dx/2, y+dy/2, z+h);
+  return face([P(x,y+dy,z),P(x+dx,y+dy,z),A],C.left,op)
+       + face([P(x+dx,y,z),P(x+dx,y+dy,z),A],C.right,op);
+}
+function frameRect(x,y,z,dx,dy,t,h,C) {
+  return box(x,y,z,dx,t,h,C)+box(x,y,z,t,dy,h,C)+box(x+dx-t,y,z,t,dy,h,C)+box(x,y+dy-t,z,dx,t,h,C);
+}
+const tileFace = (x,y,z,dx,dy,fill,op) =>
+  face([P(x,y,z),P(x+dx,y,z),P(x+dx,y+dy,z),P(x,y+dy,z)],fill,op);
+function isoLine(a,b,extra){ const [x1,y1]=P(...a),[x2,y2]=P(...b);
+  return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" ${extra}/>`; }
+function isoCircle(cx,cy,cz,r,extra){ const [ox,oy]=P(cx,cy,cz);
+  return `<circle r="${r*S}" transform="translate(${ox.toFixed(2)} ${oy.toFixed(2)}) matrix(${CX30} ${SIN30} ${-CX30} ${SIN30} 0 0)" fill="none" ${extra}/>`; }
+
+/* ── 18 concepts. Each draw(t): t=.22 enter, .6 motion, 1 hold ──────────── */
+const CARDS = [
+{ title: "01 · Nightshade 3.0", concepts: [
+  { name: "Delaminate", blurb: "one slab cleaves into consensus + execution layers",
+    draw: (t) => {
+      const g = lerp(0, 2.6, t), mid = t < 1;
+      let s = box(-3.2,-3.2,0, 6.4,6.4,.9, t<.4 ? GREEN : WIRE);
+      if (t > .05) {
+        s += isoLine([-3.2,-3.2,.9+g],[-3.2,-3.2,.9], dashCream)
+           + isoLine([3.2,-3.2,.9+g],[3.2,-3.2,.9], dashCream)
+           + isoLine([-3.2,3.2,.9+g],[-3.2,3.2,.9], dashCream);
+        s += box(-3.2,-3.2,.9+g, 6.4,6.4,.9, GREEN);
+      }
+      if (mid && t > .3) s += isoCircle(0,0,.9+g/2, 4.6, dashCream);
+      return s; } },
+  { name: "Interleave", blurb: "four contracts slide in and lock as one pinwheel",
+    draw: (t) => {
+      const d = lerp(4.6, 0, t);
+      let s = "";
+      // Molinete: cada placa llega por SU eje y calza contra la siguiente.
+      s += box(-3.9, -3.9 - d, 0, 6.4, 1.4, .6, WIRE);           // norte, desde -y
+      s += box(-3.9 - d, -2.5, 0, 1.4, 6.4, .6, WIRE);           // oeste, desde -x
+      if (t < 1)
+        s += isoLine([0,-6.4,.3],[0,-3.4,.3], dashCream) + isoLine([-6.4,0,.3],[-3.4,0,.3], dashCream)
+           + isoLine([6.4,0,.3],[3.4,0,.3], dashCream) + isoLine([0,6.4,.3],[0,3.4,.3], dashCream);
+      s += hexPrism(0, 0, 0, 1.15, lerp(.15, 1.2, t), t < .8 ? WIRE : GREEN);
+      s += box(2.5, -2.5 + d, 0, 1.4, 6.4, .6, WIRE);            // este, desde +y... llega por su eje
+      s += box(-2.5 + d, 2.5, 0, 6.4, 1.4, .6, WIRE);            // sur, desde +x
+      return s; } },
+  { name: "Veil", blurb: "a wire canopy descends and shields one shard of five",
+    draw: (t) => {
+      const z = lerp(4.4, 1.1, t);
+      let s = "";
+      for (let i = 0; i < 5; i++) {
+        const x = -5.4 + i * 2.3, shield = i === 2 && t === 1;
+        s += box(x, -1.1, 0, 2, 2.2, .9, shield ? DEEP : GREEN);
+        if (shield) s += box(x, -1.1, .9, 2, 2.2, .14, MINT);
+      }
+      if (t < 1) s += isoLine([-1.1,0,z],[-1.1,0,1.1], dashCream) + isoLine([1.1,0,z],[1.1,0,1.1], dashCream);
+      s += frameRect(-1.75,-1.55, z, 3.5,3.1,.45,.4, WIRE);
+      return s; } },
+]},
+{ title: "02 · Dynamic resharding", concepts: [
+  { name: "Pinch", blurb: "a hex shard stretches, necks, and divides in two",
+    draw: (t) => {
+      if (t < .4)      // stretched capsule
+        return prism([[ -3.4,-1],[-1.7,-2.9],[1.7,-2.9],[3.4,-1],[3.4,1],[1.7,2.9],[-1.7,2.9],[-3.4,1]], 0, 1.8, GREEN);
+      if (t < .8)      // necked waist
+        return prism([[-4.2,-1],[-2.5,-2.9],[-.9,-2.9],[0,-1],[.9,-2.9],[2.5,-2.9],[4.2,-1],[4.2,1],[2.5,2.9],[.9,2.9],[0,1],[-.9,2.9],[-2.5,2.9],[-4.2,1]], 0, 1.8, GREEN)
+             + isoLine([0,-3.6,.9],[0,3.6,.9], dashCream);
+      return hexPrism(-2.9,0,0, 2, 1.8, GREEN) + hexPrism(3, 0, 0, 1.85, 1.8, GREEN);
+    } },
+  { name: "Overflow", blurb: "a full tray spills its excess into a new shard tray",
+    draw: (t) => {
+      let s = frameRect(-5.4,-2.4,0, 4.8,4.8,.5,1, WIRE);
+      s += box(-4.7,-1.7,0, 1.6,1.6,1.2, WIRE) + box(-2.6,-1.7,0, 1.6,1.6,1.2, WIRE)
+         + box(-4.7,.4,0, 1.6,1.6,1.2, WIRE);
+      const arcX = lerp(-2.6, 2.6, t), arcZ = t < 1 ? 2 + Math.sin(t*Math.PI)*1.8 : 0;
+      if (t > .35 && t < 1)
+        s += isoLine([-2,.9,2.4],[.6,.9,3.4], dashCream) + isoLine([.6,.9,3.4],[2.8,.9,2.2], dashCream);
+      if (t <= .35) s += box(-2.6,.4,0, 1.6,1.6,1.2, GREEN);
+      else s += box(arcX,.4,arcZ, 1.6,1.6,1.2, GREEN);
+      if (t > .6) s += frameRect(1.6,-.6,0, 3.4,3.4,.45,.9, WIRE);
+      return s; } },
+  { name: "Ripple", blurb: "a pressure wave crosses the grid; the crest raises new shards",
+    draw: (t) => {
+      // 5×5, tres anillos (centro / medio / borde): la cresta viaja un anillo
+      // por frame, así los tres cuadros son estados distintos de la onda.
+      const crest = t < .4 ? 0 : t < .9 ? 1 : 2;
+      let s = "";
+      for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) {
+        const ring = Math.max(Math.abs(i - 2), Math.abs(j - 2));
+        const up = ring === crest;
+        s += box(-5.4 + i*2.2, -5.4 + j*2.2, 0, 1.85, 1.85, up ? 1.5 : .35, up ? GREEN : WIRE);
+      }
+      if (t < 1) s += isoCircle(0,0,1.8, lerp(1.6,5,t), dashCream);
+      return s; } },
+]},
+{ title: "03 · Speed. Scale. Access.", concepts: [
+  { name: "Comet", blurb: "a block streaks the rail, chevron afterimages decaying behind",
+    draw: (t) => {
+      const x = lerp(-4.4, 3.5, t);
+      let s = box(-5.6,-1.3,0, 11.2,2.6,.45, WIRE);
+      if (t === 1) s += box(2.5,-1.45,.45, 2.6,2.9,.2, MINT);
+      // Afterimages: copias fantasma del propio bloque, decayendo — no
+      // escombros; el rastro ES el bloque que acaba de estar ahí.
+      for (let k = 3; k >= 1; k--) {
+        const cx = x - k * 1.7;
+        if (cx > -5.2 && t < 1) s += box(cx-.9,-1,.45, 1.9,2,1.9, GREEN, .42 - k*.11);
+      }
+      s += box(x-.9,-1,.45, 1.9,2,1.9, GREEN);
+      return s; } },
+  { name: "Telescope", blurb: "nested hexes rise in stagger — the core reaches highest",
+    draw: (t) => {
+      const h1 = lerp(.3, 1, Math.min(t*3,1)), h2 = lerp(.3, 2.2, Math.max(0,Math.min((t-.2)*2,1)));
+      const h3 = lerp(.3, 3.2, Math.max(0,Math.min((t-.4)*1.7,1)));
+      let s = hexPrism(0,0,0, 4, h1, WIRE) + hexPrism(0,0,h1, 2.8, h2, WIRE)
+            + hexPrism(0,0,h1+h2, 1.6, h3, GREEN);
+      if (t === 1) s += hexPrism(0,0,h1+h2+h3, 1.6, .35, MINT);
+      if (t > .1 && t < 1) s += isoLine([0,0,h1+h2+h3+.6],[0,0,h1+h2+h3+1.8], dashCream);
+      return s; } },
+  { name: "Shutter", blurb: "six blades iris open, exposing the green core",
+    draw: (t) => {
+      const r = lerp(1.5, 4.1, t), a0 = lerp(0, .9, t);
+      let s = "";
+      const blades = [...Array(6)].map((_,k) => {
+        const a = a0 + k*Math.PI/3;
+        const cx = r*Math.cos(a), cy = r*Math.sin(a);
+        return { cy, svg: prism(rot([[ -1.5,-.8],[1.5,-.8],[1.5,.8],[-1.5,.8]], a+.5, 0,0).map(p=>[p[0]+cx,p[1]+cy]), .8, .5, WIRE) };
+      }).sort((p,q)=> (p.cy) - (q.cy));
+      s += hexPrism(0,0,0, 1.5, lerp(.1,1.1,t), t<.5 ? DEEP : GREEN);
+      for (const b of blades) s += b.svg;
+      if (t>.2 && t<1) s += isoCircle(0,0,1, r+1.6, dashCream);
+      return s; } },
+]},
+{ title: "04 · Private Shard", concepts: [
+  { name: "Encase", blurb: "a cage assembles around the shard; it dims to deep green",
+    draw: (t) => {
+      const h = lerp(0, 3.5, Math.min(t*1.4,1)), lid = lerp(5.6, 3.5, Math.max(0,(t-.4)/.6));
+      let s = box(-3.1,-3.1,0, .5,.5,h, WIRE) + box(2.6,-3.1,0, .5,.5,h, WIRE);
+      s += box(-1.2,-1.2,0, 2.4,2.4,2.4, t===1 ? DEEP : GREEN);
+      if (t === 1) s += box(-1.2,-1.2,2.4, 2.4,2.4,.15, MINT);
+      s += box(-3.1,2.6,0, .5,.5,h, WIRE) + box(2.6,2.6,0, .5,.5,h, WIRE);
+      if (t > .4) s += frameRect(-3.1,-3.1, lid, 6.2,6.2,.5,.45, WIRE);
+      if (t>.1 && t<1) s += isoLine([0,0,5.9],[0,0,4.2], dashCream);
+      return s; } },
+  { name: "Redact", blurb: "the ledger's face flips tile by tile into a shielded checker",
+    draw: (t) => {
+      let s = box(-4.2,-2.6,0, 8.4,5.2,1, GREEN);
+      const n = t < .4 ? 2 : t < .9 ? 6 : 12;
+      let k = 0;
+      for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) {
+        if ((i + j) % 2 === 0) continue;
+        if (k++ < n) s += tileFace(-3.9 + i*1.35, -2.3 + j*1.2, 1.001, 1.15, 1, "#14512A");
+      }
+      if (t > .3 && t < 1)
+        s += prism(rot([[-.55,-.5],[.55,-.5],[.55,.5],[-.55,.5]], .7).map(p=>[p[0]+1.4,p[1]-.4]), 2.3, .12, DEEP)
+           + isoLine([1.4,-.4,2.2],[1.4,-.4,1.1], dashCream);
+      return s; } },
+  { name: "Enclave slot", blurb: "the shard docks into a socket ring — only its cap stays visible",
+    draw: (t) => {
+      const z = lerp(4.6, .2, t);
+      let s = "";
+      if (t<1) s += isoLine([0,0,5.6],[0,0,1.8], dashCream);
+      s += hexPrism(0,0, z, 1.55, 1.9, GREEN);
+      s += hexPrism(0,0,0, 2.7, 1.4, WIRE);          // socket ring (outer)
+      if (t === 1) {
+        s += hexPrism(0,0, 1.9, 1.55, .35, MINT);    // solo la tapa queda a la vista
+        s += isoLine([2.4,-2.4,2.2],[4.2,-4.2,3.4], dashMint);
+      }
+      return s; } },
+]},
+{ title: "05 · Quantum-safe accounts", concepts: [
+  { name: "Molt", blurb: "the old crypto shell splits away; the account emerges re-keyed",
+    draw: (t) => {
+      const g = lerp(0, 3, t), fade = t === 1 ? .45 : 1;
+      let s = box(-1.7,-1.7-g,0, 3.4,1.7,3.4, WIRE, fade);
+      s += hexPrism(0,0,0, 1.5, lerp(.4,3,t), GREEN);
+      if (t === 1) s += hexPrism(0,0,3, 1.5, .35, MINT);
+      if (t>.1 && t<1) s += isoLine([0,-3.4,1.7],[0,-4.6,1.7], dashCream) + isoLine([0,3.4,1.7],[0,4.6,1.7], dashCream);
+      s += box(-1.7,g,0, 3.4,1.7,3.4, WIRE, fade);
+      return s; } },
+  { name: "Re-key", blurb: "the hex bolt turns 60° — the turn itself is the rotation of keys",
+    draw: (t) => {
+      const a = lerp(0, Math.PI/3, t);
+      let s = "";
+      if (t>.1 && t<1) s += isoCircle(0,0,1.4, 3.6, dashCream) + isoCircle(0,0,1.4, 4.2, dashCream);
+      s += hexPrism(0,0,0, 2.6, 2.6, t < .5 ? WIRE : GREEN, a);
+      if (t === 1) s += hexPrism(0,0,2.6, 1.2, .5, MINT, a);
+      return s; } },
+  { name: "Capstone", blurb: "the ziggurat stacks up; a mint capstone seals it FIPS-tight",
+    draw: (t) => {
+      const zs = [0, .95, 1.9], sizes = [3.4, 2.4, 1.4];
+      let s = "";
+      for (let k = 0; k < 3; k++) {
+        const landed = t > k * .3;
+        const z = landed ? zs[k] : zs[k] + 3.4 - t*3;
+        s += box(-sizes[k], -sizes[k], z, sizes[k]*2, sizes[k]*2, .95, landed ? GREEN : WIRE, landed ? 1 : .85);
+        if (!landed) s += isoLine([0,0,z],[0,0,zs[k]+.95], dashCream);
+      }
+      if (t > .85) {
+        const capZ = t === 1 ? 2.85 : 4.6;
+        s += pyramid(-1.4,-1.4, capZ, 2.8, 2.8, 1.5, MINT);
+        if (t < 1) s += isoLine([0,0,capZ],[0,0,2.85], dashCream);
+      }
+      return s; } },
+]},
+{ title: "06 · Chain Signatures", concepts: [
+  { name: "Constellation", blurb: "one signature stroke lights every chain it visits",
+    draw: (t) => {
+      // Un solo arreglo con índice de recorrido: la firma visita los pads en
+      // orden y cada uno se enciende cuando el trazo lo alcanza.
+      const pads = [
+        { x:-4.6, y:-2.6, h:1.2, seq:0 }, { x:-1.2, y:-4, h:2, seq:1 },
+        { x:2.8, y:-2.9, h:1.5, seq:2 }, { x:4, y:1.4, h:.9, seq:3 },
+        { x:.4, y:3.4, h:1.6, seq:4 },
+      ];
+      const lit = t < .4 ? 1 : t < .9 ? 3 : 5;
+      let s = box(-1,-.9,0, 1.8,1.8,3.4, GREEN);
+      if (t === 1) s += box(-1,-.9,3.4, 1.8,1.8,.3, MINT);
+      let prev = [0, 0, 3.2];
+      for (const p of pads.filter((p) => p.seq < lit)) {
+        s += isoLine(prev, [p.x, p.y, p.h + .4], dashMint);
+        prev = [p.x, p.y, p.h + .4];
+      }
+      for (const p of [...pads].sort((a, b) => a.x + a.y - (b.x + b.y)))
+        s += hexPrism(p.x, p.y, 0, 1.05, p.h, p.seq < lit ? GREEN : WIRE);
+      return s; } },
+  { name: "Stamp", blurb: "one seal presses three different chains in sequence",
+    draw: (t) => {
+      const px = t < .4 ? -3.4 : t < .9 ? 0 : 3.4;
+      const pz = t < .9 ? (t < .4 ? 3.8 : 1.4) : 4.2;
+      let s = "";
+      s += hexPrism(-3.4, .2, 0, 1.35, 1, WIRE);
+      if (t > .4) s += hexPrism(-3.4, .2, 1, 1.05, .22, MINT);
+      s += box(-1.15,-.95,0, 2.3,2.3,1, WIRE);
+      if (t > .9) s += box(-.85,-.65,1, 1.7,1.7,.22, MINT);
+      s += prism(rot([[-1.2,-.85],[.4,-.85],[1.3,.15],[.4,1.15],[-1.2,1.15],[-.3,.15]], -0.2).map(p=>[p[0]+3.4,p[1]]), 0, 1, WIRE);
+      if (t === 1) s += prism(rot([[-.75,-.55],[.25,-.55],[.8,.1],[.25,.75],[-.75,.75],[-.2,.1]], -0.2).map(p=>[p[0]+3.4,p[1]]), 1, .22, MINT);
+      s += box(px-1.3, -1.1, pz, 2.6, 2.6, .8, GREEN);
+      if (t < 1) s += isoLine([px,0,pz],[px,0,pz-1.2], dashCream);
+      return s; } },
+  { name: "Thread", blurb: "the signature ribbon weaves over and under every rail — no bridge",
+    draw: (t) => {
+      const rails = [-2.3, 0, 2.3];
+      const prog = lerp(-3.4, 4.6, t);
+      let s = "";
+      // La cinta: tramos bajos (verde), tramos ALTOS por encima del riel
+      // (mint, para que el sobre-cruce cante) y RISERS verticales que los
+      // conectan — sin eso se leía como fragmentos sueltos.
+      const seg = (y0, y1, z, C) => box(-.7, y0, z, 1.4, y1 - y0, .45, C);
+      const riser = (y, z0, z1) => box(-.7, y - .45, z0, 1.4, .45, z1 - z0, MINT);
+      const parts = [];
+      rails.forEach((ry) => {
+        parts.push({ y: ry, svg: box(-4.9, ry-.5, .9, 9.8, 1, .5, WIRE)
+                              + box(-4.9, ry-.4, 0, .7,.8,.9, WIRE) + box(3.9, ry-.4, 0, .7,.8,.9, WIRE) });
+      });
+      const plan = [
+        { y0: -4.4, y1: -2.9, z: .1, hi: false }, { y0: -2.9, y1: -1.7, z: 1.7, hi: true },
+        { y0: -1.7, y1: -.6, z: .1, hi: false },  { y0: -.6, y1: .6, z: 1.7, hi: true },
+        { y0: .6, y1: 1.7, z: .1, hi: false },    { y0: 1.7, y1: 2.9, z: 1.7, hi: true },
+        { y0: 2.9, y1: 4.4, z: .1, hi: false },
+      ];
+      plan.forEach((r, i) => {
+        if (r.y0 >= prog) return;
+        parts.push({ y: r.y0 + .01, svg: seg(r.y0, Math.min(r.y1, prog), r.z, r.hi ? MINT : GREEN) });
+        if (i > 0 && r.y0 < prog) parts.push({ y: r.y0, svg: riser(r.y0 + .4, .1, 2.15) });
+      });
+      parts.sort((a, b) => a.y - b.y);
+      parts.forEach((p) => (s += p.svg));
+      if (t < 1) s += isoLine([0, prog, 2.7],[0, prog + 1.3, 2.7], dashMint);
+      else s += box(-.95, 4.4, 0, 1.9, 1.9, 1.9, GREEN);
+      return s; } },
+]},
+];
+
+/* ── Render ──────────────────────────────────────────────────────────────── */
+const PHASES = [ ["01 · enter", .22], ["02 · motion", .6], ["03 · hold", 1] ];
+const sheet = document.getElementById("sheet");
+CARDS.forEach((card) => {
+  const row = document.createElement("section");
+  row.className = "card-row";
+  row.innerHTML = `<h2>${card.title}</h2>`;
+  card.concepts.forEach((c) => {
+    const el = document.createElement("div");
+    el.className = "concept";
+    el.innerHTML = `<div class="head"><b>${c.name}</b><span>${c.blurb}</span></div>`;
+    const frames = document.createElement("div");
+    frames.className = "frames";
+    PHASES.forEach(([label, t]) => {
+      const f = document.createElement("article");
+      f.className = "frame";
+      f.innerHTML = `<svg viewBox="-115 -88 230 168"><g transform="translate(0 10)">${c.draw(t)}</g></svg>
+                     <div class="cap">${label}</div>`;
+      frames.appendChild(f);
+    });
+    el.appendChild(frames);
+    row.appendChild(el);
+  });
+  sheet.appendChild(row);
+});
+</script>
+</body>
+</html>

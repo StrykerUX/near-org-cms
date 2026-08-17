@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chain Signatures — 20 concepts</title>
+<style>
+  :root { --ink:#101010; --cream:#F5F4F1; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--ink); color: var(--cream);
+         font: 15px/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif;
+         padding: 56px 48px 96px; }
+  header.page { max-width: 1560px; margin: 0 auto 16px; }
+  header.page h1 { font-size: 30px; font-weight: 600; }
+  header.page p { color: rgba(245,244,241,.55); max-width: 74ch; margin-top: 8px; }
+  header.page p.def { color: rgba(245,244,241,.7); border-left: 2px solid #8bf29c;
+                      padding-left: 14px; margin-top: 16px; }
+  .grid { max-width: 1560px; margin: 32px auto 0; display: grid; gap: 18px;
+          grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+  .tile { border: 1px solid var(--cream); border-radius: 16px; background: var(--ink);
+          overflow: hidden; cursor: pointer; transition: background .25s; }
+  .tile:hover { background: rgba(245,244,241,.06); }
+  .tile img { display: block; width: 100%; aspect-ratio: 1376/768; object-fit: cover; }
+  .tile .cap { padding: 10px 16px 13px; }
+  .tile .cap .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .tile .cap b { font-size: 14px; font-weight: 600; }
+  .tile .cap span.id { font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+                       color: rgba(245,244,241,.45); white-space: nowrap; }
+  .tile .cap p { font-size: 12px; color: rgba(245,244,241,.5); margin-top: 3px; }
+  /* Lightbox */
+  #lb { position: fixed; inset: 0; background: rgba(10,10,10,.94); display: none;
+        align-items: center; justify-content: center; z-index: 50; cursor: zoom-out; }
+  #lb.on { display: flex; }
+  #lb img { max-width: 94vw; max-height: 90vh; border-radius: 8px; }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>Chain Signatures — 20 concepts</h1>
+  <p class="def">One NEAR account — even a smart contract — directly controls native addresses
+     on Bitcoin, Ethereum, Solana and 30+ chains. Derivation paths deterministically map the
+     account to an address on each chain, and eight independent MPC nodes co-sign with key
+     <em>shares</em> — the full private key never exists anywhere, yet valid native signatures
+     come out. Nothing wrapped, no bridge: remote, native control. One hand signing on every
+     chain at once.</p>
+  <p>Twenty single-frame concepts, each the hero moment of an implied animation.
+     Generated with Nano Banana on Higgsfield in the glass-and-glow brand language.
+     Click any frame for full size.</p>
+</header>
+<div class="grid" id="grid"></div>
+<div id="lb"><img id="lbimg" alt=""/></div>
+
+<script>
+const CONCEPTS = [
+  ["One key, many doors", "the account's beam unlocks one of six chain doorways mid-swing"],
+  ["Key of shares", "a key silhouette held in formation by eight shards that never touch"],
+  ["Signature constellation", "one stroke mid-circuit around orbiting chain pads"],
+  ["The unbridged gap", "light arcs over the void — no bridge exists, none is needed"],
+  ["Remote hand", "a hand of light reaches across to press a distant ledger"],
+  ["Eight scribes", "eight node threads braid into one ribbon over the document"],
+  ["Derivation tree", "one seed, deterministic branches, three addresses igniting"],
+  ["Synchronized locks", "one key turns; every lock on the wall rotates with it"],
+  ["Wax seal", "the press moment — molten mint light squeezing from the seal"],
+  ["Split pen", "eight slivers converge to a single nib mid-stroke"],
+  ["Address mirror", "one cube, many reflections — each facet a different address"],
+  ["Interference choir", "eight ripples intersect; the signature rises at the crossing"],
+  ["Key of light", "no key exists — eight beams form one inside the keyhole"],
+  ["Signing ring", "a ring of signatures orbits the foreign chain; the account rides it"],
+  ["Many ledgers, one quill", "one quill splits to write every open ledger at once"],
+  ["Relay flare", "the packet frozen at hop apex; visited pads still warm"],
+  ["Vault dials", "seven rings aligned, the last a few degrees from the click"],
+  ["Lantern chain", "the light travels inside the chain, third link lit from within"],
+  ["Fingerprint bloom", "identity mid-morph — ridges becoming a foreign address"],
+  ["The gateway", "the transaction paused in the gate while eight threads seal it"],
+];
+const grid = document.getElementById("grid");
+CONCEPTS.forEach(([name, blurb], i) => {
+  const n = String(i + 1).padStart(2, "0");
+  const el = document.createElement("article");
+  el.className = "tile";
+  el.innerHTML = `<img src="img/cs-${n}.png" alt="${name}" loading="lazy"/>
+    <div class="cap"><div class="row"><b>${name}</b><span class="id">chainsig-${n}</span></div>
+    <p>${blurb}</p></div>`;
+  el.onclick = () => { document.getElementById("lbimg").src = `img/cs-${n}.png`;
+                       document.getElementById("lb").classList.add("on"); };
+  grid.appendChild(el);
+});
+document.getElementById("lb").onclick = () => document.getElementById("lb").classList.remove("on");
+</script>
+</body>
+</html>
