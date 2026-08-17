@@ -8,6 +8,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import { DIAGRAMS, type DiagramKey } from "@/components/sections/protocol/spineDiagrams";
+import SpeedLottie from "@/components/sections/protocol/SpeedLottie";
 
 /**
  * The protocol, as six equal claims on a horizontal shelf.
@@ -120,10 +121,12 @@ export default function ProtocolSpine() {
 
         // Diagram timelines are built once per card and only played while
         // that card is open — six looping animations at once is exactly what
-        // makes a page feel heavy.
+        // makes a page feel heavy. "speed" es la excepción: su animación es
+        // el Lottie de SpeedLottie, que se gobierna solo por data-open; acá
+        // le corresponde un timeline vacío para no romper el contrato.
         const timelines = cards.map((card) => {
           const key = card.dataset.diagram as DiagramKey;
-          return DIAGRAMS[key].build(card);
+          return key === "speed" ? gsap.timeline({ paused: true }) : DIAGRAMS[key].build(card);
         });
 
         const accordion = motionOk && isDesktop;
@@ -377,7 +380,7 @@ export default function ProtocolSpine() {
                     </header>
 
                     <div className="min-h-[13rem] flex-1 pt-5">
-                      <Art />
+                      {item.key === "speed" ? <SpeedLottie /> : <Art />}
                     </div>
 
                     <p className="mt-4 max-w-[56ch] text-body-sm text-cream/65 text-pretty">
