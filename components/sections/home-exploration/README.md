@@ -27,7 +27,33 @@ una sección. Reusa `sweep` justamente para que no se confunda con una variante.
 |---|---|
 | `pixelGrid.ts` | Módulo **puro**: la retícula, los cuatro relojes, la normalización de umbrales. Cero DOM |
 | `PixelTransition.tsx` | El pintado y el enganche al scroll. `"use client"` |
-| `SpecimenBand.tsx` | Sección de relleno, para ver cada transición **entre** dos secciones |
+| `LabDivider.tsx` | El separador entre pruebas: quién es la animación de abajo, con qué parámetros |
+| `SpecimenBand.tsx` | Banda de relleno, para ver cada transición **entre** dos secciones |
+
+## Cada prueba es autocontenida, y eso es el diseño
+
+La primera versión encadenaba los colores (cream → stone → ink → …) y reusaba cada
+banda como el "después" de una prueba **y** el "antes" de la siguiente. Se leía
+como un sitio real y ahorraba altura, pero costaba lo único que el laboratorio
+tiene que dar: a mitad de scroll, con la etiqueta ya fuera de cuadro, no había
+forma de saber si la transición que estabas mirando era la 03 o la 04.
+
+Tres piezas lo resuelven, y las tres hacen falta:
+
+1. **`LabDivider` abre cada prueba** y cada prueba trae **sus dos bandas**, sin
+   compartir ninguna con la vecina. Cuesta altura y no importa.
+2. **El separador no se parece a ninguna banda**: `--ink-slate` con dos reglas de
+   `--near-green-accent`. Las reglas no son adorno — con solo el fondo, el
+   separador se distinguía perfecto entre bandas cream y quedaba casi invisible
+   entre bandas `--ink` (dos negros a 1.3:1).
+3. **Los captions de las bandas llevan el número** (`03 · arriba · ink`), porque a
+   mitad de gesto el separador ya salió de cuadro pero siempre hay una banda
+   adyacente en pantalla.
+
+El color es también la razón de que el separador vaya **entre grupos** y no pegado
+a la transición: el `from` de una transición tiene que ser el color de lo que está
+inmediatamente arriba, y un separador metido entre la banda y el bloque obligaría a
+que ese `from` fuera `--ink-slate`.
 
 ## Cómo se usa
 
