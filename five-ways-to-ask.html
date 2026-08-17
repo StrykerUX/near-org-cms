@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five Ways to Ask</title>
+<style>
+  :root{
+    --paper:#EDEDE9;
+    --card:#FFFFFF;
+    --ink:#16160F;
+    --ink-soft:#5D5D52;
+    --rule:#D5D5CB;
+    --marker:#EDE04B;
+    --marker-ink:#16160F;
+
+    --sans:"Helvetica Neue",Helvetica,"Segoe UI",Arial,sans-serif;
+    --serif:"Iowan Old Style","Hoefler Text",Palatino,"Palatino Linotype",Georgia,serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#1A1A16;
+      --card:#232320;
+      --ink:#F0F0E8;
+      --ink-soft:#9C9C90;
+      --rule:#35352E;
+      --marker:#E4D648;
+      --marker-ink:#16160F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1A1A16;
+    --card:#232320;
+    --ink:#F0F0E8;
+    --ink-soft:#9C9C90;
+    --rule:#35352E;
+    --marker:#E4D648;
+    --marker-ink:#16160F;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:17px;
+    line-height:1.65;
+    margin:0;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{background:var(--marker);color:var(--marker-ink)}
+
+  a:focus-visible,button:focus-visible{
+    outline:2px solid var(--ink);
+    outline-offset:3px;
+  }
+
+  .sheet{
+    max-width:860px;
+    margin:0 auto;
+    padding:0 28px 96px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead{
+    padding:72px 0 40px;
+    border-bottom:1px solid var(--ink);
+  }
+
+  .kicker{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 28px;
+  }
+
+  h1{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:clamp(38px,7vw,64px);
+    line-height:1.02;
+    letter-spacing:-0.035em;
+    text-wrap:balance;
+    margin:0 0 24px;
+  }
+
+  .standfirst{
+    max-width:34em;
+    font-size:19px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .standfirst strong{color:var(--ink);font-weight:400}
+
+  /* ---------- the five ---------- */
+
+  .habits{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+
+  .habit{
+    display:grid;
+    grid-template-columns:132px 1fr;
+    gap:32px;
+    padding:40px 0;
+    border-bottom:1px solid var(--rule);
+  }
+
+  .tag{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.13em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding-top:9px;
+  }
+
+  .habit-body{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    max-width:44em;
+  }
+
+  h2{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:25px;
+    line-height:1.18;
+    letter-spacing:-0.022em;
+    text-wrap:balance;
+    margin:0;
+  }
+
+  .habit p{margin:0;color:var(--ink-soft)}
+  .habit p strong{color:var(--ink);font-weight:400}
+
+  /* the highlighter — the one flourish */
+
+  .say{
+    font-family:var(--mono);
+    font-size:14.5px;
+    line-height:1.95;
+    color:var(--marker-ink);
+    margin:2px 0 0;
+  }
+  .say span{
+    background-image:linear-gradient(
+      180deg,
+      transparent 4%,
+      var(--marker) 4%,
+      var(--marker) 94%,
+      transparent 94%
+    );
+    box-decoration-break:clone;
+    -webkit-box-decoration-break:clone;
+    padding:0 5px;
+  }
+
+  /* ---------- swap table ---------- */
+
+  .swap{
+    padding:48px 0 0;
+  }
+
+  .swap h2{margin-bottom:24px}
+
+  .table-wrap{overflow-x:auto}
+
+  table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:460px;
+  }
+
+  th{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.13em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:400;
+    text-align:left;
+    padding:0 0 12px;
+    border-bottom:1px solid var(--ink);
+  }
+  th:first-child{width:44%;padding-right:28px}
+
+  td{
+    padding:18px 0;
+    border-bottom:1px solid var(--rule);
+    vertical-align:top;
+    font-size:16px;
+  }
+  td:first-child{
+    padding-right:28px;
+    color:var(--ink-soft);
+    text-decoration:line-through;
+    text-decoration-thickness:1px;
+  }
+  td:last-child{color:var(--ink)}
+
+  /* ---------- close ---------- */
+
+  .close{
+    margin-top:56px;
+    padding:32px 34px;
+    background:var(--card);
+    border:1px solid var(--rule);
+  }
+  .close p{
+    margin:0;
+    font-size:19px;
+    line-height:1.55;
+    max-width:32em;
+    text-wrap:balance;
+  }
+  .close .lede{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.13em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+  }
+
+  @media (max-width:620px){
+    body{font-size:16px}
+    .sheet{padding:0 20px 72px}
+    .masthead{padding:48px 0 32px}
+    .habit{
+      grid-template-columns:1fr;
+      gap:12px;
+      padding:32px 0;
+    }
+    .tag{padding-top:0}
+    h2{font-size:22px}
+  }
+</style>
+
+</head>
+<body>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <p class="kicker">For designers · working with Claude</p>
+    <h1>You don't need the right words. You need the real ones.</h1>
+    <p class="standfirst">Claude is not a search box, and it is not a junior who needs a perfect brief. It works best when you talk the way you'd talk to someone sitting next to you. <strong>Five habits cover almost everything.</strong></p>
+  </header>
+
+  <div class="habits">
+
+    <section class="habit">
+      <div class="tag">Show</div>
+      <div class="habit-body">
+        <h2>Paste the picture instead of describing it</h2>
+        <p>Claude can see. A screenshot of the actual screen, a reference you like, a photo of a sketch on paper — all of it works, and all of it beats a paragraph trying to explain the same thing.</p>
+        <p class="say"><span>Here's how it looks now. [paste] Here's what I want. [paste] Get the cards closer together.</span></p>
+      </div>
+    </section>
+
+    <section class="habit">
+      <div class="tag">Point</div>
+      <div class="habit-body">
+        <h2>Say where, not just what</h2>
+        <p>"Make the button bigger" could be any of forty buttons. Name the page and the part. You don't need file names — the words you'd use out loud are enough.</p>
+        <p class="say"><span>On the pricing page, in the plan cards — make the price bigger than the plan name.</span></p>
+      </div>
+    </section>
+
+    <section class="habit">
+      <div class="tag">Ask first</div>
+      <div class="habit-body">
+        <h2>Get options before anything is built</h2>
+        <p>When you don't know what you want yet, don't make Claude guess — it will guess, and then you're reacting to one answer instead of choosing between several. Say <strong>don't change anything</strong> out loud; that's the part that stops it from building.</p>
+        <p class="say"><span>Give me 3 options for the hero layout. Don't change anything yet.</span></p>
+      </div>
+    </section>
+
+    <section class="habit">
+      <div class="tag">One thing</div>
+      <div class="habit-body">
+        <h2>Change one thing at a time</h2>
+        <p>Five requests in one message get you five changes at once, and when something looks off you won't know which one did it. Small steps also mean you can say "go back" and only lose a minute.</p>
+        <p class="say"><span>Just the spacing for now — leave the colors alone.</span></p>
+      </div>
+    </section>
+
+    <section class="habit">
+      <div class="tag">Symptom</div>
+      <div class="habit-body">
+        <h2>Describe what's wrong, not how to fix it</h2>
+        <p>You don't have to know the cause. Say what you're seeing and Claude will find it — and if you guess at a fix, you can send it looking in the wrong place.</p>
+        <p class="say"><span>The last card overlaps the black section underneath it when I scroll.</span></p>
+      </div>
+    </section>
+
+  </div>
+
+  <section class="swap">
+    <h2>Same idea, sharper</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Vague</th>
+            <th scope="col">Usable</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Make it more modern</td>
+            <td>More white space, and one weight lighter on the body text</td>
+          </tr>
+          <tr>
+            <td>It doesn't feel right</td>
+            <td>It feels stiff — I want the movement to be slower and smoother</td>
+          </tr>
+          <tr>
+            <td>Fix the spacing</td>
+            <td>Too much air between the title and the first card</td>
+          </tr>
+          <tr>
+            <td>Can you clean this up?</td>
+            <td>Same layout, but everything aligned to the left edge of the title</td>
+          </tr>
+          <tr>
+            <td>Do it like the reference</td>
+            <td>Like the reference, but keep our colors and our type</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="close">
+    <p class="lede">If you remember one thing</p>
+    <p>You can always stop and say <em>"wait — explain what you just did, in plain terms."</em> Asking is free, and it's how you stay in charge of the work.</p>
+  </section>
+
+</div>
+</body>
+</html>
