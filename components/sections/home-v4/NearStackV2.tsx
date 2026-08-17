@@ -98,6 +98,55 @@ const MARK_TRANSFORM = (() => {
 const NEAR_MARK_D =
   "m421.61,108c-13,0-25.07,6.74-31.88,17.82l-73.37,108.93c-2.39,3.59-1.42,8.43,2.17,10.82,2.91,1.94,6.76,1.7,9.41-.58l72.22-62.64c1.2-1.08,3.05-.97,4.13.23.49.55.75,1.26.75,1.99v196.12c0,1.62-1.31,2.92-2.93,2.92-.87,0-1.69-.38-2.24-1.05L181.56,121.24c-7.11-8.39-17.55-13.23-28.54-13.24h-7.63c-20.65,0-37.39,16.74-37.39,37.39v276.22c0,20.65,16.74,37.39,37.39,37.39,13,0,25.07-6.74,31.88-17.82l73.37-108.93c2.39-3.59,1.42-8.43-2.17-10.82-2.91-1.94-6.76-1.7-9.41.58l-72.22,62.64c-1.2,1.08-3.05.97-4.13-.23-.49-.55-.75-1.26-.74-1.99v-196.17c0-1.62,1.31-2.92,2.93-2.92.86,0,1.69.38,2.24,1.05l218.28,261.37c7.11,8.39,17.55,13.23,28.54,13.24h7.63c20.65.01,37.4-16.72,37.42-37.37V145.39c0-20.65-16.74-37.39-37.39-37.39Z";
 
+/* ── Las sombras de la columna, como elemento propio ──────────────────────── */
+
+// Los 7 parches de sombra que la columna proyecta sobre los anillos venían
+// horneados en los svg verdes (multiply + pattern). En V2 los horneados se
+// apagan ([data-stack-noshadow] en el stage) y estos son SU reemplazo 1:1 —
+// mismas coords, mismos patterns (url(#…) resuelve contra los defs de las
+// instancias ya montadas). data-shadow-when separa los de la BASE (los
+// proyectan los cubos de abajo) de los del TOPE (los de arriba): el build
+// funde cada grupo cuando su bloque aterriza; sin bloque encima, sin sombra.
+// El wrapper exterior es del tween (autoAlpha); el interior conserva el
+// blend y la opacidad de fábrica.
+const COLUMN_SHADOWS = {
+  ai: {
+    viewBox: "0 0 546 443",
+    base: [{ x: 185.14, y: 281.23, w: 175.2, h: 161.28, fill: "ag-pattern0_11_498", op: 0.46 }],
+    top: [{ x: 176.98, y: -49.0098, w: 191.52, h: 166.56, fill: "ag-pattern1_11_498", op: 0.46 }],
+  },
+  intents: {
+    viewBox: "0 0 371 248",
+    base: [
+      { x: 97.36, y: 109.49, w: 108.96, h: 137.76, fill: "ig-pattern0_11_549", op: 0.42 },
+      { x: 163.6, y: 109.49, w: 108.96, h: 137.76, fill: "ig-pattern1_11_549", op: 0.42 },
+    ],
+    top: [{ x: 89.55, y: -44.1899, w: 191.04, h: 161.76, fill: "ig-pattern2_11_549", op: 0.46 }],
+  },
+  nearcom: {
+    viewBox: "0 0 695 604",
+    base: [{ x: 239.7, y: 442.146, w: 175.2, h: 161.76, fill: "ng-pattern0_11_436", op: 0.46 }],
+    top: [{ x: 231.463, y: -46.0137, w: 191.52, h: 174.72, fill: "ng-pattern1_11_436", op: 0.46 }],
+  },
+} as const;
+
+function ColumnShadows({ ring, className }: { ring: keyof typeof COLUMN_SHADOWS; className: string }) {
+  const s = COLUMN_SHADOWS[ring];
+  return (
+    <svg viewBox={s.viewBox} aria-hidden="true" className={className}>
+      {(["base", "top"] as const).map((when) =>
+        s[when].map((r) => (
+          <g key={`${when}-${r.fill}`} data-shadow-when={when}>
+            <g style={{ mixBlendMode: "multiply" }} opacity={r.op}>
+              <rect x={r.x} y={r.y} width={r.w} height={r.h} fill={`url(#${r.fill})`} />
+            </g>
+          </g>
+        ))
+      )}
+    </svg>
+  );
+}
+
 /* ── Bubble tags: ancla en % del stage por pieza encendida ────────────────── */
 
 const SEG_NAMES: Record<string, string> = {
@@ -141,7 +190,7 @@ const HIDE_UPPER_CUBES =
 const HIDE_LOWER_CUBES =
   '[&_[data-stack-cube="3"]]:hidden [&_[data-stack-cube="4"]]:hidden [&_[data-stack-cube="5"]]:hidden';
 
-export default function NearStack() {
+export default function NearStackV2() {
   // La parada activa del recorrido pineado: -1 = todavía no lockeó (los seis
   // colapsados y solo la columna en escena), 0..5 = STAGE_ORDER.
   const [scrollIdx, setScrollIdx] = useState(-1);
@@ -229,6 +278,26 @@ export default function NearStack() {
       // ocurre ARRIBA y el resto del recorrido se ve entero.
       buildTl.to(nodes, { autoAlpha: 1, duration: 0.22, ease: "sine.inOut" }, at);
     }
+    // Las sombras de la columna esperan a su bloque: sin bloque encima, sin
+    // sombra. Las de la BASE funden cuando aterrizan los cubos de abajo
+    // (cubo 4 clava a ~0.84s) y las del TOPE con los de arriba (cubo 0 a
+    // ~2.04s). Componen multiplicativamente con la visibilidad del anillo,
+    // así que solo se ven cuando SU anillo además está en escena.
+    gsap.set(scope.querySelectorAll("[data-shadow-when]"), { autoAlpha: 0 });
+    buildTl.to(
+      scope.querySelectorAll('[data-shadow-when="base"]'),
+      { autoAlpha: 1, duration: 0.35, ease: "sine.inOut" },
+      0.9
+    );
+    buildTl.to(
+      scope.querySelectorAll('[data-shadow-when="top"]'),
+      { autoAlpha: 1, duration: 0.35, ease: "sine.inOut" },
+      2.0
+    );
+    // 30% más rápido, pedido — por timeScale y no reescribiendo duraciones:
+    // los números de arriba siguen siendo la partitura legible (velocidad
+    // constante 200px/s, aterrizajes, sombras) y el ritmo se ajusta acá.
+    buildTl.timeScale(1.3);
     return () => {
       builtRef.current = true;
       setEnhanced(false);
@@ -284,19 +353,20 @@ export default function NearStack() {
   const showAi = stage >= 2;
   const showNearcom = stage >= 6;
 
-  // Hover sobre la COLUMNA: las otras piezas visibles no caen a wireframe —
-  // se quedan como están pero ATENUADAS (fills al 15% de opacidad, líneas al
-  // 70%; ver dimClass). Hover sobre cualquier otra pieza: solo lo hovereado
-  // verde, el resto de lo visible en wireframe. Sin hover, lo acumulado va
-  // verde — al LLEGAR a NEAR AI el anillo entero se enciende, después cada
-  // producto enciende solo su pieza, y near.com vuelve a encender todo.
-  const dimOthers = hoverTarget === "protocol";
+  // Hover sobre CUALQUIER pieza (columna incluida): solo lo hovereado verde,
+  // el resto de lo visible cae a wireframe — fill negro y stroke blanco,
+  // nunca color translúcido. (Antes la columna era especial: dejaba a las
+  // demás en verde atenuado al 15% de fill, y ese velo dejaba VER el color a
+  // través — pedido que caigan a wire como con el resto de los hovers.)
+  // Sin hover, lo acumulado va verde — al LLEGAR a NEAR AI el anillo entero
+  // se enciende, después cada producto enciende solo su pieza, y near.com
+  // vuelve a encender todo.
   const litColumn = hover ? hoverTarget === "protocol" : true;
-  const litIntents = showIntents && (hover && !dimOthers ? hoverTarget === "intents" : true);
-  const litNearcom = showNearcom && (hover && !dimOthers ? hoverTarget === "nearcom" : true);
+  const litIntents = showIntents && (hover ? hoverTarget === "intents" : true);
+  const litNearcom = showNearcom && (hover ? hoverTarget === "nearcom" : true);
   const litSeg: string | null = !showAi
     ? null
-    : hover && !dimOthers
+    : hover
       ? (SEG_KEYS.find((k) => k === hoverTarget) ?? null)
       : stage === 2 || stage >= 6
         ? "all"
@@ -309,9 +379,15 @@ export default function NearStack() {
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
+    // Hover sobre UN producto de AI: los hermanos no caen a wireframe seco —
+    // se ATENÚAN al 30% conservando algo de color, igual que los cubos
+    // vecinos de la columna cuando se hoverea uno (pedido). En los demás
+    // estados (paradas del scroll, hover en otras capas) siguen apagándose.
+    const segHover = hover?.kind === "seg";
     stage.querySelectorAll<SVGGElement>("[data-ai-green] [data-stack-seg]").forEach((g) => {
       g.style.transition = "opacity 300ms";
-      g.style.opacity = litSeg === "all" || g.dataset.stackSeg === litSeg ? "1" : "0";
+      g.style.opacity =
+        litSeg === "all" || g.dataset.stackSeg === litSeg ? "1" : segHover ? "0.3" : "0";
     });
     // El split: hover sobre la columna la parte en sus seis cubos (verde y
     // wireframe a la vez — comparten geometría y orden de grupos). Con un
@@ -473,10 +549,16 @@ export default function NearStack() {
     `pointer-events-none absolute transition-opacity duration-500 motion-reduce:transition-none [&_path]:transition-[fill-opacity,stroke-opacity] [&_path]:duration-300 ${
       visible ? "opacity-100 [&_path]:pointer-events-auto" : "opacity-0"
     }`;
-  // Atenuación al hoverear la columna: los fills de las demás piezas al 15%
-  // de opacidad y sus líneas al 70% — presencia sin competir.
-  const dimClass = (dim: boolean) =>
-    dim ? "[&_path]:[fill-opacity:0.15] [&_path]:[stroke-opacity:0.7]" : "";
+  // Las copias de FONDO de los anillos (la divergencia de V2): mismas capas
+  // pero pintadas DEBAJO de todos los cubos y con la máscara del canal
+  // apagada (data-stack-unmask, regla en globals.css) — son el anillo
+  // CONTINUO que se ve detrás de un cubo en vuelo. Con la columna completa
+  // los cubos las tapan pixel por pixel, así que en reposo nada cambia.
+  // Sin hit-area nunca: el hover en el canal es de los cubos.
+  const backClass = (visible: boolean) =>
+    `pointer-events-none absolute transition-opacity duration-500 motion-reduce:transition-none [&_path]:transition-[fill-opacity,stroke-opacity] [&_path]:duration-300 ${
+      visible ? "opacity-100" : "opacity-0"
+    }`;
   const greenClass = (lit: boolean) =>
     `absolute left-0 top-0 w-full transition-opacity duration-300 motion-reduce:transition-none ${lit ? "opacity-100" : "opacity-0"}`;
 
@@ -524,16 +606,52 @@ export default function NearStack() {
           <div className="lg:flex lg:h-full lg:items-center lg:justify-center lg:self-stretch">
             <div
               ref={stageRef}
+              data-stack-noshadow
               onPointerOver={onOver}
               onPointerMove={onMove}
               onPointerLeave={onLeave}
               onClick={onStageClick}
               className="relative mx-auto aspect-[695/650] w-full max-w-[340px] lg:h-[51svh] lg:w-auto lg:max-w-full [&_path]:cursor-pointer"
             >
-              {/* Apilado: mitad BAJA de la columna (cubos 3–5) al fondo,
-                  anillos encima (sus máscaras recortan el canal de la
+              {/* Apilado V2: copias de fondo CONTINUAS de los anillos al
+                  fondo de todo, mitad BAJA de la columna (cubos 3–5) encima,
+                  anillos enmascarados encima (el frente que envuelve a la
                   columna), y la mitad ALTA (cubos 0–2) por encima de todo —
                   el cubo de arriba es la capa más alta del ensamble. */}
+              {/* overflow-visible en las copias de fondo: el vértice superior
+                  de la cáscara (y del brazo de ironclaw) vive en y NEGATIVA
+                  del viewBox — la máscara horneada lo recortaba igual, pero
+                  sin máscara el clip default del svg lo cortaba CHATO en vez
+                  de terminar en punta. */}
+              <div
+                data-stack-unmask
+                className={`${backClass(showIntents)}`}
+                style={layerStyle("intents")}
+              >
+                <IntentsWire className="w-full overflow-visible" />
+                <IntentsGreen className={`${greenClass(litIntents)} overflow-visible`} />
+              </div>
+              <div
+                data-stack-unmask
+                className={`${backClass(showAi)}`}
+                style={layerStyle("ai")}
+              >
+                <AiRingWire className="w-full overflow-visible" />
+                {/* data-ai-green también acá: el efecto de segmentos ilumina
+                    TODAS las instancias, así el fondo y el frente del anillo
+                    de AI siempre coinciden. */}
+                <div data-ai-green>
+                  <AiRingGreen className="absolute left-0 top-0 w-full overflow-visible" />
+                </div>
+              </div>
+              <div
+                data-stack-unmask
+                className={`${backClass(showNearcom)}`}
+                style={layerStyle("nearcom")}
+              >
+                <NearcomWire className="w-full overflow-visible" />
+                <NearcomGreen className={`${greenClass(litNearcom)} overflow-visible`} />
+              </div>
               {/* overflow-visible en los svg de la columna: al partirse, los
                   cubos de las puntas se corren FUERA del viewBox y el clip
                   default del svg los cortaba. */}
@@ -545,17 +663,37 @@ export default function NearStack() {
                 <ColumnWire className="w-full overflow-visible" />
                 <ColumnGreen className={`${greenClass(litColumn)} overflow-visible`} />
               </div>
+              {/* Cada sombra va en un wrapper hermano JUSTO DEBAJO de su
+                  anillo: multiplica sobre la columna y el fondo (como la
+                  horneada, que en el svg original se pintaba ANTES de los
+                  paths del anillo) y los brazos frontales del anillo pintan
+                  ENCIMA, limpios — la sombra nunca cae sobre lo que está
+                  DELANTE de la columna. */}
+              <div
+                className={`${backClass(showIntents)}`}
+                style={layerStyle("intents")}
+              >
+                <ColumnShadows ring="intents" className={greenClass(litIntents)} />
+              </div>
               <div
                 data-stack-layer="intents"
-                className={`${layerClass(showIntents)} ${dimClass(dimOthers)}`}
+                className={`${layerClass(showIntents)}`}
                 style={layerStyle("intents")}
               >
                 <IntentsWire className="w-full" />
                 <IntentsGreen className={greenClass(litIntents)} />
               </div>
+              {/* Como su horneada, la sombra de AI no depende del lit por
+                  segmento: visible siempre que la capa lo sea. */}
+              <div
+                className={`${backClass(showAi)}`}
+                style={layerStyle("ai")}
+              >
+                <ColumnShadows ring="ai" className="absolute left-0 top-0 w-full" />
+              </div>
               <div
                 data-stack-layer="ai"
-                className={`${layerClass(showAi)} ${dimClass(dimOthers)}`}
+                className={`${layerClass(showAi)}`}
                 style={layerStyle("ai")}
               >
                 <AiRingWire className="w-full" />
@@ -567,8 +705,14 @@ export default function NearStack() {
                 </div>
               </div>
               <div
+                className={`${backClass(showNearcom)}`}
+                style={layerStyle("nearcom")}
+              >
+                <ColumnShadows ring="nearcom" className={greenClass(litNearcom)} />
+              </div>
+              <div
                 data-stack-layer="nearcom"
-                className={`${layerClass(showNearcom)} ${dimClass(dimOthers)}`}
+                className={`${layerClass(showNearcom)}`}
                 style={layerStyle("nearcom")}
               >
                 <NearcomWire className="w-full" />
@@ -673,7 +817,7 @@ export default function NearStack() {
                 // productos se expandían juntos apenas abría la caja de AI.
                 <div
                   data-open={aiOpen}
-                  className="group/ai rounded-2xl border border-cream transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.14] motion-reduce:transition-none"
+                  className="group/ai rounded-2xl border border-cream transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-ink-soft motion-reduce:transition-none"
                 >
                   {/* Click en la barra de NEAR AI = saltar a SU parada (el
                       anillo entero encendido); el scroll sigue a los tres. */}
@@ -752,7 +896,7 @@ function RailBlock({
       data-open={expanded}
       className={`group/blk ${
         nested ? "rounded-xl border border-cream/25" : "rounded-2xl border border-cream"
-      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-cream/[0.14] motion-reduce:transition-none`}
+      } transition-colors duration-300 data-[open=true]:border-cta-mint/70 data-[open=false]:hover:bg-ink-soft motion-reduce:transition-none`}
     >
       {/* La barra de título es un botón: click = saltar a la parada de esta
           caja en el track (goTo). Scroll y click, el mismo mecanismo. */}

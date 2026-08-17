@@ -53,9 +53,10 @@ export default function UpdatesList() {
                   {update.date}
                 </span>
 
+                {/* Negro SIEMPRE, no solo al hover — pedido. */}
                 <span
                   aria-hidden="true"
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors group-hover:border-foreground group-hover:text-foreground"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground text-foreground"
                 >
                   <Plus className="size-4" strokeWidth={1.5} />
                 </span>
