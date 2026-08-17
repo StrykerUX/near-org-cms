@@ -13,7 +13,7 @@ import { SEQUENCE_BEATS as BEATS } from "@/components/sections/quantum/quantumCo
 // §3 + §4 of the copy deck, as ONE pinned composition.
 //
 // The section locks to the viewport the moment its top reaches the top of the
-// frame and holds for three beats. Nothing scrolls away: the frame — the links
+// frame and holds for two beats. Nothing scrolls away: the frame — the links
 // and the ring field — is constant, and only the core changes. That is
 // what lets the whole argument occupy one screen while still carrying more than
 // one screen's worth of material.
@@ -57,29 +57,25 @@ import { SEQUENCE_BEATS as BEATS } from "@/components/sections/quantum/quantumCo
 // them on the scrub, outward through beat one and inward through beat two.
 
 // ── Copy ─────────────────────────────────────────────────────────────────────
-// Every line below is from docs/quantum-security-brief.md. Beat 1 is §3, beat 3
-// is §4, and beat 2 is assembled from §3, §9 and the fourth and fifth answers of
-// the §10 FAQ. Nothing here is sourced from outside the deck — see the README
-// before adding anything that is.
+// El copy vive en quantumContent.ts (SEQUENCE_BEATS, dictado por Lawrence,
+// 2026-08-17). DOS beats: la amenaza y la respuesta — el beat introductorio
+// se eliminó a pedido y la secuencia pasó de tres partes a dos.
 
-// Pinned travel. Beats one and two were tightened by 20% — they set up a problem
-// the reader already half-knows. Beat three's dwell AFTER the answer finishes
-// writing was then halved, which is where the rest of the reduction came from:
-// once the line has landed there is nothing left to read, and holding the pin
-// there just makes the section feel stuck.
-const TRAVEL_SVH = 196;
+// Pinned travel, escalado desde la versión de tres beats para conservar el
+// MISMO recorrido de scroll por beat (~48svh la amenaza, ~97svh la
+// respuesta): quitar un beat acorta la sección, no acelera las otras dos.
+const TRAVEL_SVH = 145;
 const TRAVEL = `${TRAVEL_SVH}svh`;
 
 // ── Timeline map ─────────────────────────────────────────────────────────────
 // Positions in the scrubbed timeline. Hoisted to module scope because the ring
 // geometry below and the sweep's own trigger both have to agree with them.
-const CUT = [0.28, 0.54];
-const BEAT3_SPAN = 0.53;
-const TIMELINE_END = CUT[1] + BEAT3_SPAN;
-const BEAT_START = [0, CUT[0], CUT[1]];
-const BEAT_END = [CUT[0], CUT[1], TIMELINE_END];
-/** Where beat three begins, measured in svh of scroll after the pin engages. */
-const BEAT3_SVH = (CUT[1] / TIMELINE_END) * TRAVEL_SVH;
+const CUT = 0.33; // donde termina el beat de la amenaza
+const TIMELINE_END = 1;
+const BEAT_START = [0, CUT];
+const BEAT_END = [CUT, TIMELINE_END];
+/** Where the answer beat begins, measured in svh of scroll after the pin engages. */
+const ANSWER_SVH = (CUT / TIMELINE_END) * TRAVEL_SVH;
 
 // Type arrives QUICKLY and then the beat holds. The two halves are separate
 // decisions: a fast entrance keeps the section feeling responsive to the wheel,
@@ -306,7 +302,7 @@ export default function ThreatSequence() {
           trigger: scope,
           // svh has to be resolved by hand — ScrollTrigger's offset syntax
           // takes px or a percentage of the trigger, not viewport units.
-          start: () => `top top-=${(BEAT3_SVH / 100) * window.innerHeight}`,
+          start: () => `top top-=${(ANSWER_SVH / 100) * window.innerHeight}`,
           end: "bottom top",
           // `will-change` only while the band is actually turning. It used to be
           // a permanent class in the JSX, which meant this element — 68vw square,
@@ -474,8 +470,9 @@ export default function ThreatSequence() {
 
       // Spans derived from the cuts, with clearance either side, so retiming a
       // beat re-fits its wave instead of leaving it running past the handover.
-      wave(0.02, CUT[0] - 0.04, true); // beat one — radiating out
-      wave(CUT[0] + 0.04, CUT[1] - CUT[0] - 0.05, false); // beat two — closing in
+      // Un solo wave ahora: el beat de la amenaza radia hacia afuera; en el
+      // de la respuesta el protagonismo es del sweep que entra rotando.
+      wave(0.02, CUT - 0.04, true);
     }
 
     return () => {
