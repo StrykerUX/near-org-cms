@@ -361,8 +361,18 @@
      El tracking de la serif es un valor PROPIO y uniforme, no el de la sans: la
      escala sans lo hace variar con el tamaño (−0.02em en display, −0.015 en h1,
      −0.01 en h2, 0 en h4) y acá es −0.02em en todas las escalas. O sea que a
-     tamaño h1/h2 la serif queda más apretada que la sans, a propósito — va con
-     los masters condensed que sirve lib/fonts.ts. */
+     tamaño h1/h2 la serif queda más apretada que la sans.
+
+     OJO: ese −0.02em se eligió cuando lib/fonts.ts servía los masters
+     CONDENSED, y la justificación era que iba con ellos. Ya no son condensed
+     (ver la nota larga en lib/fonts.ts), así que este valor quedó sin el
+     razonamiento que lo sostenía: hoy aprieta una serif de ancho normal, que es
+     lo contrario de lo que el cambio de master buscaba.
+
+     Se deja en −0.02em a propósito y no se ajusta de arrastre: mover el master
+     y el tracking en el mismo paso hace imposible atribuir el resultado. Es lo
+     primero a revisar si el acento todavía no encaja, con las páginas
+     delante. */
   --text-serif--letter-spacing: -0.02em;
   --text-serif--font-weight: 400;
   /* Compensa la x-height de Kepler contra Montreal cuando un span serif va

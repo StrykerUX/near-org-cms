@@ -95,18 +95,33 @@ FEATURES = DEFAULT_ON + POSITIONING + FIGURES
 # ── Perfiles ──────────────────────────────────────────────────────────────────
 
 PROFILES = {
-    # Kepler va CONDENSED en todos sus usos, en 400 normal e itálica.
+    # Kepler va en los masters de ANCHO NORMAL, Subhead y Display, en 400 normal
+    # e itálica.
     #
     # Los nombres de archivo conservan el sufijo del master a propósito: es lo
-    # que deja ver de un vistazo que `--font-serif` ya no apunta al master de
-    # texto, y por qué no puede hacerlo. Kepler Std trae condensed SOLO en
-    # Display y Subhead — no existe `KeplerStd-Cn` (texto) ni `CnCapt`, y el kit
-    # de Typekit que esto reemplazó tampoco los tenía.
+    # que deja ver de un vistazo que `--font-serif` no apunta al master de texto,
+    # y por qué no puede hacerlo. Que caiga en Subhead no es un parche por falta
+    # de opción, es un mejor encaje óptico: alimenta text-h1-serif (44–88px),
+    # text-h2-serif (34–60px) y accent-serif (1.18em de un heading), y el master
+    # de texto está dibujado para 9–13pt. Subhead lo está para ~14–24pt.
     #
-    # Que `--font-serif` caiga en Subhead no es un parche por falta de opción,
-    # es un mejor encaje óptico: alimenta text-h1-serif (44–88px), text-h2-serif
-    # (34–60px) y accent-serif (1.18em de un heading), y el master de texto está
-    # dibujado para 9–13pt. Subhead está dibujado para ~14–24pt.
+    # ── Por qué NO son las condensed ───────────────────────────────────────
+    #
+    # Lo fueron hasta acá, heredado del kit de Typekit que esto reemplazó (que
+    # servía `kepler-std-condensed-display` y `-subhead`). El problema es que
+    # `--text-serif--optical-scale` compensa ALTURA y no ancho, y las condensed
+    # son ~25% más angostas:
+    #
+    #                          x-height   avance medio
+    #     Montreal (la sans)      510          520
+    #     Kepler CnItSubh         433          360      ×1.18 → 425  (−18%)
+    #     Kepler ItSubh           433          450      ×1.18 → 531  (+2%)
+    #
+    # O sea que con las condensed el acento quedaba con la x-height correcta y
+    # el ancho de otra fuente, y se leía chico al lado de la sans. Subir la
+    # escala no lo arregla: para igualar el avance haría falta 1.44, y ahí la
+    # x-height se va 22% por encima de la de Montreal. Se cambia un desbalance
+    # por otro — la palanca era el master, no el tamaño.
     "kepler": {
         "src": ROOT / "public" / "fonts" / "kepler-font",
         "out": ROOT / "assets" / "fonts" / "kepler",
@@ -114,10 +129,10 @@ PROFILES = {
         "full_family": True,  # el origen son OTF de escritorio: --all tiene sentido
         "unicodes": KEPLER_UNICODES,
         "faces": [
-            ("KeplerStd-CnSubh", "--font-kepler · 400 normal"),
-            ("KeplerStd-CnItSubh", "--font-kepler · 400 italic"),
-            ("KeplerStd-CnDisp", "--font-kepler-display · 400 normal"),
-            ("KeplerStd-CnItDisp", "--font-kepler-display · 400 italic"),
+            ("KeplerStd-Subh", "--font-kepler · 400 normal"),
+            ("KeplerStd-ItSubh", "--font-kepler · 400 italic"),
+            ("KeplerStd-Disp", "--font-kepler-display · 400 normal"),
+            ("KeplerStd-ItDisp", "--font-kepler-display · 400 italic"),
         ],
         "verify_repo": False,  # solo aparece en headings que escribimos nosotros
     },

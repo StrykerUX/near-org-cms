@@ -5,8 +5,8 @@
 | Token del DS | Familia | Faces |
 |---|---|---|
 | `--font-sans` | PP Neue Montreal | Book (400), BookItalic, Medium (500), Bold (700) |
-| `--font-serif` | Kepler Std **Condensed Subhead** | CnSubh (400), CnItSubh |
-| `--font-display` | Kepler Std **Condensed Display** | CnDisp (400), CnItDisp |
+| `--font-serif` | Kepler Std **Subhead** | Subh (400), ItSubh |
+| `--font-display` | Kepler Std **Display** | Disp (400), ItDisp |
 | `--font-mono` | PP Neue Montreal Mono | Regular (400), Medium (500) |
 
 Las cuatro se registran con `next/font/local` en `lib/fonts.ts`, leyendo
@@ -20,31 +20,43 @@ Kepler tiene dos masters registrados porque los masters ópticos son dibujos
 distintos, no dos tamaños del mismo. Qué escala usa cuál lo deciden las
 `@utility text-*-serif` / `accent-*` de `app/globals.css`.
 
-**Kepler Std trae condensed solo en Display y Subhead.** No existe
-`KeplerStd-Cn` (texto) ni `CnCapt`, y el kit de Typekit que esto reemplazó
-tampoco los tenía: servía `kepler-std-condensed-display` y
-`kepler-std-condensed-subhead`, nada más. Así que `--font-serif` no puede seguir
-en el master de texto.
+`--font-serif` alimenta `text-h1-serif` (44–88px), `text-h2-serif` (34–60px) y
+`accent-serif` (1.18em de un heading). El master de texto está dibujado para
+9–13pt — estaba mal usado. Subhead lo está para ~14–24pt.
 
-Y no hace falta que siga: alimenta `text-h1-serif` (44–88px), `text-h2-serif`
-(34–60px) y `accent-serif` (1.18em de un heading). El master de texto está
-dibujado para 9–13pt — estaba mal usado. Subhead lo está para ~14–24pt.
+### Por qué NO son las condensed
 
-Si alguna vez hace falta un Kepler condensado *para texto corrido*, no existe;
-lo más cerca es semicondensed, que sí tiene master de texto (`KeplerStd-Scn`,
-minúsculas a 435 milésimas de em contra 357 de la condensed).
+Lo fueron hasta que se midió el desbalance que el equipo de diseño venía
+reportando: el acento itálico se leía **más chico** que la sans que lo rodea.
 
-### Métricas, para lo que sí cambia y lo que no
-
-Todos los masters de Kepler comparten x-height (433) y cap-height (654), así que
+El diagnóstico intuitivo es subir el tamaño, y es el equivocado. Todos los
+masters de Kepler comparten x-height (433) y cap-height (654), así que
 `--text-serif--optical-scale: 1.18` —que compensa la x-height de Kepler contra
-la de Montreal (510)— vale igual con las condensed. Lo que cambia es el ancho:
-las minúsculas pasan de 467 a 357 en `--font-serif` y de 428 a 321 en
-`--font-display`, un 24–25% más angosto.
+la de Montreal (510)— ya dejaba la ALTURA exacta. Lo que no compensa es el
+ancho, y ahí las condensed son ~25% más angostas:
 
-Ese 1.18 compensa **altura, no ancho**. Si los `<Accent>` embebidos en headings
-sans se leen subdimensionados, el ajuste es ese token, y mueve los 13 acentos a
-la vez.
+| | x-height | avance medio | avance ×1.18 |
+|---|---|---|---|
+| Montreal (la sans) | 510 | 520 | — |
+| Kepler **Cn**ItSubh | 433 | 360 | 425 · **−18%** |
+| Kepler ItSubh | 433 | 450 | 531 · +2% |
+
+O sea: el acento tenía la altura correcta y el ancho de otra fuente. Subir la
+escala no lo arregla — para igualar el avance del condensed hace falta `1.44`, y
+a esa escala la x-height se va **22% por encima** de la de Montreal. Se cambia un
+desbalance por otro.
+
+La palanca era el master, no el tamaño. Con los de ancho normal el `1.18` iguala
+las dos cosas a la vez.
+
+**Si el acento vuelve a leerse mal, medí antes de tocar el token.** Es el
+instrumento para la altura y nada más; comprobá si lo que está descalzado es el
+ancho, el peso o el master óptico.
+
+Si alguna vez hace falta un Kepler *condensado*, sigue estando en los OTF: solo
+Display y Subhead lo traen (no existe `KeplerStd-Cn` de texto ni `CnCapt`), y lo
+más cerca para texto corrido es semicondensed (`KeplerStd-Scn`, minúsculas a 435
+milésimas de em contra 357 de la condensed).
 
 ## Dónde vive cada cosa
 
