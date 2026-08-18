@@ -116,50 +116,57 @@ export type ProofSpec = {
   readonly pitch: string;
 };
 
-// ── La segunda ronda ────────────────────────────────────────────────────────
+// ── La ronda que quedó ──────────────────────────────────────────────────────
 //
-// La primera fueron diez versiones que barrían todo el espacio de soluciones
-// (tablero Solari, dial, carril horizontal, plotter, cartas hojeables…). Viven
-// en el commit `b145ca6` y **se borraron a propósito**: siete de las diez
-// escondían cinco de las seis pruebas detrás de un gesto, y esta sección tiene
-// que entregar las seis SIN que nadie toque nada.
+// Hubo dos antes. La primera fueron diez versiones que barrían el espacio de
+// soluciones (tablero Solari, dial, carril horizontal, plotter, cartas
+// hojeables…): siete escondían cinco de las seis pruebas detrás de un gesto, y
+// esta sección tiene que entregar las seis sin que nadie toque nada. La segunda
+// fueron tres sobre una composición asimétrica común, y se descartaron enteras.
+// Viven en los commits `b145ca6` y `b566b04`.
 //
-// Las tres que quedan comparten esas reglas, que ya no se discuten:
+// Estas tres nacieron como bocetos en un canvas de diseño y se eligieron ahí
+// antes de escribir una línea de código, que es la razón de que las tres sean
+// estructuras y no efectos.
+//
+// Lo que las tres cumplen, y ya no se discute:
 //
 //   · las seis cifras visibles a la vez, desde el primer frame;
 //   · nada depende del puntero — el hover puede AÑADIR, nunca revelar;
-//   · light mode: entra después del negro de NEAR Stack y entrega al stone de
-//     la newsletter, así que el blanco es el contraste de la página;
+//   · light mode: la sección entra después del negro de NEAR Stack y entrega al
+//     stone de la newsletter, así que el blanco es el contraste de la página;
 //   · el cuerpo completo de las seis, sin recortar;
-//   · 100svh de alto y CERO recorrido extra, incluida la 03.
+//   · una pantalla de alto y CERO recorrido extra;
+//   · un plan propio por debajo de 1024px — no una degradación automática.
 //
-// Lo único que cambia entre las tres es DE DÓNDE sale el movimiento.
+// Lo que cambia entre las tres es la ESTRUCTURA, no el mecanismo. Las tres
+// entran una vez, al aparecer, y se quedan quietas.
 export const PROOF_ALTS: readonly ProofSpec[] = [
   {
-    id: "cadence",
-    index: "01",
-    title: "Cadence",
+    id: "datum",
+    index: "B",
+    title: "Datum",
     stack: "DOM + GSAP",
-    travel: "100svh · entra y se queda quieta",
+    travel: "100svh · la más baja de las tres",
     pitch:
-      "Composición asimétrica en doce columnas: las seis cifras no alinean entre sí y dos de ellas mandan sobre las otras cuatro. Al entrar en cuadro se revelan en diagonal, con las reglas trazándose bajo cada una; después la sección no se mueve nunca más.",
+      "Un eje cruza el ancho y las seis pruebas cuelgan de él, alternando arriba y abajo. La que menos estorba: le sobra alto en cualquier pantalla. A cambio, seis columnas de un sexto del ancho dejan la cifra a escala de h2 y con quiebre en casi todas. En móvil el eje GIRA: la línea pasa a vertical y las fichas cuelgan de ella.",
   },
   {
-    id: "halo",
-    index: "02",
-    title: "Halo",
-    stack: "WebGL2 · shader propio",
-    travel: "100svh · una capa de fondo que respira",
+    id: "index",
+    index: "C",
+    title: "Index",
+    stack: "DOM + GSAP",
+    travel: "100svh · seis filas en una pantalla",
     pitch:
-      "La misma composición, sobre un campo de curvas de nivel en gris casi blanco que deriva muy despacio. El fondo no compite: nunca pasa de un 4% de contraste, y lo que hace es dar profundidad a un blanco que si no sería plano.",
+      "Seis renglones de un documento: número, rótulo, cifra, cuerpo, y una regla de borde a borde entre cada uno. La única en la que las seis cifras están alineadas entre sí, así que se COMPARAN. La más legible y la menos memorable — se parece a una tabla porque lo es.",
   },
   {
-    id: "staircase",
-    index: "03",
-    title: "Staircase",
-    stack: "DOM + GSAP · scroll",
-    travel: "100svh · cero recorrido extra",
+    id: "columns",
+    index: "D",
+    title: "Columns",
+    stack: "DOM + GSAP",
+    travel: "100svh · seis columnas de alto completo",
     pitch:
-      "Las seis arrancan escalonadas en una diagonal pronunciada y el scroll las ENDEREZA mientras la sección cruza el viewport. Conducida por scroll sin gastar un solo píxel de más: no hay sticky ni track, el recorrido es el paso natural de la sección por la pantalla.",
+      "Las cifras escritas en vertical ocupan la columna entera; el cuerpo queda al pie, horizontal. La más gráfica: se lee como una sola pieza antes de leer una palabra. El precio es que una cifra en vertical cuesta un instante más. En móvil la cifra vuelve a acostarse y la sección cae a seis bloques apilados.",
   },
 ];

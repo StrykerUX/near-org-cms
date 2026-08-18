@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/proof-alt",
-  title: "Proof Lab · 3 versiones",
+  title: "Proof Lab · 3 estructuras",
   description:
-    "Tres versiones alternativas de la sección de pruebas de la homepage sobre una misma composición asimétrica: entrada en diagonal, capa de fondo en WebGL y escalonado conducido por el scroll. Las tres entregan las seis cifras completas sin pedir interacción. Ver components/sections/proof-alt/README.md.",
-  blurb: "3 secciones de pruebas, misma composición",
+    "Tres estructuras para la sección de pruebas de la homepage: un eje con seis marcas, seis renglones de documento y seis columnas del alto de la pantalla. Las tres entregan las seis cifras completas sin pedir interacción, en una pantalla y sin recorrido extra. Ver components/sections/proof-alt/README.md.",
+  blurb: "3 estructuras de pruebas, mismas cifras",
   nav: false,
   sitemap: false,
   robots: "noindex",
