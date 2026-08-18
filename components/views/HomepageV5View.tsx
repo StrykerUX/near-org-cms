@@ -18,7 +18,15 @@ import UpdatesList from "@/components/sections/UpdatesList";
 export default function HomepageV5View() {
   return (
     <main className="flex flex-col bg-cream">
-      <HeroVideo subheading={false} />
+      {/* Asset v2: art-glass slabs (hero-descent-19) — 1440p all-intra para el
+          scrub (24fps/192f/8s, mismos números que el original), poster del
+          frame 1 exacto. El default de HeroVideo sigue siendo el clip viejo
+          (v4 intacta); el 1080p convive en public/ como fallback liviano. */}
+      <HeroVideo
+        subheading={false}
+        src="/prototype/v2/hero-descent-v2.mp4"
+        poster="/prototype/v2/hero-descent-v2-poster.jpg"
+      />
       <QuantumBars />
       <OwnYourOwn />
       <NearStackV2 />

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hero Mark — 12 fills</title>
+<style>
+  @font-face { font-family: "Montreal"; src: url("../hero-gallery/fonts/PPNeueMontreal-Medium.woff2") format("woff2"); font-weight: 500; }
+  @font-face { font-family: "Montreal"; src: url("../hero-gallery/fonts/PPNeueMontreal-Book.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "KeplerDisp"; src: url("../hero-gallery/fonts/KeplerStd-CnItDisp.woff2") format("woff2"); font-style: italic; }
+
+  :root { --ink:#101010; --cream:#F5F4F1; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--ink); color: var(--cream);
+         font: 15px/1.5 Montreal, -apple-system, sans-serif; padding: 56px 48px 96px; }
+  header.page { max-width: 1560px; margin: 0 auto 28px; }
+  header.page h1 { font-size: 30px; font-weight: 500; }
+  header.page p { color: rgba(245,244,241,.55); max-width: 70ch; margin-top: 8px; font-weight: 400; }
+  .grid { max-width: 1560px; margin: 0 auto; display: grid; gap: 18px;
+          grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+  .tile { border: 1px solid var(--cream); border-radius: 16px; overflow: hidden; cursor: pointer; }
+  .tile .cap { display: flex; justify-content: space-between; padding: 9px 16px 12px;
+               background: var(--ink); }
+  .tile .cap b { font-size: 14px; font-weight: 500; }
+  .tile .cap span { font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+                    color: rgba(245,244,241,.45); }
+
+  /* ── The hero mock. All type in cqw so the same markup is a thumbnail or a
+        full-screen view — it is one composition at two zooms. ─────────────── */
+  .hero { container-type: inline-size; aspect-ratio: 16 / 9; position: relative;
+          background: var(--cream); overflow: hidden; }
+  /* The massive mark: video-fill stand-in masked through the NEAR mark,
+     bleeding off the right and bottom — the crop is what makes it feel huge. */
+  .hero .mark { position: absolute; right: -9cqw; bottom: -14cqw;
+                width: 62cqw; aspect-ratio: 1 / 1;
+                background-size: cover; background-position: center;
+                -webkit-mask: url("../v2/near-mark.svg") center / contain no-repeat;
+                mask: url("../v2/near-mark.svg") center / contain no-repeat; }
+  /* Nav pill, simplified from SiteHeader: dark bar, wordmark, links, CTA. */
+  .hero .nav { position: absolute; top: 2.2cqw; left: 50%; transform: translateX(-50%);
+               width: 86cqw; height: 4.6cqw; border-radius: 1.6cqw;
+               background: #0a0a0a; color: #fff; display: flex; align-items: center;
+               justify-content: space-between; padding: 0 .6cqw 0 2cqw; }
+  .hero .nav .wordmark { font-weight: 500; font-size: 1.9cqw; letter-spacing: -.02em; }
+  .hero .nav .links { display: flex; gap: 2.4cqw; font-size: 1.05cqw; letter-spacing: .14em;
+                      text-transform: uppercase; color: rgba(255,255,255,.9); }
+  .hero .nav .cta { background: #8bf29c; color: #000; font-size: 1.1cqw; font-weight: 500;
+                    padding: 1cqw 1.7cqw; border-radius: 1.2cqw; }
+  /* Headline on the cream, clear of the mark: black, display scale,
+     "world." in Kepler like the accents of the site. */
+  .hero .headline { position: absolute; left: 4.2cqw; top: 26cqw;
+                    font-size: 8.6cqw; line-height: .98; letter-spacing: -.03em;
+                    color: #000; font-weight: 500; }
+  .hero .headline em { font-family: KeplerDisp, serif; font-style: italic;
+                       font-size: 1.12em; letter-spacing: 0; }
+
+  /* Lightbox: same mock, big. */
+  #lb { position: fixed; inset: 0; background: rgba(10,10,10,.95); display: none;
+        align-items: center; justify-content: center; z-index: 50; cursor: zoom-out; }
+  #lb.on { display: flex; }
+  #lb .hero { width: min(94vw, 170vh); border-radius: 10px; }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>Hero Mark — the NEAR mark as a video window</h1>
+  <p>Twelve texture fills (Higgsfield statics standing in for AI video) masked through a
+     massive NEAR mark on the homepage hero. Same composition, twelve materials —
+     click any tile for full size. The winning fill becomes the video brief.</p>
+</header>
+<div class="grid" id="grid"></div>
+<div id="lb"></div>
+
+<script>
+const FILLS = [
+  ["Emerald silk", "flowing fabric"],
+  ["Liquid chrome", "molten metal, green reflections"],
+  ["Ink bloom", "macro ink in water"],
+  ["Aurora", "light curtains"],
+  ["Particle drift", "ember field in flow"],
+  ["Night ocean", "rolling waves, green moonlight"],
+  ["Lit smoke", "volumetric plumes"],
+  ["Caustics", "refracted water light"],
+  ["Dunes", "green-washed ridges"],
+  ["Oil slick", "iridescent marble"],
+  ["Light trails", "long-exposure ribbons"],
+  ["Storm light", "cloud shafts"],
+];
+const hero = (n) => `
+  <div class="hero">
+    <div class="mark" style="background-image:url('img/fill-${n}.png')"></div>
+    <div class="nav">
+      <span class="wordmark">near</span>
+      <span class="links"><span>Products</span><span>Stack</span><span>Resources</span><span>About</span></span>
+      <span class="cta">Get started</span>
+    </div>
+    <div class="headline">Own your<br/><em>world.</em></div>
+  </div>`;
+const grid = document.getElementById("grid");
+FILLS.forEach(([name, blurb], i) => {
+  const n = String(i + 1).padStart(2, "0");
+  const t = document.createElement("article");
+  t.className = "tile";
+  t.innerHTML = hero(n) + `<div class="cap"><b>${name}</b><span>hero-mark-${n} · ${blurb}</span></div>`;
+  t.onclick = () => {
+    const lb = document.getElementById("lb");
+    lb.innerHTML = hero(n);
+    lb.classList.add("on");
+  };
+  grid.appendChild(t);
+});
+document.getElementById("lb").onclick = (e) => e.currentTarget.classList.remove("on");
+</script>
+</body>
+</html>

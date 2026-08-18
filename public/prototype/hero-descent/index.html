@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hero Descent Remake — glass mountains</title>
+<style>
+  @font-face { font-family: "Montreal"; src: url("../hero-gallery/fonts/PPNeueMontreal-Medium.woff2") format("woff2"); font-weight: 500; }
+  @font-face { font-family: "Montreal"; src: url("../hero-gallery/fonts/PPNeueMontreal-Book.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "KeplerDisp"; src: url("../hero-gallery/fonts/KeplerStd-CnItDisp.woff2") format("woff2"); font-style: italic; }
+
+  :root { --ink:#101010; --cream:#F5F4F1; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--ink); color: var(--cream);
+         font: 15px/1.5 Montreal, -apple-system, sans-serif; padding: 56px 48px 96px; }
+  header.page { max-width: 1560px; margin: 0 auto 28px; }
+  header.page h1 { font-size: 30px; font-weight: 500; }
+  header.page p { color: rgba(245,244,241,.55); max-width: 72ch; margin-top: 8px; font-weight: 400; }
+  .grid { max-width: 1560px; margin: 0 auto; display: grid; gap: 18px;
+          grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); }
+  .tile { border: 1px solid var(--cream); border-radius: 16px; overflow: hidden; cursor: pointer; }
+  .tile.ref { border-color: #8bf29c; }
+  .tile .cap { display: flex; justify-content: space-between; padding: 9px 16px 12px; background: var(--ink); }
+  .tile .cap b { font-size: 14px; font-weight: 500; }
+  .tile .cap b em { color: #8bf29c; font-style: normal; }
+  .tile .cap span { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: rgba(245,244,241,.45); }
+
+  /* La composición del hero v5 sobre cada candidato: headline centrado sobre
+     el cielo cream, montañas debajo — como HeroVideo real. */
+  .hero { container-type: inline-size; aspect-ratio: 16 / 9; position: relative;
+          overflow: hidden; background-size: cover; background-position: center bottom; }
+  .hero .nav { position: absolute; top: 2.2cqw; left: 50%; transform: translateX(-50%);
+               width: 54cqw; height: 4.6cqw; border-radius: 2.4cqw;
+               background: #0a0a0a; color: #fff; display: flex; align-items: center;
+               justify-content: space-between; padding: 0 .55cqw 0 2cqw; }
+  .hero .nav .wordmark { font-weight: 500; font-size: 1.9cqw; letter-spacing: -.02em; }
+  .hero .nav .links { display: flex; gap: 2cqw; font-size: 1.15cqw; color: rgba(255,255,255,.92); }
+  .hero .nav .cta { background: #8bf29c; color: #000; font-size: 1.15cqw; font-weight: 500;
+                    padding: .95cqw 1.7cqw; border-radius: 1.8cqw; }
+  .hero .stack { position: absolute; inset: 0; display: flex; flex-direction: column;
+                 align-items: center; justify-content: flex-start; padding-top: 9.5cqw;
+                 gap: 1.6cqw; text-align: center; color: #000; }
+  .hero .headline { font-size: 7.6cqw; line-height: .96; letter-spacing: -.03em; font-weight: 500; }
+  .hero .headline em { font-family: KeplerDisp, serif; font-style: italic; font-size: 1.12em; letter-spacing: 0; }
+
+  #lb { position: fixed; inset: 0; background: rgba(10,10,10,.95); display: none;
+        align-items: center; justify-content: center; z-index: 50; cursor: zoom-out; }
+  #lb.on { display: flex; }
+  #lb .hero { width: min(94vw, 170vh); border-radius: 10px; }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>Hero Descent Remake — glass mountains at 2K</h1>
+  <p>The current hero video is 1280×720 — soft on any modern display. Eight regenerated
+     candidates at 2752×1536, same glass-mountain language. The first green-bordered tile
+     is the CURRENT video's poster for comparison. Pick one and it becomes the
+     image-to-video brief for the new hero clip.</p>
+</header>
+<div class="grid" id="grid"></div>
+<div id="lb"></div>
+
+<script>
+const TILES = [
+  ["ref", "../v2/hero-descent-poster.jpg", "CURRENT (reference)", "1280×720 · the one that looks soft"],
+  ["01", "img/mtn-01.png", "Faithful I", "layered ridges, warm glints"],
+  ["02", "img/mtn-02.png", "Faithful II", "jade steps, chartreuse light"],
+  ["03", "img/mtn-03.png", "Jewel cut", "caustic lines, hardest edges"],
+  ["04", "img/mtn-04.png", "Low horizon", "small ridge band, huge sky"],
+  ["05", "img/mtn-05.png", "First light", "dawn rake, golden ridge lines"],
+  ["06", "img/mtn-06.png", "Glacial", "mint/teal only, coldest"],
+  ["07", "img/mtn-07.png", "Low-poly", "graphic triangular facets"],
+  ["08", "img/mtn-08.png", "Alpine", "tall steep peaks, dramatic"],
+  ["09", "img/mtn-09.png", "Remaster I", "ROUND 2 · image-referenced, exact style"],
+  ["10", "img/mtn-10.png", "Remaster II", "ROUND 2 · faithful, hairline sharpen"],
+  ["11", "img/mtn-11.png", "Paper cutouts", "ROUND 2 · flat bands, soft glow"],
+  ["12", "img/mtn-12.png", "Finer detail", "ROUND 2 · more striations, same softness"],
+  ["13", "img/mtn-13.png", "More sky", "ROUND 2 · ridges lower, stronger glow"],
+  ["14", "img/mtn-14.png", "Richer greens", "ROUND 2 · deeper emerald, same matte"],
+  ["15", "img/mtn-15.png", "Sibling ridges", "ROUND 2 · varied zigzag rhythm"],
+  ["16", "img/mtn-16.png", "Wide & calm", "ROUND 2 · broader, longer bands"],
+  ["17", "img/mtn-17.png", "CGI panes", "ROUND 3 · photoreal glass, clean layer edges"],
+  ["18", "img/mtn-18.png", "Precision cut", "ROUND 3 · hairline edge light, caustics"],
+  ["19", "img/mtn-19.png", "Art-glass slabs", "ROUND 3 · light gaps between sheets"],
+  ["20", "img/mtn-20.png", "Museum glass", "ROUND 3 · polished front, frosted rear"],
+  ["21", "img/mtn-21.png", "Depth of field", "ROUND 3 · sharp front, defocused rear"],
+  ["22", "img/mtn-22.png", "Vitrines", "ROUND 3 · bright seams between layers"],
+];
+const hero = (src) => `
+  <div class="hero" style="background-image:url('${src}')">
+    <div class="nav">
+      <span class="wordmark">near</span>
+      <span class="links"><span>For Founders</span><span>For Developers</span><span>Tech Stack</span></span>
+      <span class="cta">Get started</span>
+    </div>
+    <div class="stack">
+      <div class="headline">Own your<br/><em>world.</em></div>
+    </div>
+  </div>`;
+const grid = document.getElementById("grid");
+TILES.forEach(([id, src, name, note]) => {
+  const t = document.createElement("article");
+  t.className = "tile" + (id === "ref" ? " ref" : "");
+  t.innerHTML = hero(src) + `<div class="cap"><b>${id === "ref" ? "<em>" + name + "</em>" : name}</b><span>${id === "ref" ? "" : "hero-descent-" + id + " · "}${note}</span></div>`;
+  t.onclick = () => {
+    const lb = document.getElementById("lb");
+    lb.innerHTML = hero(src);
+    lb.classList.add("on");
+  };
+  grid.appendChild(t);
+});
+document.getElementById("lb").onclick = (e) => e.currentTarget.classList.remove("on");
+</script>
+</body>
+</html>

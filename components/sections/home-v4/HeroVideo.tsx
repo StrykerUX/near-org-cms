@@ -3,7 +3,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { createVideoScrub } from "@/components/primitives/motion/videoScrub";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { HERO_UNIT } from "@/components/sections/home-v4/heroGeometry";
@@ -64,10 +64,37 @@ const CHASE = 0.14;
 // en vez de frenar de golpe.
 const CHASE_DOCKING = 0.09;
 
+// Máscara de cada palabra del titular. Es markup PERMANENTE (no lo inyecta
+// SplitText) para que el final de la intro no tenga que revertir nada — ver el
+// bloque "Intro del titular" en el motion.
+//
+// `overflow-clip` y NO `overflow-hidden`: hidden convierte al inline-block en
+// scroll container y su baseline pasa a ser el borde inferior del margin-box,
+// lo que desalinea el texto contra el strut del <h1>; clip recorta igual sin
+// tocar la baseline. Los paddings dan aire para que el descender de "your" y
+// el voladizo itálico de "world." no se recorten en reposo, y los margins
+// negativos los cancelan para que la caja ocupe exactamente lo que ocuparía la
+// palabra sola (el espaciado entre palabras y entre líneas no cambia).
+const HEADLINE_MASK =
+  "inline-block overflow-clip px-[0.15em] -mx-[0.15em] pt-[0.1em] -mt-[0.1em] pb-[0.15em] -mb-[0.15em]";
+
 // `subheading`: v5 lo apaga (pedido — sin bajada debajo de "Own your world.");
 // v4 no pasa nada y conserva la suya. Los tweens que apuntan a
 // [data-hero='sub'] toleran el selector vacío (gsap sobre lista vacía es no-op).
-export default function HeroVideo({ subheading = true }: { subheading?: boolean } = {}) {
+// `src`/`poster`/`fps`: v6 del asset — v5 pasa el clip nuevo (art-glass slabs,
+// re-encodeado all-intra) sin tocar el default, que sigue siendo el de v4.
+// El fps VIAJA con el asset: está medido con ffprobe, no leído en runtime.
+export default function HeroVideo({
+  subheading = true,
+  src = "/prototype/v2/hero-descent.mp4",
+  poster = "/prototype/v2/hero-descent-poster.jpg",
+  fps = FPS,
+}: {
+  subheading?: boolean;
+  src?: string;
+  poster?: string;
+  fps?: number;
+} = {}) {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
     const mm = gsap.matchMedia();
@@ -155,7 +182,7 @@ export default function HeroVideo({ subheading = true }: { subheading?: boolean 
       // de unidades en `target` (a veces fracción de progreso, a veces segundos).
       if (video) {
         const scrub = createVideoScrub(video, {
-          fps: FPS,
+          fps,
           chase: CHASE,
           chaseDocking: CHASE_DOCKING,
         });
@@ -174,94 +201,66 @@ export default function HeroVideo({ subheading = true }: { subheading?: boolean 
 
       // ── 4. Intro del titular ──────────────────────────────────────────────
       //
-      // ⚠️ El gradiente del <h1> y SplitText NO PUEDEN convivir.
+      // SIN SplitText. La versión anterior partía el titular en palabras
+      // enmascaradas y hacía `split.revert()` al terminar — y ese revert
+      // reconstruye el markup original en el frame exacto en que la animación
+      // asienta, con un reflow que se veía como un POP de posición al final.
       //
-      // El titular se pinta con `background-clip: text` + `color: transparent`:
-      // el color sale del fondo del <h1>, recortado a la silueta de sus letras.
-      // Cuando SplitText parte el texto, cada palabra queda dentro de un wrapper
-      // con `overflow: hidden` y su propio transform, y el fondo del <h1> deja de
-      // alcanzarlas. Las letras siguen siendo transparentes, pero ya no hay nada
-      // detrás que las rellene: el titular se vuelve INVISIBLE, y encima justo al
-      // terminar la animación (que es cuando parece que "debería" aparecer).
+      // Ahora las máscaras viven en el JSX (cada palabra dentro de un wrapper
+      // `overflow-clip` permanente — ver el <h1> abajo), así que al terminar no
+      // hay nada que revertir: el DOM del asentamiento es el mismo de la
+      // animación y el mismo del SSR. Cero mutación estructural = cero pop.
+      // Tampoco hace falta esperar `document.fonts.ready`: sin split no hay
+      // medición de anchos que pueda quedar obsoleta.
       //
-      // Por eso el gradiente vive detrás de `data-intro="done"` —fondo Y clip
-      // juntos, nunca uno sin el otro— y ese atributo se enciende recién después
-      // de `split.revert()`, con el markup original ya restaurado. Durante la
-      // animación el texto es negro sólido; el cambio no se nota porque el
+      // El gradiente sigue detrás de `data-intro="done"`: `background-clip:
+      // text` no alcanza a descendientes con transform propio, así que cada
+      // tween limpia su transform al completar (`clearProps`) y el atributo se
+      // enciende recién al final, con las palabras ya sin transforms. Durante
+      // la animación el texto es negro sólido; el cambio no se nota porque el
       // gradiente TAMBIÉN es negro en su primer 55%.
       if (heading) {
         gsap.set(rest, { autoAlpha: 0, y: 16 });
 
-        let split: SplitText | null = null;
-        // `fonts.ready` es una promesa, y el cleanup de abajo puede correr antes
-        // de que resuelva: en dev pasa en cada mount por StrictMode, y en
-        // producción con cualquier navegación rápida. Sin este flag, `run()` hacía
-        // SplitText sobre un nodo ya revertido y creaba una timeline fuera del
-        // gsap.context que ya se cerró — o sea tweens que nadie va a limpiar,
-        // escribiendo sobre un DOM desconectado.
-        let cancelled = false;
+        const words = q("[data-hero-word]");
+        // "world." entra un beat después que el resto, no dentro del stagger:
+        // es la palabra en cursiva y el remate de la frase.
+        const lead = words.slice(0, -1);
+        const last = words.slice(-1);
 
-        const run = () => {
-          if (cancelled) return;
-          // Nada de `autoSplit` ni de `onSplit`.
-          //
-          // `autoSplit` re-partiría el titular al cambiar los anchos,
-          // deshaciendo el revert de abajo y devolviendo las letras al estado
-          // transparente-sin-fondo. Y `onSplit` deja a SplitText como dueño del
-          // timeline que devuelve, lo que vuelve REENTRANTE llamar a `revert()`
-          // desde su `onComplete`: el revert se come los tweens que ese mismo
-          // callback acababa de crear — así fue como el subtítulo se quedaba en
-          // `opacity: 0` para siempre mientras el título sí terminaba bien.
-          //
-          // Partir una vez, animar, y revertir al final. Sin callbacks anidados.
-          split = SplitText.create(heading, { type: "words", mask: "words" });
-          const words = split.words;
-          // "world." entra un beat después que el resto, no dentro del stagger:
-          // es la palabra en cursiva y el remate de la frase.
-          const lead = words.slice(0, -1);
-          const last = words.slice(-1);
-
-          // El timeline no espera al video. El original espera el evento
-          // `playing`, pero en modo scrub el video está pausado a propósito y
-          // ese evento no llega nunca: el titular aparecía por su temporizador
-          // de rescate, 1.8s tarde. Cualquier variante del gate hereda eso.
-          const tl = gsap.timeline();
-          tl.from(lead, {
-            yPercent: 110,
-            autoAlpha: 0,
-            stagger: 0.08,
-            duration: 0.9,
-            ease: "power3.out",
-          }, 0);
-          tl.from(last, {
-            yPercent: 110,
-            autoAlpha: 0,
-            duration: 0.9,
-            ease: "power3.out",
-          }, 0.42);
-          // El subtítulo entra montado sobre el final del titular, y va DENTRO
-          // del timeline: como paso de la coreografía, no como efecto colateral
-          // de un callback.
-          tl.to(rest, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.45");
-          tl.call(() => {
-            // Recién acá, con todo terminado: primero devolver el markup, y
-            // DESPUÉS encender el gradiente. Al revés, el clip caería sobre las
-            // palabras todavía enmascaradas y el titular desaparecería.
-            split?.revert();
-            heading.dataset.intro = "done";
-          });
-        };
-
-        // El split se hace cuando las fuentes ya midieron. Hasta entonces el
-        // titular se ve NORMAL (negro sólido, sin animar): si `fonts.ready` no
-        // resuelve nunca, el peor caso es que no haya intro — no que no haya
-        // titular.
-        if (document.fonts?.ready) document.fonts.ready.then(run).catch(run);
-        else run();
+        // El timeline no espera al video. El original espera el evento
+        // `playing`, pero en modo scrub el video está pausado a propósito y
+        // ese evento no llega nunca: el titular aparecía por su temporizador
+        // de rescate, 1.8s tarde. Cualquier variante del gate hereda eso.
+        //
+        // yPercent 130 y no 110: el wrapper clipea en el padding-box y lleva
+        // ~0.15em de bleed (ver HEADLINE_MASK), así que con 110 asomaría un
+        // filo de la palabra en el primer frame.
+        const tl = gsap.timeline();
+        tl.from(lead, {
+          yPercent: 130,
+          autoAlpha: 0,
+          stagger: 0.08,
+          duration: 0.9,
+          ease: "power3.out",
+          clearProps: "transform,opacity,visibility",
+        }, 0);
+        tl.from(last, {
+          yPercent: 130,
+          autoAlpha: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          clearProps: "transform,opacity,visibility",
+        }, 0.42);
+        // El subtítulo entra montado sobre el final del titular, y va DENTRO
+        // del timeline: como paso de la coreografía, no como efecto colateral
+        // de un callback.
+        tl.to(rest, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.45");
+        tl.call(() => {
+          heading.dataset.intro = "done";
+        });
 
         cleanups.push(() => {
-          cancelled = true;
-          split?.revert();
           delete heading.dataset.intro;
         });
       }
@@ -307,8 +306,8 @@ export default function HeroVideo({ subheading = true }: { subheading?: boolean 
           NEGRO. */}
       <video
         data-hero-bg
-        src="/prototype/v2/hero-descent.mp4"
-        poster="/prototype/v2/hero-descent-poster.jpg"
+        src={src}
+        poster={poster}
         muted
         playsInline
         preload="metadata"
@@ -362,9 +361,25 @@ export default function HeroVideo({ subheading = true }: { subheading?: boolean 
           data-hero="heading"
           className="text-display text-pretty data-[intro=done]:bg-clip-text data-[intro=done]:text-transparent data-[intro=done]:[background-image:linear-gradient(135deg,#000_0%,#000_55%,var(--ink-deep)_100%)]"
         >
-          Own your
-          <br />
-          <Accent display>world.</Accent>
+          {/* Cada palabra: wrapper-máscara permanente + span interno que es lo
+              que anima (inline-block para que el transform aplique). Las líneas
+              son <span> block en vez de <br/> para que cada máscara quede en su
+              línea. Ver HEADLINE_MASK arriba. */}
+          <span className="block">
+            <span className={HEADLINE_MASK}>
+              <span data-hero-word className="inline-block">Own</span>
+            </span>{" "}
+            <span className={HEADLINE_MASK}>
+              <span data-hero-word className="inline-block">your</span>
+            </span>
+          </span>
+          <span className="block">
+            <span className={HEADLINE_MASK}>
+              <span data-hero-word className="inline-block">
+                <Accent display>world.</Accent>
+              </span>
+            </span>
+          </span>
         </h1>
 
         {subheading && (
