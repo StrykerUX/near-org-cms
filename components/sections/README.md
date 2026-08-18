@@ -62,6 +62,10 @@ dar por terminado un cambio.
 | `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` | `HomepageV2View` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado; sobrevivieron porque el port de home-v2 las reusa tal cual. |
 | `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` tal cual. |
 | `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
+| `hero-alt/*` | `HeroAltView` | `/prototype/hero-alt` — **laboratorio**: seis versiones de las dos primeras secciones de la homepage, misma copy en las seis. Tiene su propio [README](./hero-alt/README.md). |
+| `proof-alt/*` | `ProofAltView` | `/prototype/proof-alt` — **laboratorio**: diez versiones de la sección de pruebas, mismos seis datos en las diez, para elegir una que no gaste los 325svh del `ProofStepper` de ab7. Tiene su propio [README](./proof-alt/README.md). |
+
+Las dos últimas son **laboratorios**: alimentan una ruta de comparación y ninguna página real las importa. Su contenido puede cambiar o borrarse sin aviso — si una versión gana, se COPIA a la carpeta de la página que la reciba, no se importa desde ahí.
 
 ## El footer NO está acá
 

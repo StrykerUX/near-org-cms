@@ -34,10 +34,11 @@ import m27 from "@/app/prototype/homepage-v2/page.meta";
 import m28 from "@/app/prototype/homepage-v4/page.meta";
 import m29 from "@/app/prototype/homepage-v5/page.meta";
 import m30 from "@/app/prototype/hover-lab/page.meta";
-import m31 from "@/app/(motion)/quantum-security/page.meta";
-import m32 from "@/app/(site)/research/page.meta";
-import m33 from "@/app/(site)/solutions/page.meta";
-import m34 from "@/app/(site)/terms-of-use/page.meta";
+import m31 from "@/app/prototype/proof-alt/page.meta";
+import m32 from "@/app/(motion)/quantum-security/page.meta";
+import m33 from "@/app/(site)/research/page.meta";
+import m34 from "@/app/(site)/solutions/page.meta";
+import m35 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -71,8 +72,9 @@ export const ROUTES: RouteEntry[] = [
   { ...m28, route: "/prototype/homepage-v4", stub: false, file: "app/prototype/homepage-v4/page.meta.ts" },
   { ...m29, route: "/prototype/homepage-v5", stub: false, file: "app/prototype/homepage-v5/page.meta.ts" },
   { ...m30, route: "/prototype/hover-lab", stub: false, file: "app/prototype/hover-lab/page.meta.ts" },
-  { ...m31, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m32, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m33, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m34, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m31, route: "/prototype/proof-alt", stub: false, file: "app/prototype/proof-alt/page.meta.ts" },
+  { ...m32, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m33, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m34, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m35, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
