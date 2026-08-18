@@ -70,6 +70,10 @@ const UNLINKED: string[] = [
 // y cada una es el rollback de una mitad de ab7. Cuando ab7 se confirme, las
 // dos bajan con v4.
 const FEATURED = [
+  // El lab de heroes va primero: es donde se está decidiendo qué reemplaza a
+  // las dos primeras secciones, así que manda sobre las homepages completas,
+  // que hoy montan la versión que se quiere cambiar.
+  "/prototype/hero-alt",
   "/prototype/homepage-ab7",
   "/prototype/homepage-ab6",
   "/prototype/homepage-v5",
