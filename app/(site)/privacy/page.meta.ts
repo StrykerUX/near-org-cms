@@ -10,6 +10,7 @@ const meta = {
   route: "/privacy",
   title: "Privacy Policy",
   description: "How NEAR handles personal data.",
+  blurb: "How NEAR handles personal data",
   nav: { header: true, footer: false, label: "Privacy Policy", order: 90 },
   sitemap: false,
   robots: "noindex",

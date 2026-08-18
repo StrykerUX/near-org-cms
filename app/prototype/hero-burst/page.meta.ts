@@ -5,6 +5,7 @@ const meta = {
   title: "Hero Burst",
   description:
     "Test del hero con burst de gradiente simétrico (shader WebGL propio): flujo radial desde el centro, aceleración por velocidad de scroll y plano de suelo espejado.",
+  blurb: "WebGL gradient burst hero test",
   nav: false,
   sitemap: false,
   robots: "noindex",

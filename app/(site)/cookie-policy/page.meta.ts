@@ -10,6 +10,7 @@ const meta = {
   route: "/cookie-policy",
   title: "Cookie Policy",
   description: "What cookies NEAR's sites set and why.",
+  blurb: "What cookies the sites set",
   nav: { header: true, footer: false, label: "Cookie Policy", order: 92 },
   sitemap: false,
   robots: "noindex",

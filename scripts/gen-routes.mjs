@@ -90,8 +90,22 @@ for (const dirAbs of walk(APP_DIR)) {
     );
   }
 
+  // ¿La página todavía está en blanco? Se deriva de si su `page.tsx` renderiza
+  // `StubView` — la view compartida de "existe para que el menú tenga a dónde
+  // apuntar, todavía no tiene contenido". Es un hecho del código y no un campo
+  // declarado en el meta a propósito: una bandera a mano sobrevive al día en
+  // que la página recibe contenido y miente desde ahí en adelante. Cuando a una
+  // stub se le escribe su view propia, el import desaparece y esto se apaga
+  // solo.
+  //
+  // Se busca el import y no `<StubView`, que también matchearía dentro de un
+  // comentario o de un string.
+  const pageSource = readFileSync(pagePath, "utf8");
+  const isStub = /^\s*import\s+StubView\s+from\s+["'`]/m.test(pageSource);
+
   routes.push({
     route,
+    stub: isStub,
     file: path.relative(ROOT, metaPath),
     // Alias @/app/... en vez de relativo — evita ambigüedad con los
     // paréntesis literales de los grupos de ruta en especificadores de
@@ -117,7 +131,7 @@ routes.sort((a, b) => a.route.localeCompare(b.route));
 
 const imports = routes.map((r, i) => `import m${i} from "${r.importSpecifier}";`).join("\n");
 const entries = routes
-  .map((r, i) => `  { ...m${i}, route: "${r.route}", file: "${r.file}" },`)
+  .map((r, i) => `  { ...m${i}, route: "${r.route}", stub: ${r.stub}, file: "${r.file}" },`)
   .join("\n");
 
 const output = `// AUTO-GENERADO por scripts/gen-routes.mjs — NO EDITAR A MANO.

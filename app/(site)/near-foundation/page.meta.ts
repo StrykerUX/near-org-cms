@@ -10,6 +10,7 @@ const meta = {
   route: "/near-foundation",
   title: "NEAR Foundation",
   description: "Supporting a decentralized ecosystem.",
+  blurb: "Supporting a decentralized ecosystem",
   nav: { header: true, footer: false, label: "NEAR Foundation", order: 41 },
   sitemap: false,
   robots: "noindex",

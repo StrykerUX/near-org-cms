@@ -10,6 +10,7 @@ const meta = {
   route: "/about",
   title: "About",
   description: "From 2017 to now: how NEAR got here and where it is going.",
+  blurb: "The story from 2017 on",
   nav: { header: true, footer: false, label: "About", order: 40 },
   sitemap: false,
   robots: "noindex",

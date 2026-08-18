@@ -10,6 +10,7 @@ const meta = {
   route: "/near-ai",
   title: "NEAR AI",
   description: "Confidential, verifiable inference and agents.",
+  blurb: "Confidential, verifiable inference and agents",
   nav: { header: true, footer: false, label: "NEAR AI", order: 13 },
   sitemap: false,
   robots: "noindex",

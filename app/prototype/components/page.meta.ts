@@ -4,6 +4,7 @@ const meta = {
   route: "/prototype/components",
   title: "Component primitives",
   description: "Reference for the prototype's shared primitives.",
+  blurb: "Reference for the shared primitives",
   nav: false,
   sitemap: false,
   robots: "noindex",

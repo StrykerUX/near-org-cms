@@ -5,6 +5,7 @@ const meta = {
   title: "Homepage Exploration",
   description:
     "Laboratorio de bloques de transición de píxel art para intercalar entre secciones — cuatro patrones más la demo de enter + exit. Ver components/sections/home-exploration/README.md.",
+  blurb: "Pixel transition blocks between sections",
   nav: false,
   sitemap: false,
   robots: "noindex",

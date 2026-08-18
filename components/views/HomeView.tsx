@@ -12,10 +12,14 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 // con título, descripción y ruta: la página se volvió más larga que cualquiera
 // de las que indexa, y encontrar una ruta exigía barrer texto.
 //
-// Ahora son tres listas en dos columnas, una por grupo, con SOLO el título y la
-// ruta. Las `description` de cada `page.meta.ts` no se pintan: en un índice de
-// 33 entradas la descripción es justamente el texto que hay que saltear. Siguen
-// llegando en el manifiesto para quien las necesite.
+// Ahora son tres listas en dos columnas, una por grupo, y cada fila lleva el
+// título, un resumen de ~5 palabras y la ruta. El resumen es el `blurb` del
+// page.meta.ts y NO la `description`: esa es una frase completa para buscadores,
+// y en un índice de 33 entradas es justamente el texto que hay que saltear.
+//
+// Muchas filas llevan además un estado —`empty` si la página todavía renderiza
+// `StubView`, `not in nav` si ningún menú la enlaza—, que es la información que
+// un sitemap no da y por la que alguien abre esta página.
 //
 // Se fueron con las cards las escenas de Unicorn. El toolkit
 // (`primitives/motion/unicornScene`) NO quedó muerto: `sections/LatestUpdates`
@@ -30,12 +34,20 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 export type HomeViewLink = {
   href: string;
   label: string;
+  // Resumen de ~5 palabras, del `blurb` del page.meta.ts. No es la
+  // `description`: esa es una frase para buscadores y acá hay 33 filas, así que
+  // lo que sirve es una etiqueta que se lee sin frenar el barrido.
+  blurb?: string;
   // Las galerías de public/ son HTML autocontenido, no rutas de Next: van con
   // <a> y no con <Link>, que intentaría navegarlas por el router.
   external?: boolean;
   // La página existe y se buildea, pero ni el header ni el footer la enlazan.
   // Es el dato accionable del índice: lo que hay que conectar al nav.
   unlinked?: boolean;
+  // La página todavía renderiza `StubView` — existe para que el menú tenga a
+  // dónde apuntar, y nada más. Lo deriva el generador del manifiesto leyendo el
+  // page.tsx, no se declara a mano.
+  empty?: boolean;
 };
 
 export type HomeViewGroup = {
@@ -62,16 +74,36 @@ export type HomeViewProps = {
  * lista de filas enlazables sobre crema, y darle un tratamiento propio serían
  * dos lenguajes para la misma cosa.
  */
+// Los dos estados que el índice reporta. Nunca van `aria-hidden`: son la única
+// diferencia real entre una fila y sus vecinas, y la razón por la que alguien
+// mira esta lista y no el sitemap.
+//
+// `empty` es un hecho derivado del código (el page.tsx renderiza `StubView`);
+// `not in nav` sale de una lista a mano en page.tsx. Se ven igual porque para
+// quien lee son lo mismo: trabajo pendiente.
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="shrink-0 rounded-full border border-rule px-2 py-0.5 text-caption-mono text-gray-intermediate">
+      {children}
+    </span>
+  );
+}
+
 function Row({ link }: { link: HomeViewLink }) {
   const inner = (
     <>
-      <span className="flex min-w-0 items-center gap-2">
-        <span className="truncate text-body">{link.label}</span>
-        {link.unlinked && (
-          // No es decorativo y por eso no va `aria-hidden`: es la única
-          // diferencia real entre esta fila y sus vecinas.
-          <span className="shrink-0 rounded-full border border-rule px-2 py-0.5 text-caption-mono text-gray-intermediate">
-            not in nav
+      {/* La columna izquierda es a su vez dos líneas: título con sus badges
+          arriba, resumen abajo. El baseline del grid cae en la primera, que es
+          lo que mantiene la ruta alineada con el título y no con el resumen. */}
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-body">{link.label}</span>
+          {link.empty && <Badge>empty</Badge>}
+          {link.unlinked && <Badge>not in nav</Badge>}
+        </span>
+        {link.blurb && (
+          <span className="truncate text-body-sm text-gray-intermediate">
+            {link.blurb}
           </span>
         )}
       </span>

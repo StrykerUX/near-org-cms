@@ -83,17 +83,38 @@ const FEATURED = [
 // public/ no resuelve directorios, y van al final de "demo" — que es lo que
 // son.
 const STATIC_GALLERIES: HomeViewLink[] = [
-  { href: "/prototype/hero-gallery/index.html", label: "Hero Lab", external: true },
-  { href: "/prototype/moments/index.html", label: "Statement Moments", external: true },
-  { href: "/prototype/spine-cards/index.html", label: "Spine Cards", external: true },
+  {
+    href: "/prototype/hero-gallery/index.html",
+    label: "Hero Lab",
+    blurb: "30 hero backgrounds, 6 text concepts",
+    external: true,
+  },
+  {
+    href: "/prototype/moments/index.html",
+    label: "Statement Moments",
+    blurb: "30 statement moments, contact sheet",
+    external: true,
+  },
+  {
+    href: "/prototype/spine-cards/index.html",
+    label: "Spine Cards",
+    blurb: "36 isometric card concepts",
+    external: true,
+  },
 ];
 
+// `blurb` y `stub` viajan tal cual desde el manifiesto: el primero lo declara
+// cada página en su meta, el segundo lo deriva el generador leyendo si el
+// page.tsx renderiza `StubView`. Ninguno de los dos se decide acá — este
+// archivo solo reparte y ordena.
 const ENTRIES = ROUTES.filter((r) => r.route !== "/").map((r) => ({
   group: groupOf(r.route, r.nav),
   link: {
     href: r.route,
     label: (r.nav !== false && r.nav?.label) || r.title,
+    blurb: r.blurb,
     unlinked: UNLINKED.includes(r.route),
+    empty: r.stub,
   } satisfies HomeViewLink,
 }));
 

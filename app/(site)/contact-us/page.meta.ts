@@ -10,6 +10,7 @@ const meta = {
   route: "/contact-us",
   title: "Contact Us",
   description: "Connect with the team.",
+  blurb: "Reach the team",
   nav: { header: true, footer: false, label: "Contact", order: 35 },
   sitemap: false,
   robots: "noindex",

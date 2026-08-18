@@ -4,6 +4,7 @@ const meta = {
   route: "/prototype",
   title: "Landing page prototype",
   description: "Work-in-progress landing page prototype.",
+  blurb: "Work-in-progress landing page",
   nav: false,
   sitemap: false,
   robots: "noindex",

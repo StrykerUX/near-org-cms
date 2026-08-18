@@ -10,6 +10,7 @@ const meta = {
   route: "/official-rules",
   title: "Official Rules",
   description: "Rules for NEAR promotions and campaigns.",
+  blurb: "Rules for promotions and campaigns",
   nav: { header: true, footer: false, label: "Official Rules", order: 93 },
   sitemap: false,
   robots: "noindex",

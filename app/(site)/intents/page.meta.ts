@@ -10,6 +10,7 @@ const meta = {
   route: "/intents",
   title: "Intents",
   description: "The universal liquidity layer for onchain markets.",
+  blurb: "Universal liquidity layer for markets",
   nav: { header: true, footer: false, label: "Intents", order: 11 },
   sitemap: false,
   robots: "noindex",
