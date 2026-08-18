@@ -47,6 +47,15 @@ const FPS = 24;
 // "mientras" se nota.
 const FILL = "0 #101010, 0.55 #1d3b32, 1 #00b96f";
 
+// Tinte multiplicado sobre el frame. El clip son slabs de vidrio muy claros, y
+// recortado a los glifos sobre crema el titular se quedaba en ~1.2:1 — "Own
+// your", que es el tramo más brillante del descenso, directamente no se leía.
+//
+// Un gris verdoso y no un gris neutro: el neutro apaga el verde del clip y el
+// titular queda de un gris sucio. Este mantiene el tiro de color del asset
+// mientras baja el valor a algo que el crema pueda sostener.
+const TINT = "#67766d";
+
 export default function CutoutHero() {
   return (
     <section
@@ -60,6 +69,7 @@ export default function CutoutHero() {
         poster={POSTER}
         fps={FPS}
         fill={FILL}
+        tint={TINT}
         fontScale={0.2}
       />
 

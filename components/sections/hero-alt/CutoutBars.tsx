@@ -73,9 +73,18 @@ export default function CutoutBars() {
           fill={FILL}
         />
 
+        {/* La placa detrás del texto va con los bordes DESVANECIDOS y no como
+            un rectángulo de color plano: las barras son imagen a sangre, y un
+            borde recto de crema encima se lee como una caja pegada — se ve el
+            corte horizontal cruzando las siete columnas. Con el gradiente, la
+            placa aparece sin que se pueda señalar dónde empieza. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] h-[44svh] -translate-y-1/2 bg-cream/80 backdrop-blur-[2px]"
+          className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] h-[52svh] -translate-y-1/2"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, rgba(245,244,241,0) 0%, rgba(245,244,241,0.92) 18%, rgba(245,244,241,0.92) 82%, rgba(245,244,241,0) 100%)",
+          }}
         />
 
         <Container className="relative z-[2]">

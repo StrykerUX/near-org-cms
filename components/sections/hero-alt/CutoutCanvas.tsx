@@ -49,6 +49,11 @@ export type CutoutCanvasProps = {
   fps: number;
   /** Gradiente que llena el recorte hasta que el video decodifica. */
   fill: string;
+  /**
+   * Tinte multiplicado sobre el frame, para asentar los valores claros del
+   * clip. `null` deja el video tal cual.
+   */
+  tint?: string | null;
 };
 
 // El clip de v5 es un descenso continuo de 8s. Los mismos valores de
@@ -66,6 +71,7 @@ export default function CutoutCanvas({
   poster,
   fps,
   fill,
+  tint = null,
 }: CutoutCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -94,7 +100,37 @@ export default function CutoutCanvas({
       backdrop = g;
     };
 
-    const paintMask = (w: number, h: number) => {
+    // ── La máscara, en UN canvas aparte ──────────────────────────────────
+    //
+    // Esto no es una optimización: es el único orden que funciona, y la primera
+    // versión lo tenía mal.
+    //
+    // `destination-in` es una operación de composición COMPLETA sobre el canvas
+    // — conserva el destino solo donde la fuente es opaca, y borra todo lo
+    // demás. Aplicada por cada primitiva, se encadena: el primer `fillText`
+    // recorta a "Own your", y el segundo recorta ESE RESULTADO a "world.". Como
+    // las dos líneas no se solapan, la intersección es vacía y el canvas queda
+    // transparente. En modo "bars" pasaba igual con las siete columnas.
+    //
+    // El síntoma era exactamente "el hero se ve en blanco": el respaldo y el
+    // video se pintaban bien y el recorte los borraba enteros.
+    //
+    // La máscara se arma entonces en su propio canvas, con todas sus primitivas
+    // en `source-over` —donde sí se suman— y el recorte es UN solo `drawImage`.
+    //
+    // Efecto lateral bueno: la máscara solo depende del tamaño y de la fuente,
+    // así que se construye en el resize y NO en cada frame. El texto deja de
+    // rasterizarse 60 veces por segundo.
+    const maskCanvas = document.createElement("canvas");
+    const maskCtx = maskCanvas.getContext("2d");
+
+    const buildMask = (w: number, h: number) => {
+      if (!maskCtx) return;
+      maskCanvas.width = w;
+      maskCanvas.height = h;
+      maskCtx.clearRect(0, 0, w, h);
+      maskCtx.fillStyle = "#000";
+
       if (target === "bars") {
         // Las siete columnas, con la silueta en V invertida — la misma de las
         // versiones 01 y 05, y por lo mismo: el centro despejado es donde va el
@@ -103,7 +139,7 @@ export default function CutoutCanvas({
         for (let i = 0; i < cols; i++) {
           const fromCenter = Math.abs(i - (cols - 1) / 2) / ((cols - 1) / 2);
           const barH = h * (0.16 + 0.6 * fromCenter * fromCenter);
-          ctx2d.fillRect(i * colW, h - barH, colW, barH);
+          maskCtx.fillRect(i * colW, h - barH, colW, barH);
         }
         return;
       }
@@ -113,13 +149,12 @@ export default function CutoutCanvas({
       // La familia y el peso salen del computed del host, que hereda del design
       // system. Hardcodear "Montreal" sería una segunda fuente para la
       // tipografía y caería a Helvetica en silencio el día que el DS cambie.
-      ctx2d.font = `${style.fontWeight} ${size}px ${style.fontFamily}`;
-      ctx2d.textAlign = "center";
-      ctx2d.textBaseline = "middle";
-      ctx2d.fillStyle = "#000";
+      maskCtx.font = `${style.fontWeight} ${size}px ${style.fontFamily}`;
+      maskCtx.textAlign = "center";
+      maskCtx.textBaseline = "middle";
       const lh = size * 1.05;
       const top = h / 2 - ((lines.length - 1) * lh) / 2;
-      lines.forEach((line, i) => ctx2d.fillText(line, w / 2, top + i * lh));
+      lines.forEach((line, i) => maskCtx.fillText(line, w / 2, top + i * lh));
     };
 
     const draw = () => {
@@ -141,9 +176,25 @@ export default function CutoutCanvas({
         ctx2d.drawImage(video, (w - dw) / 2, (h - dh) / 2, dw, dh);
       }
 
-      // 3 + 4 · el recorte
+      // 2b · el tinte
+      //
+      // El clip son slabs de vidrio muy claros: recortado a los glifos sobre
+      // crema, el titular queda en 1.2:1 de contraste y "Own your" —el tramo
+      // más brillante— desaparece. Este `multiply` baja los valores altos sin
+      // tocar los oscuros, así que el descenso sigue leyéndose como imagen y no
+      // como un texto teñido de un color plano.
+      //
+      // Va antes del recorte y no después: aplicado después teñiría también los
+      // bordes antialiaseados de la máscara, y el glifo quedaría con un halo.
+      if (tint) {
+        ctx2d.globalCompositeOperation = "multiply";
+        ctx2d.fillStyle = tint;
+        ctx2d.fillRect(0, 0, w, h);
+      }
+
+      // 3 + 4 · el recorte, en UNA sola operación
       ctx2d.globalCompositeOperation = "destination-in";
-      paintMask(w, h);
+      ctx2d.drawImage(maskCanvas, 0, 0);
       ctx2d.globalCompositeOperation = "source-over";
     };
 
@@ -155,6 +206,7 @@ export default function CutoutCanvas({
       canvas.width = w;
       canvas.height = h;
       buildBackdrop(h);
+      buildMask(w, h);
     };
 
     resize();
@@ -216,15 +268,20 @@ export default function CutoutCanvas({
     });
     ro.observe(host);
 
-    // El texto se remuestrea cuando llega la fuente real. Sin esto, el recorte
-    // conserva la silueta de la fuente de sistema hasta el próximo resize.
-    document.fonts.ready.then(draw);
+    // La máscara se remuestrea cuando llega la fuente real. `draw()` solo no
+    // alcanza: la máscara es una imagen ya rasterizada, así que redibujar sin
+    // reconstruirla conserva la silueta de la fuente de sistema hasta el
+    // próximo resize.
+    document.fonts.ready.then(() => {
+      buildMask(canvas.width, canvas.height);
+      draw();
+    });
 
     return () => {
       ro.disconnect();
       ctx.revert();
     };
-  }, [lines, target, fontScale, cols, src, poster, fps, fill]);
+  }, [lines, target, fontScale, cols, src, poster, fps, fill, tint]);
 
   return (
     <div ref={hostRef} aria-hidden="true" className="pointer-events-none absolute inset-0">

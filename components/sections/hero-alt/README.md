@@ -118,6 +118,32 @@ donde bajar la resolución casi no se ve, porque el borde de los glifos ya está
 distorsionado a propósito) y el `lead` del gate de viewport de 1 a 0.35, para
 que las dos instancias pasen menos tiempo dibujando a la vez.
 
+### 06 · Cutout se veía en blanco: `destination-in` se encadena
+
+El recorte al texto borraba el canvas entero. La causa no es el recorte sino
+**cuántas veces se aplica**: `destination-in` es una operación de composición
+completa sobre el canvas —conserva el destino donde la fuente es opaca y borra
+todo lo demás— así que aplicarla por primitiva la encadena.
+
+El primer `fillText` recortaba a `"Own your"`; el segundo recortaba **ese
+resultado** a `"world."`. Como las dos líneas no se solapan, la intersección es
+vacía. En modo `bars` pasaba igual con las siete columnas.
+
+Verificado en el navegador, no deducido: tras el respaldo el canvas tenía 53.444
+píxeles opacos de 53.443 muestreados; tras la máscara, **0**.
+
+La máscara se arma ahora en su propio canvas, con todas sus primitivas en
+`source-over` —donde sí se suman— y el recorte es UN solo `drawImage`. Efecto
+lateral bueno: la máscara solo depende del tamaño y de la fuente, así que se
+construye en el resize y no en cada frame; el texto dejó de rasterizarse 60
+veces por segundo.
+
+Después hizo falta un segundo arreglo, de diseño y no de mecanismo: el clip son
+slabs de vidrio muy claros, y recortado a los glifos sobre crema el titular
+quedaba en ~1.2:1 — `"Own your"`, el tramo más brillante del descenso, no se
+leía. Se resuelve con un `multiply` de un gris verdoso ANTES del recorte
+(después teñiría los bordes antialiaseados y dejaría halo).
+
 ### 05 · Lattice se veía vacía: dos fallos que se tapaban
 
 1. **El gesto no ocurría.** El colapso iba atado al scroll con
@@ -133,6 +159,17 @@ La regla general que dejan las dos: **un hero no puede atar su entrada al
 scroll.** Quien llega no ha tocado la rueda todavía, así que un gesto conducido
 por scroll no existe para él. Entrada por timeline, salida por scroll — es lo
 que hacen las seis ahora.
+
+## Esta página no lleva footer
+
+`/prototype/hero-alt` es la única ruta de prototipo sin footer. El del sitio es
+un takeover —wipe negro a pantalla completa con el wordmark, con su propio
+ScrollTrigger— y al final de una página que monta seis heroes se lee como una
+séptima escena, compitiendo con lo que la página existe para mostrar.
+
+Se resuelve en `components/site/PrototypeFooterSlot.tsx`, con la lista de rutas
+excluidas y el porqué de que sea una lista y no route groups. El header sí se
+queda: es lo que las seis versiones despejan con `--site-header-block`.
 
 ## Apilarlas tiene un costo
 

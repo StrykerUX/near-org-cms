@@ -1,5 +1,5 @@
+import PrototypeFooterSlot from "@/components/site/PrototypeFooterSlot";
 import ReviewWidget from "@/components/site/ReviewWidget";
-import SiteFooter from "@/components/site/SiteFooter";
 import SiteHeader from "@/components/site/SiteHeader";
 
 // Este layout monta las piezas de chrome que van sobre TODAS las páginas de
@@ -23,12 +23,19 @@ import SiteHeader from "@/components/site/SiteHeader";
 // Que el footer quede sin provider en `/prototype` y `/prototype/components`
 // tampoco lo afecta: su ScrollTrigger no depende de Lenis, y las mediciones que
 // necesita las rehace por su cuenta (ver el ResizeObserver de `SiteFooter`).
+//
+// El footer NO se monta directo: pasa por `PrototypeFooterSlot`, que lo omite
+// en las rutas que no lo llevan (hoy, solo el lab de heroes). Ver ahí el porqué
+// y cuándo conviene cambiar el enfoque por route groups.
 export default function PrototypeLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SiteHeader />
       {children}
-      <SiteFooter />
+      {/* El footer va por un slot y no directo: hay rutas de prototipo que no
+          lo llevan, y un layout hijo no puede quitar lo que este pone. La lista
+          y el razonamiento están en `PrototypeFooterSlot`. */}
+      <PrototypeFooterSlot />
       <ReviewWidget />
     </>
   );
