@@ -1,128 +1,124 @@
-# `proof-alt/` — diez versiones de la sección de pruebas
+# `proof-alt/` — tres versiones de la sección de pruebas
 
 Alimenta **una sola ruta**: `/prototype/proof-alt`. No la importa ninguna
 página real, y eso es el punto.
 
 ## De dónde viene
 
-De un problema concreto: el `ProofStepper` de `/prototype/homepage-ab7` gasta
-**325svh** de recorrido —cinco pasos de 45svh más un viewport pegado— para
-entregar cinco datos, y el lector pasa dos pantallas y media de rueda sin que
-la página avance.
+El `ProofStepper` de `/prototype/homepage-ab7` gasta **325svh** —cinco pasos de
+45svh más un viewport pegado— para entregar cinco datos, y el lector pasa dos
+pantallas y media de rueda sin que la página avance.
 
-Las diez versiones atacan eso. **Nueve caben en 100svh o 150svh.** La única que
-consume recorrido de verdad es la 05, y está para tener contra qué medir el
-ahorro: sin una versión cara, "esta es barata" no significa nada.
+**Hubo una primera ronda de diez versiones** (tablero Solari, dial, carril
+horizontal, plotter en canvas, cartas hojeables…). Está en el commit `b145ca6`
+y se borró a propósito: siete de las diez escondían cinco de las seis pruebas
+detrás de un gesto. Una sección de homepage tiene que entregar las seis sin que
+nadie toque nada, y ese requisito mató a la mayoría del catálogo de golpe.
 
-## Los datos NO son los del stepper
+## Las reglas, que ya no se discuten
 
-El stepper de ab7 monta `PROOF_STEPS` (cinco pasos: 1M+ wallets, $20B settled,
-100% uptime, 0 quantum exposure, TEE). Este laboratorio monta **otros seis
-datos**, los de la grilla 3×2 del rediseño, y viven en
-[`proofAltContent.ts`](./proofAltContent.ts):
+Las tres versiones que quedan cumplen todas:
 
-| | cifra | rótulo |
-|---|---|---|
-| 01 | 100% uptime | Built to last |
-| 02 | 1 Million TPS | Built to scale |
-| 03 | $24+ Billion | Built to connect |
-| 04 | 30+ Blockchains | Built to reach |
-| 05 | Quantum-ready | Built to resist |
-| 06 | Confidential | Built to privacy |
+1. **Las seis cifras visibles a la vez, desde el primer frame.** Nada se revela
+   al pasar el puntero. El hover puede añadir, nunca descubrir.
+2. **Light mode.** La sección entra después del negro de NEAR Stack y entrega
+   al stone de la newsletter: el blanco puro (`bg-background`) es el corte más
+   limpio que tiene la página en ese punto.
+3. **El cuerpo completo de las seis**, sin recortar. Los datos siguen
+   argumentando; no se convierten en un cartel.
+4. **100svh de alto y cero recorrido extra**, incluida la que va por scroll.
 
-Las diez versiones montan **exactamente los mismos seis**. Si cada una trajera
-su copy, la comparación mediría dos cosas a la vez.
+## La composición es una sola
 
-### Dos detalles del modelo de datos que conviene no "arreglar"
+`ProofComposition.tsx` — seis bloques (rótulo · cifra · regla · cuerpo)
+repartidos en doce columnas **sin alinearse entre sí**, y dos de las seis a
+escala de `h1` contra las otras cuatro a `h2`.
 
-**La cifra viene partida en `value` + `accent`, y el corte es óptico.** En dos
-de los seis cae a mitad de palabra (`Confi` + `dential`). Sale de la
-referencia: lo que la grilla hace es teñir el final del renglón, no separar
-dato de unidad. Renombrarlos a `number`/`unit` prometería una semántica que
-estos datos no tienen.
+Es un solo componente y no tres copias por el mismo motivo que los "motores" de
+`hero-alt`: lo que se compara entre las versiones es el MECANISMO. Con tres
+markups parecidos, la comparación mediría también las diferencias de
+maquetación que se colaran sin querer.
 
-**`count` es `null` en dos de los seis.** "Quantum-ready" y "Confidential" no
-son números y no se les inventa uno para que las seis se comporten igual. Cada
-versión que quiera contadores tiene que decidir a mano qué hace con esas dos —
-y esa decisión es parte de lo que se está evaluando. La 01 las revela con
-máscara; la 04 no cuenta nada.
+Dos decisiones que viven ahí y conviene no deshacer:
 
-## Las diez
+- **Por qué asimétrica.** Una grilla 3×2 regular se lee como tabla: el ojo la
+  barre en zeta, encuentra seis datos equivalentes y sigue. Que las cifras
+  arranquen a distinta altura y midan distinto obliga a recorrerla y dice cuál
+  importa más.
+- **El layout es un mapa literal de clases**, nunca un template string:
+  Tailwind v4 no detecta clases construidas en tiempo de ejecución y las purga.
+  Todas llevan prefijo `lg:` — por debajo de 1024px la composición es una
+  columna, y eso no es una degradación: en un móvil no hay doce columnas que
+  repartir.
 
-| # | Versión | Técnica | Recorrido | La apuesta |
-|---|---|---|---|---|
-| 01 | `LedgerGrid` | CSS + GSAP | 100svh | La grilla de la referencia tal cual. Las reglas se trazan, los dígitos aterrizan girando. **Es la línea base**: si una versión con shader no gana contra esto, no vale lo que cuesta |
-| 02 | `TickerTape` | DOM + GSAP | 100svh | Cinta infinita que **no avanza con el reloj**: avanza con la velocidad del scroll y desacelera sola. El hover la frena y abre el cuerpo |
-| 03 | `SolariBoard` | DOM + GSAP | 100svh | Tablero de estación: una cifra a la vez, lamas girando. Cambia la pregunta — ¿son una TABLA o seis TITULARES? |
-| 04 | `DialRings` | SVG animado | 100svh | Seis anillos y una aguja. Lo conduce el **ángulo del puntero**, así que se recorre en el sitio |
-| 05 | `RailScroller` | DOM + GSAP · sticky | **200svh** | El scroll vertical se vuelve recorrido horizontal. El caro, a propósito |
-| 06 | `PlotterTrace` | Canvas 2D | 100svh | Registrador de aguja: a la izquierda el papel está escrito, a la derecha todavía no. El puntero **escribe** la traza |
-| 07 | `PrismField` | WebGL2 · shader propio | 100svh | La misma grilla sobre un campo de interferencia: las celdas se enteran unas de otras |
-| 08 | `DeckStack` | DOM + GSAP · drag | 100svh | Cartas que se hojean. El scroll no participa |
-| 09 | `BentoMosaic` | CSS grid + GSAP | 100svh | Se anima **la grilla**, no los elementos: la celda apuntada se lleva el espacio de las otras |
-| 10 | `VersoParagraph` | SplitText + GSAP · sticky | 150svh | Las cifras entran como prosa y se van archivando a la derecha. La única con sintaxis |
+## Las tres
 
-## Las tres comparaciones que el lab existe para responder
+| # | Versión | Técnica | De dónde sale el movimiento |
+|---|---|---|---|
+| 01 | `CadenceStack` | DOM + GSAP | De la **entrada**: un frente en diagonal revela los seis bloques al aparecer en cuadro, y después la sección no se mueve nunca más |
+| 02 | `HaloField` | WebGL2 · shader propio | De una **capa de fondo**: curvas de nivel en gris casi blanco que derivan muy despacio. Es la 01 más esa capa, y nada más |
+| 03 | `StaircaseDrift` | DOM + GSAP · scroll | Del **scroll**: los seis bloques van escalonados mientras la sección entra y se enderezan justo cuando queda centrada |
 
-1. **01 vs 07 vs 09** — la misma grilla 3×2 tres veces: quieta, con un shader
-   detrás, y con el layout animado. Aísla exactamente cuánto aporta cada capa
-   de mecanismo sobre la misma estructura.
-2. **04 vs 05** — recorrer en el sitio (ángulo del puntero) contra recorrer
-   scrolleando. Mismo contenido, la diferencia entera es quién gasta el
-   recorrido.
-3. **03 y 08 vs todas** — una cifra a la vez contra las seis a la vez. La 08
-   además pide un gesto: **nadie está obligado a tocarla**, y quien pasa
-   scrolleando ve una de seis. Eso es un riesgo real, no un detalle.
+La 01 y la 02 comparten la entrada (`diagonalReveal.ts`), no una parecida: la
+02 es la 01 con una capa encima, y lo que se compara entre ellas es esa capa.
 
-## Reglas del repo que estas diez cumplen
+### Detalles que cuestan de descubrir
 
-- **Sección pegada = `position: sticky`, nunca `pin: true`.** Las dos con track
-  (05 y 10) declaran su alto en CSS y su ScrollTrigger solo LEE el progreso. El
-  razonamiento largo está en [`../README.md`](../README.md).
-- **El atributo de escena lo escribe el efecto, nunca el JSX.** Las siete que
-  encienden un layout superpuesto usan `enableScene`. Declarado también en el
-  markup, el primer re-render lo devolvería a "off" y el layout se desarmaría
-  sin dar ningún error.
-- **Tipografía: solo tokens de la escala.** Verificado con `pnpm
-  lint:typography`.
-- **Canvas** (06 y 07): buffer con `deviceRatio()`, `onViewportToggle` para no
-  dibujar fuera de vista, y `gsap.ticker` — nunca un `requestAnimationFrame`
-  propio.
-- **Nada de estado de React para lo que anima.** Cuatro versiones (03, 04, 06,
-  08) manejan su índice activo dentro del efecto: con `useState`, cada paso
-  re-renderizaría la sección y `useMotionScope` reconstruiría la escena entera.
-  La 02 sí usa estado, y solo para el párrafo que cambia de CONTENIDO.
+**01 — el orden de entrada es la diagonal, no el DOM.** Los bloques se ordenan
+por `left + top × 1.6` de su caja, medido dentro del efecto. Con el orden del
+DOM, el bloque de arriba a la derecha entra antes que el que tiene a su
+izquierda y el frente se ve roto. El peso extra en `top` evita que en un
+monitor muy ancho la diferencia horizontal domine y el frente salga vertical.
+
+**02 — el fondo no puede pedir atención, y eso es un número.** Las líneas van a
+`#ECEAE4` sobre blanco: ~4% de contraste, y el campo se desvanece contra el
+borde superior e inferior para que el blanco de la sección y el de la página
+sean el mismo blanco. La deriva es de 0.014 unidades por segundo — si se ve
+moverse, está mal calibrado. Lo que aporta no es movimiento, es profundidad: un
+blanco liso de 100svh entre una sección negra y una gris se lee como un hueco.
+
+**02 — el shader es el único GLSL ES 3.00 del repo.** Las curvas de nivel
+necesitan `fwidth()` para tener ancho constante en píxeles, y en ES 1.00 eso
+vive tras `GL_OES_standard_derivatives`, una extensión de WebGL1 que en un
+contexto WebGL2 **no existe**. El detalle completo está en la cabecera de
+`shaders/haloField.ts`, con el mensaje de error exacto.
+
+**02 — el canvas se esconde en cualquier fallo.** El contexto se pide con
+`alpha: false`, así que un canvas montado y sin pintar es un rectángulo NEGRO a
+pantalla completa. Escondiéndolo, lo que queda es el `bg-background` de la
+sección, o sea exactamente la versión 01: **la degradación de la 02 es la otra
+propuesta**, lo cual dice bastante sobre cuánto aporta la capa.
+
+**03 — cómo va por scroll sin costar scroll.** El recorrido no es un track: es
+el paso natural de la sección por el viewport (`top bottom` → `bottom top`,
+solo lectura, sin `pin` y sin altura declarada). Un pin o un track de 200svh
+insertan altura y obligan a gastar rueda sin avanzar, que es la queja que abrió
+todo esto. El desfase de cada bloque vale su máximo cuando la sección entra,
+cero cuando queda centrada, y el máximo con el signo cambiado cuando sale: la
+composición está escalonada mientras pasa y se endereza justo cuando se lee.
 
 ## Degradación
 
-Las diez se leen enteras sin JS y con `prefers-reduced-motion`. No es un
-adorno: es lo que hace que el layout superpuesto viva en un atributo y no en
-una clase.
-
 | | sin JS / reduced-motion |
 |---|---|
-| 01 | la grilla completa, sin trazado ni giro |
-| 02 | la cinta quieta en su posición inicial; el hover sigue abriendo cuerpos |
-| 03 | las seis fichas apiladas en flujo normal, tablero en blanco |
-| 04 | los anillos dibujados y la primera ficha; la lista de seis botones sigue funcionando |
-| 05 | los seis paneles en columna, sin carril |
-| 06 | el papel escrito ENTERO y quieto, primera ficha abierta |
-| 07 | un frame del campo en reposo (o el fondo sólido sin WebGL2) |
-| 08 | las seis cartas desplegadas en columna |
-| 09 | la grilla en reposo con los seis cuerpos visibles |
-| 10 | el párrafo entero y la columna completa, a la vez |
+| 01 | la composición completa y quieta. Los `from()` de GSAP son lo único que la escondía |
+| 02 | igual, más un frame del campo quieto (o blanco liso sin WebGL2) |
+| 03 | igual, sin desfase ni trazado — en móvil tampoco hay escalera que resolver |
+
+Ninguna esconde nada en ningún punto de su recorrido. Es la consecuencia
+directa de la regla 1, y es lo que hace que las tres sirvan para una homepage.
 
 ## Si una versión gana
 
-Se copia a `components/sections/home-ab7/` (o a la carpeta de la homepage que
-la reciba) y se monta ahí, reemplazando a `ProofStepper`. **No se importa desde
-`proof-alt/`**: esta carpeta es un laboratorio y su contenido puede cambiar o
-borrarse sin aviso — una página real que dependiera de ella la congelaría.
+Se copia a `components/sections/home-ab7/` y se monta ahí reemplazando a
+`ProofStepper`. **No se importa desde `proof-alt/`**: esta carpeta es un
+laboratorio y su contenido puede cambiar o borrarse sin aviso — ya pasó una vez
+con las diez de la primera ronda.
 
 Al hacerlo hay que decidir dos cosas que el lab deja abiertas a propósito:
 
 1. **Los datos.** Acá viven en `proofAltContent.ts`; en la homepage tienen que
-   salir de la carpeta de esa página (`homeAb7Content.ts` o su equivalente).
-2. **`ProofStepper` y sus cinco datos viejos.** Los seis de acá NO son los
-   cinco de allá. Reemplazar la sección es también reemplazar el contenido, y
-   eso es una decisión de la página, no del componente.
+   salir de la carpeta de esa página (`homeAb7Content.ts`).
+2. **Los cinco datos viejos.** `PROOF_STEPS` tiene otras cifras (1M+ wallets,
+   $20B settled, 0 quantum exposure…). Reemplazar la sección es también
+   reemplazar el contenido, y eso es una decisión de la página.

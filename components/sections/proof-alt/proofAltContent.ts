@@ -110,101 +110,56 @@ export type ProofSpec = {
   readonly index: string;
   readonly title: string;
   readonly stack: string;
-  /** Cuánto scroll consume, en palabras del lector: "100svh · sin sticky". */
+  /** Cuánto scroll consume, en palabras del lector. */
   readonly travel: string;
   /** Qué hace la versión y qué mirar. */
   readonly pitch: string;
 };
 
+// ── La segunda ronda ────────────────────────────────────────────────────────
+//
+// La primera fueron diez versiones que barrían todo el espacio de soluciones
+// (tablero Solari, dial, carril horizontal, plotter, cartas hojeables…). Viven
+// en el commit `b145ca6` y **se borraron a propósito**: siete de las diez
+// escondían cinco de las seis pruebas detrás de un gesto, y esta sección tiene
+// que entregar las seis SIN que nadie toque nada.
+//
+// Las tres que quedan comparten esas reglas, que ya no se discuten:
+//
+//   · las seis cifras visibles a la vez, desde el primer frame;
+//   · nada depende del puntero — el hover puede AÑADIR, nunca revelar;
+//   · light mode: entra después del negro de NEAR Stack y entrega al stone de
+//     la newsletter, así que el blanco es el contraste de la página;
+//   · el cuerpo completo de las seis, sin recortar;
+//   · 100svh de alto y CERO recorrido extra, incluida la 03.
+//
+// Lo único que cambia entre las tres es DE DÓNDE sale el movimiento.
 export const PROOF_ALTS: readonly ProofSpec[] = [
   {
-    id: "ledger",
+    id: "cadence",
     index: "01",
-    title: "Ledger",
-    stack: "CSS + GSAP",
-    travel: "100svh · sin sticky",
+    title: "Cadence",
+    stack: "DOM + GSAP",
+    travel: "100svh · entra y se queda quieta",
     pitch:
-      "La grilla de la referencia, dibujada: las reglas punteadas se trazan de un extremo al otro y los dígitos aterrizan girando, como un odómetro. Las dos cifras SIN dígitos se revelan con máscara — la asimetría de los datos queda a la vista en vez de disimularse.",
+      "Composición asimétrica en doce columnas: las seis cifras no alinean entre sí y dos de ellas mandan sobre las otras cuatro. Al entrar en cuadro se revelan en diagonal, con las reglas trazándose bajo cada una; después la sección no se mueve nunca más.",
   },
   {
-    id: "ticker",
+    id: "halo",
     index: "02",
-    title: "Ticker",
-    stack: "DOM + GSAP",
-    travel: "100svh · sin sticky",
-    pitch:
-      "Una cinta horizontal infinita con las seis cifras. No avanza con el reloj: avanza con la VELOCIDAD del scroll de la página, y se frena sola cuando el lector suelta. El hover detiene la cinta y abre el cuerpo de esa cifra.",
-  },
-  {
-    id: "solari",
-    index: "03",
-    title: "Solari",
-    stack: "DOM + GSAP",
-    travel: "100svh · sin sticky",
-    pitch:
-      "Un tablero de aeropuerto: un solo dato en pantalla y los caracteres girando hasta la cifra siguiente. Ciclo automático con pausa al hover, y seis teclas para saltar a mano.",
-  },
-  {
-    id: "dial",
-    index: "04",
-    title: "Dial",
-    stack: "SVG animado",
-    travel: "100svh · sin sticky",
-    pitch:
-      "Seis arcos concéntricos que se dibujan al entrar. Cada arco es una prueba; el que está activo se ilumina y su cifra ocupa el centro. Se recorre con el puntero, no con el scroll.",
-  },
-  {
-    id: "rail",
-    index: "05",
-    title: "Rail",
-    stack: "DOM + GSAP · sticky",
-    travel: "200svh · horizontal",
-    pitch:
-      "Lo contrario de todos los demás: el scroll vertical se convierte en recorrido HORIZONTAL y las seis pruebas pasan de lado. Es el único que consume recorrido de verdad, y está para tener con qué comparar.",
-  },
-  {
-    id: "plotter",
-    index: "06",
-    title: "Plotter",
-    stack: "Canvas 2D",
-    travel: "100svh · sin sticky",
-    pitch:
-      "Un registrador de aguja: una traza recorre el ancho de la sección y marca seis hitos. La aguja sigue al puntero; el hito bajo la aguja levanta su ficha.",
-  },
-  {
-    id: "prism",
-    index: "07",
-    title: "Prism",
+    title: "Halo",
     stack: "WebGL2 · shader propio",
-    travel: "100svh · sin sticky",
+    travel: "100svh · una capa de fondo que respira",
     pitch:
-      "La grilla sobre un campo de interferencia. El shader no anima solo: cada celda que el puntero toca inyecta energía en SU región y el campo la propaga a las vecinas.",
+      "La misma composición, sobre un campo de curvas de nivel en gris casi blanco que deriva muy despacio. El fondo no compite: nunca pasa de un 4% de contraste, y lo que hace es dar profundidad a un blanco que si no sería plano.",
   },
   {
-    id: "deck",
-    index: "08",
-    title: "Deck",
-    stack: "DOM + GSAP · drag",
-    travel: "100svh · sin sticky",
+    id: "staircase",
+    index: "03",
+    title: "Staircase",
+    stack: "DOM + GSAP · scroll",
+    travel: "100svh · cero recorrido extra",
     pitch:
-      "Seis cartas apiladas que se hojean con el puntero: arrastrar o hacer clic manda la de arriba al fondo. El scroll no participa — es una sección con la que se JUEGA.",
-  },
-  {
-    id: "bento",
-    index: "09",
-    title: "Bento",
-    stack: "CSS grid + GSAP",
-    travel: "100svh · sin sticky",
-    pitch:
-      "Mosaico asimétrico: las seis cifras conviven con pesos distintos y la celda enfocada se expande empujando a las demás. La animación es del LAYOUT, no de los elementos.",
-  },
-  {
-    id: "verso",
-    index: "10",
-    title: "Verso",
-    stack: "SplitText + GSAP · sticky",
-    travel: "150svh · sticky corto",
-    pitch:
-      "Un párrafo editorial con las seis cifras adentro. Al avanzar, cada cifra se desprende del párrafo y se archiva en la columna de la derecha; al final el párrafo queda hueco y la columna llena.",
+      "Las seis arrancan escalonadas en una diagonal pronunciada y el scroll las ENDEREZA mientras la sección cruza el viewport. Conducida por scroll sin gastar un solo píxel de más: no hay sticky ni track, el recorrido es el paso natural de la sección por la pantalla.",
   },
 ];
