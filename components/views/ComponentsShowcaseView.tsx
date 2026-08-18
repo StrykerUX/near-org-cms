@@ -41,11 +41,11 @@ export default function ComponentsShowcaseView() {
         <h2 className="text-h2 font-medium text-pretty">Accent</h2>
         <p className="text-body text-foreground max-w-2xl text-pretty">
           The Montreal + Kepler mix, as its own component instead of a
-          hand-copied <code className="font-mono text-body-sm">{"<span>"}</code>{" "}
-          every time. <code className="font-mono text-body-sm">display</code>{" "}
+          hand-copied <code className="text-body-sm-mono">{"<span>"}</code>{" "}
+          every time. <code className="text-body-sm-mono">display</code>{" "}
           switches between the{" "}
-          <code className="font-mono text-body-sm">font-serif</code> (H2–H4)
-          and <code className="font-mono text-body-sm">font-display</code>{" "}
+          <code className="text-body-sm-mono">font-serif</code> (H2–H4)
+          and <code className="text-body-sm-mono">font-display</code>{" "}
           (Display/H1) optical size.
         </p>
         <div className="flex flex-col gap-4">
@@ -68,13 +68,13 @@ export default function ComponentsShowcaseView() {
         <h2 className="text-h2 font-medium text-pretty">Button</h2>
         <p className="text-body text-foreground max-w-2xl text-pretty">
           A rounded pill, always.{" "}
-          <code className="font-mono text-body-sm">variant=&quot;light&quot;</code>{" "}
+          <code className="text-body-sm-mono">variant=&quot;light&quot;</code>{" "}
           for use on a dark section,{" "}
-          <code className="font-mono text-body-sm">variant=&quot;dark&quot;</code>{" "}
+          <code className="text-body-sm-mono">variant=&quot;dark&quot;</code>{" "}
           for use on a light one — renders an{" "}
-          <code className="font-mono text-body-sm">{"<a>"}</code> when{" "}
-          <code className="font-mono text-body-sm">href</code> is given, a{" "}
-          <code className="font-mono text-body-sm">{"<button>"}</code>{" "}
+          <code className="text-body-sm-mono">{"<a>"}</code> when{" "}
+          <code className="text-body-sm-mono">href</code> is given, a{" "}
+          <code className="text-body-sm-mono">{"<button>"}</code>{" "}
           otherwise.
         </p>
         <div className="flex flex-wrap items-center gap-4 rounded-xl bg-secondary p-8">
@@ -99,7 +99,7 @@ export default function ComponentsShowcaseView() {
         <h2 className="text-h2 font-medium text-pretty">Eyebrow</h2>
         <p className="text-body text-foreground max-w-2xl text-pretty">
           The uppercase kicker label. Enforces the type contract (
-          <code className="font-mono text-body-sm">text-eyebrow uppercase</code>
+          <code className="text-body-sm-mono">text-eyebrow uppercase</code>
           ) and lets the color come from context — it&rsquo;s the same
           component on a dark panel or a light one.
         </p>
@@ -121,20 +121,20 @@ export default function ComponentsShowcaseView() {
         <h2 className="text-h2 font-medium text-pretty">Container</h2>
         <p className="text-body text-foreground max-w-2xl text-pretty">
           The page gutter:{" "}
-          <code className="font-mono text-body-sm">max-w-[1780px]</code> +{" "}
-          <code className="font-mono text-body-sm">px-[60px]</code> +{" "}
-          <code className="font-mono text-body-sm">mx-auto</code>, on every
+          <code className="text-body-sm-mono">max-w-[1780px]</code> +{" "}
+          <code className="text-body-sm-mono">px-[60px]</code> +{" "}
+          <code className="text-body-sm-mono">mx-auto</code>, on every
           section in the prototype.{" "}
-          <code className="font-mono text-body-sm">as</code> picks the
-          rendered tag (<code className="font-mono text-body-sm">div</code>{" "}
+          <code className="text-body-sm-mono">as</code> picks the
+          rendered tag (<code className="text-body-sm-mono">div</code>{" "}
           by default,{" "}
-          <code className="font-mono text-body-sm">nav</code>/
-          <code className="font-mono text-body-sm">section</code> when the
+          <code className="text-body-sm-mono">nav</code>/
+          <code className="text-body-sm-mono">section</code> when the
           landmark matters) so the gutter never costs you semantics.{" "}
-          <code className="font-mono text-body-sm">width</code> switches the
-          scale: <code className="font-mono text-body-sm">&quot;site&quot;</code>{" "}
+          <code className="text-body-sm-mono">width</code> switches the
+          scale: <code className="text-body-sm-mono">&quot;site&quot;</code>{" "}
           (default, this page) or{" "}
-          <code className="font-mono text-body-sm">&quot;wide&quot;</code> (the
+          <code className="text-body-sm-mono">&quot;wide&quot;</code> (the
           blog listing pages).
         </p>
         <div className="rounded-xl border border-dashed border-border bg-muted py-6">

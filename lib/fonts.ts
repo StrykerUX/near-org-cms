@@ -64,6 +64,39 @@ export const montreal = localFont({
   display: "swap",
 });
 
+// ── PP Neue Montreal Mono, la monoespaciada ───────────────────────────────────
+// Antes `--font-mono` no apuntaba a ninguna fuente propia: caía en
+// `ui-monospace, Menlo` del sistema, así que los eyebrows, las fechas y los tags
+// del blog rendían distinto en macOS, Windows y Linux. Los originales ya estaban
+// en el repo desde el fork, sin usar.
+//
+// Solo DOS faces, contra las cuatro de la sans. Casi todos los usos de
+// `font-mono` van en peso normal; los que no, se combinan con `text-eyebrow`,
+// que es weight 500. Sin esa segunda face el navegador sintetiza el peso, y en
+// una monoespaciada eso se nota más que en una proporcional porque engorda el
+// trazo sin poder ensanchar el avance. Itálicas no van: no hay un solo uso.
+//
+// Ojo con lo de abajo si se compara con la sans: acá va `Regular`, no `Book`.
+// No es una inconsistencia — es que en esta familia el 400 nominal existe de
+// verdad, así que no hay por qué repetir el 350-declarado-400 de la sans.
+// "Corregirlo" a Book por simetría daría un mono más liviano que su propio peso.
+export const montrealMono = localFont({
+  src: [
+    {
+      path: "../assets/fonts/montreal-mono/PPNeueMontrealMono-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/montreal-mono/PPNeueMontrealMono-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+  variable: "--font-montreal-mono",
+  display: "swap",
+});
+
 // ── Kepler Std, la serif de acento ─────────────────────────────────────────────
 // Antes venía de un kit de Typekit cargado con un <link> en el <head>, que la
 // servía con `font-display: auto` — o sea bloqueando el paint hasta ~3s, y con un
@@ -71,11 +104,24 @@ export const montreal = localFont({
 // siquiera empezar a bajar. Acá next/font emite el @font-face inline y el
 // <link rel="preload"> solo.
 //
-// Va CONDENSED en todos sus usos. Kepler Std trae condensed solo en Display y
-// Subhead —no existe un master de texto condensado—, así que `--font-kepler`
-// usa Condensed Subhead. No es un parche por falta de opción: alimenta escalas
-// de 34 a 88px, y el master de texto está dibujado para 9–13pt mientras Subhead
-// lo está para ~14–24pt. Es mejor encaje del que había.
+// `--font-kepler` usa el master SUBHEAD, no el de texto. No es un parche por
+// falta de opción: alimenta escalas de 34 a 88px, y el master de texto está
+// dibujado para 9–13pt mientras Subhead lo está para ~14–24pt.
+//
+// ── Ancho normal, no condensed ───────────────────────────────────────────────
+// Fueron condensed hasta acá, heredado del kit de Typekit. El problema es que
+// `--text-serif--optical-scale` compensa ALTURA y no ancho, y las condensed son
+// ~25% más angostas: el acento quedaba con la x-height correcta de Montreal y el
+// ancho de otra fuente, o sea legible como "más chico" al lado de la sans.
+//
+//                       x-height   avance    con ×1.18
+//     Montreal             510       520         —
+//     Kepler CnItSubh      433       360        425   (−18% vs la sans)
+//     Kepler ItSubh        433       450        531   (+2%)
+//
+// Subir la escala no lo arreglaba: igualar el avance del condensed pedía 1.44, y
+// ahí la x-height se iba 22% por encima de la de Montreal. La palanca era el
+// master, no el tamaño. Ver el perfil en scripts/fonts/build-webfonts.py.
 //
 // Dos familias y no una porque los masters ópticos son dibujos distintos, no
 // dos tamaños del mismo. Cuál usa cada escala lo decide `--font-serif` /
@@ -108,12 +154,12 @@ export const montreal = localFont({
 export const kepler = localFont({
   src: [
     {
-      path: "../assets/fonts/kepler/KeplerStd-CnSubh.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-Subh.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../assets/fonts/kepler/KeplerStd-CnItSubh.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-ItSubh.woff2",
       weight: "400",
       style: "italic",
     },
@@ -131,12 +177,12 @@ export const kepler = localFont({
 export const keplerDisplay = localFont({
   src: [
     {
-      path: "../assets/fonts/kepler/KeplerStd-CnDisp.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-Disp.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../assets/fonts/kepler/KeplerStd-CnItDisp.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-ItDisp.woff2",
       weight: "400",
       style: "italic",
     },

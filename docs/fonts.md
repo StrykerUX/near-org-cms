@@ -5,11 +5,11 @@
 | Token del DS | Familia | Faces |
 |---|---|---|
 | `--font-sans` | PP Neue Montreal | Book (400), BookItalic, Medium (500), Bold (700) |
-| `--font-serif` | Kepler Std **Condensed Subhead** | CnSubh (400), CnItSubh |
-| `--font-display` | Kepler Std **Condensed Display** | CnDisp (400), CnItDisp |
-| `--font-mono` | *ninguna* | Cae en `ui-monospace, Menlo` del sistema |
+| `--font-serif` | Kepler Std **Subhead** | Subh (400), ItSubh |
+| `--font-display` | Kepler Std **Display** | Disp (400), ItDisp |
+| `--font-mono` | PP Neue Montreal Mono | Regular (400), Medium (500) |
 
-Las tres primeras se registran con `next/font/local` en `lib/fonts.ts`, leyendo
+Las cuatro se registran con `next/font/local` en `lib/fonts.ts`, leyendo
 de `assets/fonts/<familia>/`. Sus CSS vars se exponen en el `className` del
 `<html>` en `app/layout.tsx` y `app/globals.css` las consume en el `@theme
 inline`.
@@ -20,41 +20,54 @@ Kepler tiene dos masters registrados porque los masters ópticos son dibujos
 distintos, no dos tamaños del mismo. Qué escala usa cuál lo deciden las
 `@utility text-*-serif` / `accent-*` de `app/globals.css`.
 
-**Kepler Std trae condensed solo en Display y Subhead.** No existe
-`KeplerStd-Cn` (texto) ni `CnCapt`, y el kit de Typekit que esto reemplazó
-tampoco los tenía: servía `kepler-std-condensed-display` y
-`kepler-std-condensed-subhead`, nada más. Así que `--font-serif` no puede seguir
-en el master de texto.
+`--font-serif` alimenta `text-h1-serif` (44–88px), `text-h2-serif` (34–60px) y
+`accent-serif` (1.18em de un heading). El master de texto está dibujado para
+9–13pt — estaba mal usado. Subhead lo está para ~14–24pt.
 
-Y no hace falta que siga: alimenta `text-h1-serif` (44–88px), `text-h2-serif`
-(34–60px) y `accent-serif` (1.18em de un heading). El master de texto está
-dibujado para 9–13pt — estaba mal usado. Subhead lo está para ~14–24pt.
+### Por qué NO son las condensed
 
-Si alguna vez hace falta un Kepler condensado *para texto corrido*, no existe;
-lo más cerca es semicondensed, que sí tiene master de texto (`KeplerStd-Scn`,
-minúsculas a 435 milésimas de em contra 357 de la condensed).
+Lo fueron hasta que se midió el desbalance que el equipo de diseño venía
+reportando: el acento itálico se leía **más chico** que la sans que lo rodea.
 
-### Métricas, para lo que sí cambia y lo que no
-
-Todos los masters de Kepler comparten x-height (433) y cap-height (654), así que
+El diagnóstico intuitivo es subir el tamaño, y es el equivocado. Todos los
+masters de Kepler comparten x-height (433) y cap-height (654), así que
 `--text-serif--optical-scale: 1.18` —que compensa la x-height de Kepler contra
-la de Montreal (510)— vale igual con las condensed. Lo que cambia es el ancho:
-las minúsculas pasan de 467 a 357 en `--font-serif` y de 428 a 321 en
-`--font-display`, un 24–25% más angosto.
+la de Montreal (510)— ya dejaba la ALTURA exacta. Lo que no compensa es el
+ancho, y ahí las condensed son ~25% más angostas:
 
-Ese 1.18 compensa **altura, no ancho**. Si los `<Accent>` embebidos en headings
-sans se leen subdimensionados, el ajuste es ese token, y mueve los 13 acentos a
-la vez.
+| | x-height | avance medio | avance ×1.18 |
+|---|---|---|---|
+| Montreal (la sans) | 510 | 520 | — |
+| Kepler **Cn**ItSubh | 433 | 360 | 425 · **−18%** |
+| Kepler ItSubh | 433 | 450 | 531 · +2% |
+
+O sea: el acento tenía la altura correcta y el ancho de otra fuente. Subir la
+escala no lo arregla — para igualar el avance del condensed hace falta `1.44`, y
+a esa escala la x-height se va **22% por encima** de la de Montreal. Se cambia un
+desbalance por otro.
+
+La palanca era el master, no el tamaño. Con los de ancho normal el `1.18` iguala
+las dos cosas a la vez.
+
+**Si el acento vuelve a leerse mal, medí antes de tocar el token.** Es el
+instrumento para la altura y nada más; comprobá si lo que está descalzado es el
+ancho, el peso o el master óptico.
+
+Si alguna vez hace falta un Kepler *condensado*, sigue estando en los OTF: solo
+Display y Subhead lo traen (no existe `KeplerStd-Cn` de texto ni `CnCapt`), y lo
+más cerca para texto corrido es semicondensed (`KeplerStd-Scn`, minúsculas a 435
+milésimas de em contra 357 de la condensed).
 
 ## Dónde vive cada cosa
 
 ```
 assets/fonts/
-  montreal/     ← los 4 subsets que sirve el sitio      (195KB, commiteados)
-  kepler/       ← ídem                                   (156KB, commiteados)
+  montreal/       ← los 4 subsets que sirve el sitio    (195KB, commiteados)
+  montreal-mono/  ← ídem, 2 faces                        (53KB, commiteados)
+  kepler/         ← ídem                                (156KB, commiteados)
   _originals/
     pp-neue-montreal/       ← familia completa del vendor (commiteada)
-    pp-neue-montreal-mono/  ← ídem, hoy sin uso
+    pp-neue-montreal-mono/  ← ídem
 
 public/fonts/
   kepler-font/  ← los 168 OTF de escritorio     (GITIGNORADO, no está en el repo)
@@ -105,6 +118,19 @@ suyo:
 - **Montreal** no tiene nada en el PUA: sus 1352 glifos son cobertura de idiomas
   real (434 de latín, 173 de latin ext additional, 124 de cirílico, 77 de
   griego). Acá la palanca es el rango unicode. Resultado: 324KB → **195KB**.
+- **Montreal Mono** usa el MISMO rango que la sans, y por el mismo motivo: parte
+  de lo que se dibuja en mono son los tags del blog, que los escriben los
+  editores en el CMS. Trae 2320 glifos —más que la sans— así que el recorte pega
+  más fuerte: 138KB → **53KB** en dos faces.
+
+  Dos faces y no cuatro porque casi todos los usos de `font-mono` van en peso
+  normal; los que no, se combinan con `text-eyebrow`, que es weight 500. Sin esa
+  segunda face el navegador sintetiza el peso, y en una monoespaciada se nota más
+  que en una proporcional: engorda el trazo sin poder ensanchar el avance.
+
+  Y sirve `Regular`, no `Book`. No es una inconsistencia con la sans — es que en
+  esta familia el 400 nominal existe de verdad (Book es 350, igual que en la
+  sans), así que no hay por qué repetir el 350-declarado-400.
 
 De Montreal se descartan **cirílico y griego**, 204 codepoints para los que el
 sitio no tiene ni contenido ni plan. Si alguna vez aparecen, caen a la fuente de
@@ -152,10 +178,12 @@ subset y salir de `public/`.
 
 ## Pendientes
 
-- `--font-mono` es del sistema y `font-mono` se usa en ~25 lugares (eyebrows,
-  fechas y tags del blog, más los bloques de código de `/brand`), así que hoy
-  rinde distinto en macOS, Windows y Linux. `assets/fonts/_originals/pp-neue-montreal-mono/`
-  está listo para cuando se decida.
+- El chequeo de regresión junta los caracteres del CÓDIGO FUENTE, sin distinguir
+  comentario de JSX. Un `π` o un `θ` escrito en un comentario para explicar una
+  fórmula lo hace fallar, aunque no se dibuje en ninguna parte. La respuesta
+  correcta es escribirlo en ASCII, no ampliar el rango: el subset se elige por lo
+  que el sitio RENDERIZA. Pasó dos veces; si vuelve a pasar seguido, conviene que
+  el verificador ignore comentarios.
 - `assets/fonts/_originals/pp-neue-montreal/` no trae documento de licencia, a
   diferencia de Kepler. Las licencias de Pangram Pangram normalmente permiten
   self-host y subsetting, pero no hay nada contra qué verificarlo en el repo.

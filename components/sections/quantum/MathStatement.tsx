@@ -76,10 +76,11 @@ export default function MathStatement() {
           here is safe.
           The mask is inline for the usual reason: the `;` inside the gradient
           would break a shorthand declaration list. */}
-      {/* ds-exempt: decorative monospace weave, its metrics are geometry */}
       <div
         ref={fieldRef}
         aria-hidden="true"
+        // Los roles mono fijan un font-size, y el de acá se mide, no se lee.
+        // ds-exempt: decorative monospace weave, its metrics are geometry
         className="absolute inset-x-0 bottom-0 h-[70%] overflow-hidden font-mono whitespace-pre text-black/15"
         style={{
           fontSize: "clamp(10px, 0.72vw, 17px)",
@@ -107,6 +108,7 @@ export default function MathStatement() {
               línea (es lo que hacía el line-height: 0 de text-h1-serif-inline).
               Va en un wrapper y no en un selector descendiente del h2 porque
               SplitText envuelve cada línea en spans y los colapsaría. */}
+          {/* ds-exempt: anula el line-height del wrapper, no ajusta la escala — ver arriba */}
           <span className="leading-[0]">
             <Accent>Only NEAR</Accent>
           </span>{" "}

@@ -283,10 +283,14 @@ export default function HeroBurstGL() {
       />
       <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
 
-      {/* Panel de tuning (solo del prototipo). */}
+      {/* Panel de tuning (solo del prototipo). No usa la escala del DS y no
+          debería: es instrumental, vive fuera del sitio y su tamaño está elegido
+          para estorbar lo menos posible encima del canvas, no para leerse.
+          ds-exempt: panel de debug del prototipo, no UI del sitio */}
       <div className="fixed right-4 top-24 z-50 w-60 rounded-xl bg-black/85 p-3 font-mono text-[11px] text-white/85 backdrop-blur">
         <button
           type="button"
+          // ds-exempt: ídem, panel de debug
           className="mb-1 w-full text-left font-bold"
           onClick={() => setShowPanel((s) => !s)}
         >
