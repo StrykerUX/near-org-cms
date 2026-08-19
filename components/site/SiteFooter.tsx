@@ -238,6 +238,15 @@ const WORDMARK_MAX_W = "mx-auto w-full max-w-[2080px]";
 
 // El velo de la variante `veil`, dentro de la caja del wordmark (así sigue
 // exactamente a su recorte, sea cual sea el alto que el reparto le dé).
+// El alto natural de la caja del wordmark, expresado en CSS. Hace falta porque
+// en `veil` la imagen va anclada al FONDO de su caja (posición absoluta), y una
+// caja de alto `auto` con un único hijo absoluto mide cero. El reparto vertical
+// solo corre en desktop con motion; este es el valor para todo lo demás.
+const WORDMARK_BOX_H = `calc(min(100vw, 2080px) * ${(
+  (WORDMARK_H - (WORDMARK_VIEWBOX_BOTTOM - WORDMARK_FLAT_BASELINE)) /
+  WORDMARK_W
+).toFixed(4)})`;
+
 const VEIL_BASE = "pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent";
 const VEIL_INK = `${VEIL_BASE} from-ink via-ink/70`;
 
@@ -566,8 +575,11 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
         if (!panelBox) return;
 
         // Se mide SIN recortar: si no, cada medición partiría del recorte que
-        // dejó la anterior y el logo se iría achicando solo.
-        scope.style.setProperty("--footer-wordmark-h", "auto");
+        // dejó la anterior y el logo se iría achicando solo. En `veil` el alto
+        // sin recortar NO es `auto` —la imagen va absoluta y la caja colapsaría
+        // a cero, que es medir el logo como si no existiera— sino la fórmula
+        // del alto natural.
+        scope.style.setProperty("--footer-wordmark-h", veil ? WORDMARK_BOX_H : "auto");
         scope.style.setProperty("--footer-takeover-gap", `${TAKEOVER_GAP_MAX}px`);
 
         const natural = wordmark.getBoundingClientRect().height;
@@ -583,9 +595,12 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
         const h = Math.max(WORDMARK_MIN_H, Math.min(natural, room - gap));
 
         scope.style.setProperty("--footer-takeover-gap", `${Math.round(gap)}px`);
+        // En `veil` SIEMPRE va un valor en px, nunca "auto": ahí la imagen
+        // está anclada al fondo de la caja y una caja `auto` con un hijo
+        // absoluto colapsa a cero.
         scope.style.setProperty(
           "--footer-wordmark-h",
-          h < natural - 0.5 ? `${Math.round(h)}px` : "auto"
+          veil || h < natural - 0.5 ? `${Math.round(h)}px` : "auto"
         );
       };
 
@@ -833,7 +848,7 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
         <div
           data-footer-bounce
           className={`absolute inset-x-0 bottom-0 overflow-hidden ${WORDMARK_MAX_W}`}
-          style={{ height: "var(--footer-wordmark-h, auto)" }}
+          style={{ height: `var(--footer-wordmark-h, ${veil ? WORDMARK_BOX_H : "auto"})` }}
         >
           <Image
             src="/prototype/v2/near-wordmark.svg"
@@ -841,7 +856,7 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
             width={WORDMARK_W}
             height={WORDMARK_H}
             unoptimized
-            className="block h-auto w-full invert"
+            className={`block h-auto w-full invert ${veil ? "absolute inset-x-0 bottom-0" : ""}`}
             style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
           />
           {veil && <span aria-hidden="true" className={VEIL_INK} />}
@@ -889,7 +904,7 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
         data-footer-bounce
         data-footer-wordmark
         className={`relative z-[1] overflow-hidden ${WORDMARK_MAX_W}`}
-        style={{ height: "var(--footer-wordmark-h, auto)" }}
+        style={{ height: `var(--footer-wordmark-h, ${veil ? WORDMARK_BOX_H : "auto"})` }}
       >
         <Image
           src="/prototype/v2/near-wordmark.svg"
@@ -897,7 +912,9 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
           width={WORDMARK_W}
           height={WORDMARK_H}
           unoptimized
-          className="block h-auto w-full max-lg:invert"
+          className={`block h-auto w-full max-lg:invert ${
+            veil ? "absolute inset-x-0 bottom-0" : ""
+          }`}
           style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
         />
         {/* El del reposo va del color del FONDO de cada estado —ink bajo lg,
