@@ -284,6 +284,47 @@
   --text-rail--letter-spacing: -0.02em;
   --text-rail--font-weight: 500;
 
+  /* Mural — el rol que faltaba: la palabra que ocupa el ANCHO ENTERO de la
+     sección y que además se lee. Nació con la Section #2 del diseño de Caro
+     (Figma NEARORG_CLAUDE_QUANTUM, nodo 184:476), donde cuatro líneas de una
+     sola palabra cruzan el viewport de borde a borde.
+
+     No alcanzaba ninguno de los dos vecinos. `display` topa en 8rem (128px) y
+     ahí la palabra deja de tocar los bordes; `rail` llega más alto pero está
+     declarado DECORATIVO —la cinta al 6% de opacidad— y su nota dice
+     explícitamente que no se use para texto que se lea. Un rol que no existe se
+     agrega a la escala; no se parchea con `text-[153px]`.
+
+     La rampa va en `cqw` y no en `vw`, que es la parte que importa: el tamaño
+     se mide contra el ancho del BLOQUE, no del viewport. En el artboard la
+     palabra ocupa 153px sobre 1280px de contenido — 11.95% — y esa proporción
+     es el diseño: con `vw`, un monitor ancho la rompe (el contenedor topa en su
+     `max-width` mientras el texto sigue creciendo, y la palabra se parte en dos
+     renglones). Quien use este token tiene que declarar `@container` en el
+     bloque; sin contenedor, `cqw` resuelve contra el viewport y vuelve el
+     problema.
+
+     ── El coeficiente no es el del artboard, y la razón es la fuente ────────
+
+     El diseño está compuesto en Kepler Std **Semicondensed** Display y este
+     proyecto solo tiene los masters de ancho normal (Display y Subhead; ver
+     `lib/fonts.ts`, que además documenta por qué se salió de las condensed).
+     La misma palabra al mismo cuerpo mide acá ~16% más: a la proporción del
+     artboard —153px sobre 1280 de contenido, o sea 11.95cqw— "THE AGENT
+     ECONOMY" y "QUANTUM-RESISTANT" se pasaban ~245px de su caja.
+
+     10.2cqw es esa proporción corregida por el ancho de la fuente que sí
+     tenemos. Lo que se conserva es lo que el diseño busca —la palabra cruzando
+     la sección de borde a borde— y no el número. Si algún día entra el master
+     Semicondensed, esto vuelve a 11.95.
+
+     El tope de 11rem (176px) es el techo de encuadre que sale del mismo
+     cálculo. */
+  --text-mural: clamp(2.5rem, 10.2cqw, 11rem);
+  --text-mural--line-height: 1.046;
+  --text-mural--letter-spacing: -0.04em;
+  --text-mural--font-weight: 500;
+
   --text-h1: clamp(2.75rem, 2.0825rem + 2.8479vw, 5.5rem);
   --text-h1--line-height: 1.05;
   --text-h1--letter-spacing: -0.015em;
