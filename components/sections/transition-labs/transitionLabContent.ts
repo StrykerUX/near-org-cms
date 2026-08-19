@@ -3,64 +3,167 @@
 // Módulo puro, sin JSX: lo consumen el shell de cada ruta, el índice y la
 // metadata de las páginas.
 //
-// Las CINCO resuelven el mismo problema: el corte entre «Own Your Own» (cream)
-// y «The NEAR Stack» (ink). Lo que cambia es el mecanismo y lo que cuesta.
+// TODAS resuelven el mismo problema: el corte entre «Own Your Own» (cream) y
+// «The NEAR Stack» (ink). Lo que cambia es el mecanismo y lo que cuesta.
+//
+// ── Dos tandas ──────────────────────────────────────────────────────────────
+//
+// A–E fueron la primera, y quedaron DESCARTADAS: cuatro de las cinco son la
+// misma idea —algo negro llega y cubre la pantalla— y ninguna lleva contenido
+// ni conecta las dos secciones. Se conservan porque un laboratorio sin lo que
+// se descartó obliga a volver a proponerlo.
+//
+// F–L son la segunda, y todas montan sobre `SectionCut`: el solape, el
+// progreso y la degradación sin motion viven ahí, y cada variante solo aporta
+// el dibujo. Cambiar la transición de un corte es cambiar un componente.
 
-export type TransitionId = "wipe" | "counter" | "ascii" | "lattice" | "column";
+export type TransitionId =
+  | "wipe"
+  | "counter"
+  | "ascii"
+  | "lattice"
+  | "column"
+  | "slats"
+  | "fold"
+  | "mosaic"
+  | "halftone"
+  | "melt"
+  | "chapter"
+  | "sidestep";
 
 export type TransitionSpec = {
   readonly id: TransitionId;
   readonly index: string;
   readonly title: string;
+  /** Coste NETO: el recorrido menos la pantalla que solapa. */
   readonly cost: string;
   readonly stack: string;
   readonly pitch: string;
+  /** false = primera tanda, descartada. */
+  readonly current: boolean;
 };
 
 export const TRANSITIONS: readonly TransitionSpec[] = [
+  /* ── Segunda tanda ───────────────────────────────────────────────────── */
+  {
+    id: "slats",
+    index: "F",
+    title: "Slats",
+    cost: "60svh",
+    stack: "CSS + GSAP",
+    current: true,
+    pitch:
+      "El corte se hace en doce lamas inclinadas a 30.79° — el ángulo real de la cara superior del cubo del stack, el mismo con el que está dibujado el isométrico. La geometría del corte es la del objeto al que lleva, y los doce bordes llegan a destiempo.",
+  },
+  {
+    id: "fold",
+    index: "G",
+    title: "Fold",
+    cost: "70svh",
+    stack: "CSS 3D + GSAP",
+    current: true,
+    pitch:
+      "La página se pliega hacia atrás sobre su borde inferior y detrás aparece el negro, que estaba ahí todo el tiempo. La cara se apaga con el coseno del giro, como una hoja real girando fuera de la luz: sin esa sombra se lee como un rectángulo achicándose.",
+  },
+  {
+    id: "mosaic",
+    index: "H",
+    title: "Mosaic",
+    cost: "60svh",
+    stack: "Canvas 2D",
+    current: true,
+    pitch:
+      "La pantalla no se cubre: se reemplaza por partes. Una retícula de celdas y cada una se pinta cuando le toca, en un orden de ruido determinista — sube y baja y el mosaico se rearma igual, que es lo que un orden al azar no puede dar.",
+  },
+  {
+    id: "halftone",
+    index: "I",
+    title: "Halftone",
+    cost: "80svh",
+    stack: "Canvas 2D",
+    current: true,
+    pitch:
+      "La página se imprime. Trama de medio tono girada 45° como en imprenta de verdad, con los puntos engordando hasta tocarse. El gesto más editorial de los siete: habla el mismo idioma que el titular en serif, no el de la tecnología.",
+  },
+  {
+    id: "melt",
+    index: "J",
+    title: "Melt",
+    cost: "80svh",
+    stack: "Canvas 2D",
+    current: true,
+    pitch:
+      "La tinta inunda la página desde abajo con un frente irregular: dedos que se adelantan, bahías que se quedan. El único de los siete en el que el negro tiene materia — los demás son geometría, este es un fluido.",
+  },
+  {
+    id: "chapter",
+    index: "K",
+    title: "Chapter",
+    cost: "90svh",
+    stack: "CSS + GSAP",
+    current: true,
+    pitch:
+      "El rótulo del capítulo —«02 · The NEAR Stack»— aparece en medio del cambio de fondo, se queda quieto lo justo para leerse, y se va. El único que sirve a la página entera y no a este corte: con uno en cada frontera, el documento gana un índice que se ve al scrollear.",
+  },
+  {
+    id: "sidestep",
+    index: "L",
+    title: "Sidestep",
+    cost: "100svh",
+    stack: "CSS + GSAP",
+    current: true,
+    pitch:
+      "La sección siguiente entra por el lado. Toda la página baja; en este corte, y solo en este, se mueve en horizontal. Sin secuestrar la rueda: lo que se desplaza es una tira de dos paneles dentro del viewport pegajoso.",
+  },
+
+  /* ── Primera tanda · descartadas ─────────────────────────────────────── */
   {
     id: "wipe",
     index: "A",
     title: "Wipe",
-    cost: "160svh",
-    stack: "CSS + GSAP, cero canvas",
+    cost: "60svh",
+    stack: "CSS + GSAP",
+    current: false,
     pitch:
-      "El negro SUBE y tapa: un telón que entra desde abajo mientras la página de arriba se queda quieta. Es el gesto del takeover del footer, traído al corte entre secciones. La más barata de las cinco y la única que funciona igual en cualquier máquina.",
+      "El negro sube y tapa. El gesto del takeover del footer, entre secciones.",
   },
   {
     id: "counter",
     index: "B",
     title: "Counterform",
-    cost: "180svh",
-    stack: "medición del DOM + transform",
+    cost: "80svh",
+    stack: "medir el DOM + transform",
+    current: false,
     pitch:
-      "El agujero de la «O» se traga la página. La palabra que cierra la sección de arriba se repite a tamaño de póster y su contraforma crece hasta cubrir la pantalla: el negro no llega de afuera, sale de DENTRO de la tipografía. Es el mecanismo del hero de los drafts EX.",
+      "El agujero de la «O» se traga la página: el negro sale de dentro de la tipografía.",
   },
   {
     id: "ascii",
     index: "C",
     title: "ASCII",
-    cost: "200svh",
+    cost: "100svh",
     stack: "WebGL2, el shader de EX3",
+    current: false,
     pitch:
-      "La página se vuelve texto. Un campo de caracteres arranca casi invisible sobre el cream y, a medida que se scrollea, se DENSIFICA desde el centro y la paleta entera rueda a negro con los glifos en verde. Lo que entrega al stack ya es su propio fondo.",
+      "Un campo de caracteres se densifica desde el centro y la paleta rueda a negro con los glifos en verde.",
   },
   {
     id: "lattice",
     index: "D",
     title: "Lattice",
-    cost: "160svh",
+    cost: "60svh",
     stack: "Canvas 2D, el motor de hero-alt 05",
+    current: false,
     pitch:
-      "~2600 puntos colapsan y deletrean «The NEAR Stack» justo cuando el fondo termina de irse a negro. El título de la sección siguiente lo escriben las partículas antes de que la sección exista.",
+      "~2600 puntos deletrean «The NEAR Stack» cuando el fondo termina de irse a negro.",
   },
   {
     id: "column",
     index: "E",
     title: "Column",
-    cost: "180svh",
-    stack: "el arte del stack + máscara",
-    pitch:
-      "La columna del stack SUBE desde abajo y se trae el negro con ella: el fondo oscuro no es un telón aparte, es lo que la pieza va dejando atrás. La única de las cinco en la que el objeto de la sección siguiente es el que hace la transición.",
+    cost: "80svh",
+    stack: "el arte del stack",
+    current: false,
+    pitch: "La columna del stack sube y se trae el negro con ella.",
   },
 ];

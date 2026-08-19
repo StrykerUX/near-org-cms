@@ -1,6 +1,6 @@
-# `transition-labs/` — cinco maneras de pasar del cream al negro
+# `transition-labs/` — doce maneras de pasar del cream al negro
 
-Alimenta **seis rutas**: `/prototype/transition-labs` (el índice) y una por
+Alimenta **trece rutas**: `/prototype/transition-labs` (el índice) y una por
 transición. No las importa ninguna página real, y eso es el punto.
 
 ## Qué se está probando
@@ -9,58 +9,73 @@ El corte entre **«Own Your Own»** (cream) y **«The NEAR Stack»** (ink). Hoy 
 un cambio de `background-color` y nada más: la sección de arriba termina, la de
 abajo empieza, y entre las dos no pasa nada.
 
-Las cinco variantes resuelven ese mismo salto. Lo único que cambia es el
-mecanismo y lo que cuesta.
+## Segunda tanda (F–L) — las vigentes
 
 | | Variante | Coste neto | Técnica | La apuesta |
 |---|---|---|---|---|
-| **A** | `TransWipe` | 60svh | CSS + GSAP | El negro SUBE y tapa. El gesto del takeover del footer, entre secciones |
-| **B** | `TransCounter` | 80svh | medir el DOM + transform | El agujero de la «O» se traga la página: el negro sale de DENTRO de la tipografía |
-| **C** | `TransAscii` | 100svh | WebGL2, el shader de EX3 | La página se vuelve texto: el campo se densifica y la paleta rueda a negro |
-| **D** | `TransLattice` | 60svh | Canvas 2D, el motor de hero-alt 05 | ~2600 puntos deletrean «The NEAR Stack» cuando el fondo termina de irse a negro |
-| **E** | `TransColumn` | 80svh | el arte del stack | La columna sube y se trae el negro con ella |
+| **F** | `CutSlats` | 60svh | CSS + GSAP | Doce lamas al **ángulo real del isométrico** (30.79°). La geometría del corte es la del objeto al que lleva |
+| **G** | `CutFold` | 70svh | CSS 3D | La página se **pliega** hacia atrás y detrás estaba el negro |
+| **H** | `CutMosaic` | 60svh | Canvas 2D | La pantalla no se cubre: se **reemplaza por partes**, en orden de ruido determinista |
+| **I** | `CutHalftone` | 80svh | Canvas 2D | La página **se imprime**: trama de medio tono a 45°, los puntos engordan hasta tocarse |
+| **J** | `CutMelt` | 80svh | Canvas 2D | La tinta **inunda** desde abajo con un frente de dedos y bahías. El único donde el negro tiene materia |
+| **K** | `CutChapter` | 90svh | CSS + GSAP | El **rótulo del capítulo** en medio del cambio de fondo. El corte como estructura, no como efecto |
+| **L** | `CutSidestep` | 100svh | CSS + GSAP | La sección siguiente **entra por el lado**. Una vez por página o deja de significar |
 
-## La regla que las cinco comparten: SOLAPAR, no sumar
+## Primera tanda (A–E) — descartadas
 
-Cada transición es una `<section>` con `-mt-[100svh]` y `z-[2]`. El tramo
-empieza una pantalla **antes** de donde terminaría la sección anterior, así que
-el gesto ocurre encima de ella —todavía con las cards en pantalla— y no sobre un
-rectángulo vacío.
+Se conservan a la vista: un laboratorio que borra lo que no funcionó obliga a
+volver a proponerlo. El diagnóstico, corto: **cuatro de las cinco son la misma
+idea** —algo negro llega y cubre la pantalla—, ninguna lleva contenido y ninguna
+conecta las dos secciones. `TransWipe`, `TransCounter`, `TransAscii`,
+`TransLattice`, `TransColumn`.
 
-Es la corrección más importante que salió de mirarlas: la primera versión no
-solapaba, y el resultado era una pantalla entera de cream con nada, el gesto
-arrancando después, y una lectura que no era «transición» sino «pausa y después
-efecto». De ahí también que el coste de la tabla sea NETO — el recorrido menos
-la pantalla que solapa.
+## `SectionCut` — la pieza que comparten todas las nuevas
 
-Las que pintan encima (B, C, D) traen además un velo que despeja lo de arriba en
-el primer 10-15% del gesto: sin él hay dos titulares en pantalla a la vez, o una
-nube de puntos sobre las cards que se lee como suciedad.
+La primera tanda repetía en cinco archivos el mismo andamiaje: el mismo `-mt`,
+el mismo sticky, el mismo ScrollTrigger, la misma degradación. `SectionCut` se
+queda con todo eso y cada variante solo aporta el **dibujo**:
 
-## Lo que se importa y no se copia
+```tsx
+<SectionCut travel="160svh" settle={0.85} draw={draw}>…</SectionCut>
+```
 
-- `LatticeCanvas` de `hero-alt` (D) — muestrea el propio texto para sacar la
-  silueta; copiarlo para cambiarle dos líneas serían dos motores divergiendo.
-- El shader `ex/shaders/exAscii` (C) — **sin tocar una línea**. Lo único que
-  cambia es cómo se alimentan sus uniformes: allá el bulbo lo mueve el cursor y
-  la paleta es fija, acá el bulbo está clavado en el centro y lo abre el scroll.
-- `ColumnGreen` del arte generado de ab7 (E).
+- **El solape.** `-mt-[100svh]` + `z-[2]`: el tramo empieza una pantalla ANTES
+  de donde terminaría la sección anterior, así que el gesto ocurre encima de
+  ella y no sobre un rectángulo vacío. Por eso el coste de la tabla es NETO.
+- **`settle`.** Con qué fracción del recorrido el dibujo está terminado. Nunca
+  1: el último tramo queda ya en el estado final, para llegar a la sección
+  siguiente con el corte hecho y no viéndolo cerrar en el último píxel.
+- **`draw(p)` cuelga del SCROLL, no de un ticker.** Ninguna de estas
+  transiciones tiene vida propia, así que un ticker sería repintar lo mismo 60
+  veces por segundo. Las de canvas se dibujan enteras dentro de `draw`, y un
+  `ResizeObserver` las repinta con el último progreso.
+- **Sin motion**, el corte se entrega HECHO.
+
+Cambiar la transición de un corte es cambiar un componente.
 
 ## Dos trampas de GSAP que costaron encontrarse
 
-Las dos aparecieron en B y las dos valen para cualquier escena nueva:
+Salieron en la primera tanda y valen para cualquier escena nueva:
 
 1. **`transform` de GSAP contra `transform` de Tailwind.** Al escribir `scale`,
    GSAP reescribe el `transform` ENTERO con lo que él conoce: un
    `-translate-x-1/2` puesto por clase desaparece en el primer frame. Y si el
-   centrado se pasa a `xPercent/yPercent`, un `gsap.set` posterior (el de cada
-   refresh) deja **huérfano** al `quickSetter` creado antes — sus escrituras van
-   a una caché de transform que ya no es la del elemento, y la escala se queda
-   en 1 para siempre. La salida: centrar por `margin` negativo y dejar el
-   `transform` entero en manos de una sola cosa.
+   centrado se pasa a `xPercent/yPercent`, un `gsap.set` posterior deja
+   **huérfano** al `quickSetter` creado antes — sus escrituras van a una caché
+   que ya no es la del elemento. La salida: centrar por `margin` negativo y
+   dejar el `transform` en manos de una sola cosa.
 2. **`quickSetter("scale")` no escribe nada** en esta versión, mientras que
-   `quickSetter("scaleY")` —el del telón de A— sí funciona. No se investigó por
-   qué: es una escritura por frame, y `gsap.set` la hace bien.
+   `quickSetter("scaleY")` sí. No se investigó por qué: es una escritura por
+   frame y `gsap.set` la hace bien.
+
+## Una tercera, del ruido
+
+`CutMelt` sampleaba el hash directamente por columna y el frente salía con
+dientes de 3px — una forma de onda de audio, no un líquido. Un hash da valores
+independientes para posiciones vecinas; el ruido de verdad **interpola** entre
+los nodos de una retícula. Está resuelto ahí con un `vnoise` de tres octavas, y
+es el mismo error que espera a cualquiera que use el helper `noise` de
+`SectionCut` como si fuera ruido continuo.
 
 ## Cada transición en su ruta, y con las secciones DE VERDAD
 
@@ -69,12 +84,8 @@ transición entre dos rectángulos de color es una transición entre dos
 rectángulos de color: lo que hay que juzgar es cómo se siente llegar con las
 cards todavía en la retina y salir con la columna ya en pantalla.
 
-El precio es que cada ruta es pesada, y por eso hay una por variante y no las
-cinco apiladas — mismo razonamiento que en `stack-labs`.
-
 ## Solo desktop
 
 Como el resto de los labs: por debajo de `lg` o con `prefers-reduced-motion`,
-cada transición cae a su estado final estático (el fondo negro, sin viaje). Es
-la degradación correcta: lo que el gesto tenía para decir es el cambio de fondo,
-y ese se entrega sin mover un píxel.
+cada transición cae a su estado final estático. Lo que el gesto tenía para decir
+es el cambio de fondo, y ese se entrega sin mover un píxel.

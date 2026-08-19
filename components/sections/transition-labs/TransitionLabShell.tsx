@@ -68,7 +68,7 @@ export default function TransitionLabShell({
       <div className="sticky bottom-0 z-40 border-t border-cream/15 bg-ink/85 backdrop-blur-sm">
         <Container className="flex flex-wrap items-center gap-x-5 gap-y-2 py-3">
           <span className="text-caption-mono text-cream/40">Transiciones</span>
-          {TRANSITIONS.map((t) => (
+          {TRANSITIONS.filter((t) => t.current).map((t) => (
             <Link
               key={t.id}
               href={`/prototype/transition-labs/${t.id}`}
