@@ -237,7 +237,9 @@ const WORDMARK_MAX_W = "mx-auto w-full max-w-[2080px]";
 // chip se posiciona solo en Y (todos los links arrancan en x=0). Acá se anima
 // también X contra el borde del link, que es lo que lo hace inmune a cualquier
 // sangría dentro de la columna.
-const CHIP_PAD_X = 8; // el aire a cada lado del texto, dentro del chip
+const CHIP_PAD_X = 14; // el aire a cada lado del texto, dentro del chip
+const CHIP_PAD_Y = 5; // idem arriba y abajo. Los renglones están a 6px, así que
+// dos chips vecinos casi se tocan — no importa: nunca hay dos a la vez.
 const CHIP_STRETCH_MAX = 0.5; // tope del estiramiento, en fracción del alto
 const CHIP_STRETCH_PX = 160; // el salto (en px) que llega a ese tope
 
@@ -278,9 +280,9 @@ function FooterColumn({
             chip,
             {
               x: box.left - host.left - CHIP_PAD_X,
-              y,
+              y: y - CHIP_PAD_Y,
               width: box.width + CHIP_PAD_X * 2,
-              height: box.height,
+              height: box.height + CHIP_PAD_Y * 2,
               duration: 0.45,
               ease: "power3.out",
             },
