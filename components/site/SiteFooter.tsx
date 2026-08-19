@@ -36,6 +36,9 @@ import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 // panel absoluto quedaría inaccesible) el footer completo se renderiza estático
 // en cream: por eso headline+links existen DOS veces abajo — una versión en
 // flujo `lg:hidden` y el panel absoluto `hidden lg:block`.
+//
+// En una pantalla baja el takeover no entra completo en el viewport, y lo que
+// cede es el pie del logo y no el headline: ver "Pantallas bajas" más abajo.
 
 // Los cuatro grupos transcritos del tab Footer de "near.org - sitemap" (Google
 // Doc). Sin las descripciones por link, que el doc lista solo bajo Navigation.
@@ -169,6 +172,27 @@ const WORDMARK_VIEWBOX_BOTTOM = 411;
 const WORDMARK_CROP_PCT =
   ((WORDMARK_VIEWBOX_BOTTOM - WORDMARK_FLAT_BASELINE) / WORDMARK_W) * 100; // ≈0.67%
 
+// ── Pantallas bajas ─────────────────────────────────────────────────────────
+//
+// El wordmark va a sangre, así que su ALTO sale del ANCHO del viewport: ~25% de
+// él (255/981 menos el crop). En 1920×800 son 486px de logo contra 800 de
+// pantalla, y el panel del takeover —headline + cuatro columnas, ~460px— ya no
+// entra entre el borde de arriba y el logo. Lo que sobraba se iba por ARRIBA:
+// el headline cortado contra el borde superior, que es justo lo que no se
+// puede perder — el logo se sigue leyendo a medias, el headline no.
+//
+// El reparto se invierte: el panel manda y lo que cede es, en orden,
+//   1) el aire entre el panel y el logo (de 80px a 24px);
+//   2) el logo, cuya caja se acorta y lo recorta por ABAJO. Ya vivía dentro de
+//      un overflow-hidden y sus astiles altos son lo que lo hace reconocible.
+//
+// Debajo de WORDMARK_MIN_H el logo deja de encogerse: recortado a una franja
+// no se lee, y a esa altura tampoco queda nada que repartir.
+const TAKEOVER_TOP_MIN = 32; // aire mínimo sobre el headline
+const TAKEOVER_GAP_MAX = 80; // el pb-20 de siempre, cuando hay lugar
+const TAKEOVER_GAP_MIN = 24;
+const WORDMARK_MIN_H = 96;
+
 // Los grupos de links, una sola vez: los renderizan la versión estática de
 // mobile (cream) y el panel del takeover (sobre negro) con paletas distintas.
 function LinkColumns({ dark }: { dark: boolean }) {
@@ -228,11 +252,46 @@ export default function SiteFooter() {
     ({ q, scope, motionOk, isDesktop }) => {
       const wipe = q("[data-footer-wipe]")[0];
       const panel = q("[data-footer-panel]")[0];
+      const wordmark = q("[data-footer-wordmark]")[0];
       const parts = q("[data-footer-bounce]");
-      if (!wipe || !panel || parts.length === 0) return;
+      if (!wipe || !panel || !wordmark || parts.length === 0) return;
 
       // Sin motion o en mobile no hay takeover: queda la versión estática.
       if (!motionOk || !isDesktop) return;
+
+      // ── El reparto vertical (ver los TAKEOVER_* de arriba) ────────────────
+      //
+      // Va en JS y no en CSS a propósito: el alto del panel depende de cómo
+      // envuelvan headline y columnas a cada ancho, y eso no es una constante
+      // que se pueda escribir en un clamp(). Sale por dos custom properties
+      // que el markup ya consume, así que el estado por defecto —sin JS, en
+      // mobile, con reduced-motion— es el de siempre.
+      const panelBox = panel.firstElementChild as HTMLElement | null;
+      const fit = () => {
+        if (!panelBox) return;
+
+        // Se mide SIN recortar: si no, cada medición partiría del recorte que
+        // dejó la anterior y el logo se iría achicando solo.
+        scope.style.setProperty("--footer-wordmark-h", "auto");
+        scope.style.setProperty("--footer-takeover-gap", `${TAKEOVER_GAP_MAX}px`);
+
+        const natural = wordmark.getBoundingClientRect().height;
+        const content = panelBox.getBoundingClientRect().height - TAKEOVER_GAP_MAX;
+        const room = window.innerHeight - TAKEOVER_TOP_MIN - content;
+
+        const gap = Math.min(TAKEOVER_GAP_MAX, Math.max(TAKEOVER_GAP_MIN, room - natural));
+        const h = Math.max(WORDMARK_MIN_H, Math.min(natural, room - gap));
+
+        scope.style.setProperty("--footer-takeover-gap", `${Math.round(gap)}px`);
+        scope.style.setProperty(
+          "--footer-wordmark-h",
+          h < natural - 0.5 ? `${Math.round(h)}px` : "auto"
+        );
+      };
+
+      // Antes del trigger: el recorte cambia el alto del documento, y
+      // `start`/`end` se miden contra `maxScroll`.
+      fit();
 
       // El disparador es una distancia AL FONDO DEL DOCUMENTO: a PULL_PX del
       // máximo scroll arranca el wipe y un tirón lleva la página sola hasta el
@@ -363,7 +422,27 @@ export default function SiteFooter() {
       });
       ro.observe(document.documentElement);
 
+      // El reparto depende del alto Y del ancho del viewport (el logo mide un
+      // 25% del ancho), así que se recalcula en cualquier resize —no alcanza
+      // con el ResizeObserver de arriba, que mira el alto del DOCUMENTO— y una
+      // vez más cuando la fuente termina de cargar, porque el swap cambia el
+      // alto del panel.
+      let fitTimer: ReturnType<typeof setTimeout>;
+      const refit = () => {
+        clearTimeout(fitTimer);
+        fitTimer = setTimeout(() => {
+          fit();
+          st.refresh();
+        }, 150);
+      };
+      window.addEventListener("resize", refit);
+      document.fonts?.ready.then(refit);
+
       return () => {
+        window.removeEventListener("resize", refit);
+        clearTimeout(fitTimer);
+        scope.style.removeProperty("--footer-wordmark-h");
+        scope.style.removeProperty("--footer-takeover-gap");
         ro.disconnect();
         clearTimeout(refreshTimer);
         st.kill();
@@ -410,7 +489,15 @@ export default function SiteFooter() {
         data-footer-wipe
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-0 overflow-hidden bg-ink"
       >
-        <div data-footer-bounce className="absolute inset-x-0 bottom-0">
+        {/* Misma caja que el wordmark real —mismo alto, mismo overflow— para
+            que el recorte de pantallas bajas caiga en la MISMA línea en los
+            dos: si acá quedara anclada al fondo, el corte duro entre el blanco
+            y el negro se partiría en dos alturas distintas. */}
+        <div
+          data-footer-bounce
+          className="absolute inset-x-0 bottom-0 overflow-hidden"
+          style={{ height: "var(--footer-wordmark-h, auto)" }}
+        >
           <Image
             src="/prototype/v2/near-wordmark.svg"
             alt=""
@@ -445,7 +532,12 @@ export default function SiteFooter() {
         data-footer-panel
         className="invisible absolute inset-x-0 bottom-[calc(100%-10rem)] z-[3] hidden lg:block"
       >
-        <Container className="grid gap-16 pb-20 lg:grid-cols-[1fr_auto] lg:gap-24">
+        {/* El aire hasta el wordmark es lo PRIMERO que cede en una pantalla
+            baja (de 5rem a 1.5rem) antes de tocar el logo. */}
+        <Container
+          className="grid gap-16 lg:grid-cols-[1fr_auto] lg:gap-24"
+          style={{ paddingBottom: "var(--footer-takeover-gap, 5rem)" }}
+        >
           <p className="text-h2 text-cream text-pretty">
             Where money
             <br />
@@ -457,9 +549,15 @@ export default function SiteFooter() {
 
       {/* Lo único visible por defecto en desktop: el wordmark negro, DEBAJO
           del wipe — cuando el negro sube, la copia blanca de adentro del wipe
-          lo va reemplazando con un corte duro. `overflow-hidden` recorta solo
-          el overshoot de las letras redondas (ver WORDMARK_CROP_PCT). */}
-      <div data-footer-bounce className="relative z-[1] overflow-hidden">
+          lo va reemplazando con un corte duro. `overflow-hidden` recorta el
+          overshoot de las letras redondas (ver WORDMARK_CROP_PCT) y, en
+          pantallas bajas, también el pie del logo (ver TAKEOVER_*). */}
+      <div
+        data-footer-bounce
+        data-footer-wordmark
+        className="relative z-[1] overflow-hidden"
+        style={{ height: "var(--footer-wordmark-h, auto)" }}
+      >
         <Image
           src="/prototype/v2/near-wordmark.svg"
           alt="NEAR"
