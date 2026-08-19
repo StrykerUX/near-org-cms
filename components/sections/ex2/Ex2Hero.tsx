@@ -11,6 +11,7 @@ import {
   WORLD_EYE,
   WORLD_EYE_CENTER,
   WORLD_LETTERS,
+  WORLD_O_INDEX,
   WORLD_VIEWBOX,
 } from "@/components/sections/ex2/worldMark";
 
@@ -41,9 +42,14 @@ import {
 //
 // ── Los dos movimientos comparten un punto ──────────────────────────────────
 //
-// 1. El cartel ESCALA con `transform-origin` en el centro de la contraforma.
-//    Ese origen es lo que deja el ojo de la «o» clavado en el mismo punto de la
-//    pantalla mientras todo lo demás se va hacia afuera.
+// 1. Crece SOLO la «o» —su contorno y su contraforma—, escalada desde el centro
+//    del ojo. El resto del cartel («W», «r», «l», «d» y el renglón de arriba) se
+//    queda donde está y se apaga.
+//
+//    Escalar el cartel entero, que era la primera versión, tenía un problema de
+//    lectura: si todo crece a la vez, no hay nada quieto contra lo que medir el
+//    crecimiento, y el gesto se lee como un zoom de cámara. Con las vecinas
+//    fijas, lo que se ve es una letra que se abre y se traga la palabra.
 // 2. La capa de destino se recorta con un `<clipPath>` que contiene ese mismo
 //    subpath, escalado desde ese mismo punto y con el mismo factor. Como
 //    comparten centro y factor, el agujero y la letra son la misma forma
@@ -72,11 +78,13 @@ export default function Ex2Hero() {
     const stage = q("[data-stage]")[0];
     const headline = q("[data-headline]")[0];
     const mark = q<SVGSVGElement>("[data-mark]")[0];
+    const oGroup = q<SVGGElement>("[data-o]")[0];
+    const rest = q("[data-rest]");
     const clipShape = q<SVGPathElement>("[data-clip-group]")[0];
     const reveal = q("[data-reveal]")[0];
     const revealInner = q("[data-reveal-inner]")[0];
     const fade = q("[data-fade]");
-    if (!stage || !headline || !mark || !clipShape || !reveal) return;
+    if (!stage || !headline || !mark || !oGroup || !clipShape || !reveal) return;
 
     // Sin escena: el hero se lee como una portada normal y la sección de destino
     // queda debajo, en flujo. El mecanismo es un lujo; el contenido no.
@@ -100,17 +108,21 @@ export default function Ex2Hero() {
       );
     };
 
+    // La «o» escala en las unidades del viewBox, no en píxeles: así el mismo
+    // factor `k` vale para la letra y para el clip (que sí trabaja en pantalla),
+    // porque los dos escalan alrededor del mismo punto del glifo.
+    const applyO = (k: number) => {
+      const { x, y } = WORLD_EYE_CENTER;
+      oGroup.setAttribute("transform", `translate(${x} ${y}) scale(${k}) translate(${-x} ${-y})`);
+    };
+
     self.add("measure", () => {
-      // Medir SIN la escala puesta. `getBoundingClientRect` devuelve la caja ya
-      // transformada, así que medir a mitad de recorrido daba un
-      // `transform-origin` desplazado — y con el origen corrido, el agujero del
-      // clip y la contraforma pintada dejan de solaparse: se ven dos formas
-      // distintas en pantalla en vez de una.
-      gsap.set(headline, { scale: 1 });
+      // Medir SIN la escala puesta: `getBoundingClientRect` devuelve la caja ya
+      // transformada, y medir a mitad de recorrido daría una escala desplazada.
+      oGroup.removeAttribute("transform");
 
       const markBox = mark.getBoundingClientRect();
       const stageBox = stage.getBoundingClientRect();
-      const headBox = headline.getBoundingClientRect();
 
       // Cuánto mide en pantalla una unidad del viewBox.
       const s = markBox.width / WORLD_VIEWBOX.w;
@@ -124,10 +136,6 @@ export default function Ex2Hero() {
       const screenY = markBox.top + WORLD_EYE_CENTER.y * s;
       cx = screenX - stageBox.left;
       cy = screenY - stageBox.top;
-
-      gsap.set(headline, {
-        transformOrigin: `${screenX - headBox.left}px ${screenY - headBox.top}px`,
-      });
 
       base = `translate(${markBox.left - stageBox.left} ${markBox.top - stageBox.top}) scale(${s})`;
 
@@ -143,17 +151,12 @@ export default function Ex2Hero() {
       kEnd = (far * COVER) / (WORLD_EYE_CENTER.r * s);
 
       applyClip(1);
+      applyO(1);
     });
 
     self.measure();
     ScrollTrigger.addEventListener("refreshInit", self.measure);
 
-    // `gsap.set` y no `quickSetter("scale")`: el segundo escribía el transform
-    // sin la escala —`translate(0px, 0px)` y nada más— porque el titular ya
-    // tenía un `transformOrigin` puesto por `gsap.set` en la medición y los dos
-    // caminos no comparten caché. Un `set` por frame dentro de un scrub es lo
-    // que ya hacen otras secciones del repo.
-    const setScale = (k: number) => gsap.set(headline, { scale: k });
     const setInnerY = gsap.quickSetter(revealInner, "y", "px");
     const setInnerAlpha = gsap.quickSetter(revealInner, "opacity");
 
@@ -166,7 +169,7 @@ export default function Ex2Hero() {
       // `will-change` solo mientras el recorrido está activo: fijo en el
       // className, el cartel quedaría promovido a su propia capa toda la sesión.
       onToggle: (t) => {
-        headline.style.willChange = t.isActive ? "transform" : "auto";
+        oGroup.style.willChange = t.isActive ? "transform" : "auto";
       },
       onUpdate: (t) => {
         const p = t.progress;
@@ -174,8 +177,13 @@ export default function Ex2Hero() {
         // Lineal y no una ease: el cartel y el agujero tienen que crecer con el
         // MISMO factor en todo momento, y cualquier curva los desincroniza.
         const k = 1 + (kEnd - 1) * p;
-        setScale(k);
+        applyO(k);
         applyClip(k);
+
+        // Las vecinas se apagan mientras la «o» crece. No se mueven: son la
+        // referencia fija contra la que se mide el crecimiento, y moverlas
+        // devolvería la sensación de zoom que esta versión evita.
+        gsap.set(rest, { autoAlpha: 1 - Math.min(1, p * 1.8) });
 
         // El contenido de destino sube un poco y entra con opacidad en el primer
         // cuarto. Sin lo segundo, el ojo de la «o» ya deja ver dos palabras
@@ -194,9 +202,10 @@ export default function Ex2Hero() {
     return () => {
       ScrollTrigger.removeEventListener("refreshInit", self.measure);
       st.kill();
-      headline.style.willChange = "auto";
+      oGroup.style.willChange = "auto";
+      oGroup.removeAttribute("transform");
       clipShape.removeAttribute("transform");
-      gsap.set([headline, ...fade, ...(revealInner ? [revealInner] : [])], {
+      gsap.set([headline, ...rest, ...fade, ...(revealInner ? [revealInner] : [])], {
         clearProps: "all",
       });
       off();
@@ -243,24 +252,35 @@ export default function Ex2Hero() {
           </h1>
 
           <div data-headline aria-hidden="true" className="w-fit text-cream">
-            <span className="block text-kicker-xl uppercase">{EX2_HERO.lead}</span>
+            <span data-rest className="block text-kicker-xl uppercase">
+              {EX2_HERO.lead}
+            </span>
 
             {/* El cartel, desde los trazados de marca: el SVG manda el tamaño y
                 no la métrica de una fuente. */}
+            {/* `overflow-visible`: la «o» crece MUCHO más allá del viewBox, y un
+                `<svg>` recorta a su viewport por defecto — sin esto, la letra se
+                corta contra el borde de la palabra a los pocos píxeles. */}
             <svg
               data-mark
               viewBox={`0 0 ${WORLD_VIEWBOX.w} ${WORLD_VIEWBOX.h}`}
-              className="block w-[76vw] max-w-[68rem]"
+              className="block w-[76vw] max-w-[68rem] overflow-visible"
               fill="currentColor"
             >
-              {WORLD_LETTERS.map((d, i) => (
-                <path key={i} d={d} />
-              ))}
-              {/* La contraforma, pintada del color del FONDO: es lo que abre el
-                  ojo de la «o» sobre la palabra maciza. Va como path aparte y no
-                  como agujero del glifo para que el MISMO trazado pueda reusarse
-                  de máscara sin duplicarlo. */}
-              <path d={WORLD_EYE} className="fill-ink" />
+              {WORLD_LETTERS.map((d, i) =>
+                i === WORLD_O_INDEX ? null : (
+                  <path key={i} data-rest d={d} />
+                )
+              )}
+
+              {/* La «o» y su contraforma en un grupo propio: es lo único que
+                  escala. La contraforma va pintada del color del FONDO, que es
+                  lo que abre el ojo sobre la letra maciza — y como viaja DENTRO
+                  del grupo, sigue calzando con el clip a cualquier escala. */}
+              <g data-o>
+                <path d={WORLD_LETTERS[WORLD_O_INDEX]} />
+                <path d={WORLD_EYE} className="fill-ink" />
+              </g>
             </svg>
           </div>
 

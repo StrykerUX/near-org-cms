@@ -20,6 +20,13 @@
 //
 // El otro precio: si cambia la copy, hay que regenerar el asset.
 
+/**
+ * Índice de la «o» dentro de `WORLD_LETTERS`. Sale de medir con `getBBox()` las
+ * cinco letras ya montadas: el orden de los paths en el archivo no sigue el de
+ * la palabra (queda d, l, r, o, W), así que no se puede deducir contando.
+ */
+export const WORLD_O_INDEX = 3;
+
 /** El viewBox del SVG original. Todo lo de abajo está en estas unidades. */
 export const WORLD_VIEWBOX = { w: 268, h: 118 } as const;
 
