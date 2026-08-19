@@ -40,8 +40,9 @@ import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 // En una pantalla baja el takeover no entra completo en el viewport, y lo que
 // cede es el pie del logo y no el headline: ver "Pantallas bajas" más abajo.
 
-// Los cuatro grupos transcritos del tab Footer de "near.org - sitemap" (Google
-// Doc). Sin las descripciones por link, que el doc lista solo bajo Navigation.
+// Los grupos transcritos del tab Footer de "near.org - sitemap" (Google Doc) —
+// cuatro de ahí más "Terms and Policies", que el doc no tiene como columna.
+// Sin las descripciones por link, que el doc lista solo bajo Navigation.
 // Resources y About conservan sus sub-grupos (Build / Learn / Connect,
 // Fundamentals / Ecosystem), y por eso una columna es una lista de SECCIONES y
 // no una lista plana de links.
@@ -139,12 +140,24 @@ const GROUPS: {
       },
     ],
   },
-];
-
-const LEGAL: FooterLink[] = [
-  { label: "Privacy", href: "/privacy" },
-  { label: "Terms of Use", href: "/terms-of-use" },
-  { label: "Cookie Policy", href: "/cookie-policy" },
+  // La quinta columna no está en el tab Footer del sitemap doc: ahí lo legal
+  // vive como una fila al pie. Se sube a columna a pedido, y entonces la fila
+  // de abajo se queda solo con el copyright — los mismos tres links dos veces
+  // en la misma pantalla no son dos caminos, son ruido.
+  {
+    title: "Terms and Policies",
+    sections: [
+      {
+        label: "",
+        links: [
+          { label: "Terms of Use", href: "/terms-of-use" },
+          { label: "Privacy Policy", href: "/privacy" },
+          { label: "Cookie Policy", href: "/cookie-policy" },
+          { label: "Official Rules", href: "/official-rules" },
+        ],
+      },
+    ],
+  },
 ];
 
 // El wordmark es el SVG y no el PNG de 1440px: se muestra al 100% del ancho del
@@ -201,7 +214,7 @@ function LinkColumns({ dark }: { dark: boolean }) {
   }`;
 
   return (
-    <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-4 lg:gap-x-16">
+    <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-16">
       {GROUPS.map((group) => (
         <nav key={group.title} aria-label={group.title}>
           <h2 className={`text-label ${dark ? "text-cream" : ""}`}>{group.title}</h2>
@@ -569,25 +582,15 @@ export default function SiteFooter() {
         />
       </div>
 
-      {/* El legal, por ENCIMA del wipe para no quedar sepultado por el negro.
-          `mix-blend-difference` con source gris funciona sobre los DOS
+      {/* El copyright, por ENCIMA del wipe para no quedar sepultado por el
+          negro. `mix-blend-difference` con source gris funciona sobre los DOS
           estados: sobre cream cae oscuro, sobre el negro del wipe queda
-          claro. No necesita variante dark. */}
+          claro. No necesita variante dark.
+
+          Los links legales ya no están acá: subieron a su propia columna. */}
       <div className="absolute inset-x-0 bottom-6 z-[3] mix-blend-difference">
         <Container className="flex flex-wrap items-center justify-end gap-x-8 gap-y-2 text-neutral-400">
           <p className="text-body-sm">© 2026 NEAR. All rights reserved.</p>
-          <ul className="flex flex-wrap items-center gap-x-8 gap-y-2">
-            {LEGAL.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href ?? "#"}
-                  className="text-body-sm transition-opacity hover:opacity-70"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </Container>
       </div>
     </footer>
