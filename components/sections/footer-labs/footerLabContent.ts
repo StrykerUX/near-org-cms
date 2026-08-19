@@ -35,8 +35,8 @@ export const LABS: FooterLabSpec[] = [
     variant: "veil",
     title: "Veil",
     technique: "the logo sinks into the footer",
-    bet: "A gradient the colour of the background falls over the wordmark from its top edge down, and the logo sits flush against the bottom of the page: it does not end there, it goes under. The copyright floats back over it as its own layer so nothing pushes the logo up.",
-    watch: "Where the letters stop being readable. The veil is measured against the logo's own box, so it follows whatever height the vertical budget gives it — in a short viewport the logo is already cropped and the gradient lands on less of it.",
+    bet: "A gradient runs the full height of the footer — opaque at the top, gone at the bottom — and the wordmark sits whole and flush against the bottom edge: it does not end there, it goes under. The copyright floats back over it as its own layer so nothing pushes the logo up.",
+    watch: "That the logo is never cropped here: it is the panel that gives way, anchoring to the top of the viewport and lying over the veiled part of the letters. Shrink the window vertically and watch the links come down over the logo instead of the logo shrinking. On the light resting state there is no veil at all — over cream a black gradient is a band, not a surface.",
   },
   {
     id: "compact",

@@ -256,10 +256,23 @@ const WORDMARK_BOX_H = `calc(min(100vw, 2080px) * ${(
 // transparente al de abajo, así que sobre el logo cae ya muy decaído y lo que
 // se ve es la base. Con la altura atada a la caja del logo el degradado era el
 // triple de denso sobre las letras.
-// La parada del medio es la que da la forma: al 50% de la altura el negro
-// sigue al 90%, así que arriba —donde están los links— es casi opaco y toda la
-// caída ocurre en la mitad de abajo, sobre el logo.
-const VEIL = "pointer-events-none bg-gradient-to-b from-ink via-ink/90 to-transparent";
+// Las paradas son las que dan la forma: opaco arriba, 90% al 40%, 50% al 60% y
+// transparente en la base. Casi toda la caída ocurre en ese quinto del medio,
+// así que sobre los links el negro es macizo y sobre el logo se abre de golpe.
+//
+// Va en `style` y no en clases porque son CUATRO paradas: las utilidades de
+// gradiente de Tailwind dan tres (`from` / `via` / `to`) y un `via` de más no
+// existe. El color sale del token, no de un literal.
+const VEIL = "pointer-events-none";
+const VEIL_STYLE: React.CSSProperties = {
+  backgroundImage: [
+    "linear-gradient(to bottom",
+    "var(--color-ink) 0%",
+    "color-mix(in srgb, var(--color-ink) 90%, transparent) 40%",
+    "color-mix(in srgb, var(--color-ink) 50%, transparent) 60%",
+    "transparent 100%)",
+  ].join(", "),
+};
 
 // ── El indicador con inercia ────────────────────────────────────────────────
 //
@@ -888,6 +901,7 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
           <span
             aria-hidden="true"
             className={`${VEIL} absolute inset-x-0 bottom-0 h-svh`}
+            style={VEIL_STYLE}
           />
         )}
       </div>
@@ -969,6 +983,7 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
         <span
           aria-hidden="true"
           className={`${VEIL} absolute inset-0 z-[1] lg:hidden`}
+          style={VEIL_STYLE}
         />
       )}
 
