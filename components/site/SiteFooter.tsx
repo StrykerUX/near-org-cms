@@ -474,14 +474,19 @@ function StaticFooter() {
 
   return (
     <div ref={rootRef} className="lg:hidden">
-      <Container className="grid gap-16 pb-24 pt-24">
+      {/* Un div y no `<Container>`, por lo mismo que `SiteHeader`: su escala
+          `site` es `px-[60px]` FIJO en todos los breakpoints, y en un teléfono
+          de 390px eso es casi un tercio del ancho de gutter. Misma escala que
+          el header, para que los links del footer arranquen en la misma
+          vertical que el logo de arriba. */}
+      <div className="mx-auto grid w-full max-w-[1780px] gap-16 px-4 pb-24 pt-24 sm:px-6">
         <p data-footer-headline className="text-h2 text-cream text-pretty">
           Where money
           <br />
           <Accent>actually moves.</Accent>
         </p>
         <LinkColumns dark columns="two" />
-      </Container>
+      </div>
     </div>
   );
 }
@@ -860,7 +865,7 @@ export default function SiteFooter() {
           Los links legales ya no están acá: subieron a su propia columna. */}
       <div
         data-footer-legal
-        className={`relative z-[3] flex justify-end px-5 pb-5 pt-3 mix-blend-difference ${WORDMARK_MAX_W}`}
+        className={`relative z-[3] flex justify-end px-4 pb-5 pt-3 mix-blend-difference sm:px-6 lg:px-5 ${WORDMARK_MAX_W}`}
       >
         <p className="text-body-sm text-neutral-400">© 2026 NEAR. All rights reserved.</p>
       </div>
