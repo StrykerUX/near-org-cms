@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import StubView from "@/components/views/StubView";
+import ChainAbstractionView from "@/components/views/ChainAbstractionView";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
 export const metadata: Metadata = toMetadata(meta);
 
 export default function ChainAbstractionPage() {
-  return <StubView title={meta.title} />;
+  return <ChainAbstractionView />;
 }
