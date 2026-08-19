@@ -1,18 +1,26 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import Link from "next/link";
+import OwnYourOwn from "@/components/sections/home-ab7/OwnYourOwn";
 import ExHero, {
   type ExHeroLayout,
   type ExHeroWord,
 } from "@/components/sections/ex/ExHero";
 import { type ExNextMode } from "@/components/sections/ex/exNextReveal";
 
-// Los tres drafts EX comparten esta view: hero + un bloque de cierre. Lo único
-// que las distingue es el FONDO y la COMPOSICIÓN del hero, que llegan por prop.
+// Los tres drafts EX comparten esta view: hero + «Own Your Own» + un cierre. Lo
+// único que las distingue es el FONDO y la COMPOSICIÓN del hero, que llegan por
+// prop.
 //
 // Tres views idénticas salvo dos líneas divergirían en el primer ajuste, y
 // entonces la comparación mediría también esa divergencia — que es justo lo que
 // estas tres páginas existen para no hacer.
+//
+// `OwnYourOwn` se IMPORTA de ab7, no se copia. La sección mide 32KB y su gesto
+// —las cards atravesando el título quieto— depende de medir el layout en vivo:
+// una copia divergiría del original en el primer ajuste de cualquiera de los
+// dos lados, y estos drafts no existen para tener su propia versión de una
+// sección que ya está resuelta.
 
 const VARIANTS = [
   { id: "ex1", label: "EX1 · vídeo" },
@@ -47,6 +55,8 @@ export default function ExDraftView({
         tone={tone}
       />
 
+      <OwnYourOwn />
+
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
           <Eyebrow className="text-gray-intermediate">Draft</Eyebrow>
@@ -54,8 +64,9 @@ export default function ExDraftView({
             De acá para abajo, la página está por construir.
           </p>
           <p className="max-w-[62ch] text-body-lg text-gray-intermediate text-pretty">
-            Esta pasada resuelve el hero y la apertura de la O. El resto de las
-            secciones, su orden y su contenido son la decisión siguiente.
+            Esta pasada resuelve el hero, la apertura de la O y el paso a «Own
+            Your Own». El resto de las secciones, su orden y su contenido son la
+            decisión siguiente.
           </p>
         </Container>
       </section>
