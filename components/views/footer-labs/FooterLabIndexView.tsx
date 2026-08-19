@@ -38,28 +38,28 @@ export default function FooterLabIndexView() {
   return (
     <main className="bg-cream text-foreground">
       <Container as="header" className="pt-[calc(var(--site-header-block)+3rem)] pb-16">
-        <Eyebrow className="text-gray-intermediate">Footer lab · 6 alternativas</Eyebrow>
-        <h1 className="text-h1 mt-6 max-w-[18ch]">Seis maneras de terminar la página</h1>
+        <Eyebrow className="text-gray-intermediate">Footer lab · 6 alternatives</Eyebrow>
+        <h1 className="text-h1 mt-6 max-w-[18ch]">Six ways to end the page</h1>
         <p className="text-body-lg mt-6 max-w-[64ch] text-muted-foreground">
-          Seis alternativas al footer de producción, una por ruta. La información
-          es la misma en todas —el mismo titular, los mismos cinco grupos de
-          links, el mismo copyright— y también el layout: lo que cambia es el
-          mecanismo con que llegan. Cada página lleva el mismo relleno dummy
-          encima para que el footer se juzgue después de scrollear una página
-          entera, que es como se ve de verdad.
+          Six alternatives to the production footer, one per route. The
+          information is the same in all of them —same headline, same five link
+          groups, same copyright— and so is the layout: what changes is the
+          mechanism they arrive by. Every page carries the same dummy filler
+          above it so the footer is judged after scrolling a whole page, which is
+          how it is really seen.
         </p>
         <p className="text-body-sm mt-4 max-w-[64ch] text-gray-intermediate">
-          Desktop primero: las seis resuelven su idea en ≥1024px con movimiento
-          habilitado. En mobile y con <code>prefers-reduced-motion</code> las
-          seis caen al mismo footer estático, a propósito.
+          Desktop first: all six resolve their idea at ≥1024px with motion
+          enabled. On mobile and with <code>prefers-reduced-motion</code> all six
+          fall back to the same static footer, on purpose.
         </p>
       </Container>
 
       <Container as="section" className="pb-24">
-        <h2 className="text-h4">Takeover — se apropian del viewport</h2>
+        <h2 className="text-h4">Takeover — they claim the viewport</h2>
         <p className="text-body-sm mt-2 max-w-[70ch] text-muted-foreground">
-          Las tres tapan la última sección de la página, como el footer de
-          producción. Cambia por completo cómo llegan.
+          All three cover the last section of the page, like the production
+          footer. What changes completely is how they arrive.
         </p>
         <ul className="mt-8 border-b border-rule">
           {takeover.map((spec) => (
@@ -69,10 +69,10 @@ export default function FooterLabIndexView() {
       </Container>
 
       <Container as="section" className="pb-32">
-        <h2 className="text-h4">Sin takeover — conviven con la página</h2>
+        <h2 className="text-h4">No takeover — they live with the page</h2>
         <p className="text-body-sm mt-2 max-w-[70ch] text-muted-foreground">
-          Ninguna tapa nada: ocupan su propio espacio, se descubren por debajo o
-          se ganan su recorrido de scroll.
+          None of them covers anything: they take their own space, are uncovered
+          from underneath, or earn their own scroll stretch.
         </p>
         <ul className="mt-8 border-b border-rule">
           {inline.map((spec) => (

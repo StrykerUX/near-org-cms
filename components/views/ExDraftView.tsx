@@ -29,8 +29,8 @@ import { type ExNextMode } from "@/components/sections/ex/exNextReveal";
 // sección que ya está resuelta.
 
 const VARIANTS = [
-  { id: "ex1", label: "EX1 · vídeo" },
-  { id: "ex2", label: "EX2 · campo" },
+  { id: "ex1", label: "EX1 · video" },
+  { id: "ex2", label: "EX2 · field" },
   { id: "ex3", label: "EX3 · ascii" },
 ] as const;
 
@@ -72,12 +72,12 @@ export default function ExDraftView({
         <Container className="flex flex-col gap-5">
           <Eyebrow className="text-gray-intermediate">Draft</Eyebrow>
           <p className="max-w-[46ch] text-h3 text-pretty">
-            De acá para abajo, la página está por construir.
+            From here down, the page is still to be built.
           </p>
           <p className="max-w-[62ch] text-body-lg text-gray-intermediate text-pretty">
-            Esta pasada resuelve el hero, la apertura de la O y el paso a «Own
-            Your Own». El resto de las secciones, su orden y su contenido son la
-            decisión siguiente.
+            This pass resolves the hero, the opening of the O and the handover to
+            «Own Your Own». The remaining sections, their order and their content
+            are the next decision.
           </p>
         </Container>
       </section>

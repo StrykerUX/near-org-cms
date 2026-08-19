@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/stack-labs/dolly",
   title: "Stack lab · H · Dolly",
   description:
-    "Variante H del NEAR Stack: el cruce de Bleed y Traveling — arte a sangre con renglones tipográficos y una cámara que cambia de plano por parada. Track de 300svh.",
-  blurb: "Bleed × Traveling: arte a sangre con cámara",
+    "Variant H of the NEAR Stack: the crossing of Bleed and Traveling — bleeding art with typographic lines plus a camera that changes shot at every stop. 300svh track.",
+  blurb: "Bleed × Traveling: bleeding art with a camera",
   nav: false,
   sitemap: false,
   robots: "noindex",

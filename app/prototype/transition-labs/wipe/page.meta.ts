@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/wipe",
-  title: "Transición · A · Wipe",
+  title: "Transition · A · Wipe",
   description:
-    "Transición A: un telón de tinta sube y tapa el cream antes de entregar al stack. CSS y GSAP, sin canvas.",
-  blurb: "El negro sube y tapa",
+    "Transition A: an ink curtain rises and covers the cream before handing over to the stack. CSS and GSAP, no canvas.",
+  blurb: "The black rises and covers",
   nav: false,
   sitemap: false,
   robots: "noindex",

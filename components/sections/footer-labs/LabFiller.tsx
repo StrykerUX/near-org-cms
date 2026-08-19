@@ -22,23 +22,23 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 // `canTakeover()`.
 
 const CARDS = [
-  { k: "01", t: "Placeholder", d: "Bloque neutro. No es contenido real de la home." },
-  { k: "02", t: "Placeholder", d: "Está acá para dar altura y un borde superior al footer." },
-  { k: "03", t: "Placeholder", d: "Mismo peso visual en las seis rutas del lab." },
-  { k: "04", t: "Placeholder", d: "Sin animación propia: nada compite con el footer." },
-  { k: "05", t: "Placeholder", d: "Gris sobre cream, tipografía de la escala." },
-  { k: "06", t: "Placeholder", d: "La última fila es la que los takeover tapan." },
+  { k: "01", t: "Placeholder", d: "Neutral block. Not real homepage content." },
+  { k: "02", t: "Placeholder", d: "It is here to give the footer height and a top edge." },
+  { k: "03", t: "Placeholder", d: "Same visual weight across the six lab routes." },
+  { k: "04", t: "Placeholder", d: "No animation of its own: nothing competes with the footer." },
+  { k: "05", t: "Placeholder", d: "Grey on cream, type from the scale." },
+  { k: "06", t: "Placeholder", d: "The last row is the one the takeovers cover." },
 ];
 
 export default function LabFiller() {
   return (
     <>
       <Container as="section" className="flex min-h-[70svh] flex-col justify-center py-24">
-        <Eyebrow className="text-gray-intermediate">Contenido de relleno</Eyebrow>
-        <p className="text-h1 mt-6 max-w-[16ch] text-balance">Una página cualquiera</p>
+        <Eyebrow className="text-gray-intermediate">Filler content</Eyebrow>
+        <p className="text-h1 mt-6 max-w-[16ch] text-balance">Just any page</p>
         <p className="text-body-lg mt-6 max-w-[58ch] text-muted-foreground">
-          Todo lo que hay encima del footer es dummy y es igual en las seis
-          rutas del lab. Scrollear hasta el fondo es la única instrucción.
+          Everything above the footer is dummy and identical across the six lab
+          routes. Scrolling to the bottom is the only instruction.
         </p>
       </Container>
 

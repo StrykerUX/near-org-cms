@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/stack-labs/triptych",
   title: "Stack lab · G · Triptych",
   description:
-    "Variante G del NEAR Stack: índice de capas a la izquierda —la activa, más grande—, el ensamble al centro y el cuerpo a la derecha. Track de 280svh.",
-  blurb: "Índice, ensamble y cuerpo en tres columnas",
+    "Variant G of the NEAR Stack: layer index on the left —the active one larger—, the assembly in the centre and the body on the right. 280svh track.",
+  blurb: "Index, assembly and body in three columns",
   nav: false,
   sitemap: false,
   robots: "noindex",

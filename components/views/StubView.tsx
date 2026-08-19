@@ -28,11 +28,11 @@ export default function StubView({ title }: StubViewProps) {
     // `(site)` — ver `--site-header-block` en app/globals.css.
     <main className="flex flex-1 flex-col bg-cream pt-[calc(var(--site-header-block)+3rem)] pb-24">
       <Container className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <Eyebrow className="text-gray-intermediate">Próximamente</Eyebrow>
+        <Eyebrow className="text-gray-intermediate">Coming soon</Eyebrow>
         <h1 className="text-h2 text-pretty">{title}</h1>
         <p className="max-w-md text-body text-gray-intermediate text-pretty">
-          Esta página existe para que el menú del sitio tenga a dónde apuntar.
-          Todavía no tiene contenido.
+          This page exists so the site menu has somewhere to point. It has no
+          content yet.
         </p>
       </Container>
     </main>

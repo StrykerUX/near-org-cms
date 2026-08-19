@@ -4,7 +4,7 @@ const meta = {
   route: "/prototype/homepage-v4",
   title: "Homepage v4",
   description:
-    "Fork de Homepage v2 para iterar el rediseño sin tocarla — secciones propias en components/sections/home-v4/, copy hardcodeada, sin datos reales.",
+    "Fork of Homepage v2 to iterate the redesign without touching it — its own sections in components/sections/home-v4/, hardcoded copy, no real data.",
   blurb: "v2 fork, redesign iteration",
   nav: false,
   sitemap: false,

@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/mosaic",
-  title: "Transición · H · Mosaic",
+  title: "Transition · H · Mosaic",
   description:
-    "Transición H: una retícula de celdas se pinta de negro en orden de ruido determinista.",
-  blurb: "La pantalla se reemplaza por partes",
+    "Transition H: a grid of cells lands on the page from the bottom up, in a deterministic noise order.",
+  blurb: "The screen is replaced piece by piece",
   nav: false,
   sitemap: false,
   robots: "noindex",

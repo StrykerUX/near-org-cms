@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/ascii",
-  title: "Transición · C · ASCII",
+  title: "Transition · C · ASCII",
   description:
-    "Transición C: un campo de caracteres se densifica desde el centro y la paleta rueda de cream a negro con los glifos en verde.",
-  blurb: "La página se vuelve texto",
+    "Transition C: a character field thickens from the centre and the palette rolls from cream to black with the glyphs in green.",
+  blurb: "The page turns into text",
   nav: false,
   sitemap: false,
   robots: "noindex",

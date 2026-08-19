@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/stack-labs/blueprint",
   title: "Stack lab · D · Blueprint",
   description:
-    "Variante D del NEAR Stack: el ensamble como plano de ingeniería, con retícula, líneas guía a cada capa y rótulos en monoespaciada. Sin sticky.",
-  blurb: "Stack como plano de ingeniería",
+    "Variant D of the NEAR Stack: the assembly as an engineering drawing, with a grid, leader lines to each layer and monospaced labels. No sticky.",
+  blurb: "The stack as an engineering drawing",
   nav: false,
   sitemap: false,
   robots: "noindex",

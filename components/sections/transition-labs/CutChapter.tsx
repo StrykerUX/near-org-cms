@@ -90,7 +90,7 @@ export default function CutChapter({
       <div className="absolute inset-0 flex items-center justify-center px-[60px]">
         <div ref={cardRef} className="flex w-full max-w-[62rem] flex-col gap-6 text-cream">
           <div ref={numRef} className="text-caption-mono uppercase text-cta-mint">
-            capítulo {index}
+            chapter {index}
           </div>
           {/* La regla se abre desde la izquierda: es la que da la sensación de
               que el rótulo se está ESCRIBIENDO y no apareciendo. */}

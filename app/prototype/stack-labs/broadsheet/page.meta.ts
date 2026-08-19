@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/stack-labs/broadsheet",
   title: "Stack lab · B · Broadsheet",
   description:
-    "Variante B del NEAR Stack: las cuatro capas completas a la vez, con los tres productos de NEAR AI en línea, y el arte ocupando la mitad derecha de punta a punta. Sin sticky.",
-  blurb: "Stack en una pantalla, sin acordeón",
+    "Variant B of the NEAR Stack: the four layers complete at once, with the three NEAR AI products in a row, and the art filling the right half end to end. No sticky.",
+  blurb: "Stack on one screen, no accordion",
   nav: false,
   sitemap: false,
   robots: "noindex",

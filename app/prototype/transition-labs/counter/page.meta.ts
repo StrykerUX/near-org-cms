@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/counter",
-  title: "Transición · B · Counterform",
+  title: "Transition · B · Counterform",
   description:
-    "Transición B: la contraforma de la «O» crece hasta cubrir la pantalla — el negro sale de dentro de la tipografía.",
-  blurb: "El agujero de la O se traga la página",
+    "Transition B: the counterform of the «O» grows until it covers the screen — the black comes out from inside the type.",
+  blurb: "The hole in the O swallows the page",
   nav: false,
   sitemap: false,
   robots: "noindex",

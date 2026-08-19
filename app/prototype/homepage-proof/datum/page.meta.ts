@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/homepage-proof/datum",
   title: "Homepage · proof Datum",
   description:
-    "La homepage de ab7 con el ProofStepper (325svh) reemplazado por «B · Datum»: un eje que cruza el ancho con las seis pruebas colgando de él, alternando arriba y abajo. Es una composición, no un fork: las nueve secciones restantes vienen de home-ab7 sin copiar un archivo.",
-  blurb: "ab7 con la sección de pruebas datum",
+    "The ab7 homepage with the ProofStepper (325svh) replaced by «B · Datum»: an axis crossing the width with the six proofs hanging off it, alternating above and below. It is a composition, not a fork: the remaining nine sections come from home-ab7 without copying a file.",
+  blurb: "ab7 with the datum proof section",
   nav: false,
   sitemap: false,
   robots: "noindex",

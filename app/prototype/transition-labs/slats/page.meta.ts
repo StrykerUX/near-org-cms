@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/slats",
-  title: "Transición · F · Slats",
+  title: "Transition · F · Slats",
   description:
-    "Transición F: doce lamas inclinadas al ángulo real del isométrico del stack (30.79°) cierran el corte a destiempo.",
-  blurb: "Lamas al ángulo del isométrico",
+    "Transition F: twelve slats tilted to the real angle of the stack's isometric (30.79°) close the cut off-beat.",
+  blurb: "Slats at the isometric angle",
   nav: false,
   sitemap: false,
   robots: "noindex",

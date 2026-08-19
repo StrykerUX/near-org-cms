@@ -57,11 +57,11 @@ export default function FooterLabShell({
 
         <div className="mt-8 grid max-w-[110ch] gap-8 sm:grid-cols-2">
           <div>
-            <p className="text-caption uppercase text-gray-intermediate">La apuesta</p>
+            <p className="text-caption uppercase text-gray-intermediate">The bet</p>
             <p className="text-body mt-2 text-muted-foreground">{spec.bet}</p>
           </div>
           <div>
-            <p className="text-caption uppercase text-gray-intermediate">Qué mirar</p>
+            <p className="text-caption uppercase text-gray-intermediate">What to watch</p>
             <p className="text-body mt-2 text-muted-foreground">{spec.watch}</p>
           </div>
         </div>

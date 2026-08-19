@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/halftone",
-  title: "Transición · I · Halftone",
+  title: "Transition · I · Halftone",
   description:
-    "Transición I: trama de medio tono girada 45°, con los puntos engordando hasta tocarse. La página se imprime.",
-  blurb: "La página se imprime",
+    "Transition I: a halftone screen rotated 45°, its dots fattening until they touch. The page prints itself.",
+  blurb: "The page prints itself",
   nav: false,
   sitemap: false,
   robots: "noindex",

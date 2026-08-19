@@ -147,9 +147,9 @@ export const PROOF_ALTS: readonly ProofSpec[] = [
     index: "B",
     title: "Datum",
     stack: "DOM + GSAP",
-    travel: "100svh · la más baja de las tres",
+    travel: "100svh · the shortest of the three",
     pitch:
-      "Un eje cruza el ancho y las seis pruebas cuelgan de él, alternando arriba y abajo. La que menos estorba: le sobra alto en cualquier pantalla. A cambio, seis columnas de un sexto del ancho dejan la cifra a escala de h2 y con quiebre en casi todas. En móvil el eje GIRA: la línea pasa a vertical y las fichas cuelgan de ella.",
+      "An axis crosses the width and the six proofs hang off it, alternating above and below. The least intrusive: it has height to spare on any screen. In exchange, six columns a sixth of the width wide leave the figure at h2 scale and wrapping in almost all of them. On mobile the axis TURNS: the line goes vertical and the cards hang off it.",
   },
   {
     id: "index",
@@ -158,7 +158,7 @@ export const PROOF_ALTS: readonly ProofSpec[] = [
     stack: "DOM + GSAP",
     travel: "100svh · seis filas en una pantalla",
     pitch:
-      "Seis renglones de un documento: número, rótulo, cifra, cuerpo, y una regla de borde a borde entre cada uno. La única en la que las seis cifras están alineadas entre sí, así que se COMPARAN. La más legible y la menos memorable — se parece a una tabla porque lo es.",
+      "Six lines of a document: number, label, figure, body, and an edge-to-edge rule between each. The only one where the six figures are aligned with each other, so they COMPARE. The most legible and the least memorable — it looks like a table because it is one.",
   },
   {
     id: "columns",
@@ -167,6 +167,6 @@ export const PROOF_ALTS: readonly ProofSpec[] = [
     stack: "DOM + GSAP",
     travel: "100svh · seis columnas de alto completo",
     pitch:
-      "Las cifras escritas en vertical ocupan la columna entera; el cuerpo queda al pie, horizontal. La más gráfica: se lee como una sola pieza antes de leer una palabra. El precio es que una cifra en vertical cuesta un instante más. En móvil la cifra vuelve a acostarse y la sección cae a seis bloques apilados.",
+      "The figures set vertically fill the whole column; the body stays at the foot, horizontal. The most graphic: it reads as a single piece before you read a word. The price is that a vertical figure costs an instant more. On mobile the figure lies back down and the section falls to six stacked blocks.",
   },
 ];

@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/sidestep",
-  title: "Transición · L · Sidestep",
+  title: "Transition · L · Sidestep",
   description:
-    "Transición L: la sección siguiente entra por el lado, sin secuestrar la rueda.",
-  blurb: "La siguiente entra por el lado",
+    "Transition L: the next section enters from the side, without hijacking the wheel.",
+  blurb: "The next one enters from the side",
   nav: false,
   sitemap: false,
   robots: "noindex",

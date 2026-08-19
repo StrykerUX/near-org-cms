@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/ex1",
-  title: "EX1 · vídeo",
+  title: "EX1 · video",
   description:
-    "Draft del hero tipográfico sobre el vídeo art-glass, con el cartel a sangre abajo a la izquierda y la O abriéndose para descubrir la sección siguiente.",
-  blurb: "Hero tipográfico sobre vídeo",
+    "Draft of the typographic hero over the art-glass video, with the poster bleeding off the bottom left and the O opening up to uncover the next section.",
+  blurb: "Typographic hero over video",
   nav: false,
   sitemap: false,
   robots: "noindex",

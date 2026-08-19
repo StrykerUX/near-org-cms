@@ -119,7 +119,7 @@ function Row({ link }: { link: HomeViewLink }) {
       <span className="flex min-w-0 flex-col gap-0.5">
         <span className="flex min-w-0 items-center gap-2">
           <span className="truncate text-body">{link.label}</span>
-          {link.variants && <Badge>{link.variants.length} variantes</Badge>}
+          {link.variants && <Badge>{link.variants.length} variants</Badge>}
           {link.empty && <Badge>empty</Badge>}
           {link.unlinked && <Badge>not in nav</Badge>}
         </span>
