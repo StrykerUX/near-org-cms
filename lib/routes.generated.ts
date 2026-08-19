@@ -10,7 +10,7 @@ import m3 from "@/app/(site)/analytics/page.meta";
 import m4 from "@/app/(motion)/blockchain/page.meta";
 import m5 from "@/app/(site)/blog/page.meta";
 import m6 from "@/app/(site)/brand/page.meta";
-import m7 from "@/app/(site)/chain-abstraction/page.meta";
+import m7 from "@/app/(motion)/chain-abstraction/page.meta";
 import m8 from "@/app/(site)/community/page.meta";
 import m9 from "@/app/(site)/confidential-intents/page.meta";
 import m10 from "@/app/(site)/contact-us/page.meta";
@@ -84,7 +84,7 @@ export const ROUTES: RouteEntry[] = [
   { ...m4, route: "/blockchain", stub: false, file: "app/(motion)/blockchain/page.meta.ts" },
   { ...m5, route: "/blog", stub: false, file: "app/(site)/blog/page.meta.ts" },
   { ...m6, route: "/brand", stub: true, file: "app/(site)/brand/page.meta.ts" },
-  { ...m7, route: "/chain-abstraction", stub: true, file: "app/(site)/chain-abstraction/page.meta.ts" },
+  { ...m7, route: "/chain-abstraction", stub: false, file: "app/(motion)/chain-abstraction/page.meta.ts" },
   { ...m8, route: "/community", stub: true, file: "app/(site)/community/page.meta.ts" },
   { ...m9, route: "/confidential-intents", stub: true, file: "app/(site)/confidential-intents/page.meta.ts" },
   { ...m10, route: "/contact-us", stub: true, file: "app/(site)/contact-us/page.meta.ts" },
