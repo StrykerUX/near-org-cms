@@ -106,7 +106,13 @@ export function buildExNextReveal(
     // principio: arrancando a la par de la «o», el texto ya va por la mitad
     // cuando el agujero recién se abre. Esperando, el ojo llega al párrafo
     // justo cuando la lectura arranca.
-    const DELAY = 0.24;
+    //
+    // El techo está en el otro extremo: la última palabra tiene que terminar de
+    // encenderse antes de que la «o» termine de cubrir la pantalla (82% del
+    // scroll de la sección). Con 0.36 la lectura cierra bastante antes; subirlo
+    // mucho más deja el final del párrafo resolviéndose sin gesto que lo
+    // acompañe.
+    const DELAY = 0.36;
 
     // De dónde arranca una palabra sin leer. Bajo a propósito: es el fantasma
     // del párrafo, lo justo para que el bloque ocupe su sitio y no salte al
