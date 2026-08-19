@@ -7,7 +7,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
-import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
+import { DEBUG_MARKERS, EASE_OUT, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 
 // El footer del sitio. UNO solo, montado por los tres layouts del frontend —
@@ -371,18 +371,85 @@ function FooterColumn({
 
 // Los grupos de links, una sola vez: los renderizan la versión estática de
 // mobile (cream) y el panel del takeover (sobre negro) con paletas distintas.
-function LinkColumns({ dark }: { dark: boolean }) {
+function LinkColumns({ dark, columns = "auto" }: { dark: boolean; columns?: "auto" | "two" }) {
   // `relative` para que el texto quede POR ENCIMA del chip, que es absoluto y
   // si no lo taparía a medias.
   const linkClass = `relative text-body-sm transition-colors ${
     dark ? "text-cream/70 hover:text-cream" : "text-muted-foreground hover:text-foreground"
   }`;
 
+  // Mapa literal de clases: Tailwind v4 no detecta las que se arman con un
+  // template string.
+  const grid =
+    columns === "two" ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
+
   return (
-    <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-16">
+    <div className={`grid gap-x-12 gap-y-10 lg:gap-x-16 ${grid}`}>
       {GROUPS.map((group) => (
         <FooterColumn key={group.title} group={group} dark={dark} linkClass={linkClass} />
       ))}
+    </div>
+  );
+}
+
+// ── La versión sin takeover ─────────────────────────────────────────────────
+//
+// Bajo lg (y en desktop con reduced-motion) no hay takeover: el footer es una
+// pieza en flujo. En vez de dejarla como la copia pálida del desktop, INVIERTE
+// la paleta — fondo ink, links en cream, wordmark en blanco. El negro es el
+// estado en el que el footer se ve en desktop; que en mobile fuera claro era
+// una consecuencia de cómo está armado el takeover, no una decisión.
+//
+// La entrada es REPETIBLE a propósito: `toggleActions` con reverse, y no el
+// `once: true` de useScrollReveal. En mobile el footer es corto y se entra y
+// se sale de él todo el tiempo; una entrada de una sola vez deja el resto de
+// la sesión con un footer que ya no hace nada.
+function StaticFooter() {
+  const rootRef = useGsapContext<HTMLDivElement>((_self, root) => {
+    const mm = gsap.matchMedia();
+
+    // Mobile Y motion: en desktop manda el takeover, y con reduced-motion no
+    // hay entrada — el `.from()` ni siquiera llega a esconder nada.
+    mm.add(`${MQ.mobile} and ${MQ.motion}`, () => {
+      const headline = root.querySelector("[data-footer-headline]");
+      const columns = gsap.utils.toArray<HTMLElement>("nav", root);
+      // El wordmark vive fuera de este bloque —lo comparte con el takeover—
+      // así que se busca desde el footer, no desde el scope.
+      const wordmark = root.closest("footer")?.querySelector("[data-footer-wordmark]");
+      if (!headline || columns.length === 0) return;
+
+      const tl = gsap.timeline({
+        defaults: { ease: EASE_OUT },
+        scrollTrigger: {
+          trigger: root,
+          start: "top 85%",
+          // Termina antes del final del bloque: el wordmark es alto y si el
+          // `end` cayera en su base, la entrada recién se completaría con el
+          // footer ya scrolleado fuera de la pantalla.
+          end: "bottom 40%",
+          toggleActions: "play none none reverse",
+          markers: DEBUG_MARKERS,
+        },
+      });
+
+      tl.from(headline, { autoAlpha: 0, y: 32, duration: 0.8 })
+        .from(columns, { autoAlpha: 0, y: 22, duration: 0.6, stagger: 0.07 }, 0.15);
+      if (wordmark) tl.from(wordmark, { autoAlpha: 0, y: 56, duration: 0.9 }, 0.1);
+    });
+
+    return () => mm.revert();
+  }, []);
+
+  return (
+    <div ref={rootRef} className="lg:hidden">
+      <Container className="grid gap-16 pb-24 pt-24">
+        <p data-footer-headline className="text-h2 text-cream text-pretty">
+          Where money
+          <br />
+          <Accent>actually moves.</Accent>
+        </p>
+        <LinkColumns dark columns="two" />
+      </Container>
     </div>
   );
 }
@@ -623,7 +690,10 @@ export default function SiteFooter() {
     // igual que el nav de los prototipos. Las secciones no pasan de `z-20`.
     // `isolate` se queda para que el wipe/panel/legal de adentro (z-1..3) no se
     // filtren a su vez hacia afuera.
-    <footer ref={rootRef} className="relative isolate z-30 bg-cream text-foreground lg:pt-40">
+    <footer
+      ref={rootRef}
+      className="relative isolate z-30 bg-ink text-cream lg:bg-cream lg:pt-40 lg:text-foreground"
+    >
       {/* El wipe: una caja negra anclada al FONDO del footer que crece en
           ALTURA (no scaleY: el contenido de adentro no se puede deformar) y
           recorta con overflow-hidden. Como el fondo del footer es el fondo
@@ -660,16 +730,7 @@ export default function SiteFooter() {
         </div>
       </div>
 
-      {/* Mobile / reduced-motion: el footer completo, estático en cream. En lg
-          desaparece — ahí el contenido vive en el panel. */}
-      <Container className="grid gap-16 pb-24 pt-24 lg:hidden">
-        <p className="text-h2 text-pretty">
-          Where money
-          <br />
-          <Accent>actually moves.</Accent>
-        </p>
-        <LinkColumns dark={false} />
-      </Container>
+      <StaticFooter />
 
       {/* El panel del takeover: headline + columnas, posicionado con su
           borde inferior en el TOP del footer — o sea, justo encima del
@@ -714,7 +775,7 @@ export default function SiteFooter() {
           width={WORDMARK_W}
           height={WORDMARK_H}
           unoptimized
-          className="block h-auto w-full"
+          className="block h-auto w-full max-lg:invert"
           style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
         />
       </div>
