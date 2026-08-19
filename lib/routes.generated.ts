@@ -49,32 +49,33 @@ import m42 from "@/app/prototype/homepage-v5/page.meta";
 import m43 from "@/app/prototype/hover-lab/page.meta";
 import m44 from "@/app/prototype/newsletter-labs/page.meta";
 import m45 from "@/app/prototype/proof-alt/page.meta";
-import m46 from "@/app/prototype/stack-labs/page.meta";
-import m47 from "@/app/prototype/stack-labs/anchors/page.meta";
-import m48 from "@/app/prototype/stack-labs/axis/page.meta";
-import m49 from "@/app/prototype/stack-labs/bleed/page.meta";
-import m50 from "@/app/prototype/stack-labs/blueprint/page.meta";
-import m51 from "@/app/prototype/stack-labs/broadsheet/page.meta";
-import m52 from "@/app/prototype/stack-labs/dolly/page.meta";
-import m53 from "@/app/prototype/stack-labs/traveling/page.meta";
-import m54 from "@/app/prototype/stack-labs/triptych/page.meta";
-import m55 from "@/app/prototype/transition-labs/page.meta";
-import m56 from "@/app/prototype/transition-labs/ascii/page.meta";
-import m57 from "@/app/prototype/transition-labs/chapter/page.meta";
-import m58 from "@/app/prototype/transition-labs/column/page.meta";
-import m59 from "@/app/prototype/transition-labs/counter/page.meta";
-import m60 from "@/app/prototype/transition-labs/fold/page.meta";
-import m61 from "@/app/prototype/transition-labs/halftone/page.meta";
-import m62 from "@/app/prototype/transition-labs/lattice/page.meta";
-import m63 from "@/app/prototype/transition-labs/melt/page.meta";
-import m64 from "@/app/prototype/transition-labs/mosaic/page.meta";
-import m65 from "@/app/prototype/transition-labs/sidestep/page.meta";
-import m66 from "@/app/prototype/transition-labs/slats/page.meta";
-import m67 from "@/app/prototype/transition-labs/wipe/page.meta";
-import m68 from "@/app/(motion)/quantum-security/page.meta";
-import m69 from "@/app/(site)/research/page.meta";
-import m70 from "@/app/(site)/solutions/page.meta";
-import m71 from "@/app/(site)/terms-of-use/page.meta";
+import m46 from "@/app/prototype/scroll-sections/page.meta";
+import m47 from "@/app/prototype/stack-labs/page.meta";
+import m48 from "@/app/prototype/stack-labs/anchors/page.meta";
+import m49 from "@/app/prototype/stack-labs/axis/page.meta";
+import m50 from "@/app/prototype/stack-labs/bleed/page.meta";
+import m51 from "@/app/prototype/stack-labs/blueprint/page.meta";
+import m52 from "@/app/prototype/stack-labs/broadsheet/page.meta";
+import m53 from "@/app/prototype/stack-labs/dolly/page.meta";
+import m54 from "@/app/prototype/stack-labs/traveling/page.meta";
+import m55 from "@/app/prototype/stack-labs/triptych/page.meta";
+import m56 from "@/app/prototype/transition-labs/page.meta";
+import m57 from "@/app/prototype/transition-labs/ascii/page.meta";
+import m58 from "@/app/prototype/transition-labs/chapter/page.meta";
+import m59 from "@/app/prototype/transition-labs/column/page.meta";
+import m60 from "@/app/prototype/transition-labs/counter/page.meta";
+import m61 from "@/app/prototype/transition-labs/fold/page.meta";
+import m62 from "@/app/prototype/transition-labs/halftone/page.meta";
+import m63 from "@/app/prototype/transition-labs/lattice/page.meta";
+import m64 from "@/app/prototype/transition-labs/melt/page.meta";
+import m65 from "@/app/prototype/transition-labs/mosaic/page.meta";
+import m66 from "@/app/prototype/transition-labs/sidestep/page.meta";
+import m67 from "@/app/prototype/transition-labs/slats/page.meta";
+import m68 from "@/app/prototype/transition-labs/wipe/page.meta";
+import m69 from "@/app/(motion)/quantum-security/page.meta";
+import m70 from "@/app/(site)/research/page.meta";
+import m71 from "@/app/(site)/solutions/page.meta";
+import m72 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -123,30 +124,31 @@ export const ROUTES: RouteEntry[] = [
   { ...m43, route: "/prototype/hover-lab", stub: false, file: "app/prototype/hover-lab/page.meta.ts" },
   { ...m44, route: "/prototype/newsletter-labs", stub: false, file: "app/prototype/newsletter-labs/page.meta.ts" },
   { ...m45, route: "/prototype/proof-alt", stub: false, file: "app/prototype/proof-alt/page.meta.ts" },
-  { ...m46, route: "/prototype/stack-labs", stub: false, file: "app/prototype/stack-labs/page.meta.ts" },
-  { ...m47, route: "/prototype/stack-labs/anchors", stub: false, file: "app/prototype/stack-labs/anchors/page.meta.ts" },
-  { ...m48, route: "/prototype/stack-labs/axis", stub: false, file: "app/prototype/stack-labs/axis/page.meta.ts" },
-  { ...m49, route: "/prototype/stack-labs/bleed", stub: false, file: "app/prototype/stack-labs/bleed/page.meta.ts" },
-  { ...m50, route: "/prototype/stack-labs/blueprint", stub: false, file: "app/prototype/stack-labs/blueprint/page.meta.ts" },
-  { ...m51, route: "/prototype/stack-labs/broadsheet", stub: false, file: "app/prototype/stack-labs/broadsheet/page.meta.ts" },
-  { ...m52, route: "/prototype/stack-labs/dolly", stub: false, file: "app/prototype/stack-labs/dolly/page.meta.ts" },
-  { ...m53, route: "/prototype/stack-labs/traveling", stub: false, file: "app/prototype/stack-labs/traveling/page.meta.ts" },
-  { ...m54, route: "/prototype/stack-labs/triptych", stub: false, file: "app/prototype/stack-labs/triptych/page.meta.ts" },
-  { ...m55, route: "/prototype/transition-labs", stub: false, file: "app/prototype/transition-labs/page.meta.ts" },
-  { ...m56, route: "/prototype/transition-labs/ascii", stub: false, file: "app/prototype/transition-labs/ascii/page.meta.ts" },
-  { ...m57, route: "/prototype/transition-labs/chapter", stub: false, file: "app/prototype/transition-labs/chapter/page.meta.ts" },
-  { ...m58, route: "/prototype/transition-labs/column", stub: false, file: "app/prototype/transition-labs/column/page.meta.ts" },
-  { ...m59, route: "/prototype/transition-labs/counter", stub: false, file: "app/prototype/transition-labs/counter/page.meta.ts" },
-  { ...m60, route: "/prototype/transition-labs/fold", stub: false, file: "app/prototype/transition-labs/fold/page.meta.ts" },
-  { ...m61, route: "/prototype/transition-labs/halftone", stub: false, file: "app/prototype/transition-labs/halftone/page.meta.ts" },
-  { ...m62, route: "/prototype/transition-labs/lattice", stub: false, file: "app/prototype/transition-labs/lattice/page.meta.ts" },
-  { ...m63, route: "/prototype/transition-labs/melt", stub: false, file: "app/prototype/transition-labs/melt/page.meta.ts" },
-  { ...m64, route: "/prototype/transition-labs/mosaic", stub: false, file: "app/prototype/transition-labs/mosaic/page.meta.ts" },
-  { ...m65, route: "/prototype/transition-labs/sidestep", stub: false, file: "app/prototype/transition-labs/sidestep/page.meta.ts" },
-  { ...m66, route: "/prototype/transition-labs/slats", stub: false, file: "app/prototype/transition-labs/slats/page.meta.ts" },
-  { ...m67, route: "/prototype/transition-labs/wipe", stub: false, file: "app/prototype/transition-labs/wipe/page.meta.ts" },
-  { ...m68, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m69, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m70, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m71, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m46, route: "/prototype/scroll-sections", stub: false, file: "app/prototype/scroll-sections/page.meta.ts" },
+  { ...m47, route: "/prototype/stack-labs", stub: false, file: "app/prototype/stack-labs/page.meta.ts" },
+  { ...m48, route: "/prototype/stack-labs/anchors", stub: false, file: "app/prototype/stack-labs/anchors/page.meta.ts" },
+  { ...m49, route: "/prototype/stack-labs/axis", stub: false, file: "app/prototype/stack-labs/axis/page.meta.ts" },
+  { ...m50, route: "/prototype/stack-labs/bleed", stub: false, file: "app/prototype/stack-labs/bleed/page.meta.ts" },
+  { ...m51, route: "/prototype/stack-labs/blueprint", stub: false, file: "app/prototype/stack-labs/blueprint/page.meta.ts" },
+  { ...m52, route: "/prototype/stack-labs/broadsheet", stub: false, file: "app/prototype/stack-labs/broadsheet/page.meta.ts" },
+  { ...m53, route: "/prototype/stack-labs/dolly", stub: false, file: "app/prototype/stack-labs/dolly/page.meta.ts" },
+  { ...m54, route: "/prototype/stack-labs/traveling", stub: false, file: "app/prototype/stack-labs/traveling/page.meta.ts" },
+  { ...m55, route: "/prototype/stack-labs/triptych", stub: false, file: "app/prototype/stack-labs/triptych/page.meta.ts" },
+  { ...m56, route: "/prototype/transition-labs", stub: false, file: "app/prototype/transition-labs/page.meta.ts" },
+  { ...m57, route: "/prototype/transition-labs/ascii", stub: false, file: "app/prototype/transition-labs/ascii/page.meta.ts" },
+  { ...m58, route: "/prototype/transition-labs/chapter", stub: false, file: "app/prototype/transition-labs/chapter/page.meta.ts" },
+  { ...m59, route: "/prototype/transition-labs/column", stub: false, file: "app/prototype/transition-labs/column/page.meta.ts" },
+  { ...m60, route: "/prototype/transition-labs/counter", stub: false, file: "app/prototype/transition-labs/counter/page.meta.ts" },
+  { ...m61, route: "/prototype/transition-labs/fold", stub: false, file: "app/prototype/transition-labs/fold/page.meta.ts" },
+  { ...m62, route: "/prototype/transition-labs/halftone", stub: false, file: "app/prototype/transition-labs/halftone/page.meta.ts" },
+  { ...m63, route: "/prototype/transition-labs/lattice", stub: false, file: "app/prototype/transition-labs/lattice/page.meta.ts" },
+  { ...m64, route: "/prototype/transition-labs/melt", stub: false, file: "app/prototype/transition-labs/melt/page.meta.ts" },
+  { ...m65, route: "/prototype/transition-labs/mosaic", stub: false, file: "app/prototype/transition-labs/mosaic/page.meta.ts" },
+  { ...m66, route: "/prototype/transition-labs/sidestep", stub: false, file: "app/prototype/transition-labs/sidestep/page.meta.ts" },
+  { ...m67, route: "/prototype/transition-labs/slats", stub: false, file: "app/prototype/transition-labs/slats/page.meta.ts" },
+  { ...m68, route: "/prototype/transition-labs/wipe", stub: false, file: "app/prototype/transition-labs/wipe/page.meta.ts" },
+  { ...m69, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m70, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m71, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m72, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
