@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Accent from "@/components/primitives/Accent";
@@ -76,6 +77,11 @@ import { getLenis } from "@/components/site/providers/lenisInstance";
 export type SiteFooterVariant = "default" | "veil" | "compact";
 
 type FooterLink = { label: string; href: string | null };
+
+// Un destino de FUERA del sitio se marca con una flecha. Se deduce del href y
+// no de un flag al lado: un flag es una segunda fuente de verdad que se olvida
+// de actualizar el día que un link deja de ser interno.
+const isExternal = (href: string | null) => !!href && /^https?:\/\//.test(href);
 
 const GROUPS: {
   title: string;
@@ -274,29 +280,14 @@ const VEIL_STYLE: React.CSSProperties = {
   ].join(", "),
 };
 
-// ── El indicador con inercia ────────────────────────────────────────────────
+// El hover de un link: pasa al gris de los títulos de grupo, o sea al revés
+// que antes (el link es lo blanco ahora). `duration-300` y no el default de
+// 150ms: el cambio es de un gris a otro, y a 150ms se lee como un parpadeo en
+// vez de como una transición.
 //
-// Es la F18 del hover-lab (`components/views/hover-lab/FooterLinkVariantsPlus`,
-// ahí "Inertial indicator"): un chip que viaja hasta el link bajo el cursor y
-// se ESTIRA mientras viaja, proporcionalmente al salto. La deformación en el
-// eje del movimiento es lo que hace leer velocidad — y es exactamente lo que
-// una `transition` de CSS no puede expresar, porque no sabe cuánta distancia
-// va a recorrer.
-//
-// UNO POR COLUMNA y no uno para toda la grilla: el gesto es vertical, y un
-// chip cruzando de "Products" a "Terms and Policies" se leería como otra cosa.
-// Cada `<nav>` es su propio host, así que también funciona en las columnas con
-// sub-grupos, donde el chip salta por encima de los rótulos LEARN/CONNECT.
-//
-// El código no se copió del lab tal cual: allá el host es una lista plana y el
-// chip se posiciona solo en Y (todos los links arrancan en x=0). Acá se anima
-// también X contra el borde del link, que es lo que lo hace inmune a cualquier
-// sangría dentro de la columna.
-const CHIP_PAD_X = 14; // el aire a cada lado del texto, dentro del chip
-const CHIP_PAD_Y = 5; // idem arriba y abajo. Los renglones están a 6px, así que
-// dos chips vecinos casi se tocan — no importa: nunca hay dos a la vez.
-const CHIP_STRETCH_MAX = 0.5; // tope del estiramiento, en fracción del alto
-const CHIP_STRETCH_PX = 160; // el salto (en px) que llega a ese tope
+// Acá vivía el indicador con inercia (la F18 del hover-lab): un chip que
+// viajaba al link bajo el cursor estirándose según el salto. Se fue a pedido —
+// con los links en blanco, un chip detrás competía con el propio texto.
 
 function FooterColumn({
   title,
@@ -322,96 +313,15 @@ function FooterColumn({
   linkClass: string;
   className?: string;
 }) {
-  const rootRef = useGsapContext<HTMLElement>((_self, root) => {
-    const chip = root.querySelector<HTMLElement>("[data-footer-chip]");
-    if (!chip) return;
-
-    const mm = gsap.matchMedia();
-    mm.add(MQ.motion, () => {
-      // La última posición, para saber CUÁNTO saltó: un estiramiento fijo se
-      // ve igual saltando una fila que cinco, y ahí el efecto no dice nada.
-      let lastY: number | null = null;
-
-      const over = (e: PointerEvent) => {
-        const link = (e.target as HTMLElement).closest("a");
-        if (!link || !root.contains(link)) return;
-
-        const host = root.getBoundingClientRect();
-        const box = link.getBoundingClientRect();
-        const y = box.top - host.top;
-        const travel = lastY === null ? 0 : Math.abs(y - lastY);
-        lastY = y;
-
-        gsap.killTweensOf(chip);
-        gsap.set(chip, { autoAlpha: 1 });
-        gsap
-          .timeline()
-          .to(
-            chip,
-            {
-              x: box.left - host.left - CHIP_PAD_X,
-              y: y - CHIP_PAD_Y,
-              width: box.width + CHIP_PAD_X * 2,
-              height: box.height + CHIP_PAD_Y * 2,
-              duration: 0.45,
-              ease: "power3.out",
-            },
-            0
-          )
-          .to(
-            chip,
-            {
-              scaleY: 1 + Math.min(travel / CHIP_STRETCH_PX, CHIP_STRETCH_MAX),
-              duration: 0.14,
-              ease: "power2.out",
-            },
-            0
-          )
-          .to(chip, { scaleY: 1, duration: 0.5, ease: "elastic.out(1, 0.5)" }, 0.14);
-      };
-
-      const leave = () => {
-        lastY = null;
-        gsap.to(chip, { autoAlpha: 0, duration: 0.2, overwrite: true });
-      };
-
-      root.addEventListener("pointerover", over);
-      root.addEventListener("pointerleave", leave);
-      return () => {
-        root.removeEventListener("pointerover", over);
-        root.removeEventListener("pointerleave", leave);
-        // Los tweens nacen en los handlers, o sea fuera del scope que
-        // matchMedia captura: hay que matarlos a mano o el chip queda con
-        // transform inline pegada tras un remount (StrictMode los hace de a
-        // dos en dev).
-        gsap.killTweensOf(chip);
-        gsap.set(chip, { clearProps: "transform,width,height,opacity,visibility" });
-      };
-    });
-
-    return () => mm.revert();
-  }, []);
-
   return (
-    <nav ref={rootRef} aria-label={label} className={`relative ${className}`}>
-      {/* Nace sin alto ni ancho: los recibe de GSAP junto con la posición.
-          `invisible` lo mantiene fuera del árbol de accesibilidad hasta el
-          primer hover, y sin motion no se enciende nunca. */}
-      <span
-        data-footer-chip
-        aria-hidden="true"
-        // Sin `will-change`: son cinco chips por columna y diez en la página
-        // (la versión estática y el panel), invisibles casi todo el tiempo.
-        // Promoverlos a capa propia de forma permanente es memoria de GPU
-        // reservada para algo que no se está moviendo; GSAP ya promueve el que
-        // anima mientras dura el tween.
-        className={`pointer-events-none invisible absolute left-0 top-0 h-0 w-0 rounded-lg opacity-0 ${
-          dark ? "bg-cream/15" : "bg-foreground/8"
-        }`}
-      />
+    <nav aria-label={label} className={className}>
+      {/* El título del grupo va en el GRIS y los links en blanco: la jerarquía
+          la da la posición (arriba, con aire debajo), no el contraste. Con el
+          título más claro que sus links, lo primero que pesaba en la columna
+          era el rótulo y no los destinos. */}
       <h2
         aria-hidden={ghostTitle || undefined}
-        className={`relative text-label ${dark ? "text-cream" : ""} ${
+        className={`text-label ${dark ? "text-cream/70" : "text-muted-foreground"} ${
           ghostTitle ? "invisible" : ""
         }`}
       >
@@ -422,7 +332,7 @@ function FooterColumn({
           <div key={section.label || i} className="flex flex-col gap-1.5">
             {section.label && (
               <p
-                className={`relative text-caption uppercase ${
+                className={`text-caption uppercase ${
                   dark ? "text-cream/50" : "text-gray-intermediate"
                 }`}
               >
@@ -432,7 +342,20 @@ function FooterColumn({
             <ul className="flex flex-col gap-1.5">
               {section.links.map((link) => (
                 <li key={link.label}>
-                  {link.href ? (
+                  {isExternal(link.href) ? (
+                    <a
+                      href={link.href ?? "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`${linkClass} inline-flex items-center gap-1`}
+                    >
+                      {link.label}
+                      {/* `strokeWidth` 1.25 contra el 2 que trae lucide: al
+                          tamaño de un link, el trazo por defecto pesa más que
+                          la palabra que acompaña. */}
+                      <ArrowUpRight aria-hidden="true" className="size-3.5" strokeWidth={1.25} />
+                    </a>
+                  ) : link.href ? (
                     <Link href={link.href} className={linkClass}>
                       {link.label}
                     </Link>
@@ -462,10 +385,10 @@ function LinkColumns({
   columns?: "auto" | "two";
   split?: boolean;
 }) {
-  // `relative` para que el texto quede POR ENCIMA del chip, que es absoluto y
-  // si no lo taparía a medias.
-  const linkClass = `relative text-body-sm transition-colors ${
-    dark ? "text-cream/70 hover:text-cream" : "text-muted-foreground hover:text-foreground"
+  // Los links son lo BLANCO de la columna y el hover los apaga al gris del
+  // título — al revés de lo que era.
+  const linkClass = `text-body-sm transition-colors duration-300 ${
+    dark ? "text-cream hover:text-cream/70" : "text-foreground hover:text-muted-foreground"
   }`;
 
   // Mapas literales de clases: Tailwind v4 no detecta las que se arman con un
