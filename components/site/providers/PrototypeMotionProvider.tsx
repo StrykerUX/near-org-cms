@@ -4,6 +4,7 @@ import Lenis from "lenis";
 import { useEffect } from "react";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
+import { setLenis } from "./lenisInstance";
 
 // Provider de motion scopeado a las páginas de prototipo animadas (montado en
 // el propio
@@ -94,6 +95,7 @@ export default function PrototypeMotionProvider({
     mm.add(MQ.motion, () => {
       const instance = new Lenis({ autoRaf: false });
       lenis = instance;
+      setLenis(instance);
       // Dev-only handle. Lenis owns the scroll position, so anything outside
       // React that needs to move the page — a screenshot harness, a manual
       // console poke — has to go through it; `window.scrollTo` gets animated
@@ -107,6 +109,7 @@ export default function PrototypeMotionProvider({
       const raf = (time: number) => instance.raf(time * 1000);
       gsap.ticker.add(raf);
       return () => {
+        setLenis(null);
         gsap.ticker.remove(raf);
         instance.destroy();
         if (process.env.NODE_ENV !== "production") {

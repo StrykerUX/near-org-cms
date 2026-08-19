@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
+import { setLenis } from "./lenisInstance";
 
 // Smooth scroll de app/(site). Sigue siendo un provider distinto del de
 // /prototype (`PrototypeMotionProvider`) porque resuelven cosas distintas: acá NO
@@ -38,6 +39,17 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
       // había dos loops llamando `lenis.raf()` en el mismo frame — el suyo y el
       // del ticker.
       const lenis = new Lenis({ autoRaf: false });
+      // Queda a mano de quien necesite mover la página sin pelearse con él
+      // (el tirón del footer). Ver `lenisInstance.ts`.
+      setLenis(lenis);
+      // Handle sólo de dev, igual que en `PrototypeMotionProvider` y por el
+      // mismo motivo: Lenis es el dueño de la posición de scroll, así que
+      // cualquier cosa fuera de React que necesite mover la página —un
+      // harness de capturas, una prueba a mano en la consola— tiene que pasar
+      // por él; un `window.scrollTo` te lo devuelve animado al lugar.
+      if (process.env.NODE_ENV !== "production") {
+        (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+      }
 
       lenis.on("scroll", ScrollTrigger.update);
 
@@ -74,6 +86,10 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
       }
 
       return () => {
+        setLenis(null);
+        if (process.env.NODE_ENV !== "production") {
+          delete (window as unknown as { __lenis?: Lenis }).__lenis;
+        }
         lenis.destroy();
         gsap.ticker.remove(rafCallback);
         ro.disconnect();
