@@ -32,10 +32,11 @@ import m25 from "@/app/prototype/homepage-v2/page.meta";
 import m26 from "@/app/prototype/homepage-v4/page.meta";
 import m27 from "@/app/prototype/homepage-v5/page.meta";
 import m28 from "@/app/prototype/hover-lab/page.meta";
-import m29 from "@/app/(motion)/quantum-security/page.meta";
-import m30 from "@/app/(site)/research/page.meta";
-import m31 from "@/app/(site)/solutions/page.meta";
-import m32 from "@/app/(site)/terms-of-use/page.meta";
+import m29 from "@/app/prototype/scroll-sections/page.meta";
+import m30 from "@/app/(motion)/quantum-security/page.meta";
+import m31 from "@/app/(site)/research/page.meta";
+import m32 from "@/app/(site)/solutions/page.meta";
+import m33 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", file: "app/(site)/page.meta.ts" },
@@ -67,8 +68,9 @@ export const ROUTES: RouteEntry[] = [
   { ...m26, route: "/prototype/homepage-v4", file: "app/prototype/homepage-v4/page.meta.ts" },
   { ...m27, route: "/prototype/homepage-v5", file: "app/prototype/homepage-v5/page.meta.ts" },
   { ...m28, route: "/prototype/hover-lab", file: "app/prototype/hover-lab/page.meta.ts" },
-  { ...m29, route: "/quantum-security", file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m30, route: "/research", file: "app/(site)/research/page.meta.ts" },
-  { ...m31, route: "/solutions", file: "app/(site)/solutions/page.meta.ts" },
-  { ...m32, route: "/terms-of-use", file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m29, route: "/prototype/scroll-sections", file: "app/prototype/scroll-sections/page.meta.ts" },
+  { ...m30, route: "/quantum-security", file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m31, route: "/research", file: "app/(site)/research/page.meta.ts" },
+  { ...m32, route: "/solutions", file: "app/(site)/solutions/page.meta.ts" },
+  { ...m33, route: "/terms-of-use", file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
