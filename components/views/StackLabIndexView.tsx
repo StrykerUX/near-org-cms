@@ -3,18 +3,18 @@ import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { STACK_LAB_VARIANTS } from "@/components/sections/stack-labs/stackLabContent";
 
-// El índice del laboratorio del NEAR Stack: cinco layouts para el MISMO arte.
+// El índice del laboratorio del NEAR Stack: ocho layouts para el MISMO arte.
 //
-// Es una lista y no un preview de cada variante a propósito: cinco miniaturas
-// del mismo ensamble no distinguen nada —el arte es idéntico en las cinco— y
+// Es una lista y no un preview de cada variante a propósito: ocho miniaturas
+// del mismo ensamble no distinguen nada —el arte es idéntico en las ocho— y
 // además cargarlo cinco veces es exactamente lo que la separación en rutas
 // existe para evitar.
 export default function StackLabIndexView() {
   return (
     <main className="flex min-h-svh flex-col bg-cream text-ink">
       <Container as="header" className="flex flex-col gap-6 py-20 md:py-28">
-        <Eyebrow className="text-gray-intermediate">Stack lab · 5 layouts</Eyebrow>
-        <h1 className="text-h1 max-w-[22ch]">Un mismo ensamble, cinco maneras de mostrarlo</h1>
+        <Eyebrow className="text-gray-intermediate">Stack lab · 8 layouts</Eyebrow>
+        <h1 className="text-h1 max-w-[22ch]">Un mismo ensamble, ocho maneras de mostrarlo</h1>
         <p className="max-w-[62ch] text-body-lg text-gray-intermediate text-pretty">
           El arte del NEAR Stack no cambia en ninguna: mismas cuatro capas, mismo
           build-in de la columna, mismo hover, misma copy. Lo que cambia es la

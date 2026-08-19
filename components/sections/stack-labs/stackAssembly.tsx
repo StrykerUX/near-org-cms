@@ -163,6 +163,8 @@ export const SEG_KEYS = ["ironclaw", "cloud", "market"] as const;
 export type StackHover =
   | { kind: "layer"; key: "protocol" | "intents" | "nearcom" }
   | { kind: "seg"; key: (typeof SEG_KEYS)[number] }
+  /** Un cubo de la columna partida: índice 0 (arriba) … 5 (abajo). */
+  | { kind: "cube"; index: number }
   | null;
 
 export const SEG_NAMES: Record<string, string> = {
@@ -211,11 +213,17 @@ export default function StackAssembly({ stage, hover, className = "" }: StackAss
   const showAi = stage >= 2;
   const showNearcom = stage >= 6;
 
-  const hoverTarget = hover?.key ?? null;
+  // `key` solo existe en dos de las tres variantes del hover: el cubo se
+  // identifica por índice.
+  const hoverTarget = hover && "key" in hover ? hover.key : null;
 
   // Hover sobre cualquier pieza: solo lo hovereado verde, el resto de lo
   // visible cae a wireframe. Sin hover, lo acumulado va verde.
-  const litColumn = hover ? hoverTarget === "protocol" : true;
+  //
+  // Un cubo hovereado cuenta como columna: la pieza bajo el cursor ES la
+  // columna, partida. Bajarla a wireframe ahí sería apagar justo lo que se
+  // está señalando.
+  const litColumn = hover ? hover.kind === "cube" || hoverTarget === "protocol" : true;
   const litIntents = showIntents && (hover ? hoverTarget === "intents" : true);
   const litNearcom = showNearcom && (hover ? hoverTarget === "nearcom" : true);
 
