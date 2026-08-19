@@ -14,7 +14,7 @@ export type StackVariantId =
   | "blueprint"
   | "traveling"
   | "axis"
-  | "concentric"
+  | "triptych"
   | "dolly";
 
 export type StackVariantSpec = {
@@ -75,12 +75,12 @@ export const STACK_LAB_VARIANTS: readonly StackVariantSpec[] = [
       "El rótulo de la parada activa a tamaño de póster, acostado sobre el plano isométrico del ensamble (skew de 30.79°, el ángulo real de la cara superior del cubo). Una palabra por parada — siete, con nombre propio para cada producto de AI — y el párrafo abajo, derecho, para que se pueda leer.",
   },
   {
-    id: "concentric",
+    id: "triptych",
     index: "G",
-    title: "Concentric",
-    travel: "una pantalla · sin sticky",
+    title: "Triptych",
+    travel: "280svh · sticky, siete paradas",
     pitch:
-      "El layout es el diagrama: el ensamble centrado y las cuatro capas en cuatro marcos concéntricos alrededor, cada rótulo montado en el borde de SU marco. La posición del texto en pantalla significa lo mismo que la posición de su capa en el isométrico. Se navega con el puntero, no con la rueda.",
+      "Tres columnas: el índice de capas a la izquierda, el ensamble al centro dentro de su marco, y el cuerpo de la capa activa a la derecha. La activa no se marca con color sino con TAMAÑO — el estado de la sección se lee sin mirar el arte.",
   },
   {
     id: "dolly",

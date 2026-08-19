@@ -48,9 +48,9 @@ import m41 from "@/app/prototype/stack-labs/axis/page.meta";
 import m42 from "@/app/prototype/stack-labs/bleed/page.meta";
 import m43 from "@/app/prototype/stack-labs/blueprint/page.meta";
 import m44 from "@/app/prototype/stack-labs/broadsheet/page.meta";
-import m45 from "@/app/prototype/stack-labs/concentric/page.meta";
-import m46 from "@/app/prototype/stack-labs/dolly/page.meta";
-import m47 from "@/app/prototype/stack-labs/traveling/page.meta";
+import m45 from "@/app/prototype/stack-labs/dolly/page.meta";
+import m46 from "@/app/prototype/stack-labs/traveling/page.meta";
+import m47 from "@/app/prototype/stack-labs/triptych/page.meta";
 import m48 from "@/app/(motion)/quantum-security/page.meta";
 import m49 from "@/app/(site)/research/page.meta";
 import m50 from "@/app/(site)/solutions/page.meta";
@@ -102,9 +102,9 @@ export const ROUTES: RouteEntry[] = [
   { ...m42, route: "/prototype/stack-labs/bleed", stub: false, file: "app/prototype/stack-labs/bleed/page.meta.ts" },
   { ...m43, route: "/prototype/stack-labs/blueprint", stub: false, file: "app/prototype/stack-labs/blueprint/page.meta.ts" },
   { ...m44, route: "/prototype/stack-labs/broadsheet", stub: false, file: "app/prototype/stack-labs/broadsheet/page.meta.ts" },
-  { ...m45, route: "/prototype/stack-labs/concentric", stub: false, file: "app/prototype/stack-labs/concentric/page.meta.ts" },
-  { ...m46, route: "/prototype/stack-labs/dolly", stub: false, file: "app/prototype/stack-labs/dolly/page.meta.ts" },
-  { ...m47, route: "/prototype/stack-labs/traveling", stub: false, file: "app/prototype/stack-labs/traveling/page.meta.ts" },
+  { ...m45, route: "/prototype/stack-labs/dolly", stub: false, file: "app/prototype/stack-labs/dolly/page.meta.ts" },
+  { ...m46, route: "/prototype/stack-labs/traveling", stub: false, file: "app/prototype/stack-labs/traveling/page.meta.ts" },
+  { ...m47, route: "/prototype/stack-labs/triptych", stub: false, file: "app/prototype/stack-labs/triptych/page.meta.ts" },
   { ...m48, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
   { ...m49, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
   { ...m50, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
