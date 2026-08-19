@@ -4,6 +4,8 @@ import { ExBgField } from "@/components/sections/ex/ExBackgrounds";
 import StackTriptych from "@/components/sections/stack-labs/StackTriptych";
 import ProofIndex from "@/components/sections/proof-alt/ProofIndex";
 import Belongs05Halo from "@/components/sections/newsletter-labs/Belongs05Halo";
+import CustomerStories from "@/components/sections/home-ab7/CustomerStories";
+import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -21,6 +23,8 @@ export default function EX2Page() {
       stack={<StackTriptych />}
       proof={<ProofIndex />}
       newsletter={<Belongs05Halo />}
+      stories={<CustomerStories mirror />}
+      testimonials={<TestimonialMarquee direction="right" loopSeconds={60} />}
     />
   );
 }

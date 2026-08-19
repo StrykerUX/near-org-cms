@@ -4,6 +4,8 @@ import { ExBgAscii } from "@/components/sections/ex/ExBackgrounds";
 import StackDolly from "@/components/sections/stack-labs/StackDolly";
 import ProofDatum from "@/components/sections/proof-alt/ProofDatum";
 import Belongs10Ascii from "@/components/sections/newsletter-labs/Belongs10Ascii";
+import CustomerStories from "@/components/sections/home-ab7/CustomerStories";
+import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -20,6 +22,8 @@ export default function EX3Page() {
       stack={<StackDolly />}
       proof={<ProofDatum />}
       newsletter={<Belongs10Ascii />}
+      stories={<CustomerStories tone="stone" eyebrow="Built on NEAR" />}
+      testimonials={<TestimonialMarquee loopSeconds={32} />}
     />
   );
 }

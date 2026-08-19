@@ -4,6 +4,8 @@ import { ExBgVideo } from "@/components/sections/ex/ExBackgrounds";
 import StackAxis from "@/components/sections/stack-labs/StackAxis";
 import ProofColumns from "@/components/sections/proof-alt/ProofColumns";
 import Belongs01Marquee from "@/components/sections/newsletter-labs/Belongs01Marquee";
+import CustomerStories from "@/components/sections/home-ab7/CustomerStories";
+import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -20,6 +22,8 @@ export default function EX1Page() {
       stack={<StackAxis />}
       proof={<ProofColumns />}
       newsletter={<Belongs01Marquee />}
+      stories={<CustomerStories />}
+      testimonials={<TestimonialMarquee />}
     />
   );
 }

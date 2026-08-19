@@ -47,6 +47,10 @@ export type ExDraftViewProps = {
   proof?: React.ReactNode;
   /** La banda de newsletter de este draft. */
   newsletter?: React.ReactNode;
+  /** Customer stories, con la variación de este draft. */
+  stories?: React.ReactNode;
+  /** El carrusel de testimonios, con la variación de este draft. */
+  testimonials?: React.ReactNode;
 };
 
 export default function ExDraftView({
@@ -59,6 +63,8 @@ export default function ExDraftView({
   stack,
   proof,
   newsletter,
+  stories,
+  testimonials,
 }: ExDraftViewProps) {
   return (
     <main className="flex flex-col bg-cream">
@@ -80,6 +86,10 @@ export default function ExDraftView({
           donde está en la homepage — el propio laboratorio de newsletter monta
           sus vecinas así para poder juzgar el corte. */}
       {newsletter}
+
+      {stories}
+
+      {testimonials}
 
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
