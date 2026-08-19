@@ -25,19 +25,26 @@ import m18 from "@/app/(site)/official-rules/page.meta";
 import m19 from "@/app/(site)/privacy/page.meta";
 import m20 from "@/app/prototype/page.meta";
 import m21 from "@/app/prototype/components/page.meta";
-import m22 from "@/app/prototype/hero-alt/page.meta";
-import m23 from "@/app/prototype/hero-burst/page.meta";
-import m24 from "@/app/prototype/homepage-ab6/page.meta";
-import m25 from "@/app/prototype/homepage-ab7/page.meta";
-import m26 from "@/app/prototype/homepage-exploration/page.meta";
-import m27 from "@/app/prototype/homepage-v2/page.meta";
-import m28 from "@/app/prototype/homepage-v4/page.meta";
-import m29 from "@/app/prototype/homepage-v5/page.meta";
-import m30 from "@/app/prototype/hover-lab/page.meta";
-import m31 from "@/app/(motion)/quantum-security/page.meta";
-import m32 from "@/app/(site)/research/page.meta";
-import m33 from "@/app/(site)/solutions/page.meta";
-import m34 from "@/app/(site)/terms-of-use/page.meta";
+import m22 from "@/app/prototype/footer-labs/page.meta";
+import m23 from "@/app/prototype/footer-labs/ascend/page.meta";
+import m24 from "@/app/prototype/footer-labs/glyph/page.meta";
+import m25 from "@/app/prototype/footer-labs/kinetic/page.meta";
+import m26 from "@/app/prototype/footer-labs/reveal/page.meta";
+import m27 from "@/app/prototype/footer-labs/sheet/page.meta";
+import m28 from "@/app/prototype/footer-labs/stack/page.meta";
+import m29 from "@/app/prototype/hero-alt/page.meta";
+import m30 from "@/app/prototype/hero-burst/page.meta";
+import m31 from "@/app/prototype/homepage-ab6/page.meta";
+import m32 from "@/app/prototype/homepage-ab7/page.meta";
+import m33 from "@/app/prototype/homepage-exploration/page.meta";
+import m34 from "@/app/prototype/homepage-v2/page.meta";
+import m35 from "@/app/prototype/homepage-v4/page.meta";
+import m36 from "@/app/prototype/homepage-v5/page.meta";
+import m37 from "@/app/prototype/hover-lab/page.meta";
+import m38 from "@/app/(motion)/quantum-security/page.meta";
+import m39 from "@/app/(site)/research/page.meta";
+import m40 from "@/app/(site)/solutions/page.meta";
+import m41 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -62,17 +69,24 @@ export const ROUTES: RouteEntry[] = [
   { ...m19, route: "/privacy", stub: true, file: "app/(site)/privacy/page.meta.ts" },
   { ...m20, route: "/prototype", stub: false, file: "app/prototype/page.meta.ts" },
   { ...m21, route: "/prototype/components", stub: false, file: "app/prototype/components/page.meta.ts" },
-  { ...m22, route: "/prototype/hero-alt", stub: false, file: "app/prototype/hero-alt/page.meta.ts" },
-  { ...m23, route: "/prototype/hero-burst", stub: false, file: "app/prototype/hero-burst/page.meta.ts" },
-  { ...m24, route: "/prototype/homepage-ab6", stub: false, file: "app/prototype/homepage-ab6/page.meta.ts" },
-  { ...m25, route: "/prototype/homepage-ab7", stub: false, file: "app/prototype/homepage-ab7/page.meta.ts" },
-  { ...m26, route: "/prototype/homepage-exploration", stub: false, file: "app/prototype/homepage-exploration/page.meta.ts" },
-  { ...m27, route: "/prototype/homepage-v2", stub: false, file: "app/prototype/homepage-v2/page.meta.ts" },
-  { ...m28, route: "/prototype/homepage-v4", stub: false, file: "app/prototype/homepage-v4/page.meta.ts" },
-  { ...m29, route: "/prototype/homepage-v5", stub: false, file: "app/prototype/homepage-v5/page.meta.ts" },
-  { ...m30, route: "/prototype/hover-lab", stub: false, file: "app/prototype/hover-lab/page.meta.ts" },
-  { ...m31, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m32, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m33, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m34, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m22, route: "/prototype/footer-labs", stub: false, file: "app/prototype/footer-labs/page.meta.ts" },
+  { ...m23, route: "/prototype/footer-labs/ascend", stub: false, file: "app/prototype/footer-labs/ascend/page.meta.ts" },
+  { ...m24, route: "/prototype/footer-labs/glyph", stub: false, file: "app/prototype/footer-labs/glyph/page.meta.ts" },
+  { ...m25, route: "/prototype/footer-labs/kinetic", stub: false, file: "app/prototype/footer-labs/kinetic/page.meta.ts" },
+  { ...m26, route: "/prototype/footer-labs/reveal", stub: false, file: "app/prototype/footer-labs/reveal/page.meta.ts" },
+  { ...m27, route: "/prototype/footer-labs/sheet", stub: false, file: "app/prototype/footer-labs/sheet/page.meta.ts" },
+  { ...m28, route: "/prototype/footer-labs/stack", stub: false, file: "app/prototype/footer-labs/stack/page.meta.ts" },
+  { ...m29, route: "/prototype/hero-alt", stub: false, file: "app/prototype/hero-alt/page.meta.ts" },
+  { ...m30, route: "/prototype/hero-burst", stub: false, file: "app/prototype/hero-burst/page.meta.ts" },
+  { ...m31, route: "/prototype/homepage-ab6", stub: false, file: "app/prototype/homepage-ab6/page.meta.ts" },
+  { ...m32, route: "/prototype/homepage-ab7", stub: false, file: "app/prototype/homepage-ab7/page.meta.ts" },
+  { ...m33, route: "/prototype/homepage-exploration", stub: false, file: "app/prototype/homepage-exploration/page.meta.ts" },
+  { ...m34, route: "/prototype/homepage-v2", stub: false, file: "app/prototype/homepage-v2/page.meta.ts" },
+  { ...m35, route: "/prototype/homepage-v4", stub: false, file: "app/prototype/homepage-v4/page.meta.ts" },
+  { ...m36, route: "/prototype/homepage-v5", stub: false, file: "app/prototype/homepage-v5/page.meta.ts" },
+  { ...m37, route: "/prototype/hover-lab", stub: false, file: "app/prototype/hover-lab/page.meta.ts" },
+  { ...m38, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m39, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m40, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m41, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
