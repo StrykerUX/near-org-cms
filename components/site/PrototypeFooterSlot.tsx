@@ -57,11 +57,6 @@ import SiteFooter from "@/components/site/SiteFooter";
 const NO_FOOTER: string[] = [
   "/prototype/hero-alt",
   "/prototype/footer-labs",
-  // Los tres drafts EX montan su propio footer del laboratorio, uno distinto
-  // cada uno. Con el del sitio puesto habría dos.
-  "/prototype/ex1",
-  "/prototype/ex2",
-  "/prototype/ex3",
 ];
 
 export default function PrototypeFooterSlot() {

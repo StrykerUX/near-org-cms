@@ -54,8 +54,6 @@ export type ExDraftViewProps = {
   latest?: React.ReactNode;
   /** El listado de prensa. */
   news?: React.ReactNode;
-  /** El footer de este draft, del laboratorio de footers. */
-  footer?: React.ReactNode;
 };
 
 export default function ExDraftView({
@@ -72,24 +70,12 @@ export default function ExDraftView({
   testimonials,
   latest,
   news,
-  footer,
 }: ExDraftViewProps) {
   return (
-    // El contenido va envuelto en `relative z-10 bg-cream` y el footer queda
-    // FUERA, que es el contrato que pide el laboratorio de footers (mismo
-    // reparto que `FooterLabShell`):
-    //
-    // · los takeover (Sheet) se apilan en z-30 y tienen que poder subir POR
-    //   ENCIMA de la página;
-    // · Reveal va `fixed` en z-0 y tiene que quedar DEBAJO, porque la página
-    //   es la hoja opaca que se desliza y lo descubre.
-    //
-    // Sin el fondo explícito en el wrapper, Reveal se ve a través de la
-    // página entera desde el primer frame.
+    // El fondo explícito en el wrapper se queda: los tres drafts vuelven a
+    // llevar el footer del sitio, que es un takeover — sube TAPANDO la última
+    // sección desde `z-30`, y para eso lo que hay debajo tiene que ser opaco.
     <>
-      {/* El `<main>` es el wrapper, no un padre de él: el footer tiene que
-          quedar FUERA (ver arriba) y un footer dentro del landmark principal
-          es justo lo que ese landmark no debe contener. */}
       <main className="relative z-10 flex flex-col bg-cream">
         <ExHero
           background={background}
@@ -142,7 +128,6 @@ export default function ExDraftView({
         </div>
       </main>
 
-      {footer}
     </>
   );
 }
