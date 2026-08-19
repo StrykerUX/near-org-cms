@@ -473,7 +473,15 @@ export default function ExHero({
             className="flex flex-col items-center text-center"
           >
             <p data-next-copy className="max-w-[24ch] text-h2 text-balance">
-              {EX_COPY.next.body}
+              {EX_COPY.next.body.map((seg, i) =>
+                "em" in seg && seg.em ? (
+                  <em key={i} className="serif-inline">
+                    {seg.text}
+                  </em>
+                ) : (
+                  <span key={i}>{seg.text}</span>
+                ),
+              )}
             </p>
           </Container>
         </div>

@@ -22,20 +22,36 @@ export const EX_COPY = {
 
   /** Lo que se ve por el agujero de la «o». */
   next: {
-    body: "NEAR is open infrastructure powering the agent economy. Quantum-resistant and confidential by design, NEAR empowers you to trade anything anywhere and own your intelligence.",
+    /**
+     * En segmentos y no en un string porque el párrafo mezcla las dos fuentes:
+     * los tramos con `em` van en la serif del cartel. La mezcla es la misma
+     * pareja del titular —«OWN YOUR» sans, «World» serif— traída al cuerpo del
+     * texto, así que el párrafo se lee como parte de la misma frase y no como
+     * un bloque aparte.
+     *
+     * Qué va en serif: los tramos CONCEPTUALES. Lo que la marca promete va en
+     * la voz del cartel; lo técnico se queda en la sans.
+     */
+    body: [
+      { text: "NEAR is open infrastructure powering " },
+      { text: "the agent economy", em: true },
+      { text: ". Quantum-resistant and " },
+      { text: "confidential", em: true },
+      { text: " by design, NEAR empowers you to trade anything anywhere and " },
+      { text: "own your intelligence", em: true },
+      { text: "." },
+    ],
 
     /**
      * Las palabras que el tratamiento `read` enciende en verde. Se comparan
      * normalizadas (minúsculas, sin puntuación) contra cada palabra del
      * párrafo, así que el orden acá no importa y la copy se puede reescribir
      * sin tocar índices.
+     *
+     * Una sola: el verde y la serif son DOS señales, y puestas encima de las
+     * mismas palabras se anulan. La serif marca lo conceptual; el verde, el
+     * término de producto.
      */
-    accents: [
-      "quantum-resistant",
-      "confidential",
-      "own",
-      "your",
-      "intelligence",
-    ],
+    accents: ["quantum-resistant"],
   },
 } as const;

@@ -25,9 +25,9 @@
      No es un mapeo 1:1 con la nueva — es más chica en todos los niveles
      (h1 topa en 4.25rem vs 5.5rem), así que migrar CAMBIA el tamaño de los
      headings del blog. Por eso se hace aparte y no de arrastre. ── */
-  --font-size-h1:   clamp(2rem, 0.5rem + 3.125vw, 4.25rem);
-  --font-size-h2:   clamp(1.75rem, 0.583rem + 2.43vw, 3.5rem);
-  --font-size-h3:   clamp(1.25rem, 0.417rem + 1.736vw, 2.5rem);
+  --font-size-h1: clamp(2rem, 0.5rem + 3.125vw, 4.25rem);
+  --font-size-h2: clamp(1.75rem, 0.583rem + 2.43vw, 3.5rem);
+  --font-size-h3: clamp(1.25rem, 0.417rem + 1.736vw, 2.5rem);
   --font-size-body: clamp(1rem, 0.764rem + 0.3012vw, 1.125rem);
 
   /* ── paleta draft del prototipo de homepage —
@@ -42,7 +42,7 @@
      token aparte de --background (blanco puro) y no un alias: las secciones
      que lo usan llevan cards BLANCAS encima, y sobre blanco puro esas cards
      desaparecen. */
-  --cream: #F5F4F1;
+  --cream: #f5f4f1;
   --stone: #d8d6d0;
 
   /* Cuánto espacio ocupa el header fijo desde el borde de arriba: 24px de
@@ -67,15 +67,15 @@
      brillante es el CTA del nav, el oscuro los botones sobre crema, y el
      accent los círculos de flecha y los dots inline. Unificarlos aplana el
      contraste de tres jerarquías distintas. ── */
-  --near-green-accent: #00DC8D;
+  --near-green-accent: #00dc8d;
   /* Negro de sección, no #000: sobre él van cards blancas y strokes de 1px
      que a negro puro se ven como agujeros. También es el fill de las caras
      del SVG isométrico de NearStack — el back-face culling solo lee como
      oclusión sólida si fill y fondo son EXACTAMENTE el mismo valor, por eso
      ambos salen de este token y no de dos literales. */
   --ink: #101010;
-  --gray-blue: #87959A;
-  --bar: #D9D9D9;
+  --gray-blue: #87959a;
+  --bar: #d9d9d9;
   --card-tint: #eae9e6;
   --ink-deep: #0e4a30;
   --sweep: #f4ff7a;
@@ -127,30 +127,30 @@
   --cta-deep: #00b96f;
 
   /* ── shadcn/ui tokens — neutral grayscale placeholder, no palette defined yet ── */
-  --background: oklch(1.0000 0 0);
+  --background: oklch(1 0 0);
   --foreground: oklch(0 0 0);
   --card: oklch(0.9784 0.0011 197.1387);
   --card-foreground: oklch(0.2435 0 0);
-  --popover: oklch(1.0000 0 0);
+  --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.3171 0 0);
   --primary: oklch(0 0 0);
-  --primary-foreground: oklch(1.0000 0 0);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.2435 0 0);
-  --secondary-foreground: oklch(1.0000 0 0);
+  --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.9683 0.0069 247.8956);
   --muted-foreground: oklch(0.3171 0 0);
   --accent: oklch(0.9392 0.0166 250.8453);
   --accent-foreground: oklch(0.3171 0 0);
   --destructive: oklch(0.6188 0.2376 25.7658);
-  --destructive-foreground: oklch(1.0000 0 0);
+  --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.9317 0.0118 231.6594);
   --input: #e5e5e5;
   --ring: oklch(0.708 0 0);
   --sidebar: oklch(0.9784 0.0011 197.1387);
   --sidebar-foreground: oklch(0 0 0);
   --sidebar-primary: oklch(0.2435 0 0);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.9057 0.0680 201.7766);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.9057 0.068 201.7766);
   --sidebar-accent-foreground: oklch(0.3171 0 0);
   --sidebar-border: oklch(0.9271 0.0101 238.5177);
   --sidebar-ring: oklch(0.708 0 0);
@@ -158,31 +158,31 @@
 }
 
 .dark {
-  --background: #0B0B0B;
-  --foreground: #F5F5F5;
+  --background: #0b0b0b;
+  --foreground: #f5f5f5;
   --card: #1a1a1a;
-  --card-foreground: #F5F5F5;
+  --card-foreground: #f5f5f5;
   --popover: #1a1a1a;
-  --popover-foreground: #F5F5F5;
-  --primary: oklch(0.9700 0 0);
-  --primary-foreground: #0B0B0B;
+  --popover-foreground: #f5f5f5;
+  --primary: oklch(0.97 0 0);
+  --primary-foreground: #0b0b0b;
   --secondary: oklch(0.9328 0.0025 228.7857);
   --secondary-foreground: oklch(0.2435 0 0);
   --muted: #272727;
-  --muted-foreground: #E5E5E5;
+  --muted-foreground: #e5e5e5;
   --accent: oklch(0.3152 0.0427 202.4332);
-  --accent-foreground: #F5F5F5;
+  --accent-foreground: #f5f5f5;
   --destructive: oklch(0.6188 0.2376 25.7658);
-  --destructive-foreground: oklch(1.0000 0 0);
+  --destructive-foreground: oklch(1 0 0);
   --border: #3a3a3a;
   --input: #242424;
   --ring: oklch(0.439 0 0);
   --sidebar: #1a1a1a;
-  --sidebar-foreground: #F5F5F5;
-  --sidebar-primary: oklch(0.9700 0 0);
-  --sidebar-primary-foreground: #0B0B0B;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: oklch(0.97 0 0);
+  --sidebar-primary-foreground: #0b0b0b;
   --sidebar-accent: #272727;
-  --sidebar-accent-foreground: #F5F5F5;
+  --sidebar-accent-foreground: #f5f5f5;
   --sidebar-border: #272727;
   --sidebar-ring: oklch(0.439 0 0);
   --radius: 0.5rem;
@@ -246,13 +246,16 @@
   --color-cta-mint: var(--cta-mint);
   --color-cta-lime: var(--cta-lime);
 
-  --font-sans: var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans:
+    var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
   --font-mono: var(--font-montreal-mono), ui-monospace, Menlo, monospace;
   /* Kepler self-hosteada vía next/font/local (ver lib/fonts.ts). Las vars
      --font-kepler* las expone el className del <html> en app/layout.tsx. */
   --font-serif: var(--font-kepler), ui-serif, Georgia, "Times New Roman", serif;
   /* Kepler's large-size optical master — used for accent spans inside Display/H1 headings */
-  --font-display: var(--font-kepler-display), var(--font-kepler), ui-serif, Georgia, serif;
+  --font-display:
+    var(--font-kepler-display), var(--font-kepler), ui-serif, Georgia, serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -471,6 +474,23 @@
   font-weight: var(--text-serif--font-weight);
 }
 
+/* Palabras sueltas en serif DENTRO de un renglón sans — la mezcla del párrafo
+   de la sección 2 de los drafts EX.
+
+   No lleva escala propia a propósito: hereda el `font-size` del renglón que la
+   contiene y lo corrige con un `em`. El 1.14 es óptico, no arbitrario: a igual
+   `font-size`, Kepler itálica tiene la altura de x un 16% más baja que Montreal
+   y la de mayúscula un 11%, así que puesta sin corregir se lee CHICA aunque
+   ambas midan lo mismo en puntos. 1.14 es el punto entre las dos medidas: la
+   palabra serif pesa lo mismo que sus vecinas sans en el renglón. */
+@utility serif-inline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.14em;
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
 @utility text-h1-serif {
   font-family: var(--font-serif);
   font-size: var(--text-h1);
@@ -635,7 +655,11 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--lt-glass-border);
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 .linktree-glass:hover {
   background: var(--lt-glass-bg-hover);
@@ -680,13 +704,22 @@ button:hover .lucide-plus {
 [data-q-cta] {
   background-color: transparent;
   background-image:
-    linear-gradient(105deg, var(--cta-lime) 0%, var(--cta-mint) 45%, var(--cta-deep) 100%),
+    linear-gradient(
+      105deg,
+      var(--cta-lime) 0%,
+      var(--cta-mint) 45%,
+      var(--cta-deep) 100%
+    ),
     linear-gradient(var(--foreground), var(--foreground));
   background-repeat: no-repeat, no-repeat;
   background-origin: border-box;
   background-clip: border-box;
-  background-position: left center, right center;
-  background-size: 0% 100%, 0% 100%;
+  background-position:
+    left center,
+    right center;
+  background-size:
+    0% 100%,
+    0% 100%;
   transition: border-color 0.16s ease;
 }
 [data-q-cta]:hover {
@@ -698,8 +731,17 @@ button:hover .lucide-plus {
    advances, so it is never underneath the gradient's antialiased edge — that
    overlap is what left a dark stroke around the finished pill. */
 @keyframes qCtaFill {
-  0%, 22% { background-size: 0% 100%, 100% 100%; }
-  100%    { background-size: 100% 100%, 0% 100%; }
+  0%,
+  22% {
+    background-size:
+      0% 100%,
+      100% 100%;
+  }
+  100% {
+    background-size:
+      100% 100%,
+      0% 100%;
+  }
 }
 
 /* On dark: white outline and label, and the gradient enters straight in (no
@@ -712,8 +754,16 @@ button:hover .lucide-plus {
   animation-name: qCtaFillOnDark;
 }
 @keyframes qCtaFillOnDark {
-  0%   { background-size: 0% 100%, 0% 100%; }
-  100% { background-size: 100% 100%, 0% 100%; }
+  0% {
+    background-size:
+      0% 100%,
+      0% 100%;
+  }
+  100% {
+    background-size:
+      100% 100%,
+      0% 100%;
+  }
 }
 
 /* Hero sheen: the statement ramp travelling continuously through the headline.
@@ -756,8 +806,12 @@ button:hover .lucide-plus {
   animation: qSheen 11s linear infinite;
 }
 @keyframes qSheen {
-  from { background-position: 100% 0; }
-  to   { background-position: 0% 0; }
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   /* Parked on an all-ink stretch, so the headline is simply black — the colour
@@ -777,7 +831,9 @@ button:hover .lucide-plus {
 [data-q-cta][data-q-cta-filled] {
   color: #fff;
   border-color: transparent;
-  background-size: 0% 100%, 100% 100%;
+  background-size:
+    0% 100%,
+    100% 100%;
   transition: color 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
 [data-q-cta][data-q-cta-filled]:hover {
@@ -803,8 +859,16 @@ button:hover .lucide-plus {
   animation-name: qCtaFillOnWhite;
 }
 @keyframes qCtaFillOnWhite {
-  0%   { background-size: 0% 100%, 0% 100%; }
-  100% { background-size: 100% 100%, 0% 100%; }
+  0% {
+    background-size:
+      0% 100%,
+      0% 100%;
+  }
+  100% {
+    background-size:
+      100% 100%,
+      0% 100%;
+  }
 }
 [data-q-cta][data-q-cta-fill-white] [data-q-cta-top] {
   display: none;
@@ -922,15 +986,24 @@ button:hover .lucide-plus {
   animation: qCtaText 0.3s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 @keyframes qCtaText {
-  0%, 22% { clip-path: inset(0 100% 0 0); }
-  100%    { clip-path: inset(0 0 0 0); }
+  0%,
+  22% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
 }
 [data-q-cta][data-q-cta-on-dark]:hover [data-q-cta-top] {
   animation-name: qCtaTextOnDark;
 }
 @keyframes qCtaTextOnDark {
-  0%   { clip-path: inset(0 100% 0 0); }
-  100% { clip-path: inset(0 0 0 0); }
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
 /* Arrow disc: the inner arrow enters from the left while the outer one exits to
@@ -951,8 +1024,16 @@ button:hover .lucide-plus {
 [data-q-arrow-host]:hover [data-q-arrow] [data-q-arrow-in] {
   animation: qArrowIn 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.07s forwards;
 }
-@keyframes qArrowOut { to { transform: translate(110%, -50%); } }
-@keyframes qArrowIn  { to { transform: translate(-50%, -50%); } }
+@keyframes qArrowOut {
+  to {
+    transform: translate(110%, -50%);
+  }
+}
+@keyframes qArrowIn {
+  to {
+    transform: translate(-50%, -50%);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   /* The final colour states are kept (the CTA still fills, just without the
@@ -963,7 +1044,9 @@ button:hover .lucide-plus {
     animation: none;
   }
   [data-q-cta]:hover {
-    background-size: 100% 100%, 0% 100%;
+    background-size:
+      100% 100%,
+      0% 100%;
   }
   [data-q-cta]:hover [data-q-cta-top] {
     clip-path: inset(0 0 0 0);
@@ -997,9 +1080,21 @@ button:hover .lucide-plus {
   --grid-cols: 12;
   --grid-gutter: 16px;
 }
-@media (min-width: 768px)  { :root { --grid-gutter: 20px; } }
-@media (min-width: 1024px) { :root { --grid-gutter: 24px; } }
-@media (min-width: 1536px) { :root { --grid-gutter: 32px; } }
+@media (min-width: 768px) {
+  :root {
+    --grid-gutter: 20px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --grid-gutter: 24px;
+  }
+}
+@media (min-width: 1536px) {
+  :root {
+    --grid-gutter: 32px;
+  }
+}
 
 @utility grid-ds {
   display: grid;
@@ -1009,7 +1104,9 @@ button:hover .lucide-plus {
 
 /* Dev-only column ruler. Off unless `?grid` put the flag on <html>, so it can
    ship without a guard and without a bundle-size argument. */
-[data-grid-overlay] { display: none; }
+[data-grid-overlay] {
+  display: none;
+}
 html[data-grid="on"] [data-grid-overlay] {
   display: grid;
   position: fixed;

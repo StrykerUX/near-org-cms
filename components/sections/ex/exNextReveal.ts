@@ -106,12 +106,16 @@ export function buildExNextReveal(
     return {
       apply: (pr) => {
         for (let i = 0; i < words.length; i++) {
-          const t = gate(i, words.length, pr, 0.72);
+          // 0.28 y no 0.7: con una ventana ancha las 27 palabras avanzan casi
+          // en fase y el resultado es un fundido del párrafo entero — que es
+          // exactamente lo que NO es este tratamiento. Estrecha, se ve el
+          // frente de lectura corriendo por el texto.
+          const t = gate(i, words.length, pr, 0.28);
           // No arranca en 0: el párrafo entero está ahí desde el principio, en
           // gris muy bajo, y lo que avanza es la LECTURA. Apareciendo palabra
           // por palabra desde la nada, el bloque cambiaría de tamaño y el ojo
           // no tendría dónde apoyarse.
-          setAlpha[i](0.12 + 0.88 * t);
+          setAlpha[i](0.1 + 0.9 * t);
         }
       },
       revert: () => {
@@ -153,7 +157,9 @@ export function buildExNextReveal(
       const frame = Math.floor(pr * 420);
 
       for (let i = 0; i < chars.length; i++) {
-        const t = gate(i, chars.length, pr, 0.6);
+        // Misma razón que en `read`, con más margen: son ~170 caracteres, y
+        // el ruido ya da movimiento aunque la ventana no sea tan estrecha.
+        const t = gate(i, chars.length, pr, 0.38);
         setAlpha[i](t <= 0 ? 0 : 1);
 
         const next =
