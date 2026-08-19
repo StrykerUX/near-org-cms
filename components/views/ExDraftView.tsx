@@ -1,7 +1,11 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import Link from "next/link";
-import ExHero, { type ExHeroLayout, type ExHeroWord } from "@/components/sections/ex/ExHero";
+import ExHero, {
+  type ExHeroLayout,
+  type ExHeroWord,
+} from "@/components/sections/ex/ExHero";
+import { type ExNextMode } from "@/components/sections/ex/exNextReveal";
 
 // Los tres drafts EX comparten esta view: hero + un bloque de cierre. Lo único
 // que las distingue es el FONDO y la COMPOSICIÓN del hero, que llegan por prop.
@@ -21,6 +25,7 @@ export type ExDraftViewProps = {
   background: React.ReactNode;
   layout?: ExHeroLayout;
   word?: ExHeroWord;
+  reveal?: ExNextMode;
   tone?: "ink" | "cream";
 };
 
@@ -29,11 +34,18 @@ export default function ExDraftView({
   background,
   layout,
   word,
+  reveal,
   tone,
 }: ExDraftViewProps) {
   return (
     <main className="flex flex-col bg-cream">
-      <ExHero background={background} layout={layout} word={word} tone={tone} />
+      <ExHero
+        background={background}
+        layout={layout}
+        word={word}
+        reveal={reveal}
+        tone={tone}
+      />
 
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
@@ -52,13 +64,17 @@ export default function ExDraftView({
           header del sitio es fijo y se pisarían. */}
       <div className="sticky bottom-0 z-40 border-t border-ink/10 bg-cream/90 backdrop-blur-sm">
         <Container className="flex flex-wrap items-center gap-x-5 gap-y-2 py-3">
-          <span className="text-caption-mono text-gray-intermediate">EX drafts</span>
+          <span className="text-caption-mono text-gray-intermediate">
+            EX drafts
+          </span>
           {VARIANTS.map((v) => (
             <Link
               key={v.id}
               href={`/prototype/${v.id}`}
               className={`text-caption-mono transition-colors duration-200 ${
-                v.id === current ? "text-green-ink" : "text-gray-intermediate hover:text-ink"
+                v.id === current
+                  ? "text-green-ink"
+                  : "text-gray-intermediate hover:text-ink"
               }`}
             >
               {v.label}

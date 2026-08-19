@@ -7,5 +7,13 @@ import meta from "./page.meta";
 export const metadata: Metadata = toMetadata(meta);
 
 export default function EX1Page() {
-  return <ExDraftView current="ex1" background={<ExBgVideo />} layout="poster" tone="ink" />;
+  return (
+    <ExDraftView
+      current="ex1"
+      background={<ExBgVideo />}
+      layout="poster"
+      reveal="lines"
+      tone="ink"
+    />
+  );
 }

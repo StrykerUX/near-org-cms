@@ -7,5 +7,13 @@ import meta from "./page.meta";
 export const metadata: Metadata = toMetadata(meta);
 
 export default function EX3Page() {
-  return <ExDraftView current="ex3" background={<ExBgAscii />} layout="center" tone="ink" />;
+  return (
+    <ExDraftView
+      current="ex3"
+      background={<ExBgAscii />}
+      layout="center"
+      reveal="scramble"
+      tone="ink"
+    />
+  );
 }

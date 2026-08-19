@@ -20,10 +20,22 @@ export const EX_COPY = {
   video: "/prototype/v2/hero-descent-v2.mp4",
   poster: "/prototype/v2/hero-descent-v2-poster.jpg",
 
-  /** Lo que se ve por el agujero de la «o». Placeholder. */
+  /** Lo que se ve por el agujero de la «o». */
   next: {
-    kicker: "Sección 02 · placeholder",
-    title: "Lo que aparece por dentro de la O.",
-    body: "Draft. Este bloque existe para ver la transición con algo que ocupe espacio real: un kicker, un titular de dos renglones y un párrafo. El contenido definitivo se decide después.",
+    body: "NEAR is open infrastructure powering the agent economy. Quantum-resistant and confidential by design, NEAR empowers you to trade anything anywhere and own your intelligence.",
+
+    /**
+     * Las palabras que el tratamiento `read` enciende en verde. Se comparan
+     * normalizadas (minúsculas, sin puntuación) contra cada palabra del
+     * párrafo, así que el orden acá no importa y la copy se puede reescribir
+     * sin tocar índices.
+     */
+    accents: [
+      "quantum-resistant",
+      "confidential",
+      "own",
+      "your",
+      "intelligence",
+    ],
   },
 } as const;
