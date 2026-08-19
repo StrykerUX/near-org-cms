@@ -51,10 +51,16 @@ import m44 from "@/app/prototype/stack-labs/broadsheet/page.meta";
 import m45 from "@/app/prototype/stack-labs/dolly/page.meta";
 import m46 from "@/app/prototype/stack-labs/traveling/page.meta";
 import m47 from "@/app/prototype/stack-labs/triptych/page.meta";
-import m48 from "@/app/(motion)/quantum-security/page.meta";
-import m49 from "@/app/(site)/research/page.meta";
-import m50 from "@/app/(site)/solutions/page.meta";
-import m51 from "@/app/(site)/terms-of-use/page.meta";
+import m48 from "@/app/prototype/transition-labs/page.meta";
+import m49 from "@/app/prototype/transition-labs/ascii/page.meta";
+import m50 from "@/app/prototype/transition-labs/column/page.meta";
+import m51 from "@/app/prototype/transition-labs/counter/page.meta";
+import m52 from "@/app/prototype/transition-labs/lattice/page.meta";
+import m53 from "@/app/prototype/transition-labs/wipe/page.meta";
+import m54 from "@/app/(motion)/quantum-security/page.meta";
+import m55 from "@/app/(site)/research/page.meta";
+import m56 from "@/app/(site)/solutions/page.meta";
+import m57 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -105,8 +111,14 @@ export const ROUTES: RouteEntry[] = [
   { ...m45, route: "/prototype/stack-labs/dolly", stub: false, file: "app/prototype/stack-labs/dolly/page.meta.ts" },
   { ...m46, route: "/prototype/stack-labs/traveling", stub: false, file: "app/prototype/stack-labs/traveling/page.meta.ts" },
   { ...m47, route: "/prototype/stack-labs/triptych", stub: false, file: "app/prototype/stack-labs/triptych/page.meta.ts" },
-  { ...m48, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m49, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m50, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m51, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m48, route: "/prototype/transition-labs", stub: false, file: "app/prototype/transition-labs/page.meta.ts" },
+  { ...m49, route: "/prototype/transition-labs/ascii", stub: false, file: "app/prototype/transition-labs/ascii/page.meta.ts" },
+  { ...m50, route: "/prototype/transition-labs/column", stub: false, file: "app/prototype/transition-labs/column/page.meta.ts" },
+  { ...m51, route: "/prototype/transition-labs/counter", stub: false, file: "app/prototype/transition-labs/counter/page.meta.ts" },
+  { ...m52, route: "/prototype/transition-labs/lattice", stub: false, file: "app/prototype/transition-labs/lattice/page.meta.ts" },
+  { ...m53, route: "/prototype/transition-labs/wipe", stub: false, file: "app/prototype/transition-labs/wipe/page.meta.ts" },
+  { ...m54, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m55, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m56, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m57, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
