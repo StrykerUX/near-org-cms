@@ -247,8 +247,16 @@ const WORDMARK_BOX_H = `calc(min(100vw, 2080px) * ${(
   WORDMARK_W
 ).toFixed(4)})`;
 
-const VEIL_BASE = "pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent";
-const VEIL_INK = `${VEIL_BASE} from-ink via-ink/70`;
+// El velo de la variante `veil`. Va SOLO sobre fondo negro —el takeover, y la
+// versión estática bajo lg, que también es oscura— y nunca sobre el cream: en
+// claro, un degradado a negro no hunde el logo en la superficie, le pone una
+// banda encima.
+//
+// Y mide el FOOTER, no la caja del logo: arranca en el borde de arriba y llega
+// transparente al de abajo, así que sobre el logo cae ya muy decaído y lo que
+// se ve es la base. Con la altura atada a la caja del logo el degradado era el
+// triple de denso sobre las letras.
+const VEIL = "pointer-events-none bg-gradient-to-b from-ink to-transparent";
 
 // ── El indicador con inercia ────────────────────────────────────────────────
 //
@@ -526,7 +534,7 @@ function StaticFooter({ variant }: { variant: SiteFooterVariant }) {
   }, []);
 
   return (
-    <div ref={rootRef} className="lg:hidden">
+    <div ref={rootRef} className="relative z-[2] lg:hidden">
       <Container className="grid gap-16 pb-24 pt-24">
         {variant !== "compact" && (
           <p data-footer-headline className="text-h2 text-cream text-pretty">
@@ -573,6 +581,16 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
       const panelBox = panel.firstElementChild as HTMLElement | null;
       const fit = () => {
         if (!panelBox) return;
+
+        // `veil` no reparte nada: el logo va SIEMPRE entero, que es lo que la
+        // variante existe para mirar. Lo que cede es la posición del panel,
+        // que se ancla al borde de arriba del viewport y se superpone a la
+        // parte velada del logo — por eso el velo está ahí.
+        if (veil) {
+          scope.style.setProperty("--footer-wordmark-h", WORDMARK_BOX_H);
+          scope.style.setProperty("--footer-takeover-gap", `${TAKEOVER_GAP_MAX}px`);
+          return;
+        }
 
         // Se mide SIN recortar: si no, cada medición partiría del recorte que
         // dejó la anterior y el logo se iría achicando solo. En `veil` el alto
@@ -859,8 +877,16 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
             className={`block h-auto w-full invert ${veil ? "absolute inset-x-0 bottom-0" : ""}`}
             style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
           />
-          {veil && <span aria-hidden="true" className={VEIL_INK} />}
         </div>
+        {/* `h-svh` anclado al fondo y no `inset-0`: el wipe crece en altura, y
+            un degradado a su medida se iría estirando durante la animación en
+            vez de quedarse quieto. El overflow del wipe lo recorta. */}
+        {veil && (
+          <span
+            aria-hidden="true"
+            className={`${VEIL} absolute inset-x-0 bottom-0 h-svh`}
+          />
+        )}
       </div>
 
       <StaticFooter variant={variant} />
@@ -874,7 +900,19 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
           cream se colaría también dentro del takeover negro. */}
       <div
         data-footer-panel
-        className="invisible absolute inset-x-0 bottom-[calc(100%-10rem)] z-[3] hidden lg:block"
+        className={`invisible absolute inset-x-0 z-[3] hidden lg:block ${
+          veil
+            ? // Anclado al borde SUPERIOR del viewport del takeover (el wipe
+              // mide 100svh desde el fondo del footer), y no al top del
+              // wordmark: en esta variante el logo entero manda, y el panel se
+              // le pone encima.
+              //
+              // Los 72px son TAKEOVER_TOP_MIN escritos a mano: Tailwind v4 no
+              // detecta una clase armada con un template string, así que este
+              // literal y esa constante hay que moverlos juntos.
+              "top-[calc(100%-100svh+72px)]" 
+            : "bottom-[calc(100%-10rem)]"
+        }`}
       >
         {/* El aire hasta el wordmark es lo PRIMERO que cede en una pantalla
             baja (de 4.5rem a 2.5rem) antes de tocar el logo. */}
@@ -917,16 +955,19 @@ export default function SiteFooter({ variant = "default" }: { variant?: SiteFoot
           }`}
           style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
         />
-        {/* El del reposo va del color del FONDO de cada estado —ink bajo lg,
-            cream en desktop— y no de negro fijo: el logo tiene que hundirse en
-            la superficie del footer, no quedar bajo una banda negra. */}
-        {veil && (
-          <span
-            aria-hidden="true"
-            className={`${VEIL_BASE} from-ink via-ink/70 lg:from-cream lg:via-cream/70`}
-          />
-        )}
       </div>
+
+      {/* El mismo velo para la versión sin takeover, que también es oscura.
+          `z-[1]` lo deja por encima del wordmark (que va en esa misma capa,
+          antes en el DOM) y por debajo del bloque de links, que sube a `z-[2]`
+          para no quedar debajo del negro. De lg para arriba no existe: ahí el
+          reposo es cream. */}
+      {veil && (
+        <span
+          aria-hidden="true"
+          className={`${VEIL} absolute inset-0 z-[1] lg:hidden`}
+        />
+      )}
 
       {/* El copyright, en FLUJO debajo del wordmark y alineado con el borde
           derecho del logo —o sea, bajo el remate de la "r"— y no contra el

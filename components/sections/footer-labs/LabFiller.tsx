@@ -1,12 +1,11 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 
-// El contenido dummy que va ARRIBA del footer, idéntico en las seis rutas.
+// El contenido dummy que va ARRIBA del footer, idéntico en las dos rutas.
 //
-// Existe por una razón sola: un footer no se puede juzgar en el vacío. Los tres
-// takeover tapan "la última sección de la página" y los tres restantes se
-// descubren al final de un recorrido — sin página que tapar ni recorrido que
-// terminar, las seis se ven igual de bien.
+// Existe por una razón sola: un footer no se puede juzgar en el vacío. El
+// takeover tapa "la última sección de la página" — sin página que tapar, las
+// dos variantes se ven igual de bien.
 //
 // Es deliberadamente NEUTRO y no una sección real de la home: con contenido de
 // marca compitiendo, la comparación mediría la sección tanto como el footer.
@@ -15,19 +14,18 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 // ── El alto ────────────────────────────────────────────────────────────────
 //
 // El bloque entero da ~2000px en un viewport de escritorio, sobre el mínimo de
-// ~1700px que el lab pide. No es un capricho de encuadre: los seis mecanismos
-// se disparan contra el fondo del documento y varios miden un viewport entero
-// de recorrido, así que una página corta los deja arrancando ya dentro de su
-// propio rango — que es exactamente el bug que `SiteFooter` documenta en su
-// `canTakeover()`.
+// ~1700px que el lab pide. No es un capricho de encuadre: el takeover se
+// dispara contra el fondo del documento y mide un viewport entero, así que una
+// página corta lo deja arrancando ya dentro de su propio rango — que es
+// exactamente el bug que `SiteFooter` documenta en su `canTakeover()`.
 
 const CARDS = [
   { k: "01", t: "Placeholder", d: "Neutral block. Not real homepage content." },
   { k: "02", t: "Placeholder", d: "It is here to give the footer height and a top edge." },
-  { k: "03", t: "Placeholder", d: "Same visual weight across the six lab routes." },
+  { k: "03", t: "Placeholder", d: "Same visual weight across both lab routes." },
   { k: "04", t: "Placeholder", d: "No animation of its own: nothing competes with the footer." },
   { k: "05", t: "Placeholder", d: "Grey on cream, type from the scale." },
-  { k: "06", t: "Placeholder", d: "The last row is the one the takeovers cover." },
+  { k: "06", t: "Placeholder", d: "The last row is the one the takeover covers." },
 ];
 
 export default function LabFiller() {
@@ -37,7 +35,7 @@ export default function LabFiller() {
         <Eyebrow className="text-gray-intermediate">Filler content</Eyebrow>
         <p className="text-h1 mt-6 max-w-[16ch] text-balance">Just any page</p>
         <p className="text-body-lg mt-6 max-w-[58ch] text-muted-foreground">
-          Everything above the footer is dummy and identical across the six lab
+          Everything above the footer is dummy and identical across both lab
           routes. Scrolling to the bottom is the only instruction.
         </p>
       </Container>
