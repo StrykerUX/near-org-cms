@@ -299,18 +299,28 @@ const CHIP_STRETCH_MAX = 0.5; // tope del estiramiento, en fracción del alto
 const CHIP_STRETCH_PX = 160; // el salto (en px) que llega a ese tope
 
 function FooterColumn({
-  group,
+  title,
+  sections,
+  label,
+  ghostTitle = false,
   dark,
   linkClass,
   className = "",
-  split = false,
 }: {
-  group: (typeof GROUPS)[number];
+  title: string;
+  sections: (typeof GROUPS)[number]["sections"];
+  /** El aria-label, que en una columna de continuación no es el título solo. */
+  label: string;
+  /**
+   * `compact`: las columnas 2ª y 3ª de un grupo repiten el título en
+   * INVISIBLE. Repetirlo visible sería mentira (no son tres grupos), y
+   * omitirlo desalinea los rótulos de sub-grupo contra los de las columnas
+   * vecinas — que es lo único que ata las ocho columnas a una misma retícula.
+   */
+  ghostTitle?: boolean;
   dark: boolean;
   linkClass: string;
   className?: string;
-  /** `compact`: un grupo con varias sub-secciones las abre en dos columnas. */
-  split?: boolean;
 }) {
   const rootRef = useGsapContext<HTMLElement>((_self, root) => {
     const chip = root.querySelector<HTMLElement>("[data-footer-chip]");
@@ -383,7 +393,7 @@ function FooterColumn({
   }, []);
 
   return (
-    <nav ref={rootRef} aria-label={group.title} className={`relative ${className}`}>
+    <nav ref={rootRef} aria-label={label} className={`relative ${className}`}>
       {/* Nace sin alto ni ancho: los recibe de GSAP junto con la posición.
           `invisible` lo mantiene fuera del árbol de accesibilidad hasta el
           primer hover, y sin motion no se enciende nunca. */}
@@ -399,15 +409,16 @@ function FooterColumn({
           dark ? "bg-cream/15" : "bg-foreground/8"
         }`}
       />
-      <h2 className={`relative text-label ${dark ? "text-cream" : ""}`}>{group.title}</h2>
-      <div
-        className={
-          split && group.sections.length > 1
-            ? "mt-3 grid gap-x-8 gap-y-5 sm:grid-cols-2"
-            : "mt-3 flex flex-col gap-5"
-        }
+      <h2
+        aria-hidden={ghostTitle || undefined}
+        className={`relative text-label ${dark ? "text-cream" : ""} ${
+          ghostTitle ? "invisible" : ""
+        }`}
       >
-        {group.sections.map((section, i) => (
+        {title}
+      </h2>
+      <div className="mt-3 flex flex-col gap-5">
+        {sections.map((section, i) => (
           <div key={section.label || i} className="flex flex-col gap-1.5">
             {section.label && (
               <p
@@ -480,16 +491,67 @@ function LinkColumns({
       ]
     : [];
 
+  // ── `compact`: una columna por SUB-GRUPO, todas del mismo ancho ──────────
+  //
+  // Resources se abre en sus tres (Build / Learn / Connect) y About en sus dos,
+  // así que las cinco columnas pasan a ser ocho. Y son ocho HERMANAS de una
+  // misma fila flex con `flex-1 basis-0`, no tres navs de anchos distintos con
+  // sub-columnas adentro: solo siendo hermanas del mismo flex el ancho sale
+  // idéntico: anidadas, cada nivel se come sus propios gaps y las columnas de
+  // un grupo de tres terminan más angostas que las de uno de uno.
+  //
+  // Solo en el panel (`columns === "auto"`); en la versión estática de mobile
+  // ocho columnas no entran y manda la retícula de 2/3.
+  if (split && columns === "auto") {
+    const cells = GROUPS.flatMap((group) =>
+      group.sections.length > 1
+        ? group.sections.map((section, i) => ({
+            key: `${group.title}-${section.label || i}`,
+            title: group.title,
+            label: `${group.title} · ${section.label}`,
+            sections: [section],
+            ghostTitle: i > 0,
+          }))
+        : [
+            {
+              key: group.title,
+              title: group.title,
+              label: group.title,
+              sections: group.sections,
+              ghostTitle: false,
+            },
+          ]
+    );
+
+    return (
+      <div className="flex flex-wrap gap-x-8 gap-y-10">
+        {cells.map((cell) => (
+          <FooterColumn
+            key={cell.key}
+            title={cell.title}
+            label={cell.label}
+            sections={cell.sections}
+            ghostTitle={cell.ghostTitle}
+            dark={dark}
+            linkClass={linkClass}
+            className="min-w-[7rem] flex-1 basis-0"
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className={`grid gap-x-12 gap-y-10 lg:gap-x-16 ${grid}`}>
       {GROUPS.map((group, i) => (
         <FooterColumn
           key={group.title}
-          group={group}
+          title={group.title}
+          label={group.title}
+          sections={group.sections}
           dark={dark}
           linkClass={linkClass}
           className={PLACE[i] ?? ""}
-          split={split}
         />
       ))}
     </div>
@@ -559,7 +621,10 @@ function StaticFooter({ variant }: { variant: SiteFooterVariant }) {
             <Accent>actually moves.</Accent>
           </p>
         )}
-        <LinkColumns dark columns="two" split={variant === "compact"} />
+        {/* Sin `split`: las ocho columnas de `compact` son cosa del panel. En
+            un teléfono no entran, y acá lo único que la variante cambia es que
+            no hay headline. */}
+        <LinkColumns dark columns="two" />
       </Container>
     </div>
   );
