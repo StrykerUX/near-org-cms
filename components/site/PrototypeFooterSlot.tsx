@@ -54,7 +54,15 @@ import SiteFooter from "@/components/site/SiteFooter";
 // hicieron los route groups igual porque el lab es temporal por definición:
 // cuando el equipo elija una versión, la carpeta se borra y esto vuelve a ser
 // una línea. Reestructurar `app/prototype/` para algo que se va no paga.
-const NO_FOOTER: string[] = ["/prototype/hero-alt", "/prototype/footer-labs"];
+const NO_FOOTER: string[] = [
+  "/prototype/hero-alt",
+  "/prototype/footer-labs",
+  // Los tres drafts EX montan su propio footer del laboratorio, uno distinto
+  // cada uno. Con el del sitio puesto habría dos.
+  "/prototype/ex1",
+  "/prototype/ex2",
+  "/prototype/ex3",
+];
 
 export default function PrototypeFooterSlot() {
   const pathname = usePathname();

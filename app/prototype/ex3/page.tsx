@@ -8,6 +8,7 @@ import CustomerStories from "@/components/sections/home-ab7/CustomerStories";
 import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
 import LatestUpdates from "@/components/sections/LatestUpdates";
 import UpdatesList from "@/components/sections/UpdatesList";
+import FooterReveal from "@/components/sections/footer-labs/FooterReveal";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -28,6 +29,7 @@ export default function EX3Page() {
       testimonials={<TestimonialMarquee loopSeconds={32} />}
       latest={<LatestUpdates title="The latest from NEAR" align="left" />}
       news={<UpdatesList eyebrow="Media" title="In the news" rows={2} />}
+      footer={<FooterReveal />}
     />
   );
 }

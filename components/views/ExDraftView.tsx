@@ -1,5 +1,4 @@
 import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
 import Link from "next/link";
 import OwnYourOwn from "@/components/sections/home-ab7/OwnYourOwn";
 import ExHero, {
@@ -55,6 +54,8 @@ export type ExDraftViewProps = {
   latest?: React.ReactNode;
   /** El listado de prensa. */
   news?: React.ReactNode;
+  /** El footer de este draft, del laboratorio de footers. */
+  footer?: React.ReactNode;
 };
 
 export default function ExDraftView({
@@ -71,72 +72,77 @@ export default function ExDraftView({
   testimonials,
   latest,
   news,
+  footer,
 }: ExDraftViewProps) {
   return (
-    <main className="flex flex-col bg-cream">
-      <ExHero
-        background={background}
-        layout={layout}
-        word={word}
-        reveal={reveal}
-        tone={tone}
-      />
+    // El contenido va envuelto en `relative z-10 bg-cream` y el footer queda
+    // FUERA, que es el contrato que pide el laboratorio de footers (mismo
+    // reparto que `FooterLabShell`):
+    //
+    // · los takeover (Sheet) se apilan en z-30 y tienen que poder subir POR
+    //   ENCIMA de la página;
+    // · Reveal va `fixed` en z-0 y tiene que quedar DEBAJO, porque la página
+    //   es la hoja opaca que se desliza y lo descubre.
+    //
+    // Sin el fondo explícito en el wrapper, Reveal se ve a través de la
+    // página entera desde el primer frame.
+    <>
+      {/* El `<main>` es el wrapper, no un padre de él: el footer tiene que
+          quedar FUERA (ver arriba) y un footer dentro del landmark principal
+          es justo lo que ese landmark no debe contener. */}
+      <main className="relative z-10 flex flex-col bg-cream">
+        <ExHero
+          background={background}
+          layout={layout}
+          word={word}
+          reveal={reveal}
+          tone={tone}
+        />
 
-      <OwnYourOwn />
+        <OwnYourOwn />
 
-      {stack}
+        {stack}
 
-      {proof}
+        {proof}
 
-      {/* La banda va entre las pruebas y customer stories, que es exactamente
-          donde está en la homepage — el propio laboratorio de newsletter monta
-          sus vecinas así para poder juzgar el corte. */}
-      {newsletter}
+        {/* La banda va entre las pruebas y customer stories, que es exactamente
+            donde está en la homepage — el propio laboratorio de newsletter monta
+            sus vecinas así para poder juzgar el corte. */}
+        {newsletter}
 
-      {stories}
+        {stories}
 
-      {testimonials}
+        {testimonials}
 
-      {latest}
+        {latest}
 
-      {news}
+        {news}
 
-      <section className="flex min-h-svh items-center bg-cream text-ink">
-        <Container className="flex flex-col gap-5">
-          <Eyebrow className="text-gray-intermediate">Draft</Eyebrow>
-          <p className="max-w-[46ch] text-h3 text-pretty">
-            From here down, the page is still to be built.
-          </p>
-          <p className="max-w-[62ch] text-body-lg text-gray-intermediate text-pretty">
-            This pass resolves the hero, the opening of the O and the handover to
-            «Own Your Own». The remaining sections, their order and their content
-            are the next decision.
-          </p>
-        </Container>
-      </section>
+        {/* Para saltar entre los tres sin volver atrás. Abajo y no arriba: el
+            header del sitio es fijo y se pisarían. */}
+        <div className="sticky bottom-0 z-40 border-t border-ink/10 bg-cream/90 backdrop-blur-sm">
+          <Container className="flex flex-wrap items-center gap-x-5 gap-y-2 py-3">
+            <span className="text-caption-mono text-gray-intermediate">
+              EX drafts
+            </span>
+            {VARIANTS.map((v) => (
+              <Link
+                key={v.id}
+                href={`/prototype/${v.id}`}
+                className={`text-caption-mono transition-colors duration-200 ${
+                  v.id === current
+                    ? "text-green-ink"
+                    : "text-gray-intermediate hover:text-ink"
+                }`}
+              >
+                {v.label}
+              </Link>
+            ))}
+          </Container>
+        </div>
+      </main>
 
-      {/* Para saltar entre los tres sin volver atrás. Abajo y no arriba: el
-          header del sitio es fijo y se pisarían. */}
-      <div className="sticky bottom-0 z-40 border-t border-ink/10 bg-cream/90 backdrop-blur-sm">
-        <Container className="flex flex-wrap items-center gap-x-5 gap-y-2 py-3">
-          <span className="text-caption-mono text-gray-intermediate">
-            EX drafts
-          </span>
-          {VARIANTS.map((v) => (
-            <Link
-              key={v.id}
-              href={`/prototype/${v.id}`}
-              className={`text-caption-mono transition-colors duration-200 ${
-                v.id === current
-                  ? "text-green-ink"
-                  : "text-gray-intermediate hover:text-ink"
-              }`}
-            >
-              {v.label}
-            </Link>
-          ))}
-        </Container>
-      </div>
-    </main>
+      {footer}
+    </>
   );
 }
