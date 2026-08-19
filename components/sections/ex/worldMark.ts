@@ -65,8 +65,10 @@ export const WORLD_EYE = "M113.279 43.6911H113.11C109.384 43.6911 105.997 46.231
  *
  * Caja real de la contraforma: x 86.5–119.0, y 43.7–114.1.
  *
- * `r` es el semieje MENOR (la mitad del ancho) y no el promedio: es la medida
- * que decide cuánto tiene que crecer el agujero para tapar la pantalla, y con
- * el promedio de una elipse tan alargada se queda corto por el lado estrecho.
+ * Solo el centro: el radio lo mide `ExHero` con `getBBox` sobre el trazado, que
+ * es la única forma de no quedarse corto. La mitad del ancho de la caja (16.25)
+ * NO es el eje corto del óvalo — está inclinado, así que cabe con holgura
+ * dentro de su propia caja, y con esa medida el agujero deja de crecer antes de
+ * tapar la pantalla.
  */
-export const WORLD_EYE_CENTER = { x: 102.75, y: 78.9, r: 16.25 } as const;
+export const WORLD_EYE_CENTER = { x: 102.75, y: 78.9 } as const;

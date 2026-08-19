@@ -61,7 +61,23 @@ const TRAVEL = "180svh";
 
 // Margen sobre la distancia a la esquina más lejana: el agujero tiene que
 // pasarse de largo, no terminar justo al tocarla.
-const COVER = 1.08;
+const COVER = 1.25;
+
+// A qué altura del gesto el agujero YA tapó la pantalla. Antes esto era 1: la
+// «o» terminaba de cubrir exactamente en el último píxel de scroll, así que
+// durante todo el tramo final quedaba una cuña de negro en una esquina y el
+// lector veía el borde del truco. Cubriendo al 82% queda un remate de gesto
+// sobre la sección 2 ya limpia.
+const COVER_AT = 0.82;
+
+// El ojo no es un círculo: es un óvalo INCLINADO. La mitad del ancho de su CAJA
+// no es su eje corto — al estar torcido, el óvalo es más angosto que la caja que
+// lo contiene, y el escalado es uniforme, así que quien decide si el agujero
+// llegó a cubrir la pantalla es el eje corto de verdad. Midiendo sobre la caja,
+// la «o» deja una cuña de negro en la esquina justo cuando el gesto termina.
+// 0.72 sale de la inclinación del glifo de Kepler; errar por lo bajo solo hace
+// que la «o» se pase de grande, que es el lado seguro.
+const EYE_TILT = 0.72;
 
 export type ExHeroLayout =
   /** Cartel a sangre abajo a la izquierda, como la referencia original. */
@@ -152,7 +168,13 @@ export default function ExHero({ background, layout = "poster", tone = "ink" }: 
         Math.hypot(cx, h - cy),
         Math.hypot(w - cx, h - cy)
       );
-      kEnd = (far * COVER) / (WORLD_EYE_CENTER.r * s);
+      // El radio se mide, no se hardcodea: `getBBox` da la caja del trazado en
+      // unidades del viewBox (el path va sin transform en este punto) y
+      // `EYE_TILT` la corrige al ancho real del óvalo.
+      const eyeBox = clipShape.getBBox();
+      const rEye = (Math.min(eyeBox.width, eyeBox.height) / 2) * EYE_TILT;
+
+      kEnd = (far * COVER) / (rEye * s);
 
       eyeDx = cx - stageBox.width / 2;
       eyeDy = cy - stageBox.height / 2;
@@ -184,7 +206,7 @@ export default function ExHero({ background, layout = "poster", tone = "ink" }: 
       },
       onUpdate: (t) => {
         const p = t.progress;
-        const k = Math.pow(kEnd, p);
+        const k = Math.pow(kEnd, Math.min(1, p / COVER_AT));
         applyO(k);
         applyClip(k);
 
