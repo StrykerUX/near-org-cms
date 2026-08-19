@@ -400,6 +400,34 @@
   --text-wordmark--line-height: 0.8;
   --text-wordmark--letter-spacing: -0.03em;
   --text-wordmark--font-weight: 500;
+
+  /* ── Cartel ──────────────────────────────────────────────────────────────
+     Un titular que se mide contra el ANCHO de la página y no contra una
+     escala de lectura: dos renglones que van de borde a borde. Nace para el
+     hero de /prototype/ex2, donde el tamaño no es una decisión de jerarquía
+     sino de composición — el titular ES el layout.
+
+     Son dos y no uno porque el ancho de un renglón depende de cuántos
+     caracteres tenga: con un solo tamaño, un renglón de cinco letras y otro
+     de ocho no pueden llenar los dos el mismo ancho. `--text-kicker-xl` es el
+     renglón largo y `--text-poster` el corto.
+
+     Los nombres NO comparten prefijo, y eso es a propósito: con
+     `--text-poster` y `--text-poster-lead` conviviendo, Tailwind genera el
+     primero y descarta el segundo en silencio — el titular sale a 16px y no
+     hay ningún error que lo explique. Comprobado contra el CSS emitido.
+
+     Entra al DS y no como `text-[13vw]` suelto por lo de siempre: el día que
+     el hero cambie de medida, la clase arbitraria no la encuentra nadie. */
+  --text-kicker-xl: clamp(2.5rem, 11.2vw, 13rem);
+  --text-kicker-xl--line-height: 0.92;
+  --text-kicker-xl--letter-spacing: -0.03em;
+  --text-kicker-xl--font-weight: 500;
+
+  --text-poster: clamp(3.2rem, 15.4vw, 18rem);
+  --text-poster--line-height: 0.86;
+  --text-poster--letter-spacing: -0.035em;
+  --text-poster--font-weight: 500;
 }
 
 /* ── Escalas serif ──────────────────────────────────────────────────────────
@@ -424,6 +452,21 @@
   font-family: var(--font-display);
   font-size: var(--text-display);
   line-height: var(--text-display--line-height);
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* El cartel en serif: WORLD del hero de ex2. Mismo contrato que las demás
+   escalas serif — familia + escala + los overrides serif en UNA clase, con el
+   font-size saliendo del MISMO token que la sans.
+
+   Se llama `serif-poster` y no `text-poster-serif` por la misma colisión de
+   arriba: una utility que empieza igual que un token de la escala compite con
+   él y se pierde. */
+@utility serif-poster {
+  font-family: var(--font-display);
+  font-size: var(--text-poster);
+  line-height: var(--text-poster--line-height);
   letter-spacing: var(--text-serif--letter-spacing);
   font-weight: var(--text-serif--font-weight);
 }
@@ -1018,3 +1061,5 @@ html[data-grid="on"] [data-grid-overlay] > div > span {
 [data-stack-noshadow] [data-stack-shadow] {
   display: none;
 }
+
+/* draft ex2: token de cartel — ver components/sections/ex2/Ex2Hero.tsx */
