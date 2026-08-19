@@ -5,18 +5,17 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import LabFiller from "@/components/sections/footer-labs/LabFiller";
 import type { FooterLabSpec } from "@/components/sections/footer-labs/footerLabContent";
 
-// El armazón que comparten las seis rutas del lab: ficha + relleno + footer.
+// El armazón que comparten las rutas del lab: ficha + relleno + footer.
 //
-// ── Por qué una ruta por footer y no las seis apiladas ─────────────────────
+// ── Por qué una ruta por variante y no las dos apiladas ────────────────────
 //
 // `/prototype/hero-alt` apila sus seis versiones en una sola página, y ahí es
 // lo correcto: un hero se compara mejor con el anterior a la vista. Un footer
-// no. Cinco de los seis mecanismos se disparan contra **el fondo del
-// documento** —tres tapan el viewport, uno vive en `position: fixed` detrás de
-// la página— y solo puede haber un fondo del documento. Apilados, el primero se
-// comería a los otros cinco y ninguno se vería como se ve en producción.
+// no. El footer del sitio es un takeover que se dispara contra **el fondo del
+// documento**, y solo puede haber un fondo del documento: apiladas, la primera
+// se comería a la segunda y ninguna se vería como se ve en producción.
 //
-// Una ruta por versión también le devuelve a cada una la condición real: se
+// Una ruta por variante también le devuelve a cada una la condición real: se
 // llega al footer después de scrollear una página entera, una sola vez.
 //
 // El header queda arriba porque estas páginas cargan por su URL directa y sin
@@ -39,9 +38,7 @@ export default function FooterLabShell({
           descubra al scrollear (04 · Reveal). Sin un contenedor con fondo y
           z-index, un footer fijo se pintaría por encima del texto en flujo.
 
-          `z-10` deja sitio a las dos familias: las versiones que TAPAN la
-          página se montan por encima (`z-30`, igual que `SiteFooter`), y la
-          que se descubre por debajo se monta en `z-0`. */}
+          `z-10` deja sitio al takeover, que sube por encima en `z-30`. */}
       <div className="relative z-10 bg-cream">
       <Container as="header" className="pt-[calc(var(--site-header-block)+3rem)] pb-16">
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
@@ -49,7 +46,7 @@ export default function FooterLabShell({
             ← Footer lab
           </Link>
           <Eyebrow className="text-gray-intermediate">
-            {spec.index} · {spec.takeover ? "Takeover" : "No takeover"} · {spec.technique}
+            {spec.index} · {spec.technique}
           </Eyebrow>
         </div>
 
