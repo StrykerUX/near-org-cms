@@ -105,22 +105,24 @@ export default function StackTriptych() {
       className="group/tri relative bg-ink text-cream data-[mode=track]:h-[calc(var(--travel)+100svh)]"
     >
       <div className="relative overflow-hidden group-data-[mode=track]/tri:sticky group-data-[mode=track]/tri:top-0 group-data-[mode=track]/tri:h-svh">
-        {/* El marco exterior: un hairline por dentro del borde de la pantalla.
-            Es lo que convierte la sección en una LÁMINA — algo que se mira
-            entero— en vez de una franja negra más de la página. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-6 hidden rounded-2xl border border-cream/15 lg:block"
-        />
+        {/* El ancho de la sección está TOPEADO y centrado. Sin tope, las dos
+            columnas de texto se van a los bordes de la ventana y en un monitor
+            ancho la lectura cruza medio metro de negro para llegar del índice
+            al cuerpo. El tope es lo que mantiene el tríptico como una sola
+            figura. */}
+        <div className="mx-auto flex h-full w-full max-w-[1500px] flex-col px-[60px] pb-16 pt-[calc(var(--site-header-block)+2rem)]">
+          <div className="grid flex-1 grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(15rem,1fr)_minmax(0,1.6fr)_minmax(15rem,1fr)]">
+            {/* ── Izquierda: el título y el índice ─────────────────────── */}
+            <div className="hidden flex-col gap-8 self-center lg:flex">
+              {/* El título vive ACÁ y no centrado arriba: arriba se comía una
+                  franja de alto que el gráfico necesita, y encima quedaba
+                  compitiendo con el rótulo de la capa activa, que es el que
+                  manda mientras se recorre la sección. */}
+              <h2 className="text-h2 text-pretty">
+                The NEAR <Accent>Stack</Accent>
+              </h2>
 
-        <div className="flex h-full flex-col gap-8 px-[60px] pb-16 pt-[calc(var(--site-header-block)+2rem)]">
-          <h2 className="text-center text-h2">
-            The NEAR <Accent>Stack</Accent>
-          </h2>
-
-          <div className="grid flex-1 grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(15rem,1fr)_minmax(0,1.5fr)_minmax(17rem,1fr)]">
-            {/* ── Izquierda: el índice ─────────────────────────────────── */}
-            <ul className="hidden flex-col gap-3 self-center lg:flex">
+              <ul className="flex flex-col gap-3">
               {LAYERS.map((l) => (
                 <li key={l.key} className="flex flex-col">
                   <button
@@ -175,18 +177,19 @@ export default function StackTriptych() {
                   )}
                 </li>
               ))}
-            </ul>
+              </ul>
+            </div>
 
-            {/* ── Centro: el ensamble, dentro de su marco ──────────────── */}
+            {/* ── Centro: el ensamble ─────────────────────────────────── */}
             <div className="relative flex h-full items-center justify-center">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-[min(100%,34rem)] -translate-x-1/2 rounded-3xl border border-cream/15 lg:block"
-              />
+              {/* El alto lo topa TAMBIÉN el ancho: el ensamble es casi cuadrado
+                  y su columna del grid no crece con la altura de la ventana.
+                  Solo con `svh`, en una ventana baja y angosta el arte se salía
+                  de su columna y se montaba sobre los dos textos. */}
               <div
                 ref={stageRef}
                 {...stageProps}
-                className="pointer-events-auto relative h-[46svh] lg:h-[58svh]"
+                className="pointer-events-auto relative h-[46svh] lg:h-[min(72svh,39vw)]"
               >
                 <StackAssembly stage={stage} hover={hover} className="h-full w-auto" />
                 <StackCursorTag ref={tagRef} hover={hover} />
@@ -194,7 +197,11 @@ export default function StackTriptych() {
             </div>
 
             {/* ── Derecha: el cuerpo de la parada ──────────────────────── */}
-            <div className="flex flex-col gap-6 self-center">
+            {/* `justify-self-end`: sin esto el bloque se apoya en el borde
+                IZQUIERDO de su columna y queda flotando lejos del margen
+                derecho — el índice pegado a su borde y el cuerpo a media
+                columna del suyo. */}
+            <div className="flex flex-col gap-6 self-center lg:justify-self-end">
               {/* El nombre NO se repite acá: ya está en la lista, y grande. */}
               <p className="max-w-[36ch] text-body text-cream/70 text-pretty">{BODIES[key]}</p>
 
