@@ -3,6 +3,7 @@ import ExDraftView from "@/components/views/ExDraftView";
 import { ExBgField } from "@/components/sections/ex/ExBackgrounds";
 import StackTriptych from "@/components/sections/stack-labs/StackTriptych";
 import ProofIndex from "@/components/sections/proof-alt/ProofIndex";
+import Belongs05Halo from "@/components/sections/newsletter-labs/Belongs05Halo";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -19,6 +20,7 @@ export default function EX2Page() {
       tone="ink"
       stack={<StackTriptych />}
       proof={<ProofIndex />}
+      newsletter={<Belongs05Halo />}
     />
   );
 }

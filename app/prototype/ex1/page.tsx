@@ -3,6 +3,7 @@ import ExDraftView from "@/components/views/ExDraftView";
 import { ExBgVideo } from "@/components/sections/ex/ExBackgrounds";
 import StackAxis from "@/components/sections/stack-labs/StackAxis";
 import ProofColumns from "@/components/sections/proof-alt/ProofColumns";
+import Belongs01Marquee from "@/components/sections/newsletter-labs/Belongs01Marquee";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -18,6 +19,7 @@ export default function EX1Page() {
       tone="ink"
       stack={<StackAxis />}
       proof={<ProofColumns />}
+      newsletter={<Belongs01Marquee />}
     />
   );
 }

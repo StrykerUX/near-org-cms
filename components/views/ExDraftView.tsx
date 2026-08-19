@@ -45,6 +45,8 @@ export type ExDraftViewProps = {
   stack?: React.ReactNode;
   /** La estructura de la sección de pruebas de este draft. */
   proof?: React.ReactNode;
+  /** La banda de newsletter de este draft. */
+  newsletter?: React.ReactNode;
 };
 
 export default function ExDraftView({
@@ -56,6 +58,7 @@ export default function ExDraftView({
   tone,
   stack,
   proof,
+  newsletter,
 }: ExDraftViewProps) {
   return (
     <main className="flex flex-col bg-cream">
@@ -72,6 +75,11 @@ export default function ExDraftView({
       {stack}
 
       {proof}
+
+      {/* La banda va entre las pruebas y customer stories, que es exactamente
+          donde está en la homepage — el propio laboratorio de newsletter monta
+          sus vecinas así para poder juzgar el corte. */}
+      {newsletter}
 
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
