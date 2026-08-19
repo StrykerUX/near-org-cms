@@ -59,6 +59,22 @@ import { getLenis } from "@/components/site/providers/lenisInstance";
 // `href: null` = la página todavía no existe. Se renderiza como link inerte a
 // "#" en vez de inventarle un destino: un link equivocado es peor que un
 // placeholder evidente. Al crear la página, esto es una línea.
+// ── Las variantes ───────────────────────────────────────────────────────────
+//
+// El footer de producción es `default` y es el que montan los tres layouts.
+// Las otras dos son las pruebas que viven en `/prototype/footer-labs`, y son
+// props de ESTE componente y no copias suyas: una copia se desincroniza al
+// primer cambio y la prueba deja de medir el footer real.
+//
+//   veil    · el logo se hunde detrás de la superficie del footer: un
+//             degradado del color del fondo lo cubre desde arriba y el logo
+//             queda pegado al borde inferior (el copyright vuelve a ser una
+//             capa suelta, para no empujarlo hacia arriba).
+//   compact · sin el headline, y los dos grupos con sub-secciones —Resources y
+//             About— se abren en dos columnas. Todo el alto que se ahorra se
+//             lo queda el logo: el reparto vertical ya le da lo que sobra.
+export type SiteFooterVariant = "default" | "veil" | "compact";
+
 type FooterLink = { label: string; href: string | null };
 
 const GROUPS: {
@@ -220,6 +236,11 @@ const WORDMARK_MIN_H = 96;
 // logo se lea mejor. Centrado, con el aire repartido a los dos lados.
 const WORDMARK_MAX_W = "mx-auto w-full max-w-[2080px]";
 
+// El velo de la variante `veil`, dentro de la caja del wordmark (así sigue
+// exactamente a su recorte, sea cual sea el alto que el reparto le dé).
+const VEIL_BASE = "pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent";
+const VEIL_INK = `${VEIL_BASE} from-ink via-ink/70`;
+
 // ── El indicador con inercia ────────────────────────────────────────────────
 //
 // Es la F18 del hover-lab (`components/views/hover-lab/FooterLinkVariantsPlus`,
@@ -249,11 +270,14 @@ function FooterColumn({
   dark,
   linkClass,
   className = "",
+  split = false,
 }: {
   group: (typeof GROUPS)[number];
   dark: boolean;
   linkClass: string;
   className?: string;
+  /** `compact`: un grupo con varias sub-secciones las abre en dos columnas. */
+  split?: boolean;
 }) {
   const rootRef = useGsapContext<HTMLElement>((_self, root) => {
     const chip = root.querySelector<HTMLElement>("[data-footer-chip]");
@@ -343,7 +367,13 @@ function FooterColumn({
         }`}
       />
       <h2 className={`relative text-label ${dark ? "text-cream" : ""}`}>{group.title}</h2>
-      <div className="mt-3 flex flex-col gap-5">
+      <div
+        className={
+          split && group.sections.length > 1
+            ? "mt-3 grid gap-x-8 gap-y-5 sm:grid-cols-2"
+            : "mt-3 flex flex-col gap-5"
+        }
+      >
         {group.sections.map((section, i) => (
           <div key={section.label || i} className="flex flex-col gap-1.5">
             {section.label && (
@@ -379,7 +409,15 @@ function FooterColumn({
 
 // Los grupos de links, una sola vez: los renderizan la versión estática de
 // mobile (cream) y el panel del takeover (sobre negro) con paletas distintas.
-function LinkColumns({ dark, columns = "auto" }: { dark: boolean; columns?: "auto" | "two" }) {
+function LinkColumns({
+  dark,
+  columns = "auto",
+  split = false,
+}: {
+  dark: boolean;
+  columns?: "auto" | "two";
+  split?: boolean;
+}) {
   // `relative` para que el texto quede POR ENCIMA del chip, que es absoluto y
   // si no lo taparía a medias.
   const linkClass = `relative text-body-sm transition-colors ${
@@ -418,6 +456,7 @@ function LinkColumns({ dark, columns = "auto" }: { dark: boolean; columns?: "aut
           dark={dark}
           linkClass={linkClass}
           className={PLACE[i] ?? ""}
+          split={split}
         />
       ))}
     </div>
@@ -436,7 +475,7 @@ function LinkColumns({ dark, columns = "auto" }: { dark: boolean; columns?: "aut
 // `once: true` de useScrollReveal. En mobile el footer es corto y se entra y
 // se sale de él todo el tiempo; una entrada de una sola vez deja el resto de
 // la sesión con un footer que ya no hace nada.
-function StaticFooter() {
+function StaticFooter({ variant }: { variant: SiteFooterVariant }) {
   const rootRef = useGsapContext<HTMLDivElement>((_self, root) => {
     const mm = gsap.matchMedia();
 
@@ -445,10 +484,12 @@ function StaticFooter() {
     mm.add(`${MQ.mobile} and ${MQ.motion}`, () => {
       const headline = root.querySelector("[data-footer-headline]");
       const columns = gsap.utils.toArray<HTMLElement>("nav", root);
+      // En `compact` no hay headline: la entrada arranca por las columnas.
+      const lead = headline ?? columns[0];
       // El wordmark vive fuera de este bloque —lo comparte con el takeover—
       // así que se busca desde el footer, no desde el scope.
       const wordmark = root.closest("footer")?.querySelector("[data-footer-wordmark]");
-      if (!headline || columns.length === 0) return;
+      if (!lead || columns.length === 0) return;
 
       const tl = gsap.timeline({
         defaults: { ease: EASE_OUT },
@@ -464,8 +505,11 @@ function StaticFooter() {
         },
       });
 
-      tl.from(headline, { autoAlpha: 0, y: 32, duration: 0.8 })
-        .from(columns, { autoAlpha: 0, y: 22, duration: 0.6, stagger: 0.07 }, 0.15);
+      tl.from(lead, { autoAlpha: 0, y: 32, duration: 0.8 }).from(
+        columns,
+        { autoAlpha: 0, y: 22, duration: 0.6, stagger: 0.07 },
+        headline ? 0.15 : 0.06
+      );
       if (wordmark) tl.from(wordmark, { autoAlpha: 0, y: 56, duration: 0.9 }, 0.1);
     });
 
@@ -475,18 +519,23 @@ function StaticFooter() {
   return (
     <div ref={rootRef} className="lg:hidden">
       <Container className="grid gap-16 pb-24 pt-24">
-        <p data-footer-headline className="text-h2 text-cream text-pretty">
-          Where money
-          <br />
-          <Accent>actually moves.</Accent>
-        </p>
-        <LinkColumns dark columns="two" />
+        {variant !== "compact" && (
+          <p data-footer-headline className="text-h2 text-cream text-pretty">
+            Where money
+            <br />
+            <Accent>actually moves.</Accent>
+          </p>
+        )}
+        <LinkColumns dark columns="two" split={variant === "compact"} />
       </Container>
     </div>
   );
 }
 
-export default function SiteFooter() {
+export default function SiteFooter({ variant = "default" }: { variant?: SiteFooterVariant } = {}) {
+  const veil = variant === "veil";
+  const compact = variant === "compact";
+
   // El footer ya no se remonta con cada página: vive en el layout, que
   // sobrevive a la navegación de cliente. Sin esta dependencia el
   // ScrollTrigger se quedaría midiendo contra el `maxScroll` de la página
@@ -525,7 +574,9 @@ export default function SiteFooter() {
         const content = panelBox.getBoundingClientRect().height - TAKEOVER_GAP_MAX;
         // La fila del copyright vive DEBAJO del logo, así que es alto que el
         // reparto no tiene para dar.
-        const legalH = legal ? legal.getBoundingClientRect().height : 0;
+        // En `veil` el copyright es una capa suelta sobre el logo: no ocupa
+        // alto que el reparto tenga que descontar.
+        const legalH = legal && !veil ? legal.getBoundingClientRect().height : 0;
         const room = window.innerHeight - TAKEOVER_TOP_MIN - content - legalH;
 
         const gap = Math.min(TAKEOVER_GAP_MAX, Math.max(TAKEOVER_GAP_MIN, room - natural));
@@ -735,7 +786,7 @@ export default function SiteFooter() {
         gsap.set(panel, { clearProps: "transform,opacity,visibility" });
       };
     },
-    [pathname]
+    [pathname, variant]
   );
 
   return (
@@ -793,10 +844,11 @@ export default function SiteFooter() {
             className="block h-auto w-full invert"
             style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
           />
+          {veil && <span aria-hidden="true" className={VEIL_INK} />}
         </div>
       </div>
 
-      <StaticFooter />
+      <StaticFooter variant={variant} />
 
       {/* El panel del takeover: headline + columnas, posicionado con su
           borde inferior en el TOP del footer — o sea, justo encima del
@@ -812,15 +864,19 @@ export default function SiteFooter() {
         {/* El aire hasta el wordmark es lo PRIMERO que cede en una pantalla
             baja (de 4.5rem a 2.5rem) antes de tocar el logo. */}
         <Container
-          className="grid gap-16 lg:grid-cols-[1fr_auto] lg:gap-24"
+          className={`grid gap-16 ${
+            compact ? "lg:grid-cols-1" : "lg:grid-cols-[1fr_auto] lg:gap-24"
+          }`}
           style={{ paddingBottom: "var(--footer-takeover-gap, 4.5rem)" }}
         >
-          <p className="text-h2 text-cream text-pretty">
-            Where money
-            <br />
-            <Accent>actually moves.</Accent>
-          </p>
-          <LinkColumns dark />
+          {!compact && (
+            <p className="text-h2 text-cream text-pretty">
+              Where money
+              <br />
+              <Accent>actually moves.</Accent>
+            </p>
+          )}
+          <LinkColumns dark split={compact} />
         </Container>
       </div>
 
@@ -844,6 +900,15 @@ export default function SiteFooter() {
           className="block h-auto w-full max-lg:invert"
           style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
         />
+        {/* El del reposo va del color del FONDO de cada estado —ink bajo lg,
+            cream en desktop— y no de negro fijo: el logo tiene que hundirse en
+            la superficie del footer, no quedar bajo una banda negra. */}
+        {veil && (
+          <span
+            aria-hidden="true"
+            className={`${VEIL_BASE} from-ink via-ink/70 lg:from-cream lg:via-cream/70`}
+          />
+        )}
       </div>
 
       {/* El copyright, en FLUJO debajo del wordmark y alineado con el borde
@@ -860,7 +925,9 @@ export default function SiteFooter() {
           Los links legales ya no están acá: subieron a su propia columna. */}
       <div
         data-footer-legal
-        className={`relative z-[3] flex justify-end px-5 pb-5 pt-3 mix-blend-difference ${WORDMARK_MAX_W}`}
+        className={`z-[3] flex justify-end px-5 mix-blend-difference ${WORDMARK_MAX_W} ${
+          veil ? "absolute inset-x-0 bottom-5" : "relative pb-5 pt-3"
+        }`}
       >
         <p className="text-body-sm text-neutral-400">© 2026 NEAR. All rights reserved.</p>
       </div>
