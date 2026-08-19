@@ -231,10 +231,6 @@ export default function Ex2Hero() {
         {/* El vídeo: loop, no scrubbeado. Todo el scroll de la sección se lo
             lleva la apertura del ojo — con el descenso avanzando a la vez,
             serían dos animaciones peleándose por la misma rueda. */}
-        {/* Sin velo: el vídeo va a opacidad plena y el contraste del titular lo
-            resuelve el color de la tipografía —tinta sobre un clip claro— y no
-            una capa oscura encima. Si el clip cambia por uno con zonas oscuras,
-            esta decisión se cae y hay que volver a un velo o invertir el texto. */}
         <video
           data-fade
           className="absolute inset-0 h-full w-full object-cover"
@@ -246,6 +242,19 @@ export default function Ex2Hero() {
           playsInline
           preload="metadata"
           aria-hidden="true"
+        />
+
+        {/* El velo, ahora en BLANCO y no en tinta: el titular es negro, así que
+            lo que le da contraste es ACLARAR el vídeo, no oscurecerlo.
+            
+            35% arriba y 10% abajo, y ese reparto no es simétrico por capricho:
+            arriba caen el nav y el renglón «OWN YOUR» sobre la parte más clara
+            del clip —la que menos ayuda a un texto negro— mientras que abajo el
+            vídeo ya es oscuro por sí solo y un velo fuerte lo lavaría. */}
+        <div
+          data-fade
+          aria-hidden="true"
+          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.10)_100%)]"
         />
 
         <Container className="relative flex h-full flex-col justify-end pb-[10svh] pt-[var(--site-header-block)]">
