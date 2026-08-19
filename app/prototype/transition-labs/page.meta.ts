@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs",
-  title: "Transiciones · índice",
+  title: "Transition lab · 12 cortes",
   description:
-    "Cinco maneras de pasar del cream de «Own Your Own» al negro de «The NEAR Stack»: telón, contraforma, ASCII, partículas y la columna subiendo.",
-  blurb: "Cinco transiciones entre cream e ink",
+    "Doce maneras de pasar del cream de «Own Your Own» al negro de «The NEAR Stack»: siete vigentes sobre una pieza común y cinco descartadas.",
+  blurb: "12 cortes entre cream e ink",
   nav: false,
   sitemap: false,
   robots: "noindex",

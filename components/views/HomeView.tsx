@@ -31,6 +31,12 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 // El `<h1>` sigue siendo `sr-only`, y ahora además hace falta de verdad: los
 // `<h2>` de los tres grupos cuelgan de él, y sin ese nivel un lector de
 // pantalla que salta por headings aterriza en tres listas sin contexto.
+/** Una variante dentro de un laboratorio: solo nombre corto y ruta. */
+export type HomeViewVariant = {
+  href: string;
+  label: string;
+};
+
 export type HomeViewLink = {
   href: string;
   label: string;
@@ -48,6 +54,15 @@ export type HomeViewLink = {
   // dónde apuntar, y nada más. Lo deriva el generador del manifiesto leyendo el
   // page.tsx, no se declara a mano.
   empty?: boolean;
+  // Las variantes de un laboratorio. Cuando las hay, la fila deja de ser una
+  // página suelta y pasa a ser el ÍNDICE de un conjunto: se dibuja con su
+  // cuenta y con las variantes debajo.
+  //
+  // Es la distinción que el índice no hacía y que hacía falta: una fila de
+  // `/prototype/stack-labs/bleed` y una de `/prototype/homepage-ab7` se veían
+  // igual, y no son lo mismo — la primera es un diseño DENTRO de una
+  // exploración, la segunda es una página que se puede enseñar.
+  variants?: HomeViewVariant[];
 };
 
 export type HomeViewGroup = {
@@ -55,6 +70,12 @@ export type HomeViewGroup = {
   title: string;
   note: string;
   links: HomeViewLink[];
+  /**
+   * `list` (por defecto) — dos columnas de filas, para páginas sueltas.
+   * `tree` — una sola columna, porque cada fila arrastra su tira de variantes
+   * y a dos columnas esas tiras chocan con la ruta de la columna vecina.
+   */
+  layout?: "list" | "tree";
 };
 
 export type HomeViewProps = {
@@ -98,6 +119,7 @@ function Row({ link }: { link: HomeViewLink }) {
       <span className="flex min-w-0 flex-col gap-0.5">
         <span className="flex min-w-0 items-center gap-2">
           <span className="truncate text-body">{link.label}</span>
+          {link.variants && <Badge>{link.variants.length} variantes</Badge>}
           {link.empty && <Badge>empty</Badge>}
           {link.unlinked && <Badge>not in nav</Badge>}
         </span>
@@ -134,6 +156,28 @@ function Row({ link }: { link: HomeViewLink }) {
           {inner}
         </Link>
       )}
+
+      {/* La tira de variantes. Va FUERA del enlace del padre —un <a> dentro de
+          otro <a> no es HTML válido y el navegador lo desarma— y sangrada, que
+          es lo único que hace falta para que se lea como subordinada.
+
+          Píldoras y no filas: una variante no necesita resumen ni ruta a la
+          vista, solo su nombre corto. Diez filas completas por laboratorio
+          devolverían el índice al problema que tenía. */}
+      {link.variants && link.variants.length > 0 && (
+        <ul className="flex flex-wrap gap-x-1.5 gap-y-1 border-b border-dotted border-border py-2 pl-5">
+          {link.variants.map((v) => (
+            <li key={v.href}>
+              <Link
+                href={v.href}
+                className="block rounded-full border border-rule px-2.5 py-0.5 text-caption-mono text-gray-intermediate transition-colors duration-200 hover:border-ink hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              >
+                {v.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </li>
   );
 }
@@ -160,11 +204,17 @@ export default function HomeView({ groups }: HomeViewProps) {
             <div className="flex flex-col gap-2 border-b border-ink pb-4">
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="text-h3">{group.title}</h2>
+                {/* La cuenta suma las variantes: un grupo de 5 laboratorios con
+                    40 diseños adentro no son 5 páginas, y el número del
+                    encabezado es lo primero que se mira para calibrar. */}
                 <span
                   aria-hidden
                   className="text-caption-mono text-gray-intermediate"
                 >
-                  {group.links.length}
+                  {group.links.reduce(
+                    (n, l) => n + 1 + (l.variants?.length ?? 0),
+                    0
+                  )}
                 </span>
               </div>
               <Eyebrow className="text-gray-intermediate">{group.note}</Eyebrow>
@@ -175,7 +225,13 @@ export default function HomeView({ groups }: HomeViewProps) {
                 mitades caen a alturas distintas y la lista deja de leerse como
                 una tabla. El `gap-x` es grande a propósito — es lo único que
                 separa la ruta de una columna del título de la siguiente. */}
-            <ul className="grid grid-cols-1 gap-x-16 sm:grid-cols-2">
+            <ul
+              className={
+                group.layout === "tree"
+                  ? "grid grid-cols-1"
+                  : "grid grid-cols-1 gap-x-16 sm:grid-cols-2"
+              }
+            >
               {group.links.map((link) => (
                 <Row key={link.href} link={link} />
               ))}
