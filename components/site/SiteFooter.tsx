@@ -9,6 +9,7 @@ import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, EASE_OUT, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { getLenis } from "@/components/site/providers/lenisInstance";
 
 // El footer del sitio. UNO solo, montado por los tres layouts del frontend —
 // `app/(site)`, `app/(motion)` y `app/prototype` — y por ninguna view.
@@ -330,7 +331,12 @@ function FooterColumn({
       <span
         data-footer-chip
         aria-hidden="true"
-        className={`pointer-events-none invisible absolute left-0 top-0 h-0 w-0 rounded-lg opacity-0 will-change-transform ${
+        // Sin `will-change`: son cinco chips por columna y diez en la página
+        // (la versión estática y el panel), invisibles casi todo el tiempo.
+        // Promoverlos a capa propia de forma permanente es memoria de GPU
+        // reservada para algo que no se está moviendo; GSAP ya promueve el que
+        // anima mientras dura el tween.
+        className={`pointer-events-none invisible absolute left-0 top-0 h-0 w-0 rounded-lg opacity-0 ${
           dark ? "bg-cream/15" : "bg-foreground/8"
         }`}
       />
@@ -556,6 +562,51 @@ export default function SiteFooter() {
       // recorte. Un solo elemento absoluto adentro — el reflow es trivial.
       const tl = gsap.timeline({ paused: true });
 
+      // ── El tirón ──────────────────────────────────────────────────────────
+      //
+      // Los últimos ~100px los recorre la página sola. Va POR LENIS cuando hay
+      // smooth scroll: Lenis escribe `scrollTop` en cada frame desde su propia
+      // posición interpolada, así que un `gsap.to(scroller, { scrollTop })` se
+      // le pisa de a un frame por vez — los dos escribiendo la misma propiedad
+      // en el mismo frame. Eso era el tironeo al llegar al footer.
+      //
+      // Sin Lenis (reduced-motion, /blog) el scroll nativo no tiene dueño y el
+      // tween sirve igual: `scrollTop` es una propiedad numérica normal, no
+      // hace falta ScrollToPlugin.
+      const pull = () => {
+        const target = ScrollTrigger.maxScroll(window);
+        // Ya está abajo: sin esto, cruzar el umbral dos veces seguidas
+        // re-dispara un tirón de cero px que igual emite eventos de scroll.
+        if (Math.abs(scroller.scrollTop - target) < 2) return;
+
+        const lenis = getLenis();
+        if (lenis) {
+          // `lock: true` durante los 450ms del tirón. No es por autoridad: sin
+          // lock, la inercia que el usuario todavía trae cancela el `scrollTo`
+          // a mitad de camino y el takeover queda abierto con la página SIN
+          // llegar al fondo — o sea con una franja de la sección anterior
+          // asomando debajo del negro. Y el forcejeo entre los dos hace que la
+          // dirección del scroll oscile, que es lo que re-dispara el trigger
+          // en loop.
+          lenis.scrollTo(target, { duration: 0.45, lock: true, force: true });
+          return;
+        }
+        gsap.to(scroller, {
+          scrollTop: target,
+          duration: 0.45,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+      };
+
+      // El tirón pierde SIEMPRE contra el usuario escapando hacia arriba —
+      // pero sólo hay algo que matar en el camino sin Lenis: el `scrollTo`
+      // bloqueado dura 450ms y termina solo, y cancelarlo moviendo el scroll a
+      // mano es justamente lo que lo desincroniza.
+      const releasePull = () => {
+        if (!getLenis()) gsap.killTweensOf(scroller);
+      };
+
       const takeover = (on: boolean) => {
         if (on) {
           if (!canTakeover()) return;
@@ -566,20 +617,9 @@ export default function SiteFooter() {
             ease: "power3.out",
             overwrite: "auto",
           });
-          // El tirón: los últimos ~100px los recorre la página sola.
-          // `scrollTop` es una propiedad numérica normal — no hace falta
-          // ScrollToPlugin. `overwrite` mata un tirón anterior si el umbral
-          // se cruza dos veces seguidas.
-          gsap.to(scroller, {
-            scrollTop: ScrollTrigger.maxScroll(window),
-            duration: 0.45,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
+          pull();
         } else {
-          // El tirón pierde SIEMPRE contra el usuario escapando hacia arriba:
-          // sin el kill seguiría arrastrándolo al fondo.
-          gsap.killTweensOf(scroller);
+          releasePull();
           tl.reverse();
           // El primer gesto de scroll inverso DISPARA la salida y de ahí corre
           // sola: rápida y lineal, sin quedar atada al ritmo del scroll.
