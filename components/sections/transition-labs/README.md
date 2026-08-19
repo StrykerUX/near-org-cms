@@ -72,7 +72,15 @@ Cambiar la transición de un corte es cambiar un componente.
    ganaba a la sección entrante en la zona de solape, aunque esta venga después
    en el DOM: por los agujeros del velo se veía la sección equivocada. Quien
    monte un corte tiene que darle a la de abajo un índice al menos igual.
-3. **El coste cero se probó y no sirve.** Con `travel` 140 el neto es 0svh, pero
+3. **El velo opaco recortaba la sección de arriba.** Al pasar al modelo de
+   revelar, el velo pasó a ser opaco desde el primer frame — y mientras el
+   tramo ENTRA en pantalla, con el progreso todavía en 0 y el sticky sin
+   pegarse, su caja tapa la parte baja del viewport. Como es del mismo color
+   que el fondo, no se ve un panel: se ve la sección anterior cortada a media
+   card por una línea horizontal. El escenario entero (velo + piso) aparece
+   ahora en el primer 5% del gesto y no antes; el fundido es invisible (cream
+   sobre cream) y lo que arregla es que antes de empezar no haya nada pintado.
+4. **El coste cero se probó y no sirve.** Con `travel` 140 el neto es 0svh, pero
    el gesto queda en 40svh —tres golpes de rueda— y no da tiempo a verlo. El
    recorrido es `travel − 100svh`, así que alargarlo cuesta scroll uno a uno.
 

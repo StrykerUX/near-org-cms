@@ -127,24 +127,44 @@ export default function SectionCut({
   // componente de arriba re-renderiza y crea una función nueva.
   const drawRef = useRef(draw);
   drawRef.current = draw;
+  const stageRef = useRef<HTMLDivElement>(null);
 
   const rootRef = useMotionScope<HTMLElement>(
     ({ scope, motionOk }) => {
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      // El escenario entero (velo + piso) aparece en el primer 5% del gesto y
+      // no antes.
+      //
+      // Es una corrección, no un efecto: el velo es OPACO y del color de la
+      // sección de arriba, así que mientras el tramo entra en pantalla —con el
+      // progreso todavía en 0, el sticky sin pegarse— su caja recorta la cola
+      // de esa sección por una línea horizontal. Como el fondo es el mismo
+      // color, no se ve un panel: se ve la sección CORTADA a media card.
+      //
+      // El fundido en sí es invisible (cream sobre cream); lo que arregla es que
+      // antes de empezar no haya nada pintado.
+      const paint = (p: number) => {
+        stage.style.opacity = `${Math.min(1, p / 0.05)}`;
+        drawRef.current(p);
+      };
+
       // Sin motion (o en móvil) el corte se entrega HECHO. Es la degradación
       // correcta: lo que el gesto tenía para decir es el estado final, y ese se
       // puede entregar sin mover un píxel.
       if (!motionOk) {
-        drawRef.current(1);
+        paint(1);
         return;
       }
 
-      drawRef.current(0);
+      paint(0);
 
       const t = ScrollTrigger.create({
         trigger: scope,
         start: "top top",
         end: "bottom bottom",
-        onUpdate: (self) => drawRef.current(Math.min(1, self.progress / settle)),
+        onUpdate: (self) => paint(Math.min(1, self.progress / settle)),
       });
 
       return () => t.kill();
@@ -163,7 +183,7 @@ export default function SectionCut({
       }
       className="relative z-[2] -mt-[100svh] h-[var(--travel)] bg-transparent"
     >
-      <div className="sticky top-0 h-svh overflow-hidden">
+      <div ref={stageRef} className="sticky top-0 h-svh overflow-hidden opacity-0">
         <div aria-hidden="true" className="absolute inset-0" style={{ background: to }} />
         {/* El wrapper es POSICIONADO a propósito. El piso es `absolute`, y en el
             orden de pintado de CSS un elemento posicionado va por encima de
