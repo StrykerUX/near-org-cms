@@ -157,6 +157,12 @@ export default function Ex2Hero() {
     self.measure();
     ScrollTrigger.addEventListener("refreshInit", self.measure);
 
+    // Estado de reposo, aplicado a mano. `onUpdate` no corre hasta que el lector
+    // scrollea, así que sin esto el contenido de destino queda a opacidad plena
+    // y se le ven dos palabras sueltas DENTRO del ojo de la «o» desde el primer
+    // paint. Con el velo del vídeo bajo (0.10/0.20) se nota mucho más que antes.
+    if (revealInner) gsap.set(revealInner, { y: 40, opacity: 0 });
+
     const setInnerY = gsap.quickSetter(revealInner, "y", "px");
     const setInnerAlpha = gsap.quickSetter(revealInner, "opacity");
 
@@ -216,7 +222,7 @@ export default function Ex2Hero() {
     <section
       ref={rootRef}
       style={{ "--travel": TRAVEL } as React.CSSProperties}
-      className="group/ex2 relative bg-ink text-cream data-[ex2=on]:h-[calc(var(--travel)+100svh)]"
+      className="group/ex2 relative bg-ink text-ink data-[ex2=on]:h-[calc(var(--travel)+100svh)]"
     >
       <div
         data-stage
@@ -225,9 +231,13 @@ export default function Ex2Hero() {
         {/* El vídeo: loop, no scrubbeado. Todo el scroll de la sección se lo
             lleva la apertura del ojo — con el descenso avanzando a la vez,
             serían dos animaciones peleándose por la misma rueda. */}
+        {/* Sin velo: el vídeo va a opacidad plena y el contraste del titular lo
+            resuelve el color de la tipografía —tinta sobre un clip claro— y no
+            una capa oscura encima. Si el clip cambia por uno con zonas oscuras,
+            esta decisión se cae y hay que volver a un velo o invertir el texto. */}
         <video
           data-fade
-          className="absolute inset-0 h-full w-full object-cover opacity-70"
+          className="absolute inset-0 h-full w-full object-cover"
           src={EX2_HERO.video}
           poster={EX2_HERO.poster}
           autoPlay
@@ -238,12 +248,6 @@ export default function Ex2Hero() {
           aria-hidden="true"
         />
 
-        <div
-          data-fade
-          aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,16,16,0.55)_0%,rgba(16,16,16,0.25)_45%,rgba(16,16,16,0.75)_100%)]"
-        />
-
         <Container className="relative flex h-full flex-col justify-end pb-[10svh] pt-[var(--site-header-block)]">
           {/* El titular accesible. El cartel de abajo es `aria-hidden`, así que
               esta es la única fuente del titular para un lector de pantalla. */}
@@ -251,7 +255,7 @@ export default function Ex2Hero() {
             {EX2_HERO.lead} {EX2_HERO.word}
           </h1>
 
-          <div data-headline aria-hidden="true" className="w-fit text-cream">
+          <div data-headline aria-hidden="true" className="w-fit text-ink">
             <span data-rest className="block text-kicker-xl uppercase">
               {EX2_HERO.lead}
             </span>
@@ -273,13 +277,19 @@ export default function Ex2Hero() {
                 )
               )}
 
-              {/* La «o» y su contraforma en un grupo propio: es lo único que
-                  escala. La contraforma va pintada del color del FONDO, que es
-                  lo que abre el ojo sobre la letra maciza — y como viaja DENTRO
-                  del grupo, sigue calzando con el clip a cualquier escala. */}
+              {/* La «o» es lo único que escala.
+                  
+                  Contorno y contraforma van en UN path con `fillRule="evenodd"`,
+                  no en dos paths superpuestos: el ojo tiene que ser un agujero
+                  de verdad para que se vea el vídeo a través. Pintarlo de un
+                  color sólido funcionaba mientras el fondo era negro plano; con
+                  el vídeo a opacidad plena, ese parche se vería como una mancha
+                  del color equivocado sobre la imagen. */}
               <g data-o>
-                <path d={WORLD_LETTERS[WORLD_O_INDEX]} />
-                <path d={WORLD_EYE} className="fill-ink" />
+                <path
+                  d={`${WORLD_LETTERS[WORLD_O_INDEX]} ${WORLD_EYE}`}
+                  fillRule="evenodd"
+                />
               </g>
             </svg>
           </div>
@@ -287,11 +297,11 @@ export default function Ex2Hero() {
           <div data-fade className="mt-10 flex items-center gap-6">
             <a
               href={EX2_HERO.cta.href}
-              className="rounded-2xl border border-cream/40 px-7 py-4 text-label-lg text-cream transition-colors duration-200 hover:bg-cream hover:text-ink"
+              className="rounded-2xl border border-ink/40 px-7 py-4 text-label-lg text-ink transition-colors duration-200 hover:bg-ink hover:text-cream"
             >
               {EX2_HERO.cta.label}
             </a>
-            <p className="max-w-[38ch] text-body-sm text-cream/60 text-pretty">{EX2_HERO.sub}</p>
+            <p className="max-w-[38ch] text-body-sm text-ink/70 text-pretty">{EX2_HERO.sub}</p>
           </div>
         </Container>
 
