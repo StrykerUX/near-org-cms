@@ -7,7 +7,15 @@
 // sin tocar, que es la condición del lab — las cinco variantes dicen
 // exactamente lo mismo y lo único que cambia es cómo lo muestran.
 
-export type StackVariantId = "bleed" | "broadsheet" | "anchors" | "blueprint" | "traveling";
+export type StackVariantId =
+  | "bleed"
+  | "broadsheet"
+  | "anchors"
+  | "blueprint"
+  | "traveling"
+  | "axis"
+  | "concentric"
+  | "dolly";
 
 export type StackVariantSpec = {
   readonly id: StackVariantId;
@@ -57,5 +65,29 @@ export const STACK_LAB_VARIANTS: readonly StackVariantSpec[] = [
     travel: "380svh · sticky, el más caro",
     pitch:
       "Pantalla partida: a la izquierda el arte en plano cerrado sobre la capa activa, a la derecha esa capa a tamaño de titular. El arte no cambia — cambia desde dónde se mira.",
+  },
+  {
+    id: "axis",
+    index: "F",
+    title: "Axis",
+    travel: "260svh · sticky, siete paradas",
+    pitch:
+      "El rótulo de la parada activa a tamaño de póster, acostado sobre el plano isométrico del ensamble (skew de 30.79°, el ángulo real de la cara superior del cubo). Una palabra por parada — siete, con nombre propio para cada producto de AI — y el párrafo abajo, derecho, para que se pueda leer.",
+  },
+  {
+    id: "concentric",
+    index: "G",
+    title: "Concentric",
+    travel: "una pantalla · sin sticky",
+    pitch:
+      "El layout es el diagrama: el ensamble centrado y las cuatro capas en cuatro marcos concéntricos alrededor, cada rótulo montado en el borde de SU marco. La posición del texto en pantalla significa lo mismo que la posición de su capa en el isométrico. Se navega con el puntero, no con la rueda.",
+  },
+  {
+    id: "dolly",
+    index: "H",
+    title: "Dolly",
+    travel: "300svh · sticky, siete planos",
+    pitch:
+      "El cruce de A y E: el arte a sangre y las capas como renglones (de A) más la cámara que cambia de plano en cada parada (de E). Sin pantalla partida — el visor son los bordes de la ventana, así que no se mira una cámara: se está dentro.",
   },
 ];

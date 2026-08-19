@@ -16,6 +16,12 @@ import { type ExNextMode } from "@/components/sections/ex/exNextReveal";
 // entonces la comparación mediría también esa divergencia — que es justo lo que
 // estas tres páginas existen para no hacer.
 //
+// La sección del NEAR Stack llega por prop y no está fijada acá: cada draft
+// monta la SUYA (F · Axis, G · Concentric, H · Dolly, del laboratorio de
+// `stack-labs`), y las tres se importan de ahí en vez de copiarse — mismo
+// motivo que `OwnYourOwn`: el ensamble son ~287KB de paths y su escena es
+// geometría medida.
+//
 // `OwnYourOwn` se IMPORTA de ab7, no se copia. La sección mide 32KB y su gesto
 // —las cards atravesando el título quieto— depende de medir el layout en vivo:
 // una copia divergiría del original en el primer ajuste de cualquiera de los
@@ -35,6 +41,8 @@ export type ExDraftViewProps = {
   word?: ExHeroWord;
   reveal?: ExNextMode;
   tone?: "ink" | "cream";
+  /** La variante del NEAR Stack de este draft. */
+  stack?: React.ReactNode;
 };
 
 export default function ExDraftView({
@@ -44,6 +52,7 @@ export default function ExDraftView({
   word,
   reveal,
   tone,
+  stack,
 }: ExDraftViewProps) {
   return (
     <main className="flex flex-col bg-cream">
@@ -56,6 +65,8 @@ export default function ExDraftView({
       />
 
       <OwnYourOwn />
+
+      {stack}
 
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
