@@ -196,7 +196,7 @@ const WORDMARK_CROP_PCT =
 // puede perder — el logo se sigue leyendo a medias, el headline no.
 //
 // El reparto se invierte: el panel manda y lo que cede es, en orden,
-//   1) el aire entre el panel y el logo (de 96px a 40px);
+//   1) el aire entre el panel y el logo (de 72px a 40px);
 //   2) el logo, cuya caja se acorta y lo recorta por ABAJO. Ya vivía dentro de
 //      un overflow-hidden y sus astiles altos son lo que lo hace reconocible.
 //
@@ -209,8 +209,8 @@ const WORDMARK_CROP_PCT =
 // El aire se mide contra el borde de la ventana y no se le reserva nada al
 // header: es `fixed` pero se esconde al scrollear hacia abajo, y al takeover
 // sólo se llega bajando — cuando el panel aparece, el header ya no está.
-const TAKEOVER_TOP_MIN = 56; // aire mínimo sobre el headline
-const TAKEOVER_GAP_MAX = 96; // el aire entre los links y el logo, cuando hay lugar
+const TAKEOVER_TOP_MIN = 72; // aire mínimo sobre el headline
+const TAKEOVER_GAP_MAX = 72; // el aire entre los links y el logo, cuando hay lugar
 const TAKEOVER_GAP_MIN = 40;
 const WORDMARK_MIN_H = 96;
 
@@ -681,10 +681,10 @@ export default function SiteFooter() {
         className="invisible absolute inset-x-0 bottom-[calc(100%-10rem)] z-[3] hidden lg:block"
       >
         {/* El aire hasta el wordmark es lo PRIMERO que cede en una pantalla
-            baja (de 6rem a 2.5rem) antes de tocar el logo. */}
+            baja (de 4.5rem a 2.5rem) antes de tocar el logo. */}
         <Container
           className="grid gap-16 lg:grid-cols-[1fr_auto] lg:gap-24"
-          style={{ paddingBottom: "var(--footer-takeover-gap, 6rem)" }}
+          style={{ paddingBottom: "var(--footer-takeover-gap, 4.5rem)" }}
         >
           <p className="text-h2 text-cream text-pretty">
             Where money
