@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/homepage-proof/index",
   title: "Homepage · proof Index",
   description:
-    "La homepage de ab7 con el ProofStepper (325svh) reemplazado por «C · Index»: seis renglones de un documento —número, rótulo, cifra, cuerpo— con una regla entre cada uno. Es una composición, no un fork: las nueve secciones restantes vienen de home-ab7 sin copiar un archivo.",
-  blurb: "ab7 con la sección de pruebas index",
+    "The ab7 homepage with the ProofStepper (325svh) replaced by «C · Index»: six lines of a document —number, label, figure, body— with a rule between each. It is a composition, not a fork: the remaining nine sections come from home-ab7 without copying a file.",
+  blurb: "ab7 with the index proof section",
   nav: false,
   sitemap: false,
   robots: "noindex",

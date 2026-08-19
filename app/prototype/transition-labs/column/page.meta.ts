@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/column",
-  title: "Transición · E · Column",
+  title: "Transition · E · Column",
   description:
-    "Transición E: la columna del stack sube desde abajo y se trae el negro con ella.",
-  blurb: "La columna arrastra el fondo",
+    "Transition E: the stack column rises from below and brings the black up with it.",
+  blurb: "The column drags the background up",
   nav: false,
   sitemap: false,
   robots: "noindex",

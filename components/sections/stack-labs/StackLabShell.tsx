@@ -47,11 +47,11 @@ export default function StackLabShell({
             {spec?.pitch}
           </p>
           <p className="max-w-[62ch] text-body-sm text-gray-intermediate text-pretty">
-            <span className="text-caption-mono text-green-ink">recorrido:</span> {spec?.travel}
+            <span className="text-caption-mono text-green-ink">travel:</span> {spec?.travel}
           </p>
           <p className="text-caption-mono text-gray-intermediate">
-            Seguí scrolleando — la sección empieza abajo, después de una pantalla
-            de aire, para que se sienta como se siente en la página.
+            Keep scrolling — the section starts below, after a screen of air, so
+            it feels the way it feels on the page.
           </p>
         </Container>
       </section>
@@ -61,10 +61,10 @@ export default function StackLabShell({
       {/* Lo que viene DESPUÉS: en la homepage, la sección de pruebas, blanca. */}
       <section className="flex min-h-svh items-center bg-background text-ink">
         <Container className="flex flex-col gap-4">
-          <Eyebrow className="text-gray-intermediate">Lo que sigue</Eyebrow>
+          <Eyebrow className="text-gray-intermediate">What comes next</Eyebrow>
           <p className="max-w-[52ch] text-h3 text-pretty">
-            Acá entra la sección de pruebas. Está para que se vea el corte de
-            salida: negro → blanco.
+            The proof section goes here. It exists so the exit cut is visible:
+            black → white.
           </p>
         </Container>
       </section>

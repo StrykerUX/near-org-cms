@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/ex3",
   title: "EX3 · ascii",
   description:
-    "Draft del hero tipográfico sobre un campo de caracteres en WebGL que se densifica alrededor del cursor, con el titular centrado.",
-  blurb: "Hero tipográfico sobre campo ASCII",
+    "Draft of the typographic hero over a WebGL character field that thickens around the cursor, with the headline centred.",
+  blurb: "Typographic hero over an ASCII field",
   nav: false,
   sitemap: false,
   robots: "noindex",

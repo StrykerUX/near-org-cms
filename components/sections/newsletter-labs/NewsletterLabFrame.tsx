@@ -54,7 +54,7 @@ export default function NewsletterLabFrame({
               </div>
             )}
             <div className="flex flex-col gap-1">
-              <dt className="text-caption-mono text-near-green-accent">qué mirar</dt>
+              <dt className="text-caption-mono text-near-green-accent">what to watch</dt>
               <dd className="text-body-sm text-cream/70 text-pretty">{spec.pitch}</dd>
             </div>
           </dl>
@@ -64,7 +64,7 @@ export default function NewsletterLabFrame({
       {/* Lo que hay encima en la homepage: el blanco de la sección de pruebas. */}
       <div className="flex h-[28svh] items-end bg-background">
         <Container className="pb-6">
-          <Eyebrow className="text-gray-intermediate/70">↑ sección de pruebas · blanco</Eyebrow>
+          <Eyebrow className="text-gray-intermediate/70">↑ proof section · white</Eyebrow>
         </Container>
       </div>
 

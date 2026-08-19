@@ -47,16 +47,16 @@ export default function HeroAltView() {
   return (
     <main className="flex flex-col bg-cream">
       <Container as="header" className="py-20 md:py-28">
-        <Eyebrow className="opacity-50">Hero lab · 6 versiones</Eyebrow>
+        <Eyebrow className="opacity-50">Hero lab · 6 versions</Eyebrow>
         <h1 className="text-h1 mt-6 max-w-[20ch]">
-          Seis heroes, la misma frase
+          Six heroes, the same sentence
         </h1>
         <p className="text-body-lg mt-6 max-w-[62ch] opacity-70">
-          Las dos primeras secciones de la homepage, seis veces, con la copy
-          idéntica en todas. Lo único que cambia entre una y otra es el
-          mecanismo — si la copy también cambiara, la comparación mediría dos
-          cosas a la vez. Cada versión abre con su ficha: qué técnica usa y qué
-          mirar en cada mitad del par.
+          The first two sections of the homepage, six times, with identical copy
+          in all of them. The only thing that changes between one and the next is
+          the mechanism — if the copy changed too, the comparison would be
+          measuring two things at once. Every version opens with its card: what
+          technique it uses and what to watch in each half of the pair.
         </p>
 
         <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-2">

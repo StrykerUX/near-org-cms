@@ -41,20 +41,20 @@ export default function NewsletterLabView() {
   return (
     <main className="flex flex-col bg-cream">
       <Container as="header" className="py-20 md:py-28">
-        <Eyebrow className="opacity-50">Newsletter lab · 14 variantes</Eyebrow>
-        <h1 className="text-h1 mt-6 max-w-[22ch]">Catorce maneras de pedir un correo</h1>
+        <Eyebrow className="opacity-50">Newsletter lab · 14 variants</Eyebrow>
+        <h1 className="text-h1 mt-6 max-w-[22ch]">Fourteen ways to ask for an email</h1>
         <p className="text-body-lg mt-6 max-w-[62ch] opacity-70">
-          La banda «NEAR belongs to you», catorce veces, con la misma copy: el
-          wordmark, el claim, el párrafo y el campo. Lo que cambia es la
-          composición, el fondo y la forma del campo — y en las seis últimas,
-          además, algo se mueve.
+          The «NEAR belongs to you» band, fourteen times, with the same copy:
+          wordmark, claim, paragraph and field. What changes is the composition,
+          the background and the shape of the field — and in the last six,
+          something moves as well.
         </p>
         <p className="text-body-sm mt-5 max-w-[62ch] opacity-60">
-          Las escaleras que hoy abren y cierran la sección quedaron FUERA de las
-          ocho: todas resuelven la juntura de otra manera, o con un corte recto.
-          Cada variante va con sus dos vecinas de la homepage —el blanco de las
-          pruebas encima, el crema de customer stories debajo— para que el corte
-          se vea.
+          The staircases that open and close the section today are OUT of all
+          eight: each one resolves the seam another way, or with a straight cut.
+          Every variant comes with its two homepage neighbours —the white of the
+          proof section above, the cream of customer stories below— so the cut is
+          visible.
         </p>
 
         <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-2">

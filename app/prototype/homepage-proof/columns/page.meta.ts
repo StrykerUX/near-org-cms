@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/homepage-proof/columns",
   title: "Homepage · proof Columns",
   description:
-    "La homepage de ab7 con el ProofStepper (325svh) reemplazado por «D · Columns»: seis columnas del alto de la pantalla, con las cifras escritas en vertical. Es una composición, no un fork: las nueve secciones restantes vienen de home-ab7 sin copiar un archivo.",
-  blurb: "ab7 con la sección de pruebas columns",
+    "The ab7 homepage with the ProofStepper (325svh) replaced by «D · Columns»: six full-height columns with the figures set vertically. It is a composition, not a fork: the remaining nine sections come from home-ab7 without copying a file.",
+  blurb: "ab7 with the columns proof section",
   nav: false,
   sitemap: false,
   robots: "noindex",

@@ -38,7 +38,7 @@ export default function TransitionLabShell({
     <main className="flex flex-col bg-cream">
       <section className="flex min-h-svh flex-col justify-end bg-cream pb-24 pt-[calc(var(--site-header-block)+3rem)] text-ink">
         <Container className="flex flex-col gap-6">
-          <Eyebrow className="text-gray-intermediate">Transición</Eyebrow>
+          <Eyebrow className="text-gray-intermediate">Transition</Eyebrow>
           <h1 className="text-h2 max-w-[24ch]">
             {spec?.index} · {spec?.title}
           </h1>
@@ -46,13 +46,13 @@ export default function TransitionLabShell({
             {spec?.pitch}
           </p>
           <p className="max-w-[62ch] text-body-sm text-gray-intermediate text-pretty">
-            <span className="text-caption-mono text-green-ink">cuesta:</span> {spec?.cost}
+            <span className="text-caption-mono text-green-ink">costs:</span> {spec?.cost}
             {" · "}
-            <span className="text-caption-mono text-green-ink">técnica:</span> {spec?.stack}
+            <span className="text-caption-mono text-green-ink">technique:</span> {spec?.stack}
           </p>
           <p className="text-caption-mono text-gray-intermediate">
-            Seguí scrolleando — abajo está «Own Your Own», después la transición,
-            y después el stack.
+            Keep scrolling — «Own Your Own» is below, then the transition, then
+            the stack.
           </p>
         </Container>
       </section>
@@ -73,7 +73,7 @@ export default function TransitionLabShell({
           del sitio es fijo y se pisarían. */}
       <div className="sticky bottom-0 z-40 border-t border-cream/15 bg-ink/85 backdrop-blur-sm">
         <Container className="flex flex-wrap items-center gap-x-5 gap-y-2 py-3">
-          <span className="text-caption-mono text-cream/40">Transiciones</span>
+          <span className="text-caption-mono text-cream/40">Transitions</span>
           {TRANSITIONS.filter((t) => t.current).map((t) => (
             <Link
               key={t.id}

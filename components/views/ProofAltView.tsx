@@ -36,14 +36,13 @@ export default function ProofAltView() {
   return (
     <main className="flex flex-col bg-cream">
       <Container as="header" className="py-20 md:py-28">
-        <Eyebrow className="opacity-50">Proof lab · 3 estructuras</Eyebrow>
-        <h1 className="text-h1 mt-6 max-w-[20ch]">Seis pruebas, tres estructuras</h1>
+        <Eyebrow className="opacity-50">Proof lab · 3 structures</Eyebrow>
+        <h1 className="text-h1 mt-6 max-w-[20ch]">Six proofs, three structures</h1>
         <p className="text-body-lg mt-6 max-w-[62ch] opacity-70">
-          La sección de pruebas de la homepage, tres veces, con las mismas seis
-          cifras y el cuerpo completo en todas. Las seis están visibles desde el
-          primer frame: nada se revela al pasar el puntero. Las tres miden una
-          pantalla, entran una vez y se quedan quietas. Lo que cambia es la
-          estructura.
+          The homepage proof section, three times, with the same six figures and
+          the full body in all of them. All six are visible from the first frame:
+          nothing is revealed on hover. All three measure one screen, enter once
+          and stay still. What changes is the structure.
         </p>
 
         <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-2">

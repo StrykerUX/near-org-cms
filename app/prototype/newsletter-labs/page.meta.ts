@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/newsletter-labs",
-  title: "Newsletter lab · 14 variantes",
+  title: "Newsletter lab · 14 variants",
   description:
-    "Catorce versiones de la banda «NEAR belongs to you» con la misma copy: cartel, línea de escritura, banda partida, campo dentro de la frase, halo de luz, grano sobre lima, columna con retícula, verde de marca a sangre, y seis con movimiento — teletipo, wordmark en ASCII, un telón que abre la sección, anillos que responden al foco del campo, cintas de caracteres perpetuas y una persiana de once lamas. Sin las escaleras de la sección actual. Ver components/sections/newsletter-labs/README.md.",
-  blurb: "14 versiones de la banda de newsletter",
+    "Fourteen versions of the «NEAR belongs to you» band with the same copy: poster, writing line, split band, a field inside the sentence, halo of light, grain over lime, column with a grid, brand green bleeding off, and six with movement — ticker, ASCII wordmark, a curtain that opens the section, rings that answer the field's focus, perpetual character ribbons and an eleven-slat blind. Without the staircases of the current section. See components/sections/newsletter-labs/README.md.",
+  blurb: "14 versions of the newsletter band",
   nav: false,
   sitemap: false,
   robots: "noindex",

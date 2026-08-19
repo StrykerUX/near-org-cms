@@ -4,7 +4,7 @@ const meta = {
   route: "/prototype/homepage-v2",
   title: "Homepage v2",
   description:
-    "Port del rebuild de la homepage al design system del repo — secciones propias, copy hardcodeada, sin datos reales.",
+    "Port of the homepage rebuild onto the repo's design system — its own sections, hardcoded copy, no real data.",
   blurb: "Rebuild on the design system",
   nav: false,
   sitemap: false,

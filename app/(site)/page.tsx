@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import HomeView, { type HomeViewGroup, type HomeViewLink } from "@/components/views/HomeView";
+import HomeView, {
+  type HomeViewGroup,
+  type HomeViewLink,
+  type HomeViewVariant,
+} from "@/components/views/HomeView";
 import { ROUTES } from "@/lib/routes.generated";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
@@ -25,6 +29,18 @@ export const metadata: Metadata = toMetadata(meta);
 // cualquier lista de rutas escrita acá a mano divergiría del menú real en el
 // primer cambio. `nav` es lo que cada página DECLARA sobre sí misma, y eso sí
 // vive en un solo lugar.
+// ── Prototipo suelto vs laboratorio ─────────────────────────────────────────
+//
+// Un `/prototype/*` de un solo segmento es una PÁGINA: se abre y se enseña.
+// Uno de dos segmentos es un DISEÑO DENTRO de otra cosa — una variante de un
+// laboratorio— y no se enseña solo, se compara contra sus hermanas.
+//
+// El índice las trataba igual, y con 49 rutas de prototipo eso significaba
+// abrir `/prototype/stack-labs/bleed` creyendo que era una página terminada.
+// Ahora las variantes cuelgan de la fila de su laboratorio.
+const isVariant = (route: string) => route.split("/").length === 4;
+const parentOf = (route: string) => route.split("/").slice(0, 3).join("/");
+
 function groupOf(route: string, nav: (typeof ROUTES)[number]["nav"]) {
   if (route === "/design-system") return "rules" as const;
   if (route.startsWith("/prototype")) return "demo" as const;
@@ -33,6 +49,24 @@ function groupOf(route: string, nav: (typeof ROUTES)[number]["nav"]) {
   if (nav === false) return "demo" as const;
   return "site" as const;
 }
+
+// El nombre corto de una variante, para la píldora: el título completo repite
+// el del laboratorio ("Stack lab · C · Anchors") y a diez píldoras por fila eso
+// es diez veces la misma palabra.
+//
+// Lista explícita y no un prefijo común calculado: los títulos no comparten uno
+// limpio ("Transiciones · índice" contra "Transición · C · ASCII" comparten
+// "Transici", que corta a mitad de palabra). Agregar un laboratorio es agregar
+// una línea acá.
+const STRIP = [
+  /^Stack lab · /,
+  /^Transición · /,
+  /^Footer /,
+  /^Homepage · proof /,
+];
+
+const shortLabel = (title: string) =>
+  STRIP.reduce((t, re) => t.replace(re, ""), title);
 
 // Páginas que EXISTEN y se buildean, pero que ningún menú enlaza todavía. Se
 // marcan en la lista para que el índice diga qué falta conectar, en vez de
@@ -86,11 +120,36 @@ const FEATURED = [
 // page.meta.ts. Entran a mano, con el index.html explícito en el href porque
 // public/ no resuelve directorios, y van al final de "demo" — que es lo que
 // son.
+//
+// Para revisarla:
+//
+//     for d in public/prototype/*/; do [ -f "$d/index.html" ] && basename $d; done
+//
+// De esa cuenta salían nueve y el índice enlazaba tres: seis galerías existían,
+// se buildeaban y no había forma de llegar a ellas desde ningún sitio.
 const STATIC_GALLERIES: HomeViewLink[] = [
   {
     href: "/prototype/hero-gallery/index.html",
     label: "Hero Lab",
     blurb: "30 hero backgrounds, 6 text concepts",
+    external: true,
+  },
+  {
+    href: "/prototype/hero-descent/index.html",
+    label: "Hero Descent",
+    blurb: "Remake del hero, glass mountains",
+    external: true,
+  },
+  {
+    href: "/prototype/hero-gradient/index.html",
+    label: "Hero Gradient",
+    blurb: "8 candidatos de degradado",
+    external: true,
+  },
+  {
+    href: "/prototype/hero-mark/index.html",
+    label: "Hero Mark",
+    blurb: "12 rellenos del mark",
     external: true,
   },
   {
@@ -100,40 +159,109 @@ const STATIC_GALLERIES: HomeViewLink[] = [
     external: true,
   },
   {
+    href: "/prototype/chainsig/index.html",
+    label: "Chain Signatures",
+    blurb: "20 conceptos de chain signatures",
+    external: true,
+  },
+  {
     href: "/prototype/spine-cards/index.html",
     label: "Spine Cards",
     blurb: "36 isometric card concepts",
     external: true,
   },
+  {
+    href: "/prototype/spine-motion/index.html",
+    label: "Spine Motion",
+    blurb: "18 conceptos animados",
+    external: true,
+  },
+  {
+    href: "/prototype/spine-motion-v2/index.html",
+    label: "Spine Motion v2",
+    blurb: "La misma serie, glass & glow",
+    external: true,
+  },
+];
+
+// Laboratorios que NO tienen una ruta por variante: apilan sus versiones en una
+// sola página. Son laboratorios igual —se entra a comparar, no a ver una página
+// terminada— así que van con los otros, aunque no traigan tira de píldoras.
+//
+// Lista a mano porque no hay nada en el manifiesto que lo diga: una ruta de un
+// segmento con seis diseños dentro se ve idéntica a una página normal.
+const STACKED_LABS = [
+  "/prototype/hero-alt",
+  "/prototype/newsletter-labs",
+  "/prototype/proof-alt",
+  "/prototype/hover-lab",
+  "/prototype/components",
 ];
 
 // `blurb` y `stub` viajan tal cual desde el manifiesto: el primero lo declara
 // cada página en su meta, el segundo lo deriva el generador leyendo si el
 // page.tsx renderiza `StubView`. Ninguno de los dos se decide acá — este
 // archivo solo reparte y ordena.
-const ENTRIES = ROUTES.filter((r) => r.route !== "/").map((r) => ({
+const ALL = ROUTES.filter((r) => r.route !== "/");
+
+// Las variantes, agrupadas por su laboratorio. Solo cuelgan si el padre EXISTE
+// en el manifiesto: `/prototype/homepage-proof/*` son tres homepages completas
+// sin ruta índice, y sin esta condición quedarían escondidas bajo un padre que
+// nadie puede abrir.
+// `Set<string>` explícito: las rutas del manifiesto están tipadas como
+// `/${string}`, y un Set de ese tipo rechaza un `.has()` con un string común.
+const PARENTS = new Set<string>(ALL.map((r) => r.route));
+const VARIANTS = new Map<string, HomeViewVariant[]>();
+for (const r of ALL) {
+  if (!r.route.startsWith("/prototype/") || !isVariant(r.route)) continue;
+  const parent = parentOf(r.route);
+  if (!PARENTS.has(parent)) continue;
+  const list = VARIANTS.get(parent) ?? [];
+  list.push({ href: r.route, label: shortLabel(r.title) });
+  VARIANTS.set(parent, list);
+}
+
+// Las variantes se ordenan por su nombre corto, que empieza por la letra o el
+// número con el que el laboratorio las enumera: A, B, C… o 01, 02, 03. Ese es
+// el orden en que se compararon, y el único que hace que la tira se lea como
+// una serie y no como una bolsa.
+for (const list of VARIANTS.values()) {
+  list.sort((a, b) => a.label.localeCompare(b.label, "en"));
+}
+
+// Fuera de la lista plana las variantes que ya cuelgan de su laboratorio. El
+// `isVariant` no es redundante: `parentOf` de una ruta de tres segmentos se
+// devuelve a SÍ MISMA, así que sin él cada laboratorio se filtraba a sí mismo y
+// los tres con variantes desaparecían del índice.
+const ENTRIES = ALL.filter(
+  (r) => !(isVariant(r.route) && VARIANTS.has(parentOf(r.route)))
+).map((r) => ({
   group: groupOf(r.route, r.nav),
+  isLab: VARIANTS.has(r.route) || STACKED_LABS.includes(r.route),
   link: {
     href: r.route,
     label: (r.nav !== false && r.nav?.label) || r.title,
     blurb: r.blurb,
     unlinked: UNLINKED.includes(r.route),
     empty: r.stub,
+    variants: VARIANTS.get(r.route),
   } satisfies HomeViewLink,
 }));
 
-const pick = (group: string) =>
-  ENTRIES.filter((e) => e.group === group).map((e) => e.link);
+const pick = (group: string, lab?: boolean) =>
+  ENTRIES.filter((e) => e.group === group && (lab === undefined || e.isLab === lab)).map(
+    (e) => e.link
+  );
 
-// Alfabético por etiqueta, que en una lista de 22 es lo único que hace que
+// Alfabético por etiqueta, que en una lista larga es lo único que hace que
 // buscar una página sea buscar y no barrer. `localeCompare` y no `<`: el orden
 // por code point manda los acentos al final.
 const byLabel = (a: HomeViewLink, b: HomeViewLink) =>
   a.label.localeCompare(b.label, "en");
 
-// En "demo" el alfabético no sirve: lo que importa es la cadena de versiones,
-// y `Homepage AB6 / AB7 / v2 / v4 / v5` ordenado por nombre las mezcla al
-// azar respecto de cómo se derivan una de otra.
+// En las páginas de prototipo el alfabético no sirve: lo que importa es la
+// cadena de versiones, y `Homepage AB6 / AB7 / v2 / v4 / v5` ordenado por
+// nombre las mezcla al azar respecto de cómo se derivan una de otra.
 const byFeatured = (a: HomeViewLink, b: HomeViewLink) => {
   const rank = (href: string) => {
     const i = FEATURED.indexOf(href);
@@ -142,6 +270,18 @@ const byFeatured = (a: HomeViewLink, b: HomeViewLink) => {
   return rank(a.href) - rank(b.href) || byLabel(a, b);
 };
 
+// ── Los cinco grupos ────────────────────────────────────────────────────────
+//
+// El corte que faltaba está entre los dos del medio. Antes había un solo cajón
+// —"Demos & prototypes"— con 49 rutas de prototipo mezcladas, y ahí adentro
+// convivían la homepage que se le enseña a alguien y la variante C de un
+// laboratorio de transiciones. Abrir la segunda creyendo que era la primera era
+// cuestión de tiempo.
+//
+//   · Prototipos   — páginas completas. Se abren y se muestran.
+//   · Laboratorios — comparaciones. Se entra a elegir entre variantes, y las
+//                    variantes cuelgan de su índice.
+//   · Galerías     — HTML autocontenido en public/, ni siquiera páginas de Next.
 const GROUPS: HomeViewGroup[] = [
   {
     id: "site",
@@ -150,10 +290,23 @@ const GROUPS: HomeViewGroup[] = [
     links: pick("site").sort(byLabel),
   },
   {
-    id: "demo",
-    title: "Demos & prototypes",
-    note: "Versions, explorations and galleries — noindex",
-    links: [...pick("demo").sort(byFeatured), ...STATIC_GALLERIES],
+    id: "prototypes",
+    title: "Prototypes",
+    note: "Full pages — open one and show it",
+    links: pick("demo", false).sort(byFeatured),
+  },
+  {
+    id: "labs",
+    title: "Labs",
+    note: "Comparisons — variants of one decision, not finished pages",
+    layout: "tree",
+    links: pick("demo", true).sort(byLabel),
+  },
+  {
+    id: "galleries",
+    title: "Galleries",
+    note: "Self-contained HTML in public/ — contact sheets, not Next pages",
+    links: STATIC_GALLERIES,
   },
   {
     id: "rules",

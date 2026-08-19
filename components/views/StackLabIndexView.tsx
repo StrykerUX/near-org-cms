@@ -14,18 +14,18 @@ export default function StackLabIndexView() {
     <main className="flex min-h-svh flex-col bg-cream text-ink">
       <Container as="header" className="flex flex-col gap-6 py-20 md:py-28">
         <Eyebrow className="text-gray-intermediate">Stack lab · 8 layouts</Eyebrow>
-        <h1 className="text-h1 max-w-[22ch]">Un mismo ensamble, ocho maneras de mostrarlo</h1>
+        <h1 className="text-h1 max-w-[22ch]">One assembly, eight ways to show it</h1>
         <p className="max-w-[62ch] text-body-lg text-gray-intermediate text-pretty">
-          El arte del NEAR Stack no cambia en ninguna: mismas cuatro capas, mismo
-          build-in de la columna, mismo hover, misma copy. Lo que cambia es la
-          escala a la que se muestra, dónde se corta, dónde vive el texto y
-          cuánto scroll cuesta.
+          The NEAR Stack art never changes: same four layers, same column
+          build-in, same hover, same copy. What changes is the scale it is shown
+          at, where it is cropped, where the text lives and how much scroll it
+          costs.
         </p>
         <p className="max-w-[62ch] text-body-sm text-gray-intermediate text-pretty">
-          Cada ruta trae una pantalla de aire antes y otra después, para que la
-          sección se juzgue como se encuentra en la página: llegando con inercia
-          de scroll, y con el corte contra el fondo claro a la entrada y a la
-          salida.
+          Every route brings a screen of air before and after, so the section is
+          judged the way it is met on the page: arriving with scroll momentum,
+          and with the cut against the light background on the way in and on the
+          way out.
         </p>
       </Container>
 

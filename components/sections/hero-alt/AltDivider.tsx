@@ -46,7 +46,7 @@ export default function AltDivider({ spec }: AltDividerProps) {
             <dd className="text-body-sm text-cream/70 text-pretty">{spec.hero}</dd>
           </div>
           <div className="flex flex-col gap-1.5">
-            <dt className="text-caption-mono text-near-green-accent">2ª sección</dt>
+            <dt className="text-caption-mono text-near-green-accent">2nd section</dt>
             <dd className="text-body-sm text-cream/70 text-pretty">{spec.second}</dd>
           </div>
         </dl>

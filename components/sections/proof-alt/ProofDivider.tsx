@@ -45,7 +45,7 @@ export default function ProofDivider({ spec }: ProofDividerProps) {
             <dd className="text-body-sm text-cream/70">{spec.travel}</dd>
           </div>
           <div className="flex flex-col gap-1.5">
-            <dt className="text-caption-mono text-near-green-accent">qué mirar</dt>
+            <dt className="text-caption-mono text-near-green-accent">what to watch</dt>
             <dd className="text-body-sm text-cream/70 text-pretty">{spec.pitch}</dd>
           </div>
         </dl>

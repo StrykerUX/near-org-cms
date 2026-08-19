@@ -14,19 +14,18 @@ export default function TransitionLabIndexView() {
   return (
     <main className="flex min-h-svh flex-col bg-cream text-ink">
       <Container as="header" className="flex flex-col gap-6 py-20 md:py-28">
-        <Eyebrow className="text-gray-intermediate">Transiciones · 12 mecanismos</Eyebrow>
-        <h1 className="text-h1 max-w-[22ch]">Del cream al negro, doce maneras</h1>
+        <Eyebrow className="text-gray-intermediate">Transitions · 12 mechanisms</Eyebrow>
+        <h1 className="text-h1 max-w-[22ch]">From cream to black, twelve ways</h1>
         <p className="max-w-[62ch] text-body-lg text-gray-intermediate text-pretty">
-          El corte entre «Own Your Own» y «The NEAR Stack» es hoy un cambio de
-          fondo y nada más. Cada variante resuelve ese mismo salto con un
-          mecanismo distinto, y todas las de la segunda tanda montan sobre la
-          misma pieza: cambiar la transición de un corte es cambiar un
-          componente.
+          The cut between «Own Your Own» and «The NEAR Stack» is a change of
+          background today and nothing else. Every variant solves that same jump
+          with a different mechanism, and all of the second batch sit on the same
+          piece: changing the transition of a cut is changing one component.
         </p>
         <p className="max-w-[62ch] text-body-sm text-gray-intermediate text-pretty">
-          Cada ruta monta las DOS secciones de verdad, no maquetas: lo que hay
-          que juzgar es cómo se siente llegar con las cards todavía en la retina
-          y salir con la columna ya en pantalla.
+          Every route mounts the TWO real sections, not mockups: what has to be
+          judged is how it feels to arrive with the cards still in your eye and
+          leave with the column already on screen.
         </p>
       </Container>
 
@@ -52,11 +51,11 @@ export default function TransitionLabIndexView() {
       {/* Las descartadas se conservan a la vista: un laboratorio que borra lo
           que no funcionó obliga a volver a proponerlo. */}
       <Container className="flex flex-col gap-4 pb-24 pt-12">
-        <Eyebrow className="text-gray-intermediate">Primera tanda · descartadas</Eyebrow>
+        <Eyebrow className="text-gray-intermediate">First batch · discarded</Eyebrow>
         <p className="max-w-[62ch] text-body-sm text-gray-intermediate text-pretty">
-          Cuatro de las cinco son la misma idea —algo negro llega y cubre la
-          pantalla— y ninguna lleva contenido ni conecta las dos secciones. Están
-          acá para no volver a proponerlas.
+          Four of the five are the same idea —something black arrives and covers
+          the screen— and none of them carries content or connects the two
+          sections. They are here so nobody proposes them again.
         </p>
         <div className="flex flex-col">
           {TRANSITIONS.filter((t) => !t.current).map((t) => (

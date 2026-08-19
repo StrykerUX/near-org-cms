@@ -3,8 +3,9 @@ import type { PageMeta } from "@/lib/page-meta";
 const meta = {
   route: "/prototype/footer-labs/glyph",
   title: "Footer 02 · Glyph",
-  description: "Takeover por dentro de una letra: la pantalla negra está recortada con la forma del wordmark y esa forma crece hasta que un trazo cubre el viewport.",
-  blurb: "Takeover por el wordmark",
+  description:
+    "A takeover from inside a letter: the black screen is clipped to the shape of the wordmark, and that shape grows until a single stroke covers the viewport.",
+  blurb: "Takeover through the wordmark",
   nav: false,
   sitemap: false,
   robots: "noindex",

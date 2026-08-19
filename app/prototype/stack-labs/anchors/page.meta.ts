@@ -4,8 +4,8 @@ const meta = {
   route: "/prototype/stack-labs/anchors",
   title: "Stack lab · C · Anchors",
   description:
-    "Variante C del NEAR Stack: cada ficha anclada a la pieza de la que habla con un trazo corto, en vez de una lista aparte. Track de 200svh.",
-  blurb: "Stack con el texto pegado a su capa",
+    "Variant C of the NEAR Stack: each card anchored to the piece it talks about with a short stroke, instead of a separate list. 200svh track.",
+  blurb: "Stack with the text pinned to its layer",
   nav: false,
   sitemap: false,
   robots: "noindex",

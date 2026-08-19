@@ -4,7 +4,7 @@ const meta = {
   route: "/prototype/hero-burst",
   title: "Hero Burst",
   description:
-    "Test del hero con burst de gradiente simétrico (shader WebGL propio): flujo radial desde el centro, aceleración por velocidad de scroll y plano de suelo espejado.",
+    "Hero test with a symmetric gradient burst (custom WebGL shader): radial flow from the centre, acceleration driven by scroll speed, and a mirrored ground plane.",
   blurb: "WebGL gradient burst hero test",
   nav: false,
   sitemap: false,

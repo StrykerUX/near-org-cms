@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/transition-labs/chapter",
-  title: "Transición · K · Chapter",
+  title: "Transition · K · Chapter",
   description:
-    "Transición K: el rótulo del capítulo aparece en medio del cambio de fondo. El corte como estructura, no como efecto.",
-  blurb: "El rótulo del capítulo",
+    "Transition K: the chapter label appears in the middle of the background change. The cut as structure, not as an effect.",
+  blurb: "The chapter label",
   nav: false,
   sitemap: false,
   robots: "noindex",

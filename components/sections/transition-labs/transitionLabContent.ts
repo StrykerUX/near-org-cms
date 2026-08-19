@@ -53,7 +53,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "CSS + GSAP",
     current: true,
     pitch:
-      "Doce lamas inclinadas a 30.79° — el ángulo real de la cara superior del cubo del stack— entran escalonadas sobre la sección de arriba, que se sigue viendo entre lama y lama. La geometría del corte es la del objeto al que lleva, y los doce bordes llegan a destiempo.",
+      "Twelve slats tilted to 30.79° — the real angle of the top face of the stack's cube — come in staggered over the section above, which stays visible between one slat and the next. The geometry of the cut is that of the object it leads to, and the twelve edges arrive off-beat.",
   },
   {
     id: "fold",
@@ -63,7 +63,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "CSS 3D + GSAP",
     current: true,
     pitch:
-      "La página se pliega hacia atrás sobre su borde inferior y detrás aparece la sección siguiente, que estaba ahí todo el tiempo. La cara se apaga con el coseno del giro, como una hoja real girando fuera de la luz: sin esa sombra se lee como un rectángulo achicándose.",
+      "The page folds backwards on its bottom edge and behind it is the next section, which was there all along. The face dims with the cosine of the turn, like a real sheet rotating out of the light: without that shading it reads as a rectangle shrinking.",
   },
   {
     id: "mosaic",
@@ -73,7 +73,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La pantalla no se cubre de golpe: se reemplaza por partes. Celdas que se posan de abajo hacia arriba, en un orden de ruido determinista — sube y baja y el mosaico se rearma igual, que es lo que un orden al azar no puede dar.",
+      "The screen is not covered in one go: it is replaced piece by piece. Cells land from the bottom up in a deterministic noise order — scroll back and forth and the mosaic rebuilds itself the same way, which is what a random order cannot give.",
   },
   {
     id: "halftone",
@@ -83,7 +83,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La página se imprime. Trama de medio tono girada 45° como en imprenta de verdad, posada SOBRE la sección de arriba —que se ve entre los puntos— y engordando hasta tocarse. El gesto más editorial de los siete: habla el mismo idioma que el titular en serif, no el de la tecnología.",
+      "The page prints itself. A halftone screen rotated 45° as in real print, laid OVER the section above —visible between the dots— and fattening until the dots touch. The most editorial gesture of the seven: it speaks the same language as the serif headline, not that of the technology.",
   },
   {
     id: "melt",
@@ -93,7 +93,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La tinta inunda la página desde el pie con un frente irregular: dedos que se adelantan, bahías que se quedan, y por encima la sección de arriba hasta que la alcanza. El único de los siete en el que el corte tiene materia — los demás son geometría, este es un fluido.",
+      "The ink floods the page from the foot with an uneven front: fingers running ahead, bays lagging behind, and above it the section that was there until the ink reaches it. The only one of the seven where the cut has matter — the rest are geometry, this one is a fluid.",
   },
   {
     id: "chapter",
@@ -103,7 +103,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "CSS + GSAP",
     current: true,
     pitch:
-      "El rótulo del capítulo —«02 · The NEAR Stack»— aparece en medio del cambio de fondo, se queda quieto lo justo para leerse, y se va. El único que sirve a la página entera y no a este corte: con uno en cada frontera, el documento gana un índice que se ve al scrollear.",
+      "The chapter label —«02 · The NEAR Stack»— appears in the middle of the background change, holds still just long enough to be read, and leaves. The only one that serves the whole page and not this one cut: with one at every boundary, the document gains an index you can see while scrolling.",
   },
   {
     id: "sidestep",
@@ -113,7 +113,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "CSS + GSAP",
     current: true,
     pitch:
-      "La sección siguiente entra por el lado. Toda la página baja; en este corte, y solo en este, se mueve en horizontal. Sin secuestrar la rueda: lo que se desplaza es el velo, y detrás queda la sección.",
+      "The next section enters from the side. The whole page goes down; in this cut, and only in this one, it moves sideways. Without hijacking the wheel: what travels is the veil, and the section is what stays behind it.",
   },
 
   /* ── Primera tanda · descartadas ─────────────────────────────────────── */
@@ -125,45 +125,45 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "CSS + GSAP",
     current: false,
     pitch:
-      "El negro sube y tapa. El gesto del takeover del footer, entre secciones.",
+      "The black rises and covers. The footer takeover gesture, between sections.",
   },
   {
     id: "counter",
     index: "B",
     title: "Counterform",
     cost: "80svh",
-    stack: "medir el DOM + transform",
+    stack: "DOM measurement + transform",
     current: false,
     pitch:
-      "El agujero de la «O» se traga la página: el negro sale de dentro de la tipografía.",
+      "The hole in the «O» swallows the page: the black comes out from inside the type.",
   },
   {
     id: "ascii",
     index: "C",
     title: "ASCII",
     cost: "100svh",
-    stack: "WebGL2, el shader de EX3",
+    stack: "WebGL2, the EX3 shader",
     current: false,
     pitch:
-      "Un campo de caracteres se densifica desde el centro y la paleta rueda a negro con los glifos en verde.",
+      "A character field thickens from the centre and the palette rolls to black with the glyphs in green.",
   },
   {
     id: "lattice",
     index: "D",
     title: "Lattice",
     cost: "60svh",
-    stack: "Canvas 2D, el motor de hero-alt 05",
+    stack: "Canvas 2D, the hero-alt 05 engine",
     current: false,
     pitch:
-      "~2600 puntos deletrean «The NEAR Stack» cuando el fondo termina de irse a negro.",
+      "~2600 dots spell «The NEAR Stack» as the background finishes going black.",
   },
   {
     id: "column",
     index: "E",
     title: "Column",
     cost: "80svh",
-    stack: "el arte del stack",
+    stack: "the stack art",
     current: false,
-    pitch: "La columna del stack sube y se trae el negro con ella.",
+    pitch: "The stack column rises and brings the black up with it.",
   },
 ];
