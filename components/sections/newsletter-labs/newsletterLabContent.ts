@@ -16,7 +16,10 @@ export type NewsletterVariantId =
   | "field"
   | "teletype"
   | "ascii"
-  | "curtain";
+  | "curtain"
+  | "sonar"
+  | "ticker"
+  | "shutter";
 
 export type NewsletterVariantSpec = {
   readonly id: NewsletterVariantId;
@@ -139,5 +142,35 @@ export const NEWSLETTER_VARIANTS: readonly NewsletterVariantSpec[] = [
     motion: "un telón barre la sección y se va",
     pitch:
       "La banda no está: se ABRE. Un telón de lima barre de abajo arriba, se va por el borde superior y el bloque sube detrás. La única que trata la juntura como un gesto, que es lo que hacían las escaleras.",
+  },
+  {
+    id: "sonar",
+    index: "12",
+    title: "Sonar",
+    ground: "stone",
+    input: "píldora, con anillos propios",
+    motion: "responde al FOCO, no a la llegada",
+    pitch:
+      "La única cuyo gesto lo dispara el lector: al enfocar el campo salen anillos desde él. Las demás gastan su movimiento antes del clic; esta lo guarda para el momento que importa.",
+  },
+  {
+    id: "ticker",
+    index: "13",
+    title: "Ticker",
+    ground: "stone",
+    input: "píldora, centrada",
+    motion: "dos cintas que no paran nunca",
+    pitch:
+      "Dos cintas de caracteres cruzan la banda en direcciones opuestas, por encima y por debajo del bloque. La única con movimiento perpetuo — y por eso la que más riesgo tiene de competir con el campo.",
+  },
+  {
+    id: "shutter",
+    index: "14",
+    title: "Shutter",
+    ground: "stone, tras lamas crema",
+    input: "píldora, entra con la apertura",
+    motion: "once lamas se abren desde el centro",
+    pitch:
+      "La hermana dura de la 11: en vez de un telón entero, once lamas verticales se retiran desde el centro hacia los extremos. Aquella dice «se abre»; esta, «se destraba».",
   },
 ];

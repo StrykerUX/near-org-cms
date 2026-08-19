@@ -1,4 +1,4 @@
-# `newsletter-labs/` — once maneras de pedir un correo
+# `newsletter-labs/` — catorce maneras de pedir un correo
 
 Alimenta **una sola ruta**: `/prototype/newsletter-labs`. No la importa ninguna
 página real, y eso es el punto.
@@ -6,7 +6,7 @@ página real, y eso es el punto.
 ## Qué se está probando
 
 La banda «NEAR belongs to you» de la homepage (`home-ab7/BelongsNewsletter`).
-Las once llevan **exactamente la misma copy** —wordmark, el claim, el párrafo de
+Las catorce llevan **exactamente la misma copy** —wordmark, el claim, el párrafo de
 siempre y el campo con su "email address" / "sign up"— y no se añadió nada: ni
 frecuencia, ni prueba social, ni línea de privacidad. Lo único que cambia es la
 composición, el fondo y la forma del campo.
@@ -41,9 +41,9 @@ La **05** es la comparación más directa contra la sección actual: misma
 composición, otra escala, fondo con materia. Si esa no se siente mejor, el
 problema de la banda no era el fondo.
 
-## Y tres con movimiento
+## Y seis con movimiento
 
-Las ocho de arriba son composición pura: entran y ya están. Estas tres agregan
+Las ocho de arriba son composición pura: entran y ya están. Estas seis agregan
 un gesto, que es la única variable nueva.
 
 | | Variante | Qué se mueve |
@@ -51,10 +51,44 @@ un gesto, que es la única variable nueva.
 | 09 | `Belongs09Teletype` | **El párrafo se escribe**, con un cursor que lo guía, y el campo entra cuando el cursor se apaga. Nadie dice dónde seguir escribiendo: lo dice el orden |
 | 10 | `Belongs10Ascii` | **El wordmark está dibujado con caracteres** y llega hecho ruido: cada bloque parpadea por unos glifos y se estabiliza en la palabra |
 | 11 | `Belongs11Curtain` | **Un telón de lima barre** la sección de abajo arriba, sale por el borde superior, y el bloque sube detrás desde su máscara |
+| 12 | `Belongs12Sonar` | **Anillos que salen del campo al enfocarlo**. La única cuyo gesto lo dispara el lector |
+| 13 | `Belongs13Ticker` | **Dos cintas de caracteres** cruzan la banda en sentidos opuestos y no paran nunca. La única con movimiento perpetuo |
+| 14 | `Belongs14Shutter` | **Once lamas verticales** se retiran desde el centro hacia los extremos y descubren la banda |
 
-La 11 es la única que trata la juntura como un GESTO: las otras diez resuelven
-el corte contra las vecinas con una decisión de color, y esta con movimiento —
-que es lo que hacían las escaleras, con otro vocabulario.
+### Las tres que resuelven la juntura con movimiento
+
+La 11 y la 14 son hermanas: las dos hacen con un gesto lo que hacían las
+escaleras. La diferencia es el registro — un telón entero dice «se abre»; once
+lamas escalonadas dicen «se destraba». Ninguna de las otras doce toca la
+juntura: la resuelven con una decisión de color.
+
+### 12 · Sonar — el único gesto que no se gasta antes de tiempo
+
+Las otras cinco disparan su movimiento al llegar la sección; esta lo guarda para
+el clic en el campo, que es el único momento que a esta banda le importa.
+
+Va por **foco y no por hover** a propósito: el hover se dispara de paso —el
+puntero cruza camino de otra cosa y la sección late sin que nadie haya decidido
+nada— y además se pierde en teclado, que es la mitad de los casos. Se engancha
+por delegación (`focusin` burbujea, `focus` no), así que **no toca
+`ShineField`**: si el componente de producción cambia por dentro, esto sigue
+funcionando.
+
+### 13 · Ticker — el riesgo está en el mismo sitio que la apuesta
+
+Es la única que nunca para. Una banda que respira convierte el final de la
+página en algo vivo; y algo que nunca para compite con todo lo que tiene al
+lado, que acá es el campo. Por eso las cintas van al 12% de opacidad y a ~35px
+por segundo: si al leer el párrafo el ojo se va a los bordes, está mal
+calibrado. `pauseOffscreen` corta las dos cuando la sección sale de pantalla.
+
+### 14 · Shutter — desde el centro, no de izquierda a derecha
+
+Con once lamas escalonadas de izquierda a derecha el frente se lee como una ola:
+el ojo lo sigue y llega al borde con el contenido ya destapado a sus espaldas.
+Desde el centro, las dos mitades se abren a la vez y el sitio donde termina el
+gesto es también donde está el texto. El retardo sale de la DISTANCIA al centro
+(`Math.abs`), no del índice, así que las lamas simétricas arrancan juntas.
 
 ### Detalles de las tres
 
@@ -81,13 +115,22 @@ una difiere, la palabra se tuerce.
 con la palabra: el heading dice «NEAR belongs to you» igual que en las otras
 diez. Un lector de pantalla leyendo cinco filas de bloques sería ruido puro.
 
-**11 — el telón arranca DEBAJO de la sección (`top-full`), no dentro con un
-`translate-y-full`.** En Tailwind v4 esa clase compila a la propiedad
+**11 y 14 — nada de clases `translate-*` en el markup.** El telón arranca
+DEBAJO de la sección (`top-full`) y las lamas en su sitio, con el estado inicial
+puesto por GSAP. En Tailwind v4 esa clase compila a la propiedad
 `translate`, NO a `transform`; GSAP anima `yPercent` por `transform`, así que
 las dos se suman y el telón terminaba su recorrido «fuera por arriba» desplazado
 otro +100% por la clase — o sea justo encima del contenido, cubriéndolo para
 siempre. Es el mismo bug que `home-ab7/NearStackV2` documenta en sus capas.
 Además así degrada bien: sin JS el telón se queda debajo y no tapa nada.
+
+**12 — los anillos no se montan y desmontan.** Los tres viven siempre en el DOM
+y el foco solo reproduce la timeline. Montarlos al vuelo obligaría a medir el
+campo justo cuando el navegador está resolviendo el foco (y puede estar
+haciendo scroll para mostrarlo), y el primer anillo saldría de una posición
+vieja. Al perder el foco NO se corta el pulso en curso: la onda que ya salió
+termina su camino, porque cortarla dejaría un anillo congelado a media
+pantalla.
 
 ## Cuatro variantes pierden el brillo del campo, y hay que contarlo
 
@@ -145,6 +188,8 @@ Se lleva a `home-ab7/BelongsNewsletter`, y ahí hay que decidir:
 1. **Si las escaleras vuelven**, y cómo conviven con el fondo elegido — salvo
    que gane la 11, que ya trae su propia respuesta a la juntura.
 2. **El campo**: si la ganadora es 02, 04, 06 o 10, qué pasa con el glyph-shine.
-3. **El móvil**, que este lab no diseñó — las once se resuelven en desktop y por
-   debajo caen a su flujo vertical, que es correcto pero no está pensado. En la
-   10 hay que mirarlo de cerca: una rejilla de 30 caracteres a 375px no entra.
+3. **El móvil**, que este lab no diseñó — las catorce se resuelven en desktop y
+   por debajo caen a su flujo vertical, que es correcto pero no está pensado.
+   Dos hay que mirarlas de cerca: la 10 (una rejilla de 30 caracteres a 375px no
+   entra) y la 13 (dos cintas en movimiento en una pantalla estrecha ocupan una
+   proporción mucho mayor de lo que se ve).
