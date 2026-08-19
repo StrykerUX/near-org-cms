@@ -196,16 +196,29 @@ const WORDMARK_CROP_PCT =
 // puede perder — el logo se sigue leyendo a medias, el headline no.
 //
 // El reparto se invierte: el panel manda y lo que cede es, en orden,
-//   1) el aire entre el panel y el logo (de 80px a 24px);
+//   1) el aire entre el panel y el logo (de 128px a 56px);
 //   2) el logo, cuya caja se acorta y lo recorta por ABAJO. Ya vivía dentro de
 //      un overflow-hidden y sus astiles altos son lo que lo hace reconocible.
 //
 // Debajo de WORDMARK_MIN_H el logo deja de encogerse: recortado a una franja
 // no se lee, y a esa altura tampoco queda nada que repartir.
-const TAKEOVER_TOP_MIN = 32; // aire mínimo sobre el headline
-const TAKEOVER_GAP_MAX = 80; // el pb-20 de siempre, cuando hay lugar
-const TAKEOVER_GAP_MIN = 24;
+//
+// Los dos mínimos son ALTOS a propósito: son el peor caso, o sea lo que se ve
+// en la pantalla más baja, y ahí es donde un footer se siente apretado. El
+// precio lo paga el logo, que es lo que se puede leer a medias.
+// El aire sobre el headline se mide DESDE EL HEADER, no desde el borde: el
+// header del sitio es `fixed` y sigue ahí durante el takeover, así que un
+// margen contra el borde de la ventana metía los títulos de las columnas
+// justo debajo de la píldora negra.
+const TAKEOVER_TOP_MIN = 32; // aire entre el header y el headline
+const TAKEOVER_GAP_MAX = 128; // el aire entre los links y el logo, cuando hay lugar
+const TAKEOVER_GAP_MIN = 56;
 const WORDMARK_MIN_H = 96;
+
+// El wordmark deja de ser a sangre pasados los 1920px: más ancho que eso, el
+// alto que reclama (25% del ancho) le come la pantalla al panel sin que el
+// logo se lea mejor. Centrado, con el aire repartido a los dos lados.
+const WORDMARK_MAX_W = "mx-auto w-full max-w-[1920px]";
 
 // ── El indicador con inercia ────────────────────────────────────────────────
 //
@@ -385,6 +398,7 @@ export default function SiteFooter() {
       const wipe = q("[data-footer-wipe]")[0];
       const panel = q("[data-footer-panel]")[0];
       const wordmark = q("[data-footer-wordmark]")[0];
+      const legal = q("[data-footer-legal]")[0];
       const parts = q("[data-footer-bounce]");
       if (!wipe || !panel || !wordmark || parts.length === 0) return;
 
@@ -409,7 +423,14 @@ export default function SiteFooter() {
 
         const natural = wordmark.getBoundingClientRect().height;
         const content = panelBox.getBoundingClientRect().height - TAKEOVER_GAP_MAX;
-        const room = window.innerHeight - TAKEOVER_TOP_MIN - content;
+        // La fila del copyright vive DEBAJO del logo, así que es alto que el
+        // reparto no tiene para dar.
+        const legalH = legal ? legal.getBoundingClientRect().height : 0;
+        const header =
+          parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--site-header-block")
+          ) || 0;
+        const room = window.innerHeight - header - TAKEOVER_TOP_MIN - content - legalH;
 
         const gap = Math.min(TAKEOVER_GAP_MAX, Math.max(TAKEOVER_GAP_MIN, room - natural));
         const h = Math.max(WORDMARK_MIN_H, Math.min(natural, room - gap));
@@ -627,7 +648,7 @@ export default function SiteFooter() {
             y el negro se partiría en dos alturas distintas. */}
         <div
           data-footer-bounce
-          className="absolute inset-x-0 bottom-0 overflow-hidden"
+          className={`absolute inset-x-0 bottom-0 overflow-hidden ${WORDMARK_MAX_W}`}
           style={{ height: "var(--footer-wordmark-h, auto)" }}
         >
           <Image
@@ -665,10 +686,10 @@ export default function SiteFooter() {
         className="invisible absolute inset-x-0 bottom-[calc(100%-10rem)] z-[3] hidden lg:block"
       >
         {/* El aire hasta el wordmark es lo PRIMERO que cede en una pantalla
-            baja (de 5rem a 1.5rem) antes de tocar el logo. */}
+            baja (de 8rem a 3.5rem) antes de tocar el logo. */}
         <Container
           className="grid gap-16 lg:grid-cols-[1fr_auto] lg:gap-24"
-          style={{ paddingBottom: "var(--footer-takeover-gap, 5rem)" }}
+          style={{ paddingBottom: "var(--footer-takeover-gap, 8rem)" }}
         >
           <p className="text-h2 text-cream text-pretty">
             Where money
@@ -687,7 +708,7 @@ export default function SiteFooter() {
       <div
         data-footer-bounce
         data-footer-wordmark
-        className="relative z-[1] overflow-hidden"
+        className={`relative z-[1] overflow-hidden ${WORDMARK_MAX_W}`}
         style={{ height: "var(--footer-wordmark-h, auto)" }}
       >
         <Image
@@ -701,16 +722,23 @@ export default function SiteFooter() {
         />
       </div>
 
-      {/* El copyright, por ENCIMA del wipe para no quedar sepultado por el
-          negro. `mix-blend-difference` con source gris funciona sobre los DOS
+      {/* El copyright, en FLUJO debajo del wordmark y alineado con el borde
+          derecho del logo —o sea, bajo el remate de la "r"— y no contra el
+          gutter del Container, que en pantallas anchas lo dejaba lejos del
+          logo. Antes era absoluto contra el fondo del footer y en pantallas
+          bajas caía ENCIMA de las letras.
+
+          Sigue por encima del wipe para no quedar sepultado por el negro;
+          `mix-blend-difference` con source gris funciona sobre los DOS
           estados: sobre cream cae oscuro, sobre el negro del wipe queda
           claro. No necesita variante dark.
 
           Los links legales ya no están acá: subieron a su propia columna. */}
-      <div className="absolute inset-x-0 bottom-6 z-[3] mix-blend-difference">
-        <Container className="flex flex-wrap items-center justify-end gap-x-8 gap-y-2 text-neutral-400">
-          <p className="text-body-sm">© 2026 NEAR. All rights reserved.</p>
-        </Container>
+      <div
+        data-footer-legal
+        className={`relative z-[3] flex justify-end px-5 pb-5 pt-3 mix-blend-difference ${WORDMARK_MAX_W}`}
+      >
+        <p className="text-body-sm text-neutral-400">© 2026 NEAR. All rights reserved.</p>
       </div>
     </footer>
   );
