@@ -92,10 +92,15 @@ const GROUPS: {
     sections: [
       {
         label: "",
+        // Los tres productos viven FUERA del sitio, y estos son los mismos
+        // href que el menú Products del header — que los tiene transcritos del
+        // sitemap doc. Antes apuntaban a `/nearcom`, `/intents` y `/near-ai`:
+        // esas páginas existen, pero son las páginas SOBRE cada producto, no
+        // el producto. Desde el footer, "near.com" tiene que llevar a near.com.
         links: [
-          { label: "near.com", href: "/nearcom" },
-          { label: "Intents", href: "/intents" },
-          { label: "NEAR AI", href: "/near-ai" },
+          { label: "near.com", href: "https://near.com" },
+          { label: "Intents", href: "https://intents.near.org" },
+          { label: "NEAR AI", href: "https://near.ai" },
         ],
       },
     ],
