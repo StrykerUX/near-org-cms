@@ -38,10 +38,16 @@ import m31 from "@/app/prototype/homepage-v4/page.meta";
 import m32 from "@/app/prototype/homepage-v5/page.meta";
 import m33 from "@/app/prototype/hover-lab/page.meta";
 import m34 from "@/app/prototype/proof-alt/page.meta";
-import m35 from "@/app/(motion)/quantum-security/page.meta";
-import m36 from "@/app/(site)/research/page.meta";
-import m37 from "@/app/(site)/solutions/page.meta";
-import m38 from "@/app/(site)/terms-of-use/page.meta";
+import m35 from "@/app/prototype/stack-labs/page.meta";
+import m36 from "@/app/prototype/stack-labs/anchors/page.meta";
+import m37 from "@/app/prototype/stack-labs/bleed/page.meta";
+import m38 from "@/app/prototype/stack-labs/blueprint/page.meta";
+import m39 from "@/app/prototype/stack-labs/broadsheet/page.meta";
+import m40 from "@/app/prototype/stack-labs/traveling/page.meta";
+import m41 from "@/app/(motion)/quantum-security/page.meta";
+import m42 from "@/app/(site)/research/page.meta";
+import m43 from "@/app/(site)/solutions/page.meta";
+import m44 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -79,8 +85,14 @@ export const ROUTES: RouteEntry[] = [
   { ...m32, route: "/prototype/homepage-v5", stub: false, file: "app/prototype/homepage-v5/page.meta.ts" },
   { ...m33, route: "/prototype/hover-lab", stub: false, file: "app/prototype/hover-lab/page.meta.ts" },
   { ...m34, route: "/prototype/proof-alt", stub: false, file: "app/prototype/proof-alt/page.meta.ts" },
-  { ...m35, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m36, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m37, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m38, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m35, route: "/prototype/stack-labs", stub: false, file: "app/prototype/stack-labs/page.meta.ts" },
+  { ...m36, route: "/prototype/stack-labs/anchors", stub: false, file: "app/prototype/stack-labs/anchors/page.meta.ts" },
+  { ...m37, route: "/prototype/stack-labs/bleed", stub: false, file: "app/prototype/stack-labs/bleed/page.meta.ts" },
+  { ...m38, route: "/prototype/stack-labs/blueprint", stub: false, file: "app/prototype/stack-labs/blueprint/page.meta.ts" },
+  { ...m39, route: "/prototype/stack-labs/broadsheet", stub: false, file: "app/prototype/stack-labs/broadsheet/page.meta.ts" },
+  { ...m40, route: "/prototype/stack-labs/traveling", stub: false, file: "app/prototype/stack-labs/traveling/page.meta.ts" },
+  { ...m41, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m42, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m43, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m44, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
