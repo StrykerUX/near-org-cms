@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ExDraftView from "@/components/views/ExDraftView";
 import { ExBgField } from "@/components/sections/ex/ExBackgrounds";
 import StackTriptych from "@/components/sections/stack-labs/StackTriptych";
+import ProofIndex from "@/components/sections/proof-alt/ProofIndex";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -17,6 +18,7 @@ export default function EX2Page() {
       reveal="read"
       tone="ink"
       stack={<StackTriptych />}
+      proof={<ProofIndex />}
     />
   );
 }

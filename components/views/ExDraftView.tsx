@@ -43,6 +43,8 @@ export type ExDraftViewProps = {
   tone?: "ink" | "cream";
   /** La variante del NEAR Stack de este draft. */
   stack?: React.ReactNode;
+  /** La estructura de la sección de pruebas de este draft. */
+  proof?: React.ReactNode;
 };
 
 export default function ExDraftView({
@@ -53,6 +55,7 @@ export default function ExDraftView({
   reveal,
   tone,
   stack,
+  proof,
 }: ExDraftViewProps) {
   return (
     <main className="flex flex-col bg-cream">
@@ -67,6 +70,8 @@ export default function ExDraftView({
       <OwnYourOwn />
 
       {stack}
+
+      {proof}
 
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
