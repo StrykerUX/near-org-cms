@@ -7,5 +7,5 @@ import meta from "./page.meta";
 export const metadata: Metadata = toMetadata(meta);
 
 export default function EX2Page() {
-  return <ExDraftView current="ex2" background={<ExBgField />} layout="center" tone="ink" />;
+  return <ExDraftView current="ex2" background={<ExBgField />} layout="center" word="match" tone="ink" />;
 }

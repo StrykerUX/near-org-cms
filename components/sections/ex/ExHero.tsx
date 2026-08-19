@@ -85,15 +85,27 @@ export type ExHeroLayout =
   /** Titular centrado con subtítulo y dos acciones al pie. */
   | "center";
 
+export type ExHeroWord =
+  /** «World» domina el cartel: mucho más alta que el renglón de arriba. */
+  | "poster"
+  /** «World» al tamaño del renglón de arriba: los dos leen como un titular. */
+  | "match";
+
 export type ExHeroProps = {
   /** El fondo: se pinta detrás de todo y recibe `data-fade` para retirarse. */
   background: React.ReactNode;
   layout?: ExHeroLayout;
+  word?: ExHeroWord;
   /** Color del cartel y del texto. Los fondos claros piden tinta; los oscuros, cream. */
   tone?: "ink" | "cream";
 };
 
-export default function ExHero({ background, layout = "poster", tone = "ink" }: ExHeroProps) {
+export default function ExHero({
+  background,
+  layout = "poster",
+  word = "poster",
+  tone = "ink",
+}: ExHeroProps) {
   // Único en el documento: con dos instancias, dos `<clipPath id="eye">` harían
   // que la segunda capa usara la máscara de la primera.
   const clipId = `ex-eye-${useId().replace(/:/g, "")}`;
@@ -245,8 +257,16 @@ export default function ExHero({ background, layout = "poster", tone = "ink" }: 
 
   // El cartel. En `center` es más contenido: comparte pantalla con el subtítulo
   // y las acciones, así que no puede ir a sangre.
+  //
+  // `match` lo baja hasta que la altura de mayúscula de «World» iguala la del
+  // renglón de arriba. El ancho no se puede copiar del renglón: la itálica de
+  // Kepler trae ascendentes y descendentes largos, así que a igual ancho la
+  // palabra se ve mucho más grande de lo que mide. 34vw sale de medir la «W»
+  // contra la «O» en pantalla, no de una proporción del viewBox.
   const markClass = centered
-    ? "block w-[52vw] max-w-[46rem] overflow-visible"
+    ? word === "match"
+      ? "block w-[34vw] max-w-[30rem] overflow-visible"
+      : "block w-[52vw] max-w-[46rem] overflow-visible"
     : "block w-[76vw] max-w-[68rem] overflow-visible";
 
   return (

@@ -1,7 +1,7 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import Link from "next/link";
-import ExHero, { type ExHeroLayout } from "@/components/sections/ex/ExHero";
+import ExHero, { type ExHeroLayout, type ExHeroWord } from "@/components/sections/ex/ExHero";
 
 // Los tres drafts EX comparten esta view: hero + un bloque de cierre. Lo único
 // que las distingue es el FONDO y la COMPOSICIÓN del hero, que llegan por prop.
@@ -20,13 +20,20 @@ export type ExDraftViewProps = {
   current: (typeof VARIANTS)[number]["id"];
   background: React.ReactNode;
   layout?: ExHeroLayout;
+  word?: ExHeroWord;
   tone?: "ink" | "cream";
 };
 
-export default function ExDraftView({ current, background, layout, tone }: ExDraftViewProps) {
+export default function ExDraftView({
+  current,
+  background,
+  layout,
+  word,
+  tone,
+}: ExDraftViewProps) {
   return (
     <main className="flex flex-col bg-cream">
-      <ExHero background={background} layout={layout} tone={tone} />
+      <ExHero background={background} layout={layout} word={word} tone={tone} />
 
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
