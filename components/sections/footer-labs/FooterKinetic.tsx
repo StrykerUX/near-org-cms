@@ -2,7 +2,6 @@
 
 import Container from "@/components/primitives/Container";
 import { gsap } from "@/components/primitives/motion/gsapClient";
-import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import {
   FooterHeadlineLines,
@@ -11,6 +10,7 @@ import {
   FooterWordmark,
 } from "./FooterParts";
 import FooterStaticFallback from "./FooterStaticFallback";
+import { enterExit } from "./footerScene";
 
 // 05 · Kinetic — footer editorial en flujo, que se construye de abajo hacia
 // arriba.
@@ -33,10 +33,10 @@ import FooterStaticFallback from "./FooterStaticFallback";
 //   0.85  el titular, por líneas   máscaras propias, escalonadas
 //   1.05  columnas y legal         stagger
 //
-// Los tiempos son propios y no un `scrub`: es la única de las seis en flujo que
-// se anima sola. Un footer que se re-arma cada vez que el lector sube dos
-// líneas y vuelve a bajar es ruido, así que `once: true` y listo — entra y se
-// queda en su estado final.
+// Los tiempos son propios y no un `scrub`. Y la escena se DESHACE al subir,
+// más rápido de lo que entró: lo que hay que evitar no es que se pueda
+// deshacer sino que se repita por un gesto mínimo, y de eso se encargan el
+// `start` y el `end` del trigger. Ver `footerScene.ts`.
 
 export default function FooterKinetic() {
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
@@ -56,9 +56,7 @@ export default function FooterKinetic() {
     gsap.set(wordmark, { clipPath: "inset(0% 100% 0% 0%)" });
     gsap.set([...lines, ...cols, legal].filter(Boolean), { autoAlpha: 0, y: 30 });
 
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: scope, start: "top 80%", once: true, markers: DEBUG_MARKERS },
-    });
+    const tl = gsap.timeline({ paused: true });
 
     // 1 · El fondo. `clip-path` y no `scaleY`: adentro vive el wordmark, y un
     // escalado lo deformaría — el clip solo mueve el borde del recorte.
@@ -76,8 +74,10 @@ export default function FooterKinetic() {
     tl.to(cols, { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.07 }, 1.05);
     if (legal) tl.to(legal, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, 1.3);
 
+    const st = enterExit(tl, { trigger: scope, start: "top 80%" });
+
     return () => {
-      tl.scrollTrigger?.kill();
+      st.kill();
       tl.kill();
       gsap.set([bg, wordmark, ...lines, ...cols, legal].filter(Boolean), {
         clearProps: "clipPath,transform,opacity,visibility",

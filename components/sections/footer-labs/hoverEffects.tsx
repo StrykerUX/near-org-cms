@@ -7,7 +7,7 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import type { FooterLink } from "./footerLabContent";
 
-// Los cuatro hovers de `/prototype/hover-lab` que el lab de footers adoptó,
+// Los dos hovers de `/prototype/hover-lab` que el lab de footers adoptó,
 // portados acá.
 //
 // ── Por qué portados y no importados ───────────────────────────────────────
@@ -23,18 +23,20 @@ import type { FooterLink } from "./footerLabContent";
 // Tailwind, así que estos links no dependen de que nadie más cargue una
 // hoja de estilos.
 //
-// ── Los cuatro, y de dónde vienen ──────────────────────────────────────────
+// ── Los dos, y de dónde vienen ─────────────────────────────────────────────
 //
-//   ramp      (05 · Brand ramp)        CSS. El verde de marca barre el texto
-//                                      con `background-clip: text`.
 //   chars     (15 · Char stagger)      GSAP + SplitText. Sube en `power3`,
 //                                      vuelve en `elastic` — la ida y la
 //                                      vuelta con curvas distintas es lo que
 //                                      CSS no puede dar.
 //   inertial  (18 · Inertial indicator) GSAP. Un chip que persigue al link y se
 //                                      ESTIRA proporcionalmente al salto.
-//   scramble  (21 · Eased scramble)    GSAP. El texto se revuelve y se resuelve
-//                                      con el progreso en `power2.out`.
+//
+// Se probaron cuatro. Los otros dos —`05 · Brand ramp`, que barría el verde de
+// marca por el texto, y `21 · Eased scramble`, que revolvía las letras— se
+// quitaron: los cuatro juntos hacían que el bloque de links pareciera un
+// muestrario y no un footer. Están en `/prototype/hover-lab`, que es donde
+// viven las alternativas.
 //
 // ── La adaptación del 18 ───────────────────────────────────────────────────
 //
@@ -45,23 +47,22 @@ import type { FooterLink } from "./footerLabContent";
 // cuando cambia de fila. Sin eso, el estiramiento se veía perpendicular al
 // movimiento — que es exactamente al revés de lo que la inercia hace.
 
-export type HoverEffect = "ramp" | "chars" | "inertial" | "scramble";
+export type HoverEffect = "chars" | "inertial";
 
 /**
  * El reparto por defecto, en el orden de `GROUPS`: Products, Stack, Resources,
  * About, Terms and Policies.
  *
- * Intercalados a propósito y no agrupados por costo: puestos en fila, los dos
- * de GSAP quedarían juntos y el footer tendría una mitad "cara" y otra
- * "barata", que es justo lo que no se quiere comparar. Así cada uno tiene un
- * vecino distinto arriba y al lado.
+ * Alternados, no repartidos por tipo de grupo. Con cinco grupos y dos efectos,
+ * alternar deja a cada uno con un vecino del otro tipo arriba y al lado, que es
+ * lo que permite comparar los dos sin ir y volver entre columnas.
  */
 export const DEFAULT_EFFECTS: HoverEffect[] = [
-  "ramp",
   "chars",
   "inertial",
-  "scramble",
-  "ramp",
+  "chars",
+  "inertial",
+  "chars",
 ];
 
 function linkTone(dark: boolean) {
@@ -72,32 +73,6 @@ function linkTone(dark: boolean) {
  *  destino inventado. Un link equivocado es peor que un placeholder evidente. */
 function hrefOf(link: FooterLink) {
   return link.href ?? "#";
-}
-
-/* ── 05 · Brand ramp ──────────────────────────────────────────────────────
-   El gradiente de marca vive en el propio texto (`background-clip: text`) y lo
-   que se anima es su POSICIÓN, no su color: por eso el barrido tiene dirección
-   y no es un fade. Mismo mecanismo que el sheen del hero, así que footer y hero
-   hablarían un mismo idioma.
-
-   El tramo neutro del gradiente ocupa la mitad derecha y es el color de reposo:
-   con `background-size: 220%` y la posición en 100%, lo que se ve al principio
-   es solo esa parte. */
-function RampLink({ link, dark }: { link: FooterLink; dark: boolean }) {
-  const rest = dark ? "rgb(245 244 241 / 0.7)" : "rgb(108 116 119)";
-  return (
-    <Link
-      href={hrefOf(link)}
-      className="text-body-sm bg-clip-text text-transparent transition-[background-position] duration-500 ease-[cubic-bezier(0.33,0,0.67,1)] hover:bg-[position:0%_0]"
-      style={{
-        backgroundImage: `linear-gradient(100deg, var(--cta-lime) 0%, var(--cta-mint) 35%, ${rest} 50%, ${rest} 100%)`,
-        backgroundSize: "220% 100%",
-        backgroundPosition: "100% 0",
-      }}
-    >
-      {link.label}
-    </Link>
-  );
 }
 
 /* ── 15 · Char stagger ────────────────────────────────────────────────────
@@ -261,99 +236,11 @@ function InertialRow({ links, dark }: { links: FooterLink[]; dark: boolean }) {
   );
 }
 
-/* ── 21 · Eased scramble ──────────────────────────────────────────────────
-   El texto se revuelve y se resuelve de izquierda a derecha. Lo que lo hace
-   legible mientras corre es que el progreso va en `power2.out`: las primeras
-   letras se asientan casi al instante, así que el principio de la palabra —que
-   es por donde se lee— se estabiliza antes que el final.
-
-   El texto que se revuelve NO es el accesible: mientras la animación corre, el
-   `textContent` es basura, así que el label real va en `aria-label` y el span
-   animado queda `aria-hidden`. Y el ancho se reserva con una copia invisible
-   del texto: sin eso, los caracteres del charset —más anchos que los de la
-   palabra— empujarían a los links vecinos en cada hover. */
-const CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*";
-
-function ScrambleRow({ links, dark }: { links: FooterLink[]; dark: boolean }) {
-  const rootRef = useGsapContext<HTMLSpanElement>((_self, root) => {
-    const mm = gsap.matchMedia();
-
-    mm.add(MQ.motion, () => {
-      const items = gsap.utils.toArray<HTMLElement>("[data-hv]", root);
-      const cleanups = items.map((el) => {
-        const target = el.querySelector<HTMLElement>("[data-scramble]");
-        const text = target?.textContent ?? "";
-        if (!target) return () => {};
-
-        const state = { p: 0 };
-        const render = () => {
-          const settled = state.p * text.length;
-          target.textContent = text
-            .split("")
-            .map((ch, i) =>
-              i < settled || ch === " " ? ch : CHARSET[(Math.random() * CHARSET.length) | 0]
-            )
-            .join("");
-        };
-
-        const enter = () =>
-          gsap.fromTo(
-            state,
-            { p: 0 },
-            { p: 1, duration: 0.7, ease: "power2.out", onUpdate: render, overwrite: true }
-          );
-        const leave = () => {
-          gsap.killTweensOf(state);
-          state.p = 1;
-          target.textContent = text;
-        };
-
-        el.addEventListener("pointerenter", enter);
-        el.addEventListener("pointerleave", leave);
-        return () => {
-          gsap.killTweensOf(state);
-          el.removeEventListener("pointerenter", enter);
-          el.removeEventListener("pointerleave", leave);
-          target.textContent = text;
-        };
-      });
-
-      return () => cleanups.forEach((fn) => fn());
-    });
-
-    return () => mm.revert();
-  }, []);
-
-  return (
-    <span ref={rootRef} className="contents">
-      {links.map((link) => (
-        <Link
-          key={link.label}
-          href={hrefOf(link)}
-          data-hv
-          aria-label={link.label}
-          className={`text-body-sm relative inline-grid transition-colors ${linkTone(dark)}`}
-        >
-          {/* La copia invisible reserva el ancho de la palabra real; las dos
-              ocupan la misma celda del grid, así que el link no cambia de
-              tamaño aunque el charset sea más ancho. */}
-          <span aria-hidden="true" className="invisible col-start-1 row-start-1">
-            {link.label}
-          </span>
-          <span data-scramble aria-hidden="true" className="col-start-1 row-start-1">
-            {link.label}
-          </span>
-        </Link>
-      ))}
-    </span>
-  );
-}
-
 /* ── El despachador ───────────────────────────────────────────────────────
-   Tres de los cuatro efectos son del LINK y podrían renderizarse uno por uno;
-   el inercial es del GRUPO —su chip viaja entre links— así que necesita
+   `chars` es un efecto del LINK y podría renderizarse link por link; el
+   inercial es del GRUPO —su chip viaja de un link a otro— así que necesita
    envolver la fila entera. Por eso la unidad de esta API es la FILA y no el
-   link: es la única forma de que los cuatro se puedan intercambiar en el mismo
+   link: es la única forma de que los dos se puedan intercambiar en el mismo
    sitio sin que quien llama tenga que saber cuál es cuál. */
 export function HoverLinkRow({
   links,
@@ -376,10 +263,7 @@ export function HoverLinkRow({
 
   return (
     <p className={`flex flex-wrap items-baseline gap-x-4 gap-y-1 ${className}`}>
-      {effect === "chars" && <CharsRow links={links} dark={dark} />}
-      {effect === "scramble" && <ScrambleRow links={links} dark={dark} />}
-      {effect === "ramp" &&
-        links.map((link) => <RampLink key={link.label} link={link} dark={dark} />)}
+      <CharsRow links={links} dark={dark} />
     </p>
   );
 }

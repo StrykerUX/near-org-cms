@@ -1,8 +1,7 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
-import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
-import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { gsap } from "@/components/primitives/motion/gsapClient";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import {
   FooterHeadlineLines,
@@ -11,6 +10,7 @@ import {
   FooterWordmark,
 } from "./FooterParts";
 import FooterStaticFallback from "./FooterStaticFallback";
+import { enterExit } from "./footerScene";
 
 // 08 · Sheet — el takeover como una hoja que se apoya encima.
 //
@@ -91,16 +91,9 @@ export default function FooterSheet() {
     );
 
     // Arranca cuando el lector llegó al fondo por su cuenta —nadie tira del
-    // scroll— y se revierte al subir: un takeover sin reversa deja la página
-    // tapada.
-    const st = ScrollTrigger.create({
-      trigger: scope,
-      start: "bottom bottom+=40",
-      end: "bottom top",
-      markers: DEBUG_MARKERS,
-      onEnter: () => tl.play(),
-      onLeaveBack: () => tl.reverse(),
-    });
+    // scroll— y se deshace al subir, más rápido de lo que entró. Ver
+    // `footerScene.ts`.
+    const st = enterExit(tl, { trigger: scope, start: "bottom bottom+=40" });
 
     return () => {
       st.kill();

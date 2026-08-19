@@ -1,8 +1,7 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
-import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
-import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { gsap } from "@/components/primitives/motion/gsapClient";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { WORDMARK } from "./footerLabContent";
 import {
@@ -12,6 +11,7 @@ import {
   FooterWordmark,
 } from "./FooterParts";
 import FooterStaticFallback from "./FooterStaticFallback";
+import { enterExit } from "./footerScene";
 
 // 07 · Ascend — el takeover de producción, con las dos cosas que le faltan.
 //
@@ -137,15 +137,14 @@ export default function FooterAscend() {
     // El trigger se crea al final: si la página ya está en el fondo al montar,
     // `onEnter` dispara en esta misma línea, y para entonces la timeline tiene
     // que estar completa.
-    const st = ScrollTrigger.create({
+    //
+    // `canPlay` es la red de la altura: si el bloque no entra, la escena no
+    // arranca y el footer se lee en flujo. Se evalúa en cada entrada y no una
+    // sola vez, porque el viewport se sigue moviendo.
+    const st = enterExit(tl, {
       trigger: scope,
       start: `bottom bottom+=${TRIGGER_SLACK}`,
-      end: "bottom top",
-      markers: DEBUG_MARKERS,
-      onEnter: () => {
-        if (fits()) tl.play();
-      },
-      onLeaveBack: () => tl.reverse(),
+      canPlay: fits,
     });
 
     return () => {

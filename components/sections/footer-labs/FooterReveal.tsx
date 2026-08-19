@@ -2,10 +2,10 @@
 
 import Container from "@/components/primitives/Container";
 import { gsap } from "@/components/primitives/motion/gsapClient";
-import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { FooterHeadline, FooterLegal, FooterLinks, FooterWordmark } from "./FooterParts";
 import FooterStaticFallback from "./FooterStaticFallback";
+import { enterExit } from "./footerScene";
 
 // 04 · Reveal — el footer ya estaba ahí; la página se corre.
 //
@@ -59,19 +59,20 @@ export default function FooterReveal() {
     // El trigger va sobre el ESPACIADOR y no sobre el footer: el footer es
     // `fixed`, así que su caja no se mueve con el scroll y un ScrollTrigger
     // anclado a él mediría siempre lo mismo. El hueco sí viaja.
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: gap,
-        start: "top 85%",
-        once: true,
-        markers: DEBUG_MARKERS,
-      },
-    });
+    const tl = gsap.timeline({ paused: true });
 
-    tl.from(items, { autoAlpha: 0, y: 22, duration: 0.7, ease: "power3.out", stagger: 0.07 });
+    // `set` + `to` y no `from`: `from` aplica su estado inicial en el frame en
+    // que se crea, y con la timeline pausada eso dejaba las columnas
+    // invisibles hasta que alguien scrolleara. Con `set` explícito el estado
+    // inicial es una escritura sola y el tween sabe de dónde sale.
+    gsap.set(items, { autoAlpha: 0, y: 22 });
+    tl.to(items, { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.07 });
+
+    const st = enterExit(tl, { trigger: gap, start: "top 85%" });
 
     return () => {
-      gsap.killTweensOf(items);
+      st.kill();
+      tl.kill();
       gsap.set(items, { clearProps: "transform,opacity,visibility" });
     };
   });

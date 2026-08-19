@@ -3,10 +3,10 @@
 import Container from "@/components/primitives/Container";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { enableScene } from "@/components/primitives/motion/stickyScene";
-import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { FooterHeadline, FooterLegal, FooterLinks, FooterWordmark } from "./FooterParts";
 import FooterStaticFallback from "./FooterStaticFallback";
+import { enterExit } from "./footerScene";
 
 // 06 · Stack — el footer con recorrido propio.
 //
@@ -25,9 +25,10 @@ import FooterStaticFallback from "./FooterStaticFallback";
 // titular se quedaba a medio encoger indefinidamente. El ritmo no era del
 // diseño, era del gesto de cada uno.
 //
-// Acá el scroll solo decide CUÁNDO empieza (`once: true`, al pegarse el
-// bloque); a partir de ahí la timeline corre con sus propias duraciones y sus
-// propias curvas, siempre igual. El `position: sticky` deja de ser el motor y
+// Acá el scroll solo decide CUÁNDO empieza —al pegarse el bloque— y cuándo se
+// deshace; entre esos dos puntos la timeline corre con sus propias duraciones y
+// sus propias curvas, siempre igual. La salida es más rápida que la entrada
+// (ver `footerScene.ts`). El `position: sticky` deja de ser el motor y
 // pasa a ser lo que le da tiempo a la escena para completarse antes de que el
 // footer salga de vista.
 //
@@ -83,19 +84,11 @@ export default function FooterStack() {
     gsap.set(cols, { autoAlpha: 0, y: 40 });
     gsap.set(tail, { yPercent: 100 });
 
-    // El trigger dispara y se retira: `once: true`, sin `scrub`. El start es el
-    // momento en que el bloque se pega al viewport, que es cuando el footer
-    // pasa a ocupar la pantalla entera y la escena tiene sentido — no antes.
-    const tl = gsap.timeline({
-      defaults: { ease: "power3.out" },
-      scrollTrigger: {
-        trigger: track,
-        start: "top top",
-        once: true,
-        invalidateOnRefresh: true,
-        markers: DEBUG_MARKERS,
-      },
-    });
+    // El start es el momento en que el bloque se pega al viewport, que es
+    // cuando el footer pasa a ocupar la pantalla entera y la escena tiene
+    // sentido — no antes. Sin `scrub`: el scroll dispara, la timeline lleva su
+    // propio tiempo.
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
 
     // Tiempo 1 — el titular llega solo, a tamaño de portada.
     // `transformOrigin` arriba a la izquierda: el titular tiene que encogerse
@@ -113,9 +106,11 @@ export default function FooterStack() {
     // Tiempo 3 — el wordmark y el legal suben desde el borde y asientan.
     tl.to(tail, { yPercent: 0, duration: 0.9, ease: "power4.out" }, 1.5);
 
+    const st = enterExit(tl, { trigger: track, start: "top top" });
+
     return () => {
       off();
-      tl.scrollTrigger?.kill();
+      st.kill();
       tl.kill();
       gsap.set([head, tail, ...cols], { clearProps: "transform,opacity,visibility" });
     };

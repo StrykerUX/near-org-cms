@@ -19,7 +19,7 @@ mediría dos cosas a la vez.
 | # | Versión | Familia | Técnica | La apuesta |
 |---|---|---|---|---|
 | 01 | `Sheet` | takeover | hoja apoyada, el logo cede | Un objeto con esquinas que sube y se apoya sobre la página oscurecida |
-| 02 | `Glyph` | takeover | `mask-image` del wordmark | El logo **es** la transición: su forma crece hasta que un trazo cubre la pantalla |
+| 02 | `Glyph` | takeover | `mask-image` del wordmark | El logo **es** la transición: se atraviesa por dentro y del otro lado está otra vez |
 | 03 | `Ascend` | takeover | el wipe de producción, sin tirón | El original sin secuestrar el scroll y sin cortarse |
 | 04 | `Reveal` | en flujo | `position: fixed`, sin scrub | El footer ya estaba abajo; la página se corre y lo descubre |
 | 05 | `Kinetic` | en flujo | clip-path + máscaras, `once` | Se construye de abajo hacia arriba: fondo, wordmark, contenido |
@@ -86,9 +86,9 @@ Al pie queda solo el copyright, en la esquina inferior derecha. Es la única
 línea del footer que no es un destino, y por eso puede irse al borde e incluso
 montarse encima del wordmark.
 
-## Los cuatro hovers
+## Los dos hovers
 
-Los links llevan cuatro efectos distintos, repartidos por grupo e intercalados
+Los links llevan dos efectos, alternados por grupo
 (ver `DEFAULT_EFFECTS` en [`hoverEffects.tsx`](./hoverEffects.tsx)). Salen de
 `/prototype/hover-lab` y están **portados, no importados**: una sección no puede
 importar de una view, y allá cada variante es un componente de demo con su
@@ -98,23 +98,55 @@ así que estos links no dependen de que nadie cargue otra hoja de estilos.
 
 | Origen | Nombre | Qué hace |
 |---|---|---|
-| 05 | Brand ramp | El verde de marca barre el texto con `background-clip: text`. Se anima la POSICIÓN del gradiente, no el color: por eso tiene dirección y no es un fade |
 | 15 | Char stagger | SplitText: sube en `power3.out`, vuelve en `elastic`. La ida y la vuelta con curvas distintas es lo que una transición CSS no puede expresar |
 | 18 | Inertial indicator | Un chip que persigue al link y se **estira** en proporción al salto. Una transición no sabe cuánto va a viajar, así que no puede deformarse por ello |
-| 21 | Eased scramble | El texto se revuelve y se resuelve con el progreso en `power2.out`: las primeras letras se asientan casi al instante, así que se lee mientras corre |
 
-Dos detalles que no son opcionales:
+Se probaron cuatro. Los otros dos —`05 · Brand ramp`, que barría el verde de
+marca por el texto con `background-clip`, y `21 · Eased scramble`, que revolvía
+las letras— se quitaron: los cuatro juntos hacían que el bloque de links
+pareciera un muestrario y no un footer. Siguen en `/prototype/hover-lab`, que es
+donde viven las alternativas.
 
-- **El 18 vino adaptado.** En el hover-lab recorre una columna vertical y solo
-  se mueve en Y. Acá los links de una sub-sección corren en línea, así que el
-  chip persigue en X y en Y y el estiramiento se aplica sobre el eje del salto
-  (`scaleX` dentro de una fila, `scaleY` al cambiar de renglón). Sin eso se veía
-  perpendicular al movimiento, que es al revés de lo que hace la inercia.
-- **El 21 reserva su ancho** con una copia invisible del texto en la misma celda
-  de grid. Sin eso, los caracteres del charset —más anchos que los de la
-  palabra— empujarían a los links vecinos en cada hover. Y el texto accesible no
-  es el que se revuelve: mientras corre, el `textContent` es basura, así que el
-  label real va en `aria-label`.
+**El 18 vino adaptado.** En el hover-lab recorre una columna vertical y solo se
+mueve en Y. Acá los links de una sub-sección corren en línea, así que el chip
+persigue en X y en Y y el estiramiento se aplica sobre el eje del salto
+(`scaleX` dentro de una fila, `scaleY` al cambiar de renglón). Sin eso se veía
+perpendicular al movimiento, que es al revés de lo que hace la inercia.
+
+## El recorrido de `02 · Glyph`
+
+Es el único de los seis con cuatro tiempos, y el orden importa:
+
+1. El lector llega al fondo y el wordmark aparece a ancho completo, como en
+   cualquiera de las otras cinco. No pasa nada más.
+2. Cuando el logo está **entero a la vista**, empieza a crecer. El disparo es
+   `start: "bottom bottom"` sobre el bloque del wordmark: su borde inferior
+   tocando el de la pantalla es, exactamente, el primer frame en que se ve
+   completo.
+
+   Disparaba antes, a mitad de logo, y el efecto perdía su premisa: lo que crece
+   tiene que ser algo que el lector ya reconoció como el wordmark. Con medio
+   logo asomando todavía no lo es —es una fila de formas cortadas— así que no se
+   leía como "el logo se agranda" sino como una mancha que aparece.
+3. Crece **sesgado hacia abajo** hasta que un solo trazo cubre el viewport, y
+   llegan el titular y los links.
+4. Y en el fondo del footer vuelve a aparecer el wordmark, ahora en blanco. Se
+   sale por donde se entró.
+
+**El sesgo se consigue animando el anclaje.** Con la máscara fija al borde
+inferior (`mask-position: 18% 100%`) crece solo hacia arriba; fija al superior,
+solo hacia abajo, y la mitad de arriba del viewport se queda sin cubrir hasta
+que entra el negro sólido — un salto visible. El anclaje arranca en 100%, donde
+coincide al píxel con el wordmark en pantalla (que es lo que hace que el
+crecimiento parezca salir del logo real), y llega a 25%: tres cuartos del glifo
+crecen hacia abajo y uno hacia arriba.
+
+**Las dos copias del logo se turnan, no conviven.** En reposo solo existe el
+wordmark real; la máscara está apagada y se enciende en 120ms mientras la otra
+se apaga. No son idénticas —el real lleva el corte óptico que lo sienta sobre el
+borde y una `mask-image` no puede aplicarlo— y con las dos encendidas se veía el
+logo DOBLE, con una silueta corrida unos píxeles. Fue el defecto más visible que
+tuvo esta versión.
 
 ## El problema de la altura, y las dos respuestas de 07 y 08
 
@@ -188,23 +220,24 @@ estático, que es la degradación correcta.
 - **Nadie tira del scroll.** El footer de producción, al cruzar su umbral, hace
   `gsap.to(scroller, { scrollTop: maxScroll })`: durante esos 450ms el scroll no
   es del lector. Ninguna de las seis hace eso. Las que tapan la pantalla
-  arrancan cuando el lector llegó al fondo por su cuenta, y se revierten al
-  subir — un takeover sin reversa deja la página tapada.
-- **Dos maneras de llevar el tiempo, y la comparación entre ellas es media
-  pregunta del lab.** `02 · Glyph` va con `scrub`: el progreso ES el
-  scroll, reversible sin escribir la reversa, pero el ritmo lo pone el gesto de
-  cada lector — rápido pasa en un borrón, lento se congela a mitad. el resto va con timeline propia: el scroll solo decide CUÁNDO empieza y a
-  partir de ahí las duraciones y las curvas son siempre las mismas.
-- **Las tres takeover chequean que haya página que tapar.** Sin al menos dos
-  viewports de documento el trigger nace ya dentro de su rango y el negro tapa
-  la pantalla al montar, sin que nadie haya scrolleado. Es el mismo bug que
-  `SiteFooter` documenta en su `canTakeover()`.
-- **El wordmark sale de `WORDMARK` y no de una `<img>` a mano.** El corte
-  óptico (`cropPct`) está medido con `getBBox()` sobre el asset, no estimado:
-  el tipo está corregido y alinear la caja al extremo real de los glifos deja
-  una franja de página bajo la "n" y la "r".
-
-## Dos detalles que se rompen fácil
+  arrancan cuando el lector llegó al fondo por su cuenta.
+- **Ninguna usa `once`, y todas se deshacen al subir.** Tres entraban con
+  `once`, con el argumento de que un footer que se re-anima cada vez que el
+  lector sube dos líneas y vuelve a bajar es ruido. El argumento estaba bien
+  pero la conclusión no: lo que hay que evitar es que se REPITA por un gesto
+  mínimo —de eso se encargan el `start` y el `end` del trigger—, no que se pueda
+  deshacer. Con `once`, quien vuelve hacia arriba se lleva un footer congelado
+  en su estado final, y en las que tapan la pantalla, una página tapada que no
+  se destapa.
+- **La salida es más rápida que la entrada**, no la entrada al revés: corre a
+  `EXIT_SPEED` (1.7, o sea ~60% del tiempo). Entrar es el gesto y vale la pena
+  mirarlo; salir es una corrección — el lector ya decidió volver a lo suyo y lo
+  que quiere es que el footer se quite de en medio.
+- **El disparo es uno solo para las seis**: `enterExit()` en
+  [`footerScene.ts`](./footerScene.ts). Ahí vive también el detalle de por qué
+  `timeScale` se resetea en cada `play()` (sin eso, la segunda entrada hereda la
+  velocidad de la salida anterior y el gesto se acelera solo cada vez que el
+  lector sube y baja).
 
 ### El `z-index` de la hoja
 
