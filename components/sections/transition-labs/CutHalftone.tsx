@@ -2,18 +2,19 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { deviceRatio } from "@/components/primitives/motion/dpr";
-import SectionCut, { CUT_FROM, clamp01, fitCanvas } from "@/components/sections/transition-labs/SectionCut";
+import SectionCut, { CUT_TO, clamp01, fitCanvas } from "@/components/sections/transition-labs/SectionCut";
 
 // ── I · Halftone ─────────────────────────────────────────────────────────────
 //
-// La página se IMPRIME al revés: una trama de medio tono cuyos puntos engordan
-// ABRIENDO el velo, hasta que se tocan y la sección de abajo queda entera a la
-// vista. El corte no es un telón, es un proceso de reproducción.
+// La página se IMPRIME. Una trama de medio tono se posa SOBRE la sección de
+// arriba —que sigue ahí, visible entre los puntos— y los puntos engordan hasta
+// tocarse. Cuando se tocan, detrás ya está la sección siguiente. El corte no es
+// un telón: es un proceso de reproducción.
 //
-// Se borra en vez de pintar (`destination-out` sobre un velo del color de la
-// sección que sale): así el último punto que cierra ya te deja dentro de la
-// sección siguiente, sin la cola de pantalla muerta que tenía el modelo de
-// tapar.
+// El canvas es TRANSPARENTE y solo se pintan los puntos. Se probó lo contrario
+// —un velo del color de la sección que sale, con los puntos abriéndolo— y se
+// descartó: el velo tapa de golpe en el primer frame, así que la sección de
+// arriba desaparece antes de que la trama diga nada.
 //
 // Es el gesto más editorial de todos, y por eso está: esta página se apoya en
 // la tipografía, no en la tecnología, y una trama de imprenta habla el mismo
@@ -50,11 +51,8 @@ export default function CutHalftone() {
     const dpr = deviceRatio();
     const { w, h } = fitCanvas(canvas, dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = CUT_FROM;
-    ctx.fillRect(0, 0, w, h);
-    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = CUT_TO;
 
     // Radio máximo: media diagonal de la celda, para que los huecos cierren.
     const rMax = (PITCH / 2) * Math.SQRT2;
@@ -84,7 +82,6 @@ export default function CutHalftone() {
         ctx.fill();
       }
     }
-    ctx.globalCompositeOperation = "source-over";
   }, []);
 
   const draw = useCallback(

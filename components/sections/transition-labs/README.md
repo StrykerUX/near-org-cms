@@ -16,8 +16,8 @@ abajo empieza, y entre las dos no pasa nada.
 | **F** | `CutSlats` | 20svh | CSS + GSAP | Doce lamas al **ángulo real del isométrico** (30.79°) que se retiran escalonadas |
 | **G** | `CutFold` | 20svh | CSS 3D | La página se **pliega** hacia atrás y detrás estaba la sección siguiente |
 | **H** | `CutMosaic` | 20svh | Canvas 2D | La pantalla se **reemplaza por partes**, de abajo hacia arriba, en orden de ruido determinista |
-| **I** | `CutHalftone` | 20svh | Canvas 2D | La página **se imprime**: trama de medio tono a 45°, los puntos engordan hasta abrirla entera |
-| **J** | `CutMelt` | 20svh | Canvas 2D | La siguiente **inunda** desde el pie con un frente de dedos y bahías |
+| **I** | `CutHalftone` | 20svh | Canvas 2D | La página **se imprime**: trama de medio tono a 45° posada encima, los puntos engordan hasta tocarse |
+| **J** | `CutMelt` | 20svh | Canvas 2D | La tinta **inunda** desde el pie con un frente de dedos y bahías |
 | **K** | `CutChapter` | 90svh | CSS + GSAP | El **rótulo del capítulo**. El corte como estructura, no como efecto |
 | **L** | `CutSidestep` | 30svh | CSS + GSAP | La sección siguiente **entra por el lado**. Una vez por página o deja de significar |
 
@@ -39,11 +39,19 @@ queda con todo eso y cada variante solo aporta el **dibujo**:
 <SectionCut travel="160svh" settle={0.85} draw={draw}>…</SectionCut>
 ```
 
-- **Revelar, no tapar.** Cada variante pinta un VELO del color de la sección que
-  sale y lo va borrando; debajo hay un piso del color de destino y, sobre el
-  final, la sección siguiente de verdad. La primera versión pintaba negro encima
-  y la sección llegaba después: eso dejaba una cola de ~24svh de pantalla negra
-  sin nada, que era lo que hacía sentir larguísimo un corte de 60svh.
+- **Superponerse.** Cada variante dibuja en el color de DESTINO encima de la
+  sección de arriba, que sigue visible entre los puntos, las celdas o las lamas
+  hasta que el dibujo la cubre. Nada se apaga y nada se funde.
+- **La cola muerta la mata el `lead`, no el dibujo.** La primera versión no
+  adelantaba la sección siguiente y quedaban ~24svh de pantalla negra esperando
+  al final de cada corte — coste declarado 60svh, tiempo percibido más de una
+  pantalla. Con el `lead`, cuando el dibujo termina de cubrir ya estás en ella.
+- **Se probó el camino contrario y se descartó**: un velo del color de la
+  sección que sale, borrado a agujeros para revelar la de abajo. El velo es
+  opaco desde el primer frame, así que la sección de arriba desaparece de golpe
+  al empezar el gesto — y con un fundido de entrada es peor, porque entonces no
+  se lee como un velo apareciendo sino como la sección apagándose. Eso no es
+  superponerse, es cortar.
 - **Los dos solapes.** `-mt-[100svh]` hacia atrás (el gesto ocurre encima de la
   sección anterior, no sobre un rectángulo vacío) y `lead` hacia adelante por
   `margin-bottom` negativo (la siguiente entra por debajo durante el gesto). El

@@ -53,7 +53,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "CSS + GSAP",
     current: true,
     pitch:
-      "Doce lamas inclinadas a 30.79° — el ángulo real de la cara superior del cubo del stack— se retiran escalonadas y dejan ver la sección de abajo. La geometría del corte es la del objeto al que lleva, y los doce bordes llegan a destiempo.",
+      "Doce lamas inclinadas a 30.79° — el ángulo real de la cara superior del cubo del stack— entran escalonadas sobre la sección de arriba, que se sigue viendo entre lama y lama. La geometría del corte es la del objeto al que lleva, y los doce bordes llegan a destiempo.",
   },
   {
     id: "fold",
@@ -73,7 +73,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La pantalla no se cubre: se reemplaza por partes. Una retícula de celdas que se abren de abajo hacia arriba, en un orden de ruido determinista — sube y baja y el mosaico se rearma igual, que es lo que un orden al azar no puede dar.",
+      "La pantalla no se cubre de golpe: se reemplaza por partes. Celdas que se posan de abajo hacia arriba, en un orden de ruido determinista — sube y baja y el mosaico se rearma igual, que es lo que un orden al azar no puede dar.",
   },
   {
     id: "halftone",
@@ -83,7 +83,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La página se imprime al revés: trama de medio tono girada 45° como en imprenta de verdad, con los puntos engordando hasta tocarse y abrir el velo entero. El gesto más editorial de los siete: habla el mismo idioma que el titular en serif, no el de la tecnología.",
+      "La página se imprime. Trama de medio tono girada 45° como en imprenta de verdad, posada SOBRE la sección de arriba —que se ve entre los puntos— y engordando hasta tocarse. El gesto más editorial de los siete: habla el mismo idioma que el titular en serif, no el de la tecnología.",
   },
   {
     id: "melt",
@@ -93,7 +93,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La sección de abajo inunda la página desde el pie con un frente irregular: dedos que se adelantan, bahías que se quedan. El único de los siete en el que el corte tiene materia — los demás son geometría, este es un fluido.",
+      "La tinta inunda la página desde el pie con un frente irregular: dedos que se adelantan, bahías que se quedan, y por encima la sección de arriba hasta que la alcanza. El único de los siete en el que el corte tiene materia — los demás son geometría, este es un fluido.",
   },
   {
     id: "chapter",

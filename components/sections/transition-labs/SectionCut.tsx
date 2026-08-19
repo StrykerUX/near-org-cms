@@ -12,18 +12,22 @@ import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 // ScrollTrigger. Cambiar la transición de un corte tiene que ser cambiar un
 // componente, no reescribir una sección.
 //
-// ── El modelo: el corte REVELA lo que viene, no tapa lo que había ───────────
+// ── El modelo: el corte se SUPERPONE, y la sección siguiente llega dentro ───
 //
-// La primera versión pintaba negro encima de la sección de arriba y recién
-// DESPUÉS llegaba la de abajo. Eso deja dos tramos muertos: una cabeza sobre el
-// final vacío de la anterior, y sobre todo una cola —el gesto terminaba antes
-// que el tramo y quedaban ~24svh de pantalla negra sin que pasara nada—. El
-// coste declarado era 60svh y el tiempo percibido, más de una pantalla.
+// Cada variante dibuja en el color de destino ENCIMA de la sección de arriba,
+// que sigue ahí y visible hasta que el dibujo la cubre. Nada se apaga y nada se
+// funde: la transición se monta sobre lo que había.
 //
-// Ahora la sección SIGUIENTE ya está montada detrás durante el gesto, y lo que
-// hace cada variante es BORRAR el velo del color de la anterior. Cuando cae la
-// última celda ya estás en la sección, no en un rectángulo negro esperándola:
-// la transición y la llegada son el mismo evento.
+// Lo que hace que el tramo no se sienta muerto no es el dibujo, es el `lead`:
+// la sección SIGUIENTE está montada detrás durante la última parte del gesto,
+// así que cuando el dibujo termina de cubrir ya estás en ella. La primera
+// versión no lo tenía y quedaban ~24svh de pantalla negra esperando — coste
+// declarado 60svh, tiempo percibido más de una pantalla.
+//
+// Se probó también el camino contrario —un velo del color de la sección que
+// sale, borrado a agujeros para revelar la de abajo— y se descartó: el velo es
+// opaco desde el primer frame, así que la sección de arriba desaparece de golpe
+// al empezar el gesto. Eso no es superponerse, es cortar.
 //
 // ── Los dos solapes ─────────────────────────────────────────────────────────
 //
@@ -55,14 +59,10 @@ import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 //
 // ── El piso ─────────────────────────────────────────────────────────────────
 //
-// Debajo del velo hay un panel del color de DESTINO. Hace falta porque la
-// sección siguiente entra por el borde inferior: durante la primera parte del
-// gesto solo ocupa la franja de abajo, y sin piso los agujeros de la mitad
-// superior mostrarían la sección de ARRIBA, que es lo que el velo está tapando
-// — el efecto se ve roto justo al empezar.
-//
-// Con el piso, cada agujero muestra desde el primer frame el color al que vas,
-// y sobre el final ese color ya es la sección de verdad.
+// `to` pinta un panel del color de destino DEBAJO del dibujo. Por defecto no
+// hay ninguno (`transparent`): con el modelo de superponer, un piso opaco
+// taparía la sección de arriba desde el primer frame, que es exactamente lo que
+// no puede pasar. Está para la variante que quiera un fondo propio.
 //
 // ── Ojo con el z-index de la sección de arriba ──────────────────────────────
 //
@@ -106,7 +106,7 @@ export type SectionCutProps = {
   travel?: string;
   /** Cuánto se adelanta la sección siguiente, para revelarla en vez de taparla. */
   lead?: string;
-  /** Color de destino, pintado como piso bajo el velo. */
+  /** Piso opcional bajo el dibujo. Por defecto ninguno. */
   to?: string;
   /** Con qué fracción del recorrido el dibujo está terminado. */
   settle?: number;
@@ -118,7 +118,7 @@ export type SectionCutProps = {
 export default function SectionCut({
   travel = "160svh",
   lead = "40svh",
-  to = "var(--ink)",
+  to = "transparent",
   settle = 1,
   draw,
   children,
@@ -134,19 +134,20 @@ export default function SectionCut({
       const stage = stageRef.current;
       if (!stage) return;
 
-      // El escenario entero (velo + piso) aparece en el primer 5% del gesto y
-      // no antes.
+      // El escenario se APAGA con `visibility` mientras el gesto no ha empezado.
+      // Hace falta para las variantes cuyo dibujo es un panel opaco (el pliegue,
+      // el paso lateral): mientras el tramo entra en pantalla —con el progreso
+      // en 0 y el sticky sin pegarse— su caja taparía la parte baja del viewport
+      // y se vería la sección anterior cortada por una línea horizontal.
       //
-      // Es una corrección, no un efecto: el velo es OPACO y del color de la
-      // sección de arriba, así que mientras el tramo entra en pantalla —con el
-      // progreso todavía en 0, el sticky sin pegarse— su caja recorta la cola
-      // de esa sección por una línea horizontal. Como el fondo es el mismo
-      // color, no se ve un panel: se ve la sección CORTADA a media card.
+      // Nunca funde: se enciende ya puesto. Un panel que sube de opacidad no se
+      // lee como un panel apareciendo, se lee como la sección de arriba
+      // apagándose — y esa sección no se apaga, se queda donde está.
       //
-      // El fundido en sí es invisible (cream sobre cream); lo que arregla es que
-      // antes de empezar no haya nada pintado.
+      // `visibility` y no `display`: no toca el layout, así que el canvas
+      // conserva su tamaño y no hay que re-medir nada al encenderlo.
       const paint = (p: number) => {
-        stage.style.opacity = `${Math.min(1, p / 0.05)}`;
+        stage.style.visibility = p > 0 ? "visible" : "hidden";
         drawRef.current(p);
       };
 
@@ -165,6 +166,10 @@ export default function SectionCut({
         start: "top top",
         end: "bottom bottom",
         onUpdate: (self) => paint(Math.min(1, self.progress / settle)),
+        // Volviendo hacia arriba, el último `onUpdate` puede dejar el progreso
+        // en un valor mínimo pero mayor que cero: sin esto el escenario se
+        // queda encendido por encima de la sección anterior.
+        onLeaveBack: () => paint(0),
       });
 
       return () => t.kill();
@@ -183,7 +188,7 @@ export default function SectionCut({
       }
       className="relative z-[2] -mt-[100svh] h-[var(--travel)] bg-transparent"
     >
-      <div ref={stageRef} className="sticky top-0 h-svh overflow-hidden opacity-0">
+      <div ref={stageRef} className="invisible sticky top-0 h-svh overflow-hidden">
         <div aria-hidden="true" className="absolute inset-0" style={{ background: to }} />
         {/* El wrapper es POSICIONADO a propósito. El piso es `absolute`, y en el
             orden de pintado de CSS un elemento posicionado va por encima de
@@ -202,13 +207,13 @@ export default function SectionCut({
 export const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 /**
- * El color de la sección que SALE — el del velo que cada variante borra.
+ * El color de la sección a la que se LLEGA — con el que dibuja cada variante.
  *
  * Constante y no prop porque hoy todos los cortes del laboratorio van del mismo
  * cream al mismo negro. El día que haya un corte entre otros dos colores, esto
  * es lo único que tiene que subir a prop.
  */
-export const CUT_FROM = "#f5f4f1";
+export const CUT_TO = "#101010";
 
 /**
  * La ventana del elemento `i` dentro del progreso global.

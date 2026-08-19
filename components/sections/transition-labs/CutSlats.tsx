@@ -16,18 +16,15 @@ import SectionCut, { gate } from "@/components/sections/transition-labs/SectionC
 // 30 redondo se nota como "un poco torcido"; con el ángulo real, las lamas y el
 // isométrico son la misma retícula.
 //
-// ── Las lamas SE RETIRAN ────────────────────────────────────────────────────
+// ── Las lamas ENTRAN sobre lo que hay ───────────────────────────────────────
 //
-// Al principio las doce cubren la pantalla con el color de la sección que sale;
-// cada una se recoge hacia su borde izquierdo (`scaleX` 1 → 0) y las doce van
-// escalonadas. Detrás está la sección siguiente, ya montada.
+// Cada lama crece desde su borde izquierdo (`scaleX` 0 → 1) en el color de
+// destino, encima de la sección de arriba, que se sigue viendo entre lama y
+// lama. Las doce van escalonadas: un wipe tiene un borde, esto tiene doce, y
+// los doce llegan a destiempo.
 //
-// Escalonar es lo que lo separa de un wipe: un wipe tiene un borde, esto tiene
-// doce, y los doce llegan a destiempo.
-//
-// En la primera versión las lamas ENTRABAN en negro y la sección de abajo
-// llegaba después. Retirándose, la última lama que se va ya te deja dentro de
-// la sección: el gesto y la llegada son lo mismo.
+// Cuando la última cierra, detrás ya está la sección siguiente — eso lo
+// resuelve el `lead` de `SectionCut`, no el dibujo.
 //
 // ── Por qué el contenedor está sobredimensionado ────────────────────────────
 //
@@ -51,7 +48,7 @@ export default function CutSlats() {
       // 0.55 de solape: las lamas se pisan bastante. Con menos, se leen como
       // doce barras entrando una por una —una lista, no un corte— y el gesto se
       // hace larguísimo.
-      gsap.set(items[i], { scaleX: 1 - gate(i, items.length, p, 0.55) });
+      gsap.set(items[i], { scaleX: gate(i, items.length, p, 0.55) });
     }
   }, []);
 
@@ -66,8 +63,8 @@ export default function CutSlats() {
           {Array.from({ length: SLATS }, (_, i) => (
             // `-mb-px`: las doce alturas salen de una división que casi nunca
             // da entero, y el redondeo deja una costura de un píxel entre lama
-            // y lama por la que se ve el piso. Solapándolas una línea, no.
-            <div key={i} className="-mb-px h-full w-full origin-left bg-cream" />
+            // y lama. Solapándolas una línea, no.
+            <div key={i} className="-mb-px h-full w-full origin-left scale-x-0 bg-ink" />
           ))}
         </div>
       </div>
