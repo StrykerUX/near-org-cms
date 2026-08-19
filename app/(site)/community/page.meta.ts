@@ -10,6 +10,7 @@ const meta = {
   route: "/community",
   title: "Community",
   description: "Validators, builders, Legion and events.",
+  blurb: "Validators, builders, Legion and events",
   nav: { header: true, footer: false, label: "Community", order: 43 },
   sitemap: false,
   robots: "noindex",

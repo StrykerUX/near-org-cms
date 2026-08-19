@@ -1,222 +1,140 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { useCallback, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import {
-  UnicornScene,
-  UNICORN_COVERS,
-  type UnicornCover,
-  useIdlePreload,
-  useMouseOnlyOnHover,
-} from "@/components/primitives/motion/unicornScene";
 
-// Índice del repo mientras el diseño real no existe: solo las cards, sin
-// encabezado ni copy de relleno. Cada card muestra la `description` de su
-// `page.meta.ts`.
+// Índice del repo mientras el diseño real no existe.
 //
-// El `<h1>` sigue existiendo como `sr-only`. No es un resto del diseño
-// anterior: una página sin encabezado deja los `<h2>` de las cards colgando de
-// ningún nivel, y un lector de pantalla que salta por headings —o el modo
-// esquema del navegador— aterriza en una lista sin contexto. Sacarlo de la
-// vista es una decisión visual; sacarlo del árbol de accesibilidad sería otra
-// cosa, y no es la que se pidió.
-export type HomeViewPage = {
+// ── Por qué listas y no cards ────────────────────────────────────────────────
+//
+// Hasta acá cada página era una card —cuatro de ellas con escena WebGL de
+// Unicorn Studio— en una grilla de 4 columnas. Con 33 páginas eso son 33 cajas
+// con título, descripción y ruta: la página se volvió más larga que cualquiera
+// de las que indexa, y encontrar una ruta exigía barrer texto.
+//
+// Ahora son tres listas en dos columnas, una por grupo, y cada fila lleva el
+// título, un resumen de ~5 palabras y la ruta. El resumen es el `blurb` del
+// page.meta.ts y NO la `description`: esa es una frase completa para buscadores,
+// y en un índice de 33 entradas es justamente el texto que hay que saltear.
+//
+// Muchas filas llevan además un estado —`empty` si la página todavía renderiza
+// `StubView`, `not in nav` si ningún menú la enlaza—, que es la información que
+// un sitemap no da y por la que alguien abre esta página.
+//
+// Se fueron con las cards las escenas de Unicorn. El toolkit
+// (`primitives/motion/unicornScene`) NO quedó muerto: `sections/LatestUpdates`
+// lo sigue usando con las mismas tres escenas, que es de donde salieron.
+//
+// Efecto lateral bueno: esta view ya no necesita estado, así que dejó de ser
+// `"use client"`. El SDK de Unicorn y sus tres JSON salen del bundle de `/`.
+//
+// El `<h1>` sigue siendo `sr-only`, y ahora además hace falta de verdad: los
+// `<h2>` de los tres grupos cuelgan de él, y sin ese nivel un lector de
+// pantalla que salta por headings aterriza en tres listas sin contexto.
+export type HomeViewLink = {
   href: string;
   label: string;
-  description: string;
-  kind: string;
-  featured: boolean;
+  // Resumen de ~5 palabras, del `blurb` del page.meta.ts. No es la
+  // `description`: esa es una frase para buscadores y acá hay 33 filas, así que
+  // lo que sirve es una etiqueta que se lee sin frenar el barrido.
+  blurb?: string;
+  // Las galerías de public/ son HTML autocontenido, no rutas de Next: van con
+  // <a> y no con <Link>, que intentaría navegarlas por el router.
+  external?: boolean;
+  // La página existe y se buildea, pero ni el header ni el footer la enlazan.
+  // Es el dato accionable del índice: lo que hay que conectar al nav.
+  unlinked?: boolean;
+  // La página todavía renderiza `StubView` — existe para que el menú tenga a
+  // dónde apuntar, y nada más. Lo deriva el generador del manifiesto leyendo el
+  // page.tsx, no se declara a mano.
+  empty?: boolean;
+};
+
+export type HomeViewGroup = {
+  id: string;
+  title: string;
+  note: string;
+  links: HomeViewLink[];
 };
 
 export type HomeViewProps = {
-  pages: HomeViewPage[];
+  groups: HomeViewGroup[];
 };
 
-// Los covers de las cards destacadas: las MISMAS tres escenas de Unicorn Studio
-// que usa `sections/LatestUpdates.tsx`, no copias ni variantes.
-//
-// Son tres y las destacadas son cuatro, así que la cuarta repite la primera
-// (`% COVERS.length`). Agregar una escena no es cambiar un color: cada JSON es un
-// export propio con sus shaders, generado desde `assets/unicorn/` — ver el
-// comentario de `UNICORN_COVERS` en el toolkit.
-//
-// El orden pone verde y verde en las posiciones 1 y 4, que no son vecinas en la
-// grilla de 4 columnas.
-const COVERS = [UNICORN_COVERS.green, UNICORN_COVERS.blue, UNICORN_COVERS.red] as const;
-
 /**
- * Card destacada, con el lenguaje visual del `PostCard` de
- * `sections/LatestUpdates.tsx`: card blanca, cover a sangre y un panel blanco
- * muescado en la esquina superior izquierda que recorta el cover en "L".
+ * Una fila del índice: título a la izquierda, ruta a la derecha.
  *
- * Es una reconstrucción y no un import: aquel `PostCard` es inseparable de sus
- * escenas de Unicorn (monta el SDK, gatea el mouse por hover, coordina cuándo
- * inicializarlas) y de su `POSTS` hardcodeado. Lo que se comparte acá es la
- * forma, no el comportamiento — extraer un primitivo común obligaría a que la
- * versión con WebGL pasara por él, que es justo la parte que no se comparte.
- * Si el cover llega a animarse también acá, ESE es el momento de extraerlo.
+ * `grid-cols-[1fr_auto]` y no flex con `justify-between`: con flex, un título
+ * largo empuja la ruta fuera de su eje y las rutas dejan de alinearse entre
+ * filas. Con la columna `auto` la ruta manda su propio ancho y el título se
+ * queda con lo que sobra — que es lo que hace que la segunda columna se lea
+ * como columna.
+ *
+ * El borde punteado es el mismo de `sections/UpdatesList`: acá también es una
+ * lista de filas enlazables sobre crema, y darle un tratamiento propio serían
+ * dos lenguajes para la misma cosa.
  */
-function FeaturedCard({
-  page,
-  cover,
-  ready,
-}: {
-  page: HomeViewPage;
-  cover: UnicornCover;
-  ready: boolean;
-}) {
-  const [hovered, setHovered] = useState(false);
-  const sceneRef = useMouseOnlyOnHover(hovered);
-
+// Los dos estados que el índice reporta. Nunca van `aria-hidden`: son la única
+// diferencia real entre una fila y sus vecinas, y la razón por la que alguien
+// mira esta lista y no el sitemap.
+//
+// `empty` es un hecho derivado del código (el page.tsx renderiza `StubView`);
+// `not in nav` sale de una lista a mano en page.tsx. Se ven igual porque para
+// quien lee son lo mismo: trabajo pendiente.
+function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <article
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-      className="group relative flex aspect-[7/6] w-full overflow-hidden rounded-[1.75rem] bg-white p-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
-    >
-      {/* El gradiente va en el contenedor y la escena encima, así que si la
-          escena no carga —o todavía no— lo que queda es el gradiente y no un
-          rectángulo gris.
-
-          El `absolute inset-0` de adentro no es decorativo: el runtime de
-          Unicorn mide su contenedor para dimensionar el canvas, y con el canvas
-          en flujo cada medición agranda la caja y la siguiente lee la caja ya
-          crecida — la card se estira sin parar. Sacado del flujo, no puede
-          empujar a su padre. */}
-      <div
-        aria-hidden
-        className="absolute inset-2.5 overflow-hidden rounded-[1.4rem]"
-        style={{ backgroundImage: cover.fallback }}
-      >
-        <div className="absolute inset-0">
-          {ready && (
-            <UnicornScene
-              jsonFilePath={cover.scene}
-              width="100%"
-              height="100%"
-              dpi={1.5}
-              scale={1}
-              fps={60}
-              // `lazyLoad` NO es opcional acá, aunque estas cards estén sobre
-              // el fold y no haya nada que diferir. No es solo un gate de
-              // viewport: es lo que decide POR QUÉ CAMINO se inicializa la
-              // escena. El SDK hace
-              //
-              //     !lazyLoad || isInView ? initializePlanes() : Mt(m)
-              //
-              // Sin la bandera, `initializePlanes()` corre sincrónicamente al
-              // registrar, antes de que el canvas exista, y revienta con
-              // "Cannot read properties of null (reading 'canvas')" adentro de
-              // `setInitialElementPlaneUniforms`.
-              //
-              // Con la bandera nunca entra por ahí, ni siquiera estando en
-              // pantalla: al registrar, el IntersectionObserver todavía no
-              // disparó, así que `isInView` es false y cae en la cola de
-              // prewarm — que es la que sí espera al canvas. Quitarla "porque
-              // ya está visible" es exactamente el razonamiento que rompe esto.
-              lazyLoad
-              placeholderClassName="h-full w-full"
-              sceneRef={sceneRef}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Los radios están al revés de lo que parece: `tl` sigue la curva de la
-          card, y `br` es la esquina que muerde el cover — sin ese radio el
-          recorte se ve como un rectángulo pegado encima de la imagen.
-          El panel es más ancho que el 60% del original porque acá la card ocupa
-          un cuarto de la grilla y no un tercio: al 60% el título entraba en tres
-          líneas. */}
-      <div className="absolute left-2.5 top-2.5 flex w-[82%] flex-col gap-1 rounded-tl-[1.4rem] rounded-br-[1.4rem] bg-white p-4 pb-5 pr-6">
-        <h2 className="text-h4 text-pretty">{page.label}</h2>
-        {/* `line-clamp-2` y no el texto entero: las descripciones salen de cada
-            `page.meta.ts` y no tienen largo acotado, así que sin el tope el
-            panel crece hasta tapar el cover y la muesca desaparece. */}
-        <p className="line-clamp-2 text-body-sm text-muted-foreground">
-          {page.description}
-        </p>
-
-        {/* El CTA es solo visual: el link real es el que cubre la card entera,
-            más abajo. Anidar un <a> acá dentro de ese otro sería HTML inválido.
-            La ruta ocupa el lugar del "Read the full story" del original porque
-            en un índice de rutas es la información que de verdad sirve. */}
-        <span aria-hidden className="mt-6 flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-near-green-dark text-white transition-transform group-hover:translate-x-0.5">
-            <ArrowRight className="size-3.5" strokeWidth={2} />
-          </span>
-          {/* `min-w-0` es lo que habilita el `truncate`: sin él este span es un
-              ítem flex y su ancho mínimo es el del contenido, así que la ruta
-              larga ensancharía el panel en vez de recortarse. */}
-          <span className="min-w-0 truncate text-caption-mono text-muted-foreground">
-            {page.href}
-          </span>
-        </span>
-      </div>
-
-      {/* Toda la card es el link, como UN solo <a> que la cubre: así un lector
-          de pantalla anuncia un destino por card en vez de varios, y el foco de
-          teclado es una sola parada. El nombre accesible sale del sr-only y no
-          de un aria-label, que los traductores automáticos ignoran. */}
-      <Link
-        href={page.href}
-        className="absolute inset-0 z-10 rounded-[1.75rem] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-near-green-dark"
-      >
-        <span className="sr-only">
-          {page.label} — {page.href}
-        </span>
-      </Link>
-    </article>
+    <span className="shrink-0 rounded-full border border-rule px-2 py-0.5 text-caption-mono text-gray-intermediate">
+      {children}
+    </span>
   );
 }
 
-/**
- * Card de referencia: las páginas que no son el trabajo en curso.
- *
- * `w-full` es obligatorio, no cosmético: el `<li>` que la contiene es un
- * contenedor flex, así que sin ancho explícito la card se dimensiona al
- * CONTENIDO y cada una termina midiendo distinto según el largo de su título y
- * su ruta. La columna del grid sí es igual para todas —Tailwind emite
- * `repeat(4, minmax(0,1fr))`—; lo que no la llenaba era la card. La destacada
- * nunca lo sufrió porque su `<article>` ya lo llevaba.
- */
-function PlainCard({ page }: { page: HomeViewPage }) {
-  return (
-    <Link
-      href={page.href}
-      className="group relative flex h-full w-full flex-col gap-3 rounded-2xl border border-rule bg-background p-6 text-ink transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-ink/35 hover:shadow-[0_14px_32px_-20px_rgba(16,16,16,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <Eyebrow className="text-gray-intermediate">{page.kind}</Eyebrow>
-        <span
-          aria-hidden
-          className="flex size-8 shrink-0 items-center justify-center rounded-full border border-rule text-ink transition-colors duration-200 group-hover:bg-ink group-hover:text-cream"
-        >
-          <ArrowUpRight className="size-4" />
+function Row({ link }: { link: HomeViewLink }) {
+  const inner = (
+    <>
+      {/* La columna izquierda es a su vez dos líneas: título con sus badges
+          arriba, resumen abajo. El baseline del grid cae en la primera, que es
+          lo que mantiene la ruta alineada con el título y no con el resumen. */}
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-body">{link.label}</span>
+          {link.empty && <Badge>empty</Badge>}
+          {link.unlinked && <Badge>not in nav</Badge>}
         </span>
-      </div>
+        {link.blurb && (
+          <span className="truncate text-body-sm text-gray-intermediate">
+            {link.blurb}
+          </span>
+        )}
+      </span>
 
-      <h2 className="text-h4 text-pretty">{page.label}</h2>
-
-      <p className="text-body-sm text-gray-intermediate text-pretty">
-        {page.description}
-      </p>
-
-      {/* `mt-auto` y no un `justify-between` en la card: la ruta se ancla abajo
-          aunque las descripciones tengan distinto largo, que es lo que mantiene
-          la grilla legible por filas. `aria-hidden` porque para un lector de
-          pantalla la ruta ya la anuncia el propio link — leerla en voz alta
-          carácter por carácter solo alarga cada elemento de la lista. */}
+      {/* `aria-hidden` en la ruta: el link ya la anuncia como destino, y leerla
+          en voz alta carácter por carácter solo alarga cada elemento. */}
       <span
         aria-hidden
-        className="mt-auto pt-4 text-caption-mono text-gray-intermediate"
+        className="flex shrink-0 items-center gap-2 text-caption-mono text-gray-intermediate transition-colors duration-200 group-hover:text-ink"
       >
-        {page.href}
+        {link.href}
+        <ArrowUpRight className="size-3.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
       </span>
-    </Link>
+    </>
+  );
+
+  const className =
+    "group grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-dotted border-border py-3 text-ink transition-colors duration-200 hover:border-ink/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink";
+
+  return (
+    <li>
+      {link.external ? (
+        <a href={link.href} className={className}>
+          {inner}
+        </a>
+      ) : (
+        <Link href={link.href} className={className}>
+          {inner}
+        </Link>
+      )}
+    </li>
   );
 }
 
@@ -225,51 +143,45 @@ function PlainCard({ page }: { page: HomeViewPage }) {
 // dos utilidades que pisan la misma propiedad se resuelven por el orden con que
 // Tailwind las emite, no por el orden en que se escriben en el atributo.
 //
-// `flex-1` es lo que hace que el crema llegue hasta el footer cuando hay pocas
-// cards: el <body> del layout raíz es `min-h-full flex flex-col`, así que sin
-// esto el fondo termina donde termina el contenido y queda una banda blanca.
-export default function HomeView({ pages }: HomeViewProps) {
-  // Un solo `ready` para las cuatro cards: el SDK inicializa las escenas DE UNA
-  // EN UNA, así que encenderlas por separado no las paralelizaría — solo haría
-  // cuatro `requestIdleCallback` para lo mismo.
-  //
-  // Sin el gate por scroll que sí tiene `LatestUpdates`: esa sección está al
-  // fondo de una página larga, estas cards están arriba de todo. Acá la precarga
-  // ociosa es la única vía, y si no corre —`saveData`, o un navegador sin
-  // `requestIdleCallback`— las cards se quedan en su gradiente, que es
-  // exactamente el resultado buscado en ese caso.
-  const [ready, setReady] = useState(false);
-  useIdlePreload(useCallback(() => setReady(true), []));
-
-  // El cover se asigna contando SOLO entre las destacadas: con el índice de la
-  // lista completa, agregar una página normal antes de una destacada le
-  // cambiaría el color, que es un acoplamiento invisible desde `page.tsx`.
-  const covers = new Map(
-    pages
-      .filter((p) => p.featured)
-      .map((p, i) => [p.href, COVERS[i % COVERS.length]] as const)
-  );
-
+// `flex-1` es lo que hace que el crema llegue hasta el footer cuando la lista
+// es corta: el <body> del layout raíz es `min-h-full flex flex-col`, así que
+// sin esto el fondo termina donde termina el contenido y queda una banda blanca.
+export default function HomeView({ groups }: HomeViewProps) {
   return (
     <main className="flex-1 bg-cream pt-[calc(var(--site-header-block)+3rem)] pb-16 lg:pb-24">
-      <Container>
-        <h1 className="sr-only">Design system in progress</h1>
+      <Container className="flex flex-col gap-16 lg:gap-20">
+        <h1 className="sr-only">Page index</h1>
 
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {pages.map((page) => (
-            <li key={page.href} className="flex">
-              {page.featured ? (
-                <FeaturedCard
-                  page={page}
-                  cover={covers.get(page.href) ?? COVERS[0]}
-                  ready={ready}
-                />
-              ) : (
-                <PlainCard page={page} />
-              )}
-            </li>
-          ))}
-        </ul>
+        {groups.map((group) => (
+          <section key={group.id} className="flex flex-col gap-6">
+            {/* El encabezado ocupa el ancho completo y no una de las dos
+                columnas: es el rótulo del grupo entero, y metido en la columna
+                izquierda se leería como la primera fila de la lista. */}
+            <div className="flex flex-col gap-2 border-b border-ink pb-4">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 className="text-h3">{group.title}</h2>
+                <span
+                  aria-hidden
+                  className="text-caption-mono text-gray-intermediate"
+                >
+                  {group.links.length}
+                </span>
+              </div>
+              <Eyebrow className="text-gray-intermediate">{group.note}</Eyebrow>
+            </div>
+
+            {/* Dos columnas que fluyen POR FILAS (grid), no por columnas
+                (`columns-2`): con multi-column los bordes punteados de las dos
+                mitades caen a alturas distintas y la lista deja de leerse como
+                una tabla. El `gap-x` es grande a propósito — es lo único que
+                separa la ruta de una columna del título de la siguiente. */}
+            <ul className="grid grid-cols-1 gap-x-16 sm:grid-cols-2">
+              {group.links.map((link) => (
+                <Row key={link.href} link={link} />
+              ))}
+            </ul>
+          </section>
+        ))}
       </Container>
     </main>
   );

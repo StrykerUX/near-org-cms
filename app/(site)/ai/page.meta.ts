@@ -10,6 +10,7 @@ const meta = {
   route: "/ai",
   title: "AI",
   description: "The AI layer of the NEAR stack.",
+  blurb: "AI layer of the stack",
   nav: { header: true, footer: false, label: "AI", order: 23 },
   sitemap: false,
   robots: "noindex",

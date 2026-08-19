@@ -10,6 +10,7 @@ const meta = {
   route: "/confidential-intents",
   title: "Confidential Intents",
   description: "Intents executed inside a private shard.",
+  blurb: "Intents inside a private shard",
   nav: { header: true, footer: false, label: "Confidential Intents", order: 12 },
   sitemap: false,
   robots: "noindex",

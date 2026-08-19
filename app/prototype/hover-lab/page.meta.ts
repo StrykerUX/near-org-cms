@@ -5,6 +5,7 @@ const meta = {
   title: "Hover lab",
   description:
     "Interaction study: 39 hover treatments for the header CTA and 28 for the footer links, from a single CSS rule to a fragment shader.",
+  blurb: "67 hover treatments, CSS to shader",
   // Es una demo interna, igual que /prototype/components: ni en el nav, ni en
   // el sitemap, ni indexable.
   nav: false,

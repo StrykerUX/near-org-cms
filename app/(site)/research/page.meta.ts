@@ -10,6 +10,7 @@ const meta = {
   route: "/research",
   title: "Research",
   description: "White paper and protocol work.",
+  blurb: "White paper and protocol work",
   nav: { header: true, footer: false, label: "Research", order: 32 },
   sitemap: false,
   robots: "noindex",

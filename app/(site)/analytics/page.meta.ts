@@ -10,6 +10,7 @@ const meta = {
   route: "/analytics",
   title: "Analytics",
   description: "Live onchain metrics.",
+  blurb: "Live onchain metrics",
   nav: { header: true, footer: false, label: "Analytics", order: 33 },
   sitemap: false,
   robots: "noindex",

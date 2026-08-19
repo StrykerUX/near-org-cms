@@ -15,6 +15,7 @@ const meta = {
   title: "Typography — Design System",
   description:
     "The typographic guidelines for the new design system: type scale, pairing rules, hierarchy, and accessibility non-negotiables.",
+  blurb: "Type scale, pairing and hierarchy",
   nav: false,
   sitemap: false,
   robots: "noindex",

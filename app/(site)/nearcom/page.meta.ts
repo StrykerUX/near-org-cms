@@ -10,6 +10,7 @@ const meta = {
   route: "/nearcom",
   title: "near.com",
   description: "One interface, 30+ chains, confidential by default.",
+  blurb: "One interface, 30+ chains, confidential",
   nav: { header: true, footer: false, label: "near.com", order: 10 },
   sitemap: false,
   robots: "noindex",

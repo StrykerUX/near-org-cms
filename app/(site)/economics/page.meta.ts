@@ -10,6 +10,7 @@ const meta = {
   route: "/economics",
   title: "Economics",
   description: "Revenue, buybacks and supply.",
+  blurb: "Revenue, buybacks and supply",
   nav: { header: true, footer: false, label: "Economics", order: 42 },
   sitemap: false,
   robots: "noindex",

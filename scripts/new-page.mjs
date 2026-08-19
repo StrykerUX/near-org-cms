@@ -76,6 +76,7 @@ const meta = {
   route: "/${slugArg}",
   title: "${title}",
   description: "TODO: escribí una descripción real antes de publicar.",
+  blurb: "TODO: 5 palabras para el índice",
   nav: { header: false, footer: false, label: "${title}", order: 999 },
   sitemap: { changeFrequency: "monthly", priority: 0.5 },
 } satisfies PageMeta;

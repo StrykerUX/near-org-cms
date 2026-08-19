@@ -10,6 +10,7 @@ const meta = {
   route: "/terms-of-use",
   title: "Terms of Use",
   description: "The terms that govern use of NEAR's sites and services.",
+  blurb: "Terms governing sites and services",
   nav: { header: true, footer: false, label: "Terms of Use", order: 91 },
   sitemap: false,
   robots: "noindex",

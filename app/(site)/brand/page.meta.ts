@@ -10,6 +10,7 @@ const meta = {
   route: "/brand",
   title: "Brand",
   description: "Logos, wordmark and brand guidelines.",
+  blurb: "Logos, wordmark and guidelines",
   nav: { header: true, footer: false, label: "Brand", order: 34 },
   sitemap: false,
   robots: "noindex",

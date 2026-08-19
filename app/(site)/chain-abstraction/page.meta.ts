@@ -10,6 +10,7 @@ const meta = {
   route: "/chain-abstraction",
   title: "Chain Abstraction",
   description: "How NEAR connects any chain.",
+  blurb: "How NEAR connects any chain",
   nav: { header: true, footer: false, label: "Chain Abstraction", order: 22 },
   sitemap: false,
   robots: "noindex",

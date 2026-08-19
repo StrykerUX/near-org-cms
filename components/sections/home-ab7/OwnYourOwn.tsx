@@ -1,0 +1,575 @@
+"use client";
+
+import Image from "next/image";
+import Accent from "@/components/primitives/Accent";
+import Container from "@/components/primitives/Container";
+import Eyebrow from "@/components/primitives/Eyebrow";
+import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
+import { gsap } from "@/components/primitives/motion/gsapClient";
+import { EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { driftOffsets } from "@/components/primitives/motion/staggerDrift";
+import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-ab7/homeAb7Content";
+
+// ── "Own Your Own": el título se queda quieto y las cards lo atraviesan ──────
+//
+// ── Quién decide las posiciones: el LAYOUT, no este archivo ─────────────────
+//
+// Cada card ocupa su propia fila del grid y se separa de la anterior con un
+// `margin-top` (porcentual, ver CARD_LAYOUT). El navegador resuelve dónde cae
+// cada una; acá no se calcula ninguna posición, no se mide nada y no se escribe
+// ningún estilo de layout.
+//
+// Esto es una vuelta al modelo del HTML original, y es deliberado. La versión
+// anterior declaraba la posición de cada card como una constante en `svh`
+// (LAND_VH, AFTER_DOCK_VH, DOCK…), y eso era irreparable: la altura de una card
+// se mide en píxeles y escala con el ANCHO de la ventana, mientras que `svh`
+// escala con el ALTO. No existe un juego de constantes que funcione en todas las
+// proporciones de ventana — cada ajuste de espaciado arreglaba un tamaño de
+// pantalla y rompía otro, y en ventanas de menos de ~1044px de alto la última
+// card terminaba desbordando sobre la sección siguiente.
+//
+// Con las cards en flujo eso no puede pasar: el contenedor mide lo que ellas
+// ocupan, sea cual sea el tamaño de la ventana, y un resize lo recalcula el
+// navegador solo. Mover una card es cambiar su `margin-top` acá abajo.
+//
+// ── Por qué sticky y no `pin: true` ────────────────────────────────────────
+// Regla del repo; el razonamiento largo está en components/sections/README.md.
+// El título es un item del grid que abarca TODAS las filas (`grid-row: 1/-1`) y
+// se pega dentro de esa celda, así que se queda centrado durante todo el
+// recorrido de las cards sin necesitar una pista de altura declarada.
+
+// Velocidad de cada card RELATIVA a la página. Solo importan las DIFERENCIAS
+// entre ellas: `driftOffsets` las centra en su media, así que sumarles una
+// constante a todas no cambia nada.
+//
+// Esa convención —pedir la velocidad en múltiplos de la del scroll y no en px— es la
+// que después se formalizó en `primitives/motion/velocityRamp.ts`, y esta sección es
+// el precedente que cita.
+//
+// El reparto es por GRUPO, no por fila: las dos de arriba (Alpha 1.4,
+// Intelligence 1.5) van rápidas y suben, las dos de abajo (Assets 0.6,
+// Agents 0.5) van lentas y se quedan. Dentro de cada par la diferencia es
+// mínima, así que los pares no se deforman: lo que se abre es el hueco DEL
+// MEDIO, que ya era el salto largo del layout y con el scroll se estira de
+// ~287 a ~647px. Ese vacío creciente es el gesto de la sección.
+//
+// Un reparto monótono con la fila daría un cizallamiento uniforme del grid —
+// las cuatro separándose parejo— que es un efecto distinto y más plano.
+//
+// Ampliar el rango NO agranda el movimiento: `driftOffsets` normaliza por el
+// swing (`max|media − speed|`), así que [0.3…1.7] da exactamente el mismo
+// desvío que [0.8…1.2]. Acá solo se decide QUIÉN sube y quién baja, y en qué
+// proporción entre ellos. La magnitud es `DRIFT_K`.
+//
+// Antes eran [0.33, 1.4, 1, 1.5]. El 1 exacto daba desvío CERO —esa card no
+// participaba del efecto— porque el desvío se calculaba contra un 1 fijo. Ahora
+// se calcula contra la media, así que ese caso no puede repetirse por accidente,
+// pero igual conviene que estén repartidas.
+const SPEEDS = [0.6, 1.5, 1.4, 0.5] as const;
+
+// Qué fracción de la amplitud máxima SEGURA se usa. `driftAmplitude` calcula, a
+// partir de los huecos reales del layout, la amplitud más grande con la que
+// ningún par de cards se acerca a menos de `MIN_GAP`; esto es cuánto de eso se
+// aprovecha.
+//
+// Con `k ≤ 1` el choque es imposible por construcción. Subirlo por encima de 1
+// no está prohibido por el helper —hay layouts donde superponerse es el efecto—
+// pero acá sería volver al bug.
+//
+// ── Por qué 0.5 y no 0.85 ───────────────────────────────────────────────────
+//
+// Las cuatro cards viven en bandas de X disjuntas, así que ningún par puede
+// chocar y `driftAmplitude` devuelve `Infinity`: el único límite que queda es
+// `spacingAmplitude`, o sea el paso más corto del layout dividido por el
+// desvío relativo más grande. Con `k = 0.85` eso daba desvíos de casi un paso
+// entero y el escalonado vertical del layout desaparecía — las cuatro
+// terminaban alineadas en una franja horizontal contra el título.
+//
+// ── Por qué acá se pasa de 1 a propósito ────────────────────────────────────
+//
+// Las dos advertencias de arriba —que `k ≤ 1` evita el choque, y el techo de
+// ~0.6 que valía en una versión anterior— asumen cosas que este layout no
+// cumple:
+//
+//   · El choque es imposible por otra razón: las cuatro bandas de X son
+//     disjuntas, así que `driftAmplitude` ni siquiera acota. `k` solo escala
+//     `spacingAmplitude`, que no es un límite de seguridad sino la escala del
+//     layout — el paso MÁS CORTO (Alpha→Intelligence, 0.65 celdas). Pasarse de
+//     1 significa "desviarse más que el hueco más chico", que acá es
+//     exactamente lo que se busca.
+//   · El techo de 0.6 era de un reparto de velocidades MONÓTONO con la fila,
+//     donde el desvío comprime el recorrido y llega a comerse el layout. El
+//     reparto por grupos (ver SPEEDS) hace lo contrario: EXPANDE. No hay punto
+//     de colapso, solo se estira.
+//
+// ── Qué se siente a 1.2 ─────────────────────────────────────────────────────
+//
+// Lo que se percibe no es el desvío sino su DERIVADA respecto del scroll: qué
+// tan distinta es la velocidad de una card de la de la página. A 1.2 los
+// desvíos son ±160 y ±200px sobre un scrub de ~1.300px, y como `sine.inOut`
+// concentra el movimiento en el medio (pico ≈ pi/2 × la media), en el tramo
+// central las cards van entre ~76% y ~124% de la velocidad del scroll. Ahí es
+// donde se lee el destiempo, y es justo cuando están centradas en pantalla.
+//
+// El costo es scroll: el recorrido pasa de 647 a ~1.007px. La sección pide
+// ~55% más de scroll que su altura de layout.
+const DRIFT_K = 1.2;
+
+// Aire mínimo entre dos cards que puedan alcanzarse, en px.
+//
+// Hoy no está haciendo nada: con las cuatro bandas disjuntas no hay ningún par
+// que se cruce en horizontal, y `driftAmplitude` —que es donde se usa— ni
+// siquiera llega a mirarlos. Se queda porque el reparto de bandas es una
+// decisión de diseño que puede cambiar, y en cuanto dos cards vuelvan a
+// compartir columna esto es lo que evita que se toquen.
+const MIN_GAP = 24;
+
+// Posición de cada card en el grid y su tinte, en el MISMO orden que
+// `OWN_YOUR_OWN_CARDS`. Se queda acá y no en el módulo de contenido porque es
+// composición: en qué celda cae cada card y cuánto se separa de la anterior.
+//
+// Clases literales y no template strings: Tailwind v4 no detecta clases
+// construidas dinámicamente. Mismo criterio que el mapa WIDTH de Container.
+//
+// ── Por qué el margen superior es NEGATIVO ─────────────────────────────────
+//
+// Cada card sigue ocupando su propia fila, así que el paso vertical entre dos
+// cards consecutivas es `alto de card + mt`. Con `mt` positivo el paso nunca
+// puede ser menor que el alto de una card: por construcción solo cabe UNA card
+// y pico en pantalla, y las cuatro pedían ~2.400px de scroll.
+//
+// Con `mt` negativo las filas se pisan y el paso baja a ~0.65–1.12 anchos de
+// celda (la card mide ~1.65), o sea tres visibles a la vez.
+//
+// El techo es que el paso deje la tercera card dentro del viewport:
+// `paso₁ + paso₂ + alto ≲ 100svh`. Con los valores de abajo eso da ~878px, o
+// sea que por debajo de ~880px de alto de ventana la tercera card empieza a
+// quedar cortada por el borde. Es el límite de subirlos más.
+//
+// Ojo: ese techo depende del ALTO de la card, así que ensancharlas lo empuja
+// hacia arriba. Al pasar de 1.17 a 1.30 celdas de ancho el alto subió de ~1.59
+// a ~1.65, y el salto largo tuvo que bajar de 1.40 a 1.12 para compensar. Los
+// dos números se mueven juntos.
+//
+// Los tres pasos son DISTINTOS a propósito, y son lo que arma la composición en
+// DOS GRUPOS: 0.65 → 1.12 → 0.75. Alpha e Intelligence quedan casi a la par
+// arriba, se abre un salto largo, y Assets y Agents vuelven a juntarse abajo.
+// Las velocidades están elegidas para reforzar exactamente ese hueco del medio
+// — ver la nota de SPEEDS.
+//
+// Pasos iguales dan un ritmo de escalera que se lee como una lista diagonal por
+// más que las bandas de X estén desordenadas.
+//
+// ── Por qué los márgenes están en % y no en px ─────────────────────────────
+//
+// Un margen porcentual —también `margin-top`— se resuelve contra el ANCHO del
+// bloque contenedor, que para un grid item es su celda. O sea: escala con lo
+// mismo que escala la card. Eso es exactamente lo que la nota de arriba pedía y
+// `svh` no podía dar; con los márgenes en px, cada valor solo estaba afinado
+// para un ancho de ventana y el paso se descolocaba en el resto.
+//
+// La unidad de acá abajo es entonces "anchos de celda": el `-mt-[100%]` de la
+// fila 2 es el alto de la card (~1.65 celdas) menos el paso deseado (0.65), y
+// `ml`/`mr` desplazan y ensanchan en esa misma escala.
+//
+// ── Los pares ml/mr hacen DOS cosas ────────────────────────────────────────
+//
+// Ancho de la card = celda × (1 − ml − mr), y su borde izquierdo se corre `ml`.
+// En las cuatro `ml + mr = −30%`, o sea todas miden 1.30 celdas (~334px a ancho
+// máximo). La SUMA es el tamaño, la diferencia es el desplazamiento: para
+// mover una card sin cambiarle el ancho hay que tocar las dos.
+//
+// ── El reparto: cuatro bandas, en desorden ─────────────────────────────────
+//
+// Las bandas de X son cuatro y no se pisan: izquierda, centro-izquierda,
+// centro-derecha, derecha. La banda de cada card es fija; lo que las desordena
+// es a QUÉ FILA va cada una — centro-izquierda, derecha, izquierda,
+// centro-derecha, bajando— así que el recorrido sale del medio, se va al borde
+// derecho, cruza la pantalla entera hasta el izquierdo y vuelve. Nunca es una
+// diagonal.
+//
+// Las bandas tampoco están equiespaciadas: los huecos entre cards vecinas son
+// ~95 / 67 / 77px a ancho máximo. Espaciarlas parejo devuelve la lectura de
+// fila, que es justo lo que se quiere evitar; pero apretar UNO de los huecos
+// mucho más que los otros —hubo una versión con 60px contra vecinos de 140—
+// empareja ese par visualmente y rompe el reparto en cuatro. La variación tiene
+// que ser chica.
+//
+// Los huecos se achicaron al ensanchar las cards: el ancho útil no cambió, así
+// que cada punto de ancho sale del aire entre bandas. A 1.30 celdas queda poco
+// margen — ensancharlas más pide reacomodar los cuatro `ml` a la vez, o las
+// bandas se empiezan a pisar y el destiempo se acota por colisión.
+//
+// ── Cuidado: el `mt` es de la FILA, no de la card ──────────────────────────
+//
+// Cada `-mt` es el paso que separa esa fila de la ANTERIOR. Reordenar las cards
+// no es solo mover su `row-start`: hay que reasignar también los `-mt` a la
+// fila que pasan a ocupar, o el ritmo vertical se desarma sin que nada falle.
+//
+// Ojo con una consecuencia que no se ve en el layout: con las cuatro bandas
+// disjuntas ningún par de cards puede chocar, así que el desvío queda sin
+// límite por colisión y solo lo acota `DRIFT_K` — ver la nota de esa constante
+// antes de subirla.
+const CARD_LAYOUT = [
+  {
+    // Assets — banda izquierda, fila 3. Llega después del salto largo (1.12):
+    // es la que abre el grupo de abajo.
+    place: "lg:col-start-2 lg:col-span-2 lg:row-start-3 lg:-mt-[53%] lg:-ml-[40%] lg:mr-[10%]",
+    tint: "bg-white/50",
+  },
+  {
+    // Intelligence — banda derecha, fila 2. El paso más corto (0.65) la deja
+    // casi a la altura de Alpha: se leen como un par, no como escalones.
+    place: "lg:col-start-10 lg:col-span-2 lg:row-start-2 lg:-mt-[100%] lg:ml-[6%] lg:-mr-[36%]",
+    tint: "bg-card-tint/50",
+  },
+  {
+    // Alpha — banda centro-izquierda, fila 1. Arriba del todo. Cruza el título
+    // por delante.
+    place: "lg:col-start-5 lg:col-span-2 lg:row-start-1 lg:mt-[31%] lg:-ml-[37%] lg:mr-[7%]",
+    tint: "bg-white/50",
+  },
+  {
+    // Agents — banda centro-derecha, fila 4, pegada a Assets (0.75). También
+    // cruza el título, por el otro lado.
+    //
+    // Es la ÚLTIMA fila, y eso no es cosmético: el `end` del ScrollTrigger se
+    // calcula con `cards[cards.length - 1]`, o sea con el índice 3 de este
+    // array. Si alguna vez la última fila la ocupa otra card, ese cálculo hay
+    // que mover con ella.
+    place: "lg:col-start-7 lg:col-span-2 lg:row-start-4 lg:-mt-[90%] lg:ml-[10%] lg:-mr-[40%]",
+    tint: "bg-card-tint/50",
+  },
+] as const;
+
+export default function OwnYourOwn() {
+  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
+    const cards = q("[data-own-card]");
+    const stage = q("[data-own-stage]")[0];
+    const title = q("[data-own-title]")[0];
+    if (cards.length !== SPEEDS.length || !stage || !title) return;
+
+    // Con reduced-motion no se anima nada: el JSX ya renderiza el estado
+    // legible, y sin transforms las cards quedan exactamente donde el layout
+    // las puso.
+    if (!motionOk) return;
+
+    // En mobile las cards se apilan en una columna y no hay ancho para que
+    // crucen el título, así que el desvío no comunica nada. Reveal genérico.
+    if (!isDesktop) {
+      gsap.from(cards, {
+        autoAlpha: 0,
+        y: REVEAL.y,
+        stagger: REVEAL.stagger,
+        duration: REVEAL.duration,
+        ease: EASE_OUT,
+        scrollTrigger: { trigger: stage, start: REVEAL.start, once: true, markers: DEBUG_MARKERS },
+      });
+      return;
+    }
+
+    // ── El desvío lo decide el LAYOUT ──────────────────────────────────────
+    //
+    // Se miden las cajas de las cards sin transform y `driftOffsets` devuelve
+    // cuánto puede desviarse cada una sin que ningún par se acerque a menos de
+    // `MIN_GAP`. Los pares que no se cruzan en horizontal —las cards viven en
+    // dos columnas— no se restringen entre sí: no pueden chocar aunque quieran,
+    // y acotarlas sería desperdiciar recorrido.
+    //
+    // Se remide en cada refresh, así que un resize o un cambio de `mt` en
+    // CARD_LAYOUT reajustan la amplitud solos. Ese es el punto: la constante en
+    // `vh` que había antes no podía hacerlo, porque el hueco entre cards escala
+    // con el ANCHO de la ventana y `vh` con el ALTO.
+    let offsets: number[] = cards.map(() => 0);
+
+    const measure = () => {
+      // A cero antes de medir: `getBoundingClientRect` devuelve la caja YA
+      // transformada, y medir sobre el desvío vigente lo realimentaría.
+      gsap.set(cards, { y: 0 });
+      const boxes = cards.map((card) => {
+        const r = card.getBoundingClientRect();
+        return {
+          top: r.top + window.scrollY,
+          bottom: r.bottom + window.scrollY,
+          left: r.left,
+          right: r.right,
+        };
+      });
+      offsets = driftOffsets(boxes, SPEEDS, { k: DRIFT_K, minGap: MIN_GAP });
+
+      // ── Reservar el sobrante del desvío ────────────────────────────────
+      //
+      // El desvío es un `transform`, y un transform NO ocupa lugar en el flujo:
+      // el grid sigue midiendo lo que las cards ocupan en su posición de
+      // layout. Una card con desvío POSITIVO baja fuera de esa caja, se sale de
+      // la sección y aterriza encima de la siguiente — que entra a sangre y en
+      // negro, así que se ve.
+      //
+      // Con desvíos chicos el `pb` del Container lo absorbía por casualidad. No
+      // es una constante que se pueda elegir: el desvío escala con el paso del
+      // layout y con `DRIFT_K`, así que cualquier número fijo se queda corto en
+      // cuanto se toca uno de los dos. Acá se calcula de lo ya medido.
+      //
+      // Va como padding del grid y no como margen de la sección para que no
+      // toque el área de filas: el título sticky abarca `grid-row: 1/-1` y su
+      // recorrido se mide contra el content box, que el padding no mueve.
+      stage.style.paddingBottom = "0px";
+      const stageBottom = stage.getBoundingClientRect().bottom + window.scrollY;
+      let overflow = 0;
+      for (let i = 0; i < boxes.length; i++) {
+        overflow = Math.max(overflow, boxes[i].bottom + offsets[i] - stageBottom);
+      }
+      stage.style.paddingBottom = `${Math.ceil(overflow)}px`;
+    };
+
+    measure();
+
+    // ── El start ────────────────────────────────────────────────────────
+    // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
+    // lo que había, la coreografía no empezaba hasta que el grid tocaba el
+    // techo de la ventana: quedaban ~850px de scroll con las cards ya en
+    // pantalla y completamente quietas, y al cruzar ese umbral el desvío
+    // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
+    //
+    // ── El end ──────────────────────────────────────────────────────────
+    // La regla: el scrub termina exactamente cuando el borde VISUAL superior
+    // de la última card (Agents) — layout + transform — alcanza el borde
+    // inferior del título pegado. Ahí las cards se congelan en su desvío
+    // final y el scroll normal se lleva todo; el `sine.inOut` ya pone la
+    // velocidad del desvío en cero en ese borde, así que la salida del
+    // scroll lock es una rampa, no un corte.
+    //
+    // La cuenta cierra sola sea cual sea la velocidad o la posición de
+    // partida, y no es iterativa: en el frame final la curva vale 1 por
+    // definición, o sea que el desvío es exactamente el de `offsets` completo.
+    // Basta con resolver
+    //     layoutTop(Agents) − scroll + drift = titleBottom
+    // para el scroll del end. Que el cruce cae justo ahí (y no antes) está
+    // garantizado porque el top visual de la card baja monótonamente en
+    // viewport mientras el scrub avanza.
+    //
+    // ── La curva ────────────────────────────────────────────────────────
+    // Un solo tramo, sin vuelta: las rápidas se mantienen rápidas y la lenta
+    // lenta durante todo el recorrido. `sine.inOut` pone la velocidad del
+    // desvío en cero en los dos bordes — la entrada suave es el "asentarse"
+    // del título en su sticky, y la salida suave evita el corte en seco al
+    // terminar la sección aunque las cards queden desplazadas.
+    //
+    // Y además concentra: la velocidad pico del desvío es pi/2 veces la media,
+    // y cae en el medio del scrub, que es donde las cards están centradas en
+    // pantalla. Una curva lineal repartiría el mismo desvío parejo y el
+    // destiempo se notaría MENOS justo donde se mira. No cambiarla por `none`
+    // buscando "más movimiento": da lo contrario, además del corte en seco.
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: stage,
+        start: "top bottom",
+        end: () => {
+          const agents = cards[cards.length - 1];
+          // Top de layout en coordenadas de documento. Se resta el transform
+          // vigente por si el refresh corre con el tween a medio aplicar.
+          const layoutTop =
+            agents.getBoundingClientRect().top +
+            window.scrollY -
+            Number(gsap.getProperty(agents, "y"));
+          const titleBottom =
+            parseFloat(getComputedStyle(title).top) + title.offsetHeight;
+          return layoutTop + offsets[cards.length - 1] - titleBottom;
+        },
+        // Número y no `true`: `scrub: true` ata el desvío al scroll 1:1, o sea
+        // que las cards son una función pura de la posición de la página y el
+        // efecto se siente rígido — la card no se mueve, la página la arrastra.
+        //
+        // Con un número, GSAP persigue el progreso del scroll con ese tiempo de
+        // catch-up en segundos. La card queda ligeramente atrás al empezar a
+        // scrollear y sigue acomodándose ~0.8s después de soltar, que es de
+        // donde sale la sensación de peso y de que responde. Es la parte
+        // "interactiva" del efecto; la diferencia de velocidades sola no la da.
+        //
+        // 0.8 y no más: por encima de ~1.5 el retraso deja de leerse como
+        // inercia y empieza a leerse como lag. El sitio ya corre Lenis, que
+        // suaviza el scroll por su lado, así que los dos se suman.
+        scrub: 0.8,
+        invalidateOnRefresh: true,
+        markers: DEBUG_MARKERS,
+        // Remedir ANTES del refresh, no después: el `end` de acá arriba y el `y`
+        // del tween son funciones que GSAP re-evalúa durante el refresh, y las
+        // dos leen `offsets`. `refreshInit` es el único hook que corre antes de
+        // esa re-evaluación.
+        onRefreshInit: measure,
+        // `will-change` solo durante el recorrido. Estas cards llevan además
+        // `backdrop-blur`, que ya fuerza su propia capa: fijo en el className,
+        // eran cuatro capas con filtro vivas durante toda la sesión para una
+        // animación que ocupa dos pantallas de scroll.
+        onToggle: (st) => {
+          const value = st.isActive ? "transform" : "auto";
+          for (const card of cards) card.style.willChange = value;
+        },
+      },
+    });
+
+    // `y` como función y no como array: GSAP la re-evalúa en cada
+    // `invalidateOnRefresh`, así que lee el `offsets` recién medido.
+    tl.fromTo(
+      cards,
+      { y: 0 },
+      { y: (i: number) => offsets[i], ease: "sine.inOut", duration: 1 }
+    );
+
+    return () => {
+      gsap.killTweensOf(cards);
+      gsap.set(cards, { clearProps: "transform" });
+      for (const card of cards) card.style.willChange = "auto";
+      // La reserva de `measure` es un estilo inline, así que sobrevive al
+      // desmontaje del efecto: sin esto, un cambio de breakpoint a mobile deja
+      // el hueco de una animación que ya no corre.
+      stage.style.paddingBottom = "";
+    };
+  });
+
+  return (
+    // z-[1]: por DEBAJO de las barras de QuantumBars, que son `z-[2]` y vienen antes en
+    // el documento. Acá decía lo contrario —"pasa POR ENCIMA"— y es al revés: si algo de
+    // las barras invade este territorio, las barras ganan.
+    //
+    // Hoy no se nota porque el `overflow-hidden` de QuantumBars las acota a su propia
+    // caja y las dos secciones no se solapan (son hermanas en flujo normal, sin margen
+    // negativo entre ellas). Pero el borde inferior del gris ahora se anima, así que
+    // cualquiera que toque esa zona necesita el orden correcto para razonar.
+    //
+    // Nada de overflow-hidden en ningún ancestro: convertiría a este elemento en
+    // el contenedor de scroll del título sticky y dejaría de pegarse, en
+    // silencio.
+    <section ref={rootRef} className="relative z-[1] bg-cream text-foreground">
+      {/* El `pb` es aire real, no compensación: separa la sección del corte con
+          la siguiente (que es negra y entra a sangre). Lo que compensa el
+          desvío de las cards es el `paddingBottom` que el efecto le escribe al
+          grid — ver `measure`. No confundir los dos: subir este `pb` para tapar
+          un desborde de animación esconde el bug para un tamaño de ventana y lo
+          deja intacto en el resto.
+
+          El gap separa tres hijos: encabezado → grid de cards → título de
+          mobile. El escalón de desktop solo actúa en el primer hueco: el tercer
+          hijo es `lg:hidden`, y un elemento oculto no genera caja ni gap. */}
+      <Container className="flex flex-col gap-24 pb-32 pt-32 lg:gap-36">
+        <div className="grid grid-cols-1 gap-24 lg:grid-cols-2">
+          <div className="flex flex-col gap-5">
+            <Eyebrow>The future of finance is yours</Eyebrow>
+            <h2 className="text-h2 text-pretty">
+              Next gen
+              <br />
+              <Accent>self custody</Accent>
+            </h2>
+          </div>
+          <p className="text-body-lg text-muted-foreground text-pretty lg:pt-12">
+            Your keys, your assets, no compromises. NEAR accounts pair
+            programmable access keys with quantum-safe signing, so you get the
+            ease of a web login with the guarantees of true self custody. Trade,
+            stake, and move value across 30+ chains without ever handing your
+            assets to an exchange.
+          </p>
+        </div>
+
+        {/* El grid manda: su altura es la de las cards y sus márgenes, así que
+            no hay ninguna altura declarada que pueda quedarse corta o larga. */}
+        <div
+          data-own-stage
+          className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-0"
+        >
+          {/* El título ocupa las cuatro filas y se pega DENTRO de esa celda: por
+              eso se queda centrado mientras las cards pasan, sin necesitar un
+              track aparte.
+
+              `self-start` es imprescindible: por defecto un grid item se estira
+              a la altura de su celda —aquí, el grid entero— y un elemento tan
+              alto como su contenedor no tiene recorrido para pegarse. Con
+              `start` mide su contenido y el sticky funciona.
+
+              El `top` va inline porque `calc()` con var y espacios es ilegible
+              como clase arbitraria. En mobile el elemento es estático y `top` no
+              tiene efecto, así que no hace falta condicionarlo.
+
+              Los márgenes recortan el tramo pegado por sus dos puntas. Van como
+              margen y no como padding a propósito: el padding agranda el
+              elemento pegado y se llevaría al `h3` con él, moviendo también la
+              posición congelada. El margen mueve el rectángulo en el que el
+              sticky puede vivir —el área de grid del item, encogida por sus
+              propios márgenes— y deja el anclaje intacto.
+
+              `mt` es la entrada: sin él el título nace exactamente a la altura
+              de la card Assets, la única sin `mt` y por lo tanto también pegada
+              al techo del grid, y las dos entran juntas.
+
+              `mb` es la salida: el título se despega cuando su borde inferior
+              alcanza el fondo del grid menos este margen, así que estos 200px
+              son —literalmente— cuánta card queda por debajo cuando el título
+              empieza a subir. Sin él quedaría clavado hasta el último píxel de
+              la última card.
+
+              Ambos en px y no en `svh`, por lo mismo que los márgenes de las
+              cards: `svh` escala con el alto de la ventana y las cards con el
+              ancho. (Las cards ya pasaron a % de su celda, que es la versión
+              buena de esa misma idea; acá el % no sirve porque el contenedor de
+              este item es todo el grid, no una celda de card.) */}
+          <div
+            data-own-title
+            className="z-[1] hidden lg:mt-[150px] lg:mb-[200px] lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
+            style={{ top: "calc(50svh - var(--text-display) / 2)" }}
+          >
+            <h3 className="whitespace-nowrap text-center text-display">
+              Own Your <Accent display>Own</Accent>
+            </h3>
+          </div>
+
+          {CARDS.map((card, i) => (
+            <article
+              key={card.title}
+              data-own-card
+              // z-[2]: las cards cruzan el título por delante, como en la
+              // referencia. El resto sale de CARD_LAYOUT, emparejado por índice
+              // con el contenido — el `cards.length !== SPEEDS.length` del efecto
+              // ya falla si los tres arrays se desincronizan.
+              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
+            >
+              {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
+                  `width`, Next genera el srcset pero el navegador asume que ocupa
+                  el 100% del viewport y baja la variante más grande. La card vive
+                  en `lg:col-span-2` de un grid de 12 y se ensancha un 30% con sus
+                  márgenes, o sea ~19vw en desktop y ancho completo en móvil. */}
+              <Image
+                src={card.src}
+                alt=""
+                width={290}
+                height={267}
+                sizes="(min-width: 1024px) 19vw, 100vw"
+                className="block h-auto w-full rounded-[1.15rem]"
+              />
+              {/* El bloque de texto también se comprime en desktop. No es
+                  cosmética: con la card a `col-span-2` el cuerpo pasa a tres
+                  líneas, y con el padding y la escala anteriores el texto pesaba
+                  más que la imagen — la card quedaba casi tan alta como antes y
+                  el objetivo (tres en pantalla) no se cumplía. En mobile la card
+                  ocupa el ancho completo, así que ahí se queda la escala grande. */}
+              <div className="flex flex-col gap-3 px-3 py-7 lg:gap-2 lg:px-2.5 lg:py-4">
+                {/* `text-label-lg` y no `text-body-lg font-medium`: el peso lo
+                    define el token, no la clase. Ese rol —body en weight
+                    medio— ya existe en la escala justamente porque se estaba
+                    parcheando a mano en varios lugares. */}
+                <h4 className="text-h4 lg:text-label-lg">{card.title}</h4>
+                <p className="text-body text-foreground/75 text-pretty lg:text-body-sm">
+                  {card.body}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* En mobile el título va después de las cards: sin el cruce no es un
+            elemento de fondo, es el cierre de la sección. */}
+        <h3 className="whitespace-nowrap text-center text-display lg:hidden">
+          Own Your <Accent display>Own</Accent>
+        </h3>
+      </Container>
+    </section>
+  );
+}

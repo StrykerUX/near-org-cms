@@ -62,6 +62,12 @@ dar por terminado un cambio.
 | `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` | `HomepageV2View` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado; sobrevivieron porque el port de home-v2 las reusa tal cual. |
 | `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` tal cual. |
 | `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
+| `hero-alt/*` | `HeroAltView` | `/prototype/hero-alt` — **laboratorio**: seis versiones de las dos primeras secciones de la homepage, misma copy en las seis. Tiene su propio [README](./hero-alt/README.md). |
+| `proof-alt/*` | `ProofAltView`, `HomepageProofDemoView` | `/prototype/proof-alt` — **laboratorio**: tres estructuras para la sección de pruebas, para elegir una que no gaste los 325svh del `ProofStepper` de ab7. Las tres entregan las seis cifras sin pedir interacción. Las mismas tres, dentro de la homepage entera, en `/prototype/homepage-proof/{datum,index,columns}` — **composiciones, no forks**: reusan `home-ab7/*` sin copiar un archivo. Tiene su propio [README](./proof-alt/README.md). |
+| `stack-labs/*` | `StackLabIndexView` | `/prototype/stack-labs/*` — **laboratorio**: cinco layouts para la sección del NEAR Stack sobre el MISMO ensamble (importado de `home-ab7`, no duplicado), para decidir un layout que no desaproveche el arte ni gaste los 320svh de `NearStackV2`. Tiene su propio [README](./stack-labs/README.md). |
+| `newsletter-labs/*` | `NewsletterLabView` | `/prototype/newsletter-labs` — **laboratorio**: catorce versiones de la banda «NEAR belongs to you» con la misma copy, sin las `StairTransition` de la sección actual. Cuatro estrenan formas de campo que el `ShineField` no cubre (y pierden su brillo); las seis últimas agregan movimiento — una de ellas, el único gesto del lab que dispara el lector. Tiene su propio [README](./newsletter-labs/README.md). |
+
+Las dos últimas son **laboratorios**: alimentan una ruta de comparación y ninguna página real las importa. Su contenido puede cambiar o borrarse sin aviso — si una versión gana, se COPIA a la carpeta de la página que la reciba, no se importa desde ahí.
 
 ## El footer NO está acá
 

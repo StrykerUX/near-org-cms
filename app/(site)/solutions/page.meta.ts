@@ -10,6 +10,7 @@ const meta = {
   route: "/solutions",
   title: "Solutions",
   description: "Explore use cases built on NEAR.",
+  blurb: "Use cases built on NEAR",
   nav: { header: true, footer: false, label: "Solutions", order: 31 },
   sitemap: false,
   robots: "noindex",
