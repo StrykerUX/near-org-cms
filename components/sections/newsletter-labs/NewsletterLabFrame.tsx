@@ -44,6 +44,15 @@ export default function NewsletterLabFrame({
               <dt className="text-caption-mono text-near-green-accent">campo</dt>
               <dd className="text-body-sm text-cream/70">{spec.input}</dd>
             </div>
+            {/* Solo las tres últimas mueven algo; en las ocho primeras la fila
+                no se pinta en vez de decir "nada", que ocuparía lo mismo y
+                afirmaría menos. */}
+            {spec.motion && (
+              <div className="flex flex-col gap-1 lg:col-span-2">
+                <dt className="text-caption-mono text-near-green-accent">se mueve</dt>
+                <dd className="text-body-sm text-cream/70">{spec.motion}</dd>
+              </div>
+            )}
             <div className="flex flex-col gap-1">
               <dt className="text-caption-mono text-near-green-accent">qué mirar</dt>
               <dd className="text-body-sm text-cream/70 text-pretty">{spec.pitch}</dd>

@@ -13,7 +13,10 @@ export type NewsletterVariantId =
   | "halo"
   | "grain"
   | "column"
-  | "field";
+  | "field"
+  | "teletype"
+  | "ascii"
+  | "curtain";
 
 export type NewsletterVariantSpec = {
   readonly id: NewsletterVariantId;
@@ -23,6 +26,8 @@ export type NewsletterVariantSpec = {
   readonly ground: string;
   /** Qué forma toma el campo de email. */
   readonly input: string;
+  /** Qué se mueve. Vacío en las ocho primeras: no se mueve nada. */
+  readonly motion?: string;
   readonly pitch: string;
 };
 
@@ -98,5 +103,41 @@ export const NEWSLETTER_VARIANTS: readonly NewsletterVariantSpec[] = [
     input: "píldora blanca grande",
     pitch:
       "Verde de marca de borde a borde, con todo el texto en tinta: el verde del sistema es claro y en crema no se lee. La única que convierte esta banda en el punto de parada de la página en vez de un descanso.",
+  },
+
+  // ── Las tres con movimiento ───────────────────────────────────────────────
+  //
+  // Las ocho de arriba son composición pura: entran y ya están. Estas tres
+  // agregan un gesto, y por eso llevan `motion` — el campo existe para dejar a
+  // la vista cuál es la variable nueva.
+  {
+    id: "teletype",
+    index: "09",
+    title: "Teletype",
+    ground: "stone",
+    input: "píldora, entra al final",
+    motion: "el párrafo se escribe, con cursor",
+    pitch:
+      "La frase se escribe al llegar y el campo aparece cuando el cursor se apaga. Nadie dice dónde seguir escribiendo: lo dice el orden.",
+  },
+  {
+    id: "ascii",
+    index: "10",
+    title: "Ascii",
+    ground: "stone",
+    input: "bloque sólido",
+    motion: "el wordmark se resuelve desde ruido",
+    pitch:
+      "El wordmark deja de ser un SVG y pasa a estar dibujado con caracteres: llega hecho ruido y se estabiliza en la palabra. Dice «infraestructura» con la forma, no con palabras.",
+  },
+  {
+    id: "curtain",
+    index: "11",
+    title: "Curtain",
+    ground: "stone + telón lima",
+    input: "píldora, sube detrás del telón",
+    motion: "un telón barre la sección y se va",
+    pitch:
+      "La banda no está: se ABRE. Un telón de lima barre de abajo arriba, se va por el borde superior y el bloque sube detrás. La única que trata la juntura como un gesto, que es lo que hacían las escaleras.",
   },
 ];

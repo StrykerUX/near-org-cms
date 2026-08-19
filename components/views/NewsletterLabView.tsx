@@ -11,6 +11,9 @@ import Belongs05Halo from "@/components/sections/newsletter-labs/Belongs05Halo";
 import Belongs06Grain from "@/components/sections/newsletter-labs/Belongs06Grain";
 import Belongs07Column from "@/components/sections/newsletter-labs/Belongs07Column";
 import Belongs08Field from "@/components/sections/newsletter-labs/Belongs08Field";
+import Belongs09Teletype from "@/components/sections/newsletter-labs/Belongs09Teletype";
+import Belongs10Ascii from "@/components/sections/newsletter-labs/Belongs10Ascii";
+import Belongs11Curtain from "@/components/sections/newsletter-labs/Belongs11Curtain";
 
 // Ocho versiones de la banda "NEAR belongs to you", cada una con sus dos vecinas
 // de la homepage alrededor.
@@ -35,12 +38,13 @@ export default function NewsletterLabView() {
   return (
     <main className="flex flex-col bg-cream">
       <Container as="header" className="py-20 md:py-28">
-        <Eyebrow className="opacity-50">Newsletter lab · 8 variantes</Eyebrow>
-        <h1 className="text-h1 mt-6 max-w-[22ch]">Ocho maneras de pedir un correo</h1>
+        <Eyebrow className="opacity-50">Newsletter lab · 11 variantes</Eyebrow>
+        <h1 className="text-h1 mt-6 max-w-[22ch]">Once maneras de pedir un correo</h1>
         <p className="text-body-lg mt-6 max-w-[62ch] opacity-70">
-          La banda «NEAR belongs to you», ocho veces, con la misma copy: el
+          La banda «NEAR belongs to you», once veces, con la misma copy: el
           wordmark, el claim, el párrafo y el campo. Lo que cambia es la
-          composición, el fondo y la forma del campo.
+          composición, el fondo y la forma del campo — y en las tres últimas,
+          además, algo se mueve.
         </p>
         <p className="text-body-sm mt-5 max-w-[62ch] opacity-60">
           Las escaleras que hoy abren y cierran la sección quedaron FUERA de las
@@ -93,6 +97,19 @@ export default function NewsletterLabView() {
 
       <NewsletterLabFrame spec={NEWSLETTER_VARIANTS[7]}>
         <Belongs08Field />
+      </NewsletterLabFrame>
+
+      {/* ── Las tres con movimiento ────────────────────────────────────── */}
+      <NewsletterLabFrame spec={NEWSLETTER_VARIANTS[8]}>
+        <Belongs09Teletype />
+      </NewsletterLabFrame>
+
+      <NewsletterLabFrame spec={NEWSLETTER_VARIANTS[9]}>
+        <Belongs10Ascii />
+      </NewsletterLabFrame>
+
+      <NewsletterLabFrame spec={NEWSLETTER_VARIANTS[10]}>
+        <Belongs11Curtain />
       </NewsletterLabFrame>
     </main>
   );
