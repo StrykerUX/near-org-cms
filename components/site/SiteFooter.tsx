@@ -7,7 +7,8 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
-import { DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
+import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 
 // El footer del sitio. UNO solo, montado por los tres layouts del frontend —
 // `app/(site)`, `app/(motion)` y `app/prototype` — y por ninguna view.
@@ -206,49 +207,167 @@ const TAKEOVER_GAP_MAX = 80; // el pb-20 de siempre, cuando hay lugar
 const TAKEOVER_GAP_MIN = 24;
 const WORDMARK_MIN_H = 96;
 
+// ── El indicador con inercia ────────────────────────────────────────────────
+//
+// Es la F18 del hover-lab (`components/views/hover-lab/FooterLinkVariantsPlus`,
+// ahí "Inertial indicator"): un chip que viaja hasta el link bajo el cursor y
+// se ESTIRA mientras viaja, proporcionalmente al salto. La deformación en el
+// eje del movimiento es lo que hace leer velocidad — y es exactamente lo que
+// una `transition` de CSS no puede expresar, porque no sabe cuánta distancia
+// va a recorrer.
+//
+// UNO POR COLUMNA y no uno para toda la grilla: el gesto es vertical, y un
+// chip cruzando de "Products" a "Terms and Policies" se leería como otra cosa.
+// Cada `<nav>` es su propio host, así que también funciona en las columnas con
+// sub-grupos, donde el chip salta por encima de los rótulos LEARN/CONNECT.
+//
+// El código no se copió del lab tal cual: allá el host es una lista plana y el
+// chip se posiciona solo en Y (todos los links arrancan en x=0). Acá se anima
+// también X contra el borde del link, que es lo que lo hace inmune a cualquier
+// sangría dentro de la columna.
+const CHIP_PAD_X = 8; // el aire a cada lado del texto, dentro del chip
+const CHIP_STRETCH_MAX = 0.5; // tope del estiramiento, en fracción del alto
+const CHIP_STRETCH_PX = 160; // el salto (en px) que llega a ese tope
+
+function FooterColumn({
+  group,
+  dark,
+  linkClass,
+}: {
+  group: (typeof GROUPS)[number];
+  dark: boolean;
+  linkClass: string;
+}) {
+  const rootRef = useGsapContext<HTMLElement>((_self, root) => {
+    const chip = root.querySelector<HTMLElement>("[data-footer-chip]");
+    if (!chip) return;
+
+    const mm = gsap.matchMedia();
+    mm.add(MQ.motion, () => {
+      // La última posición, para saber CUÁNTO saltó: un estiramiento fijo se
+      // ve igual saltando una fila que cinco, y ahí el efecto no dice nada.
+      let lastY: number | null = null;
+
+      const over = (e: PointerEvent) => {
+        const link = (e.target as HTMLElement).closest("a");
+        if (!link || !root.contains(link)) return;
+
+        const host = root.getBoundingClientRect();
+        const box = link.getBoundingClientRect();
+        const y = box.top - host.top;
+        const travel = lastY === null ? 0 : Math.abs(y - lastY);
+        lastY = y;
+
+        gsap.killTweensOf(chip);
+        gsap.set(chip, { autoAlpha: 1 });
+        gsap
+          .timeline()
+          .to(
+            chip,
+            {
+              x: box.left - host.left - CHIP_PAD_X,
+              y,
+              width: box.width + CHIP_PAD_X * 2,
+              height: box.height,
+              duration: 0.45,
+              ease: "power3.out",
+            },
+            0
+          )
+          .to(
+            chip,
+            {
+              scaleY: 1 + Math.min(travel / CHIP_STRETCH_PX, CHIP_STRETCH_MAX),
+              duration: 0.14,
+              ease: "power2.out",
+            },
+            0
+          )
+          .to(chip, { scaleY: 1, duration: 0.5, ease: "elastic.out(1, 0.5)" }, 0.14);
+      };
+
+      const leave = () => {
+        lastY = null;
+        gsap.to(chip, { autoAlpha: 0, duration: 0.2, overwrite: true });
+      };
+
+      root.addEventListener("pointerover", over);
+      root.addEventListener("pointerleave", leave);
+      return () => {
+        root.removeEventListener("pointerover", over);
+        root.removeEventListener("pointerleave", leave);
+        // Los tweens nacen en los handlers, o sea fuera del scope que
+        // matchMedia captura: hay que matarlos a mano o el chip queda con
+        // transform inline pegada tras un remount (StrictMode los hace de a
+        // dos en dev).
+        gsap.killTweensOf(chip);
+        gsap.set(chip, { clearProps: "transform,width,height,opacity,visibility" });
+      };
+    });
+
+    return () => mm.revert();
+  }, []);
+
+  return (
+    <nav ref={rootRef} aria-label={group.title} className="relative">
+      {/* Nace sin alto ni ancho: los recibe de GSAP junto con la posición.
+          `invisible` lo mantiene fuera del árbol de accesibilidad hasta el
+          primer hover, y sin motion no se enciende nunca. */}
+      <span
+        data-footer-chip
+        aria-hidden="true"
+        className={`pointer-events-none invisible absolute left-0 top-0 h-0 w-0 rounded-lg opacity-0 will-change-transform ${
+          dark ? "bg-cream/15" : "bg-foreground/8"
+        }`}
+      />
+      <h2 className={`relative text-label ${dark ? "text-cream" : ""}`}>{group.title}</h2>
+      <div className="mt-3 flex flex-col gap-5">
+        {group.sections.map((section, i) => (
+          <div key={section.label || i} className="flex flex-col gap-1.5">
+            {section.label && (
+              <p
+                className={`relative text-caption uppercase ${
+                  dark ? "text-cream/50" : "text-gray-intermediate"
+                }`}
+              >
+                {section.label}
+              </p>
+            )}
+            <ul className="flex flex-col gap-1.5">
+              {section.links.map((link) => (
+                <li key={link.label}>
+                  {link.href ? (
+                    <Link href={link.href} className={linkClass}>
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a href="#" className={linkClass}>
+                      {link.label}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
 // Los grupos de links, una sola vez: los renderizan la versión estática de
 // mobile (cream) y el panel del takeover (sobre negro) con paletas distintas.
 function LinkColumns({ dark }: { dark: boolean }) {
-  const linkClass = `text-body-sm transition-colors ${
+  // `relative` para que el texto quede POR ENCIMA del chip, que es absoluto y
+  // si no lo taparía a medias.
+  const linkClass = `relative text-body-sm transition-colors ${
     dark ? "text-cream/70 hover:text-cream" : "text-muted-foreground hover:text-foreground"
   }`;
 
   return (
     <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-16">
       {GROUPS.map((group) => (
-        <nav key={group.title} aria-label={group.title}>
-          <h2 className={`text-label ${dark ? "text-cream" : ""}`}>{group.title}</h2>
-          <div className="mt-3 flex flex-col gap-5">
-            {group.sections.map((section, i) => (
-              <div key={section.label || i} className="flex flex-col gap-1.5">
-                {section.label && (
-                  <p
-                    className={`text-caption uppercase ${
-                      dark ? "text-cream/50" : "text-gray-intermediate"
-                    }`}
-                  >
-                    {section.label}
-                  </p>
-                )}
-                <ul className="flex flex-col gap-1.5">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      {link.href ? (
-                        <Link href={link.href} className={linkClass}>
-                          {link.label}
-                        </Link>
-                      ) : (
-                        <a href="#" className={linkClass}>
-                          {link.label}
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </nav>
+        <FooterColumn key={group.title} group={group} dark={dark} linkClass={linkClass} />
       ))}
     </div>
   );
