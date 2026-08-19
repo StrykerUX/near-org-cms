@@ -248,10 +248,12 @@ function FooterColumn({
   group,
   dark,
   linkClass,
+  className = "",
 }: {
   group: (typeof GROUPS)[number];
   dark: boolean;
   linkClass: string;
+  className?: string;
 }) {
   const rootRef = useGsapContext<HTMLElement>((_self, root) => {
     const chip = root.querySelector<HTMLElement>("[data-footer-chip]");
@@ -324,7 +326,7 @@ function FooterColumn({
   }, []);
 
   return (
-    <nav ref={rootRef} aria-label={group.title} className="relative">
+    <nav ref={rootRef} aria-label={group.title} className={`relative ${className}`}>
       {/* Nace sin alto ni ancho: los recibe de GSAP junto con la posición.
           `invisible` lo mantiene fuera del árbol de accesibilidad hasta el
           primer hover, y sin motion no se enciende nunca. */}
@@ -384,15 +386,39 @@ function LinkColumns({ dark, columns = "auto" }: { dark: boolean; columns?: "aut
     dark ? "text-cream/70 hover:text-cream" : "text-muted-foreground hover:text-foreground"
   }`;
 
-  // Mapa literal de clases: Tailwind v4 no detecta las que se arman con un
+  // Mapas literales de clases: Tailwind v4 no detecta las que se arman con un
   // template string.
   const grid =
-    columns === "two" ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
+    columns === "two"
+      ? "grid-cols-2 sm:grid-cols-3"
+      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
+
+  // A partir de sm —y hasta lg, que es donde esta versión deja de existir— la
+  // quinta columna se emplaza SOLA en la tercera, y las otras cuatro quedan de
+  // a dos en las dos primeras. Con el flujo automático caían 3 + 2 y "Terms
+  // and Policies" terminaba de vecina de "About" en la segunda fila; acá es un
+  // grupo aparte —lo legal, no navegación— y se lee mejor en su propia
+  // columna. Debajo de sm no aplica ninguna: ahí manda el flujo, en 2 columnas.
+  const PLACE = columns === "two"
+    ? [
+        "sm:col-start-1 sm:row-start-1",
+        "sm:col-start-2 sm:row-start-1",
+        "sm:col-start-1 sm:row-start-2",
+        "sm:col-start-2 sm:row-start-2",
+        "sm:col-start-3 sm:row-start-1",
+      ]
+    : [];
 
   return (
     <div className={`grid gap-x-12 gap-y-10 lg:gap-x-16 ${grid}`}>
-      {GROUPS.map((group) => (
-        <FooterColumn key={group.title} group={group} dark={dark} linkClass={linkClass} />
+      {GROUPS.map((group, i) => (
+        <FooterColumn
+          key={group.title}
+          group={group}
+          dark={dark}
+          linkClass={linkClass}
+          className={PLACE[i] ?? ""}
+        />
       ))}
     </div>
   );
