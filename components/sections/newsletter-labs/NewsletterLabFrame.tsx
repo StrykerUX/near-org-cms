@@ -1,22 +1,39 @@
 import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
 import type { NewsletterVariantSpec } from "@/components/sections/newsletter-labs/newsletterLabContent";
 
-// El marco de cada variante: su ficha y las dos bandas de contexto.
+// El marco de cada variante: su ficha, y las dos bandas vecinas de la homepage.
 //
-// ── Por qué hay contexto y no van las ocho seguidas ─────────────────────────
+// ── La ficha pesa MENOS que la pieza, y antes pesaba más ────────────────────
 //
-// En la homepage esta sección vive ENTRE dos claros: encima la sección de
-// pruebas (blanca) y debajo customer stories (crema). Buena parte de lo que se
-// está decidiendo es el corte contra esos dos vecinos — sobre todo ahora, que
-// las escaleras quedaron fuera y el corte es recto.
+// La versión anterior era un bloque `bg-ink-slate` a ancho completo con el
+// número en verde a tamaño h2. En una página cuyo trabajo es comparar catorce
+// bandas pálidas, eso ponía una losa negra cada dos pantallas: lo primero que
+// veía el ojo al scrollear no era ninguna variante, era el rótulo. Y como las
+// piezas alternan crema, gris y lima, la página entera se leía como un cebrado.
 //
-// Ocho bandas pegadas una a otra se juzgarían contra la banda de al lado, que no
-// es donde van a estar. Cada una lleva su propio par de vecinas.
+// Ahora la ficha es una CARTELA de museo: crema, un filete arriba, el número en
+// mono y los datos en una línea de etiquetas. La pieza es lo único que tiene
+// color y masa.
 //
-// Las bandas miden 28svh y no una pantalla entera: lo justo para que el ojo
-// registre el cambio de color al llegar y al salir. Con una pantalla por vecina,
-// recorrer las ocho serían dieciséis pantallas de relleno.
+// ── El pitch tiene medida ───────────────────────────────────────────────────
+//
+// En el `dl` de tres columnas anterior el texto largo caía en la tercera y se
+// estiraba a todo el ancho disponible: líneas de 140 caracteres, que es el doble
+// del máximo legible. Ahora va en su propio renglón, topado a 78ch.
+//
+// ── Los rótulos de las vecinas, en el borde de FUERA ────────────────────────
+//
+// Antes «↑ proof section» estaba al final de la banda blanca, es decir pegado a
+// la variante, y se leía como si la rotulara a ella. Cada rótulo va ahora en el
+// extremo opuesto a la pieza: el de arriba arriba, el de abajo abajo.
+//
+// ── 22svh y no 28 ───────────────────────────────────────────────────────────
+//
+// Lo que hay que ver es el CORTE, no la vecina. Con catorce variantes, cada
+// svh de más son catorce svh de scroll que no muestran nada.
+
+const BAND = "h-[22svh]";
+
 export default function NewsletterLabFrame({
   spec,
   children,
@@ -28,52 +45,62 @@ export default function NewsletterLabFrame({
     <>
       <section
         id={spec.id}
-        className="scroll-mt-[var(--site-header-block)] bg-ink-slate text-cream"
+        className="scroll-mt-[var(--site-header-block)] border-t border-ink bg-cream text-ink"
       >
-        <Container className="flex flex-col gap-5 py-10">
-          <div className="flex items-baseline gap-4">
-            <span className="text-h2 text-near-green-accent">{spec.index}</span>
-            <h2 className="text-h3">{spec.title}</h2>
-          </div>
-          <dl className="grid grid-cols-1 gap-x-10 gap-y-3 lg:grid-cols-[10rem_12rem_minmax(0,1fr)]">
-            <div className="flex flex-col gap-1">
-              <dt className="text-caption-mono text-near-green-accent">fondo</dt>
-              <dd className="text-body-sm text-cream/70">{spec.ground}</dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-caption-mono text-near-green-accent">campo</dt>
-              <dd className="text-body-sm text-cream/70">{spec.input}</dd>
-            </div>
-            {/* Solo las tres últimas mueven algo; en las ocho primeras la fila
-                no se pinta en vez de decir "nada", que ocuparía lo mismo y
-                afirmaría menos. */}
-            {spec.motion && (
-              <div className="flex flex-col gap-1 lg:col-span-2">
-                <dt className="text-caption-mono text-near-green-accent">se mueve</dt>
-                <dd className="text-body-sm text-cream/70">{spec.motion}</dd>
+        <Container className="flex flex-col gap-3 py-6">
+          <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
+            <span className="text-caption-mono text-green-ink">{spec.index}</span>
+            <h2 className="text-h4">{spec.title}</h2>
+
+            {/* Los datos, como etiquetas en una sola línea. Tres columnas de un
+                `dl` para dos palabras cada una dejaban dos tercios de la fila
+                vacíos y obligaban a barrer a lo ancho para leer tres datos. */}
+            <dl className="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-caption-mono text-gray-intermediate">
+              <div className="flex gap-1.5">
+                <dt className="text-green-ink">ground</dt>
+                <dd>{spec.ground}</dd>
               </div>
-            )}
-            <div className="flex flex-col gap-1">
-              <dt className="text-caption-mono text-near-green-accent">what to watch</dt>
-              <dd className="text-body-sm text-cream/70 text-pretty">{spec.pitch}</dd>
-            </div>
-          </dl>
+              <div className="flex gap-1.5">
+                <dt className="text-green-ink">field</dt>
+                <dd>{spec.input}</dd>
+              </div>
+              {/* Solo las seis últimas mueven algo; en las ocho primeras la
+                  etiqueta no se pinta en vez de decir "nada", que ocuparía lo
+                  mismo y afirmaría menos. */}
+              {spec.motion && (
+                <div className="flex gap-1.5">
+                  <dt className="text-green-ink">motion</dt>
+                  <dd>{spec.motion}</dd>
+                </div>
+              )}
+            </dl>
+          </div>
+
+          <p className="max-w-[78ch] text-body-sm text-gray-intermediate text-pretty">
+            {spec.pitch}
+          </p>
         </Container>
       </section>
 
       {/* Lo que hay encima en la homepage: el blanco de la sección de pruebas. */}
-      <div className="flex h-[28svh] items-end bg-background">
-        <Container className="pb-6">
-          <Eyebrow className="text-gray-intermediate/70">↑ proof section · white</Eyebrow>
+      <div className={`flex ${BAND} items-start bg-background`}>
+        <Container className="pt-4">
+          <span className="text-caption-mono uppercase text-gray-intermediate/60">
+            ↑ proof section · white
+          </span>
         </Container>
       </div>
 
       {children}
 
       {/* Y lo que sigue: el crema de customer stories. */}
-      <div className="flex h-[28svh] items-start bg-cream">
-        <Container className="pt-6">
-          <Eyebrow className="text-gray-intermediate/70">↓ customer stories · crema</Eyebrow>
+      {/* `pb-12` y no `pb-4`: abajo de todo vive la barra de salto, que es
+          sticky y taparía el rótulo. */}
+      <div className={`flex ${BAND} items-end bg-cream`}>
+        <Container className="pb-12">
+          <span className="text-caption-mono uppercase text-gray-intermediate/60">
+            ↓ customer stories · cream
+          </span>
         </Container>
       </div>
     </>
