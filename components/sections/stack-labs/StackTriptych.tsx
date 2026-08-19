@@ -111,7 +111,13 @@ export default function StackTriptych() {
             al cuerpo. El tope es lo que mantiene el tríptico como una sola
             figura. */}
         <div className="mx-auto flex h-full w-full max-w-[1500px] flex-col px-[60px] pb-16 pt-[calc(var(--site-header-block)+2rem)]">
-          <div className="grid flex-1 grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(15rem,1fr)_minmax(0,1.6fr)_minmax(15rem,1fr)]">
+          {/* La calle entre columnas es ancha a propósito. El ancho del arte no
+              cambia con la parada —su caja es siempre el aspecto del viewBox—,
+              pero lo que hay DIBUJADO adentro sí: en las primeras paradas es una
+              columna angosta y sobra aire, y en la última la cáscara ocupa la
+              caja entera. Con una calle chica, esa última parada deja el texto
+              pegado al borde del dibujo. */}
+          <div className="grid flex-1 grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(15rem,1fr)_minmax(0,1.5fr)_minmax(15rem,1fr)] lg:gap-x-24">
             {/* ── Izquierda: el título y el índice ─────────────────────── */}
             <div className="hidden flex-col gap-8 self-center lg:flex">
               {/* El título vive ACÁ y no centrado arriba: arriba se comía una
@@ -185,11 +191,13 @@ export default function StackTriptych() {
               {/* El alto lo topa TAMBIÉN el ancho: el ensamble es casi cuadrado
                   y su columna del grid no crece con la altura de la ventana.
                   Solo con `svh`, en una ventana baja y angosta el arte se salía
-                  de su columna y se montaba sobre los dos textos. */}
+                  de su columna y se montaba sobre los dos textos. El tope por
+                  ancho es además lo que garantiza la calle contra los textos en
+                  la última parada, donde la cáscara llena la caja. */}
               <div
                 ref={stageRef}
                 {...stageProps}
-                className="pointer-events-auto relative h-[46svh] lg:h-[min(72svh,39vw)]"
+                className="pointer-events-auto relative h-[46svh] lg:h-[min(70svh,34vw)]"
               >
                 <StackAssembly stage={stage} hover={hover} className="h-full w-auto" />
                 <StackCursorTag ref={tagRef} hover={hover} />
