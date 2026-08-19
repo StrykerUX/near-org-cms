@@ -6,6 +6,8 @@ import ProofColumns from "@/components/sections/proof-alt/ProofColumns";
 import Belongs01Marquee from "@/components/sections/newsletter-labs/Belongs01Marquee";
 import CustomerStories from "@/components/sections/home-ab7/CustomerStories";
 import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
+import LatestUpdates from "@/components/sections/LatestUpdates";
+import UpdatesList from "@/components/sections/UpdatesList";
 import { toMetadata } from "@/lib/seo";
 import meta from "./page.meta";
 
@@ -24,6 +26,8 @@ export default function EX1Page() {
       newsletter={<Belongs01Marquee />}
       stories={<CustomerStories />}
       testimonials={<TestimonialMarquee />}
+      latest={<LatestUpdates />}
+      news={<UpdatesList />}
     />
   );
 }

@@ -23,8 +23,23 @@ const UPDATES = [
   },
 ];
 
-export default function UpdatesList() {
+// Props OPCIONALES con los defaults de siempre: la homepage de ab7 no cambia.
+export type UpdatesListProps = {
+  /** El rótulo pequeño de arriba. */
+  eyebrow?: string;
+  /** El titular de la sección. */
+  title?: string;
+  /** Cuántas filas se muestran. Nunca más de las que hay. */
+  rows?: number;
+};
+
+export default function UpdatesList({
+  eyebrow = "Media",
+  title = "NEAR in the news",
+  rows = UPDATES.length,
+}: UpdatesListProps = {}) {
   const rootRef = useScrollReveal<HTMLUListElement>();
+  const items = UPDATES.slice(0, Math.max(1, Math.min(rows, UPDATES.length)));
 
   return (
     <section className="bg-cream text-foreground">
@@ -35,12 +50,12 @@ export default function UpdatesList() {
           columna de las cards y se leía como desalineado). */}
       <Container className="grid gap-12 py-24 lg:grid-cols-3 lg:gap-7">
         <div className="flex flex-col gap-3">
-          <Eyebrow className="text-foreground">Media</Eyebrow>
-          <h2 className="text-h2 text-pretty">NEAR in the news</h2>
+          <Eyebrow className="text-foreground">{eyebrow}</Eyebrow>
+          <h2 className="text-h2 text-pretty">{title}</h2>
         </div>
 
         <ul ref={rootRef} className="lg:col-span-2">
-          {UPDATES.map((update, i) => (
+          {items.map((update, i) => (
             // El separador va como `border-b` de cada fila y no entre filas:
             // así hay línea también debajo de la última, como en la referencia.
             <li key={i} data-reveal className="border-b border-dotted border-border">

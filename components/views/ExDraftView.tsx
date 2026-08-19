@@ -51,6 +51,10 @@ export type ExDraftViewProps = {
   stories?: React.ReactNode;
   /** El carrusel de testimonios, con la variación de este draft. */
   testimonials?: React.ReactNode;
+  /** Las tres cards de «The latest from NEAR». */
+  latest?: React.ReactNode;
+  /** El listado de prensa. */
+  news?: React.ReactNode;
 };
 
 export default function ExDraftView({
@@ -65,6 +69,8 @@ export default function ExDraftView({
   newsletter,
   stories,
   testimonials,
+  latest,
+  news,
 }: ExDraftViewProps) {
   return (
     <main className="flex flex-col bg-cream">
@@ -90,6 +96,10 @@ export default function ExDraftView({
       {stories}
 
       {testimonials}
+
+      {latest}
+
+      {news}
 
       <section className="flex min-h-svh items-center bg-cream text-ink">
         <Container className="flex flex-col gap-5">
