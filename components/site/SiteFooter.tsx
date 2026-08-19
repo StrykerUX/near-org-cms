@@ -388,13 +388,9 @@ function LinkColumns({ dark, columns = "auto" }: { dark: boolean; columns?: "aut
 
   // Mapas literales de clases: Tailwind v4 no detecta las que se arman con un
   // template string.
-  // En la versión sin takeover la grilla NO se estira de borde a borde: se le
-  // pone un techo y el flex del padre la centra. Estirada, las columnas
-  // quedaban separadas por medio ancho de pantalla y la tercera se iba sola
-  // contra el borde derecho.
   const grid =
     columns === "two"
-      ? "w-full max-w-[26rem] grid-cols-2 sm:max-w-[44rem] sm:grid-cols-3"
+      ? "grid-cols-2 sm:grid-cols-3"
       : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
 
   // A partir de sm —y hasta lg, que es donde esta versión deja de existir— la
@@ -478,19 +474,14 @@ function StaticFooter() {
 
   return (
     <div ref={rootRef} className="lg:hidden">
-      {/* Un div y no `<Container>`, por lo mismo que `SiteHeader`: su escala
-          `site` es `px-[60px]` FIJO en todos los breakpoints, y en un teléfono
-          de 390px eso es casi un tercio del ancho de gutter. Misma escala que
-          el header, para que los links del footer arranquen en la misma
-          vertical que el logo de arriba. */}
-      <div className="flex flex-col items-center gap-16 px-6 pb-24 pt-24 sm:px-10">
-        <p data-footer-headline className="text-h2 text-center text-cream text-pretty">
+      <Container className="grid gap-16 pb-24 pt-24">
+        <p data-footer-headline className="text-h2 text-cream text-pretty">
           Where money
           <br />
           <Accent>actually moves.</Accent>
         </p>
         <LinkColumns dark columns="two" />
-      </div>
+      </Container>
     </div>
   );
 }
@@ -869,7 +860,7 @@ export default function SiteFooter() {
           Los links legales ya no están acá: subieron a su propia columna. */}
       <div
         data-footer-legal
-        className={`relative z-[3] flex justify-center px-6 pb-5 pt-3 mix-blend-difference sm:px-10 lg:justify-end lg:px-5 ${WORDMARK_MAX_W}`}
+        className={`relative z-[3] flex justify-end px-5 pb-5 pt-3 mix-blend-difference ${WORDMARK_MAX_W}`}
       >
         <p className="text-body-sm text-neutral-400">© 2026 NEAR. All rights reserved.</p>
       </div>
