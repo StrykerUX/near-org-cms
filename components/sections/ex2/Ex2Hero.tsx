@@ -180,9 +180,23 @@ export default function Ex2Hero() {
       onUpdate: (t) => {
         const p = t.progress;
 
-        // Lineal y no una ease: el cartel y el agujero tienen que crecer con el
-        // MISMO factor en todo momento, y cualquier curva los desincroniza.
-        const k = 1 + (kEnd - 1) * p;
+        // ── El factor crece EXPONENCIALMENTE, no linealmente ───────────────
+        //
+        // La primera versión usaba `1 + (kEnd − 1)·p` y el gesto se comía en el
+        // primer 15% del recorrido: tres clics de rueda y la letra ya era
+        // gigante. No era un problema de duración —el track medía lo mismo—
+        // sino de percepción: un zoom no se percibe por la DIFERENCIA de
+        // tamaño sino por la RAZÓN entre un instante y el siguiente. Con un
+        // factor lineal que va de 1 a 90, la primera décima de scroll ya
+        // multiplica por 10 y el resto del recorrido apenas cambia nada.
+        //
+        // `kEnd^p` reparte el crecimiento de forma uniforme: cada tramo igual
+        // de scroll multiplica el tamaño por el mismo factor, que es
+        // exactamente como el ojo lee una aproximación.
+        //
+        // Que la curva no sea lineal NO desincroniza la letra y el agujero:
+        // los dos consumen el mismo `k`, sea cual sea su forma.
+        const k = Math.pow(kEnd, p);
         applyO(k);
         applyClip(k);
 
