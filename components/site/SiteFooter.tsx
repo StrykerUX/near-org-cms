@@ -257,9 +257,9 @@ const WORDMARK_BOX_H = `calc(min(100vw, 2080px) * ${(
 // se ve es la base. Con la altura atada a la caja del logo el degradado era el
 // triple de denso sobre las letras.
 // La parada del medio es la que da la forma: al 50% de la altura el negro
-// va al 70%, así que la caída es lenta arriba —donde están los links— y
-// rápida abajo, sobre el logo. Lineal, el logo quedaba demasiado tapado.
-const VEIL = "pointer-events-none bg-gradient-to-b from-ink via-ink/70 to-transparent";
+// sigue al 90%, así que arriba —donde están los links— es casi opaco y toda la
+// caída ocurre en la mitad de abajo, sobre el logo.
+const VEIL = "pointer-events-none bg-gradient-to-b from-ink via-ink/90 to-transparent";
 
 // ── El indicador con inercia ────────────────────────────────────────────────
 //
