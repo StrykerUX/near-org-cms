@@ -67,14 +67,29 @@ compartido hasta que sirva a todas a medias.
 El arte generado (`home-ab7/stackArt.generated.tsx`, ~287KB de paths) se importa,
 nunca se duplica.
 
-## Qué quedó fuera del arte
+## Los cubos partidos
 
-**Los cubos partidos.** En `NearStackV2`, el hover sobre la columna la parte en
-sus seis cubos, cada uno un feature del protocolo, con su corredor de hover por
-posición Y y su caja de texto. Es lo que más código arrastra y quedó fuera por
-decisión del lab: si una variante gana, se le vuelve a enchufar.
+**Estuvieron fuera y volvieron.** El hover sobre la columna la parte en sus seis
+cubos y cada uno es un feature del protocolo, con su caja de texto (nombre,
+subhead en verde y cuerpo). Quedó fuera al montar el lab —es lo que más código
+arrastra— y se re-enchufó después, a pedido: sin él, los seis features del
+protocolo no aparecen en NINGÚN texto de NINGUNA variante.
 
-Lo que sí conservan todas: el build-in de la columna, el build-up por capa,
+Vive en `useStackScene`, no en cada variante, así que lo tienen las ocho. Dos
+piezas que no son obvias:
+
+- **El corredor.** Con el hover ya en la columna, moverse en vertical recorre los
+  seis cubos por POSICIÓN Y del puntero, sin mirar sobre qué path cae el evento.
+  Hace falta por dos motivos concretos: los anillos cruzan por delante y por
+  detrás justo ahí y le robarían el hover, y el propio split abre huecos entre
+  cubos por los que el puntero se cae al fondo. Se evalúa también en cada
+  `pointermove`, porque `pointerover` no vuelve a dispararse entre huecos del
+  mismo elemento.
+- **La guarda del build-in.** Mientras la columna se está construyendo, los cubos
+  son del tween de entrada: el efecto del hover no les escribe nada en ese lapso
+  o lo pisaría a mitad de vuelo.
+
+Lo demás que conservan todas: el build-in de la columna, el build-up por capa,
 el hover de capa y de producto de AI, las sombras y el mark.
 
 ## `mode: "track"` vs `"static"`

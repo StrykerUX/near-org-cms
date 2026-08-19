@@ -50,6 +50,9 @@ export default function StackAnchors() {
   // está sobre su pieza, o siempre en el fallback sin escena.
   const on = (key: StackStop | "ai") => {
     if (!enhanced) return true;
+    // Un cubo de la columna partida es la capa `protocol`: no tiene `key`
+    // propia, se identifica por índice.
+    if (hover?.kind === "cube") return key === "protocol";
     if (hover) return hover.key === key || (key === "ai" && hover.kind === "seg");
     if (key === "ai") return stop === "ai" || AI_BLOCK.subs.some((s) => s.key === stop);
     return stop === key;

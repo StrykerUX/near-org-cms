@@ -42,6 +42,12 @@ import {
 
 export type StackSceneMode = "track" | "static";
 
+/** Cuánto se separan los cubos al partirse la columna, en unidades del svg. */
+const SPLIT_GAP = 32;
+
+/** Alto del viewBox de la columna — el que convierte px de pantalla a unidades. */
+const COLUMN_VB_H = 634;
+
 export type StackSceneOptions = {
   mode?: StackSceneMode;
 };
@@ -198,7 +204,7 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
   const stage = enhanced ? scrollIdx : STAGE_ORDER.length - 1;
   const showAi = stage >= 2;
 
-  const hoverTarget = hover?.key ?? null;
+  const hoverTarget = hover && "key" in hover ? hover.key : null;
   const litSeg: string | null = !showAi
     ? null
     : hover
@@ -221,7 +227,72 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
       g.style.opacity =
         litSeg === "all" || g.dataset.stackSeg === litSeg ? "1" : segHover ? "0.3" : "0";
     });
+
+    // ── El split ────────────────────────────────────────────────────────
+    //
+    // El hover sobre la columna la PARTE en sus seis cubos, y cada uno es un
+    // feature del protocolo. Verde y wireframe se separan a la vez porque
+    // comparten geometría y orden de grupos: el `data-stack-cube` está en
+    // ambas instancias.
+    //
+    // Con un cubo concreto bajo el cursor, sus cinco hermanos se atenúan al
+    // 30% — el foco es el feature señalado, no la columna entera.
+    //
+    // La transición va inline y no en una clase porque gobierna también
+    // `opacity`, que la clase generada no cubre.
+    const split =
+      hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
+    const hoveredCube = hover?.kind === "cube" ? hover.index : null;
+
+    // Con el build-in de la columna en curso los cubos son del tween de
+    // entrada: escribirles transform/opacity acá lo pisaría a mitad de vuelo.
+    if (!builtRef.current) return;
+
+    stageEl.querySelectorAll<SVGGElement>("[data-stack-cube]").forEach((g) => {
+      const i = Number(g.dataset.stackCube);
+      g.style.transition = "transform .38s cubic-bezier(.65,0,.35,1), opacity .25s";
+      g.style.transform = split ? `translateY(${((i - 2.5) * SPLIT_GAP).toFixed(0)}px)` : "translateY(0px)";
+      // El mark de NEAR viaja con el cubo 0 (mismo `data-stack-cube`) pero NO
+      // se atenúa con él: queda negro pleno mientras sus vecinos caen al 30%.
+      g.style.opacity =
+        hoveredCube !== null && i !== hoveredCube && !("stackLogo" in g.dataset) ? "0.3" : "1";
+    });
   }, [litSeg, hover]);
+
+  /* ── El corredor de la columna ───────────────────────────────────────────
+     Con el hover YA en la columna, moverse en vertical recorre sus seis cubos
+     por POSICIÓN Y del puntero, sin depender de sobre qué path cae el evento.
+     Hace falta por dos motivos concretos: los anillos cruzan por delante y por
+     detrás justo ahí y le robarían el hover, y el propio split abre HUECOS
+     entre cubos por los que el puntero se cae al fondo.
+
+     Devuelve true si capturó el evento. */
+  const columnCorridor = (e: React.PointerEvent): boolean => {
+    const inColumn =
+      hover?.kind === "cube" || (hover?.kind === "layer" && hover.key === "protocol");
+    if (!inColumn) return false;
+    const col = stageRef.current?.querySelector('[data-stack-layer="protocol"]');
+    if (!col) return false;
+    const r = col.getBoundingClientRect();
+    if (e.clientX < r.left - 16 || e.clientX > r.right + 16) return false;
+    // Centros de los seis cubos en pantalla, CON el split aplicado: el
+    // desplazamiento va en unidades del svg, así que escala con r.height.
+    const s = r.height / COLUMN_VB_H;
+    let best = 0;
+    let bestD = Infinity;
+    for (let i = 0; i < 6; i++) {
+      const c = r.top + (78 + 95 * i + (i - 2.5) * SPLIT_GAP) * s;
+      const d = Math.abs(e.clientY - c);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    // Demasiado lejos por arriba o por abajo: soltar el modo columna.
+    if (bestD > 120 * s) return false;
+    setHover({ kind: "cube", index: best });
+    return true;
+  };
 
   const goTo = (key: StackStop) => {
     const section = rootRef.current;
@@ -253,10 +324,14 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
 
   const onPointerOver = (e: React.PointerEvent) => {
     if (e.pointerType !== "mouse") return;
+    if (columnCorridor(e)) return;
     const t = e.target as Element;
     const layer = t.closest("[data-stack-layer]")?.getAttribute("data-stack-layer");
     const seg = t.closest("[data-stack-seg]")?.getAttribute("data-stack-seg");
-    if (layer === "ai" && seg) {
+    const cube = t.closest("[data-stack-cube]")?.getAttribute("data-stack-cube");
+    if (layer === "protocol" && cube !== null && cube !== undefined) {
+      setHover({ kind: "cube", index: Number(cube) });
+    } else if (layer === "ai" && seg) {
       setHover({ kind: "seg", key: seg as (typeof SEG_KEYS)[number] });
     } else if (layer === "protocol" || layer === "intents" || layer === "nearcom") {
       setHover({ kind: "layer", key: layer });
@@ -279,6 +354,9 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
     const r = stageEl.getBoundingClientRect();
     el.style.left = `${e.clientX - r.left}px`;
     el.style.top = `${e.clientY - r.top}px`;
+    // `pointerover` no vuelve a dispararse entre huecos del MISMO elemento, así
+    // que el corredor de la columna se evalúa también en cada move.
+    if (e.pointerType === "mouse") columnCorridor(e);
   };
 
   // Click sobre una pieza = saltar a su parada. En `static` no hay adónde ir.
@@ -287,6 +365,7 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
     const layer = t.closest("[data-stack-layer]")?.getAttribute("data-stack-layer");
     const seg = t.closest("[data-stack-seg]")?.getAttribute("data-stack-seg");
     if (layer === "ai" && seg) goTo(seg as StackStop);
+    // Un cubo es un feature del protocolo: su parada es la de la capa.
     else if (layer === "protocol") goTo("protocol");
     else if (layer === "intents" || layer === "nearcom") goTo(layer as StackStop);
   };
