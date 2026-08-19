@@ -101,21 +101,35 @@ export function buildExNextReveal(
     words.forEach((w, i) => {
       if (accent[i]) w.style.color = "var(--color-green-ink)";
     });
-    gsap.set(words, { opacity: 0.12 });
+    // Cuánto del gesto pasa antes de que la lectura empiece. A diferencia de
+    // los otros dos, este tratamiento tiene el párrafo entero visible desde el
+    // principio: arrancando a la par de la «o», el texto ya va por la mitad
+    // cuando el agujero recién se abre. Esperando, el ojo llega al párrafo
+    // justo cuando la lectura arranca.
+    const DELAY = 0.24;
+
+    // De dónde arranca una palabra sin leer. Bajo a propósito: es el fantasma
+    // del párrafo, lo justo para que el bloque ocupe su sitio y no salte al
+    // aparecer. Más arriba compite con lo ya leído y el frente se pierde.
+    const REST = 0.05;
+
+    gsap.set(words, { opacity: REST });
 
     return {
       apply: (pr) => {
+        const read = clamp01((pr - DELAY) / (1 - DELAY));
+
         for (let i = 0; i < words.length; i++) {
           // 0.28 y no 0.7: con una ventana ancha las 27 palabras avanzan casi
           // en fase y el resultado es un fundido del párrafo entero — que es
           // exactamente lo que NO es este tratamiento. Estrecha, se ve el
           // frente de lectura corriendo por el texto.
-          const t = gate(i, words.length, pr, 0.28);
+          const t = gate(i, words.length, read, 0.28);
           // No arranca en 0: el párrafo entero está ahí desde el principio, en
           // gris muy bajo, y lo que avanza es la LECTURA. Apareciendo palabra
           // por palabra desde la nada, el bloque cambiaría de tamaño y el ojo
           // no tendría dónde apoyarse.
-          setAlpha[i](0.1 + 0.9 * t);
+          setAlpha[i](REST + (1 - REST) * t);
         }
       },
       revert: () => {
