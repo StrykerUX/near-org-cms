@@ -23,13 +23,14 @@ export default function RoadmapHeader({ titleId }: { titleId: string }) {
           </p>
         ))}
         {/* Custom gradient CTA, not the shared Button primitive: its palette
-            doesn't have this comp's local lime->green (see the plan's open
-            color question), and Button doesn't forward `style`. Structural
-            classes below are copied from Button.tsx's own "light" shape. */}
+            doesn't have this comp's local lime->green, and Button doesn't
+            forward `style`. Structural classes below are copied from
+            Button.tsx's own "light" shape. Background is --rm-dot-gradient —
+            same two colors as the active dots, per feedback. */}
         <a
           href="#"
           className="mt-2 inline-flex w-fit items-center gap-2 rounded-full px-5 py-2 text-label text-ink transition-[filter,transform] hover:brightness-[1.06] hover:-translate-y-px"
-          style={{ backgroundImage: "linear-gradient(100deg, var(--rm-green-light) 0%, var(--rm-green-deep) 100%)" }}
+          style={{ backgroundImage: "var(--rm-dot-gradient)" }}
         >
           {ROADMAP_HEADER.ctaLabel}
         </a>
