@@ -8,6 +8,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Objetivo del fork:** mantener el núcleo (`packages/cms-core`: auth, Prisma, API routes, lógica de admin) intacto y reemplazar el frontend (`app/(site)`, `components/`) por uno nuevo para un proyecto distinto. No hacer merge/push cruzado con `near-ai-web` — son proyectos separados a partir de aquí.
 
+## Trabajo en paralelo: git worktrees
+
+Este repo se trabaja con **varios worktrees a la vez**, uno por sesión de
+Claude, cada uno en su propia rama `tweaks/<nombre>`. Comparten el mismo `.git`
+y la misma base de datos Postgres, así que hay cinco reglas que no son
+preferencias:
+
+**1. Nunca `git checkout main`.** Ramificá desde él —
+`git checkout -b tweaks/<nombre> main`— y dejalo libre para que cualquier
+sesión pueda mergear cuando le toque. Git además lo impide si otro worktree ya
+lo tiene tomado: `git worktree list` muestra qué rama ocupa cada carpeta, y
+`git branch` marca con `+` las que están tomadas fuera de la actual. Si tenés
+que mergear a main, hacelo y **volvé a tu rama al terminar**.
+
+**2. Nada de `prisma:migrate` ni `prisma:seed`.** La base es compartida: una
+migración desde un worktree se la come el resto sin avisar.
+
+**3. No toques archivos fuera de tu carpeta.** Los otros worktrees son otras
+sesiones trabajando ahora mismo.
+
+**4. Cada worktree, su puerto.** El principal usa el 3001 (`pnpm dev`); los
+demás arrancan con `pnpm exec next dev --port <otro>`. Dos servidores en el
+mismo puerto se pisan en silencio.
+
+**5. `lib/routes.generated.ts` va a dar conflicto en casi todo merge**, porque
+es un cache commiteado que las dos ramas regeneran con rutas distintas. Se
+resuelve **siempre** con `pnpm gen:routes` y **nunca a mano**: el comando
+produce la unión de las rutas de ambas. Después, `pnpm routes:check` confirma
+que quedó al día.
+
+### Dos cosas que muerden
+
+**Turbopack se queda con las rutas borradas.** Si borrás una carpeta de
+`app/**` con el dev server corriendo, sigue en su grafo y tira
+`Module not found: Can't resolve './page.meta'` sobre un archivo que ya no
+existe. Se arregla reiniciando el server (y, si insiste, borrando
+`.next/dev/types`). Lo mismo con `tsc`: los tipos de ruta generados quedan
+stale y reportan errores de rutas fantasma.
+
+**Antes de commitear, `pnpm build` completo**, no solo `typecheck`. El
+`prebuild` corre `gen:routes`, `lint:page-meta` y `lint:typography`, que es
+donde saltan los problemas que el typecheck no ve.
+
 ## Project Structure
 
 This is a **pnpm workspace** with a standalone Next.js app at the root and a shared CMS package.
