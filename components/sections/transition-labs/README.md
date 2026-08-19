@@ -13,11 +13,11 @@ abajo empieza, y entre las dos no pasa nada.
 
 | | Variante | Coste neto | Técnica | La apuesta |
 |---|---|---|---|---|
-| **F** | `CutSlats` | 20svh | CSS + GSAP | Doce lamas al **ángulo real del isométrico** (30.79°) que se retiran escalonadas |
+| **F** | `CutSlats` | 50svh | CSS + GSAP | Doce lamas al **ángulo real del isométrico** (30.79°) que se retiran escalonadas |
 | **G** | `CutFold` | 20svh | CSS 3D | La página se **pliega** hacia atrás y detrás estaba la sección siguiente |
-| **H** | `CutMosaic` | 20svh | Canvas 2D | La pantalla se **reemplaza por partes**, de abajo hacia arriba, en orden de ruido determinista |
-| **I** | `CutHalftone` | 20svh | Canvas 2D | La página **se imprime**: trama de medio tono a 45° posada encima, los puntos engordan hasta tocarse |
-| **J** | `CutMelt` | 20svh | Canvas 2D | La tinta **inunda** desde el pie con un frente de dedos y bahías |
+| **H** | `CutMosaic` | 50svh | Canvas 2D | La pantalla se **reemplaza por partes**, de abajo hacia arriba, en orden de ruido determinista |
+| **I** | `CutHalftone` | 50svh | Canvas 2D | La página **se imprime**: trama de medio tono a 45° posada encima, los puntos engordan hasta tocarse |
+| **J** | `CutMelt` | 50svh | Canvas 2D | La tinta **inunda** desde el pie con un frente de dedos y bahías |
 | **K** | `CutChapter` | 90svh | CSS + GSAP | El **rótulo del capítulo**. El corte como estructura, no como efecto |
 | **L** | `CutSidestep` | 30svh | CSS + GSAP | La sección siguiente **entra por el lado**. Una vez por página o deja de significar |
 
@@ -42,10 +42,15 @@ queda con todo eso y cada variante solo aporta el **dibujo**:
 - **Superponerse.** Cada variante dibuja en el color de DESTINO encima de la
   sección de arriba, que sigue visible entre los puntos, las celdas o las lamas
   hasta que el dibujo la cubre. Nada se apaga y nada se funde.
-- **La cola muerta la mata el `lead`, no el dibujo.** La primera versión no
-  adelantaba la sección siguiente y quedaban ~24svh de pantalla negra esperando
-  al final de cada corte — coste declarado 60svh, tiempo percibido más de una
-  pantalla. Con el `lead`, cuando el dibujo termina de cubrir ya estás en ella.
+- **La cola muerta la mata `settle = 1`.** La primera versión cerraba el dibujo
+  al 85% del tramo y quedaban ~24svh de pantalla negra esperando al final de
+  cada corte — coste declarado 60svh, tiempo percibido más de una pantalla.
+- **`lead` (adelantar la sección siguiente) va en CERO salvo excepción.** Sale
+  barato en scroll, pero esa sección entra por abajo con un borde superior recto
+  y opaco que SUBE por debajo del dibujo: en las variantes de cobertura parcial
+  —trama, celdas, lamas— se ve como una línea divisoria cruzando la pantalla. Lo
+  usan solo las que dibujan un panel opaco desde el primer frame: Fold, Sidestep
+  y Chapter.
 - **Se probó el camino contrario y se descartó**: un velo del color de la
   sección que sale, borrado a agujeros para revelar la de abajo. El velo es
   opaco desde el primer frame, así que la sección de arriba desaparece de golpe
@@ -56,9 +61,10 @@ queda con todo eso y cada variante solo aporta el **dibujo**:
   sección anterior, no sobre un rectángulo vacío) y `lead` hacia adelante por
   `margin-bottom` negativo (la siguiente entra por debajo durante el gesto). El
   coste NETO es `travel − 100svh − lead`.
-- **El presupuesto.** Decorativo (nada que leer) → 20svh netos. Con contenido
-  (un rótulo, un dato) → hasta 90svh. `CutChapter` es el único que gasta el
-  grande, y lo gasta en una pausa para que el rótulo se lea.
+- **El presupuesto.** Decorativo (nada que leer) → 20–50svh netos, según pueda
+  usar `lead` o no. Con contenido (un rótulo, un dato) → hasta 90svh.
+  `CutChapter` es el único que gasta el grande, y lo gasta en una pausa para que
+  el rótulo se lea. Todo ese scroll es gesto visible: no hay cola muerta.
 - **`settle`.** Con qué fracción del recorrido el dibujo está terminado. Ahora
   por defecto 1: con el modelo de revelar, cerrar antes ERA la cola muerta.
 - **`draw(p)` cuelga del SCROLL, no de un ticker.** Ninguna de estas

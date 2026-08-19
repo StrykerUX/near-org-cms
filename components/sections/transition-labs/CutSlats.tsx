@@ -53,7 +53,7 @@ export default function CutSlats() {
   }, []);
 
   return (
-    <SectionCut draw={draw}>
+    <SectionCut travel="150svh" draw={draw}>
       <div
         aria-hidden="true"
         style={{ transform: `translate(-50%, -50%) rotate(${ANGLE}deg)` }}

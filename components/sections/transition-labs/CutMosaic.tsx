@@ -100,11 +100,11 @@ export default function CutMosaic() {
     return () => ro.disconnect();
   }, [paint]);
 
-  // Los valores por defecto de `SectionCut`: 160svh de tramo, 100 de solape
-  // hacia atrás y 40 de lead ⇒ 20svh netos, el presupuesto de un corte que no
-  // tiene nada que leer.
+  // 150svh de tramo menos los 100 de solape hacia atrás ⇒ 50svh de gesto, y
+  // 50svh netos: sin `lead`, porque el borde de la sección entrante se vería
+  // subir por debajo de las celdas como una línea divisoria (ver `SectionCut`).
   return (
-    <SectionCut draw={draw}>
+    <SectionCut travel="150svh" draw={draw}>
       <canvas ref={canvasRef} aria-hidden="true" className="block size-full" />
     </SectionCut>
   );

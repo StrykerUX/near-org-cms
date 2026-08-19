@@ -123,7 +123,7 @@ export default function CutMelt() {
   }, [paint]);
 
   return (
-    <SectionCut draw={draw}>
+    <SectionCut travel="150svh" draw={draw}>
       <canvas ref={canvasRef} aria-hidden="true" className="block size-full" />
     </SectionCut>
   );

@@ -59,8 +59,10 @@ export default function CutFold() {
     gsap.set(shade, { opacity: (1 - Math.cos((turn * 88 * Math.PI) / 180)) * 0.62 });
   }, []);
 
+  // Conserva `lead`: la hoja es un panel OPACO desde el primer frame, así que el
+  // borde de la sección entrante no se ve asomar por debajo.
   return (
-    <SectionCut draw={draw}>
+    <SectionCut travel="160svh" lead="40svh" draw={draw}>
       <div
         aria-hidden="true"
         style={{ perspective: "900px" }}

@@ -49,7 +49,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     id: "slats",
     index: "F",
     title: "Slats",
-    cost: "20svh",
+    cost: "50svh",
     stack: "CSS + GSAP",
     current: true,
     pitch:
@@ -69,7 +69,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     id: "mosaic",
     index: "H",
     title: "Mosaic",
-    cost: "20svh",
+    cost: "50svh",
     stack: "Canvas 2D",
     current: true,
     pitch:
@@ -79,7 +79,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     id: "halftone",
     index: "I",
     title: "Halftone",
-    cost: "20svh",
+    cost: "50svh",
     stack: "Canvas 2D",
     current: true,
     pitch:
@@ -89,7 +89,7 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     id: "melt",
     index: "J",
     title: "Melt",
-    cost: "20svh",
+    cost: "50svh",
     stack: "Canvas 2D",
     current: true,
     pitch:

@@ -18,11 +18,10 @@ import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 // que sigue ahí y visible hasta que el dibujo la cubre. Nada se apaga y nada se
 // funde: la transición se monta sobre lo que había.
 //
-// Lo que hace que el tramo no se sienta muerto no es el dibujo, es el `lead`:
-// la sección SIGUIENTE está montada detrás durante la última parte del gesto,
-// así que cuando el dibujo termina de cubrir ya estás en ella. La primera
-// versión no lo tenía y quedaban ~24svh de pantalla negra esperando — coste
-// declarado 60svh, tiempo percibido más de una pantalla.
+// Lo que hace que el tramo no se sienta muerto es que el dibujo termina EXACTO
+// donde termina el tramo (`settle` = 1). La primera versión lo cerraba al 85% y
+// quedaban ~24svh de pantalla negra esperando: coste declarado 60svh, tiempo
+// percibido más de una pantalla.
 //
 // Se probó también el camino contrario —un velo del color de la sección que
 // sale, borrado a agujeros para revelar la de abajo— y se descartó: el velo es
@@ -47,15 +46,22 @@ import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 // es `travel − 100svh`, así que alargarlo cuesta scroll uno a uno. 20svh netos
 // por 60 de gesto es el punto donde la transición se ve y no se siente.
 //
-// ── Por qué `lead` es corto ─────────────────────────────────────────────────
+// ── Por qué `lead` es CERO por defecto ──────────────────────────────────────
 //
-// La sección de abajo arranca su propio recorrido en cuanto entra, así que cada
-// svh de solape es scroll que ella gasta estando todavía medio tapada. 40svh
-// sobre los 280 del stack es un 14%: menos de una parada.
+// Adelantar la sección siguiente sale barato en scroll —cada svh de `lead` es
+// un svh que el corte no cuesta— pero tiene un precio que solo se ve en las
+// variantes de cobertura PARCIAL (trama, celdas, lamas): esa sección entra por
+// abajo con un borde superior recto y opaco, y ese borde SUBE por debajo del
+// dibujo. Mientras el dibujo no cubra del todo, el borde se ve como una línea
+// divisoria cruzando la pantalla.
 //
-// Lo que hace que un `lead` corto igual funcione es el PISO (abajo): los
-// agujeros muestran el color de destino desde el primer frame, y la sección de
-// verdad llega a tiempo para el final.
+// Con `lead` en cero no hay borde que asome: el dibujo cubre entero y recién
+// entonces empieza la sección, del mismo color. Cuesta scroll, y es el precio
+// correcto.
+//
+// Las variantes cuyo dibujo es un panel OPACO desde el primer frame (el
+// pliegue, el paso lateral, el rótulo de capítulo) sí pueden usarlo: ahí no hay
+// nada semitransparente por donde se vea el borde.
 //
 // ── El piso ─────────────────────────────────────────────────────────────────
 //
@@ -117,7 +123,7 @@ export type SectionCutProps = {
 
 export default function SectionCut({
   travel = "160svh",
-  lead = "40svh",
+  lead = "0svh",
   to = "transparent",
   settle = 1,
   draw,

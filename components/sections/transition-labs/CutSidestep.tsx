@@ -60,8 +60,12 @@ export default function CutSidestep() {
     gsap.set(inner, { xPercent: (1 - eased) * 18 });
   }, []);
 
+  // Piso de tinta: la mitad derecha de la tira está vacía, y sin piso lo que
+  // asomaría al correrse es el fondo de la página, no el color de destino.
+  // `lead` se conserva porque el panel de salida es opaco: el borde de la
+  // sección entrante no se ve asomar por debajo de nada semitransparente.
   return (
-    <SectionCut travel="170svh" draw={draw}>
+    <SectionCut travel="170svh" lead="40svh" to="var(--ink)" draw={draw}>
       {/* La tira mide dos pantallas: la de salida y la de llegada. Moverla el
           50% deja la segunda exactamente encuadrada. */}
       <div ref={stripRef} className="absolute inset-y-0 left-0 flex h-full w-[200%]">

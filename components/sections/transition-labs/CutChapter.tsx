@@ -84,7 +84,7 @@ export default function CutChapter({
   // entra en el primer 22%—, así que el piso de destino lo dejaría negro desde
   // el primer frame y se comería la entrada. Acá el velo hace de piso.
   return (
-    <SectionCut travel="230svh" to="transparent" draw={draw}>
+    <SectionCut travel="230svh" lead="40svh" to="transparent" draw={draw}>
       <div ref={inkRef} aria-hidden="true" className="absolute inset-0 bg-ink opacity-0" />
 
       <div className="absolute inset-0 flex items-center justify-center px-[60px]">
