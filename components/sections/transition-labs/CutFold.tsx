@@ -7,8 +7,11 @@ import SectionCut, { clamp01 } from "@/components/sections/transition-labs/Secti
 // ── G · Fold ─────────────────────────────────────────────────────────────────
 //
 // El bloque de arriba se PLIEGA hacia atrás sobre su borde inferior y detrás
-// aparece el negro, que estaba ahí todo el tiempo. El corte deja de ser plano:
-// la página tiene grosor y las secciones están apiladas como hojas.
+// aparece la sección siguiente, que estaba ahí todo el tiempo. El corte deja de
+// ser plano: la página tiene grosor y las secciones están apiladas como hojas.
+//
+// Es el más literal de los siete con el modelo de revelar: no hay nada que
+// pintar, solo una hoja que se quita de en medio.
 //
 // ── La hoja es un panel propio, no la sección de verdad ─────────────────────
 //
@@ -42,12 +45,11 @@ export default function CutFold() {
     const shade = shadeRef.current;
     if (!leaf || !shade) return;
 
-    // La hoja aparece antes de empezar a girar: si entrara girando ya, el
-    // primer frame sería un rectángulo torcido saliendo de la nada.
-    const inn = clamp01(p / 0.12);
-    const turn = clamp01((p - 0.12) / 0.76);
+    // La hoja está puesta desde el primer frame (es del color de la sección de
+    // arriba, así que no se percibe que apareció) y a partir del 8% gira.
+    const turn = clamp01((p - 0.08) / 0.92);
 
-    gsap.set(leaf, { autoAlpha: inn, rotateX: -88 * turn });
+    gsap.set(leaf, { rotateX: -88 * turn });
     // La cara se apaga con el coseno del giro, no linealmente: es la ley con la
     // que una superficie recibe menos luz al inclinarse, y por eso se ve como
     // una hoja y no como un fundido a negro.
@@ -58,10 +60,7 @@ export default function CutFold() {
   }, []);
 
   return (
-    <SectionCut travel="170svh" settle={0.85} draw={draw}>
-      {/* El negro está DEBAJO desde el principio: no llega, se descubre. */}
-      <div aria-hidden="true" className="absolute inset-0 bg-ink" />
-
+    <SectionCut draw={draw}>
       <div
         aria-hidden="true"
         style={{ perspective: "900px" }}

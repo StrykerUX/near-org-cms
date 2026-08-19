@@ -2,13 +2,28 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { deviceRatio } from "@/components/primitives/motion/dpr";
-import SectionCut, { clamp01, fitCanvas, noise } from "@/components/sections/transition-labs/SectionCut";
+import SectionCut, { CUT_FROM, clamp01, fitCanvas, noise } from "@/components/sections/transition-labs/SectionCut";
 
 // ── H · Mosaic ───────────────────────────────────────────────────────────────
 //
-// La pantalla no se cubre: se REEMPLAZA por partes. Una retícula de celdas y
-// cada una se pinta de negro cuando le toca, en un orden de ruido — ni fundido
-// ni barrido.
+// La pantalla no se cubre: se REEMPLAZA por partes. Una retícula de celdas, y
+// cada una se BORRA cuando le toca, dejando ver la sección de abajo — que ya
+// está montada detrás. Ni fundido ni barrido: reemplazo pieza a pieza.
+//
+// ── Se borra, no se pinta ───────────────────────────────────────────────────
+//
+// El canvas arranca lleno del color de la sección que sale y las celdas se
+// abren con `destination-out`. Pintando negro encima, la sección siguiente
+// llegaba DESPUÉS del gesto y quedaba una cola de pantalla negra sin nada;
+// borrando, la última celda que cae ya te deja dentro de la sección.
+//
+// ── De abajo hacia arriba ───────────────────────────────────────────────────
+//
+// El umbral de cada celda mezcla ruido con una pendiente vertical, y la
+// pendiente es CUADRÁTICA: las de abajo se abren casi todas juntas y arriba
+// llegan cada vez más espaciadas. Con la pendiente lineal —y con el peso que
+// tenía antes, 0.18— la dirección no se percibía y el mosaico parecía puro
+// azar.
 //
 // ── El orden es ruido, no azar ──────────────────────────────────────────────
 //
@@ -46,27 +61,35 @@ export default function CutMosaic() {
     const dpr = deviceRatio();
     const { w, h } = fitCanvas(canvas, dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#101010";
+    ctx.fillStyle = CUT_FROM;
+    ctx.fillRect(0, 0, w, h);
 
     const cols = Math.ceil(w / CELL);
     const rows = Math.ceil(h / CELL);
 
+    // A partir de acá se BORRA: cada celda abre un agujero en el velo.
+    ctx.globalCompositeOperation = "destination-out";
+
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
-        // El umbral mezcla ruido con una leve pendiente vertical: el mosaico
-        // avanza de abajo hacia arriba lo justo para tener dirección, sin
-        // llegar a leerse como un barrido.
-        const t = noise(x, y) * 0.82 + (1 - y / rows) * 0.18;
-        const a = clamp01((p * 1.18 - t) / 0.16);
+        // `depth` es 0 en la fila de ABAJO y 1 en la de arriba, al cuadrado:
+        // umbral bajo abajo (se abren casi todas juntas) y alto arriba (llegan
+        // espaciadas). Con la cuenta al revés el mosaico se abre desde arriba,
+        // que es justo lo contrario.
+        const depth = rows > 1 ? 1 - y / (rows - 1) : 0;
+        const t = noise(x, y) * 0.45 + depth * depth * 0.55;
+        const a = clamp01((p * 1.12 - t) / 0.14);
         if (a <= 0) continue;
         ctx.globalAlpha = a;
         // +1 en el tamaño: sin eso, el redondeo del dispositivo deja hilos de
-        // fondo entre celdas contiguas y la pantalla nunca queda negra del todo.
+        // velo entre celdas contiguas y la pantalla nunca se abre del todo.
         ctx.fillRect(x * CELL, y * CELL, CELL + 1, CELL + 1);
       }
     }
     ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
   }, []);
 
   const draw = useCallback(
@@ -85,8 +108,11 @@ export default function CutMosaic() {
     return () => ro.disconnect();
   }, [paint]);
 
+  // Los valores por defecto de `SectionCut`: 160svh de tramo, 100 de solape
+  // hacia atrás y 40 de lead ⇒ 20svh netos, el presupuesto de un corte que no
+  // tiene nada que leer.
   return (
-    <SectionCut travel="160svh" settle={0.85} draw={draw}>
+    <SectionCut draw={draw}>
       <canvas ref={canvasRef} aria-hidden="true" className="block size-full" />
     </SectionCut>
   );

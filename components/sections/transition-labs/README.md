@@ -13,13 +13,13 @@ abajo empieza, y entre las dos no pasa nada.
 
 | | Variante | Coste neto | Técnica | La apuesta |
 |---|---|---|---|---|
-| **F** | `CutSlats` | 60svh | CSS + GSAP | Doce lamas al **ángulo real del isométrico** (30.79°). La geometría del corte es la del objeto al que lleva |
-| **G** | `CutFold` | 70svh | CSS 3D | La página se **pliega** hacia atrás y detrás estaba el negro |
-| **H** | `CutMosaic` | 60svh | Canvas 2D | La pantalla no se cubre: se **reemplaza por partes**, en orden de ruido determinista |
-| **I** | `CutHalftone` | 80svh | Canvas 2D | La página **se imprime**: trama de medio tono a 45°, los puntos engordan hasta tocarse |
-| **J** | `CutMelt` | 80svh | Canvas 2D | La tinta **inunda** desde abajo con un frente de dedos y bahías. El único donde el negro tiene materia |
-| **K** | `CutChapter` | 90svh | CSS + GSAP | El **rótulo del capítulo** en medio del cambio de fondo. El corte como estructura, no como efecto |
-| **L** | `CutSidestep` | 100svh | CSS + GSAP | La sección siguiente **entra por el lado**. Una vez por página o deja de significar |
+| **F** | `CutSlats` | 20svh | CSS + GSAP | Doce lamas al **ángulo real del isométrico** (30.79°) que se retiran escalonadas |
+| **G** | `CutFold` | 20svh | CSS 3D | La página se **pliega** hacia atrás y detrás estaba la sección siguiente |
+| **H** | `CutMosaic` | 20svh | Canvas 2D | La pantalla se **reemplaza por partes**, de abajo hacia arriba, en orden de ruido determinista |
+| **I** | `CutHalftone` | 20svh | Canvas 2D | La página **se imprime**: trama de medio tono a 45°, los puntos engordan hasta abrirla entera |
+| **J** | `CutMelt` | 20svh | Canvas 2D | La siguiente **inunda** desde el pie con un frente de dedos y bahías |
+| **K** | `CutChapter` | 90svh | CSS + GSAP | El **rótulo del capítulo**. El corte como estructura, no como efecto |
+| **L** | `CutSidestep` | 30svh | CSS + GSAP | La sección siguiente **entra por el lado**. Una vez por página o deja de significar |
 
 ## Primera tanda (A–E) — descartadas
 
@@ -39,12 +39,20 @@ queda con todo eso y cada variante solo aporta el **dibujo**:
 <SectionCut travel="160svh" settle={0.85} draw={draw}>…</SectionCut>
 ```
 
-- **El solape.** `-mt-[100svh]` + `z-[2]`: el tramo empieza una pantalla ANTES
-  de donde terminaría la sección anterior, así que el gesto ocurre encima de
-  ella y no sobre un rectángulo vacío. Por eso el coste de la tabla es NETO.
-- **`settle`.** Con qué fracción del recorrido el dibujo está terminado. Nunca
-  1: el último tramo queda ya en el estado final, para llegar a la sección
-  siguiente con el corte hecho y no viéndolo cerrar en el último píxel.
+- **Revelar, no tapar.** Cada variante pinta un VELO del color de la sección que
+  sale y lo va borrando; debajo hay un piso del color de destino y, sobre el
+  final, la sección siguiente de verdad. La primera versión pintaba negro encima
+  y la sección llegaba después: eso dejaba una cola de ~24svh de pantalla negra
+  sin nada, que era lo que hacía sentir larguísimo un corte de 60svh.
+- **Los dos solapes.** `-mt-[100svh]` hacia atrás (el gesto ocurre encima de la
+  sección anterior, no sobre un rectángulo vacío) y `lead` hacia adelante por
+  `margin-bottom` negativo (la siguiente entra por debajo durante el gesto). El
+  coste NETO es `travel − 100svh − lead`.
+- **El presupuesto.** Decorativo (nada que leer) → 20svh netos. Con contenido
+  (un rótulo, un dato) → hasta 90svh. `CutChapter` es el único que gasta el
+  grande, y lo gasta en una pausa para que el rótulo se lea.
+- **`settle`.** Con qué fracción del recorrido el dibujo está terminado. Ahora
+  por defecto 1: con el modelo de revelar, cerrar antes ERA la cola muerta.
 - **`draw(p)` cuelga del SCROLL, no de un ticker.** Ninguna de estas
   transiciones tiene vida propia, así que un ticker sería repintar lo mismo 60
   veces por segundo. Las de canvas se dibujan enteras dentro de `draw`, y un
@@ -52,6 +60,21 @@ queda con todo eso y cada variante solo aporta el **dibujo**:
 - **Sin motion**, el corte se entrega HECHO.
 
 Cambiar la transición de un corte es cambiar un componente.
+
+## Tres trampas de CSS/layout que costaron encontrarse
+
+1. **El piso tapaba el velo.** El piso es `absolute` y los velos de canvas eran
+   cajas en flujo: en el orden de pintado de CSS, un elemento posicionado va por
+   encima de TODO el contenido en flujo del mismo contexto, así que el color de
+   destino se comía la transición desde el primer frame. Los `children` van
+   envueltos en un contenedor posicionado para que mande el orden del DOM.
+2. **El `z-index` de la sección que sale.** `OwnYourOwn` trae `z-[1]` propio y
+   ganaba a la sección entrante en la zona de solape, aunque esta venga después
+   en el DOM: por los agujeros del velo se veía la sección equivocada. Quien
+   monte un corte tiene que darle a la de abajo un índice al menos igual.
+3. **El coste cero se probó y no sirve.** Con `travel` 140 el neto es 0svh, pero
+   el gesto queda en 40svh —tres golpes de rueda— y no da tiempo a verlo. El
+   recorrido es `travel − 100svh`, así que alargarlo cuesta scroll uno a uno.
 
 ## Dos trampas de GSAP que costaron encontrarse
 

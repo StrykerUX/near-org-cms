@@ -61,7 +61,13 @@ export default function TransitionLabShell({
 
       {children}
 
-      <StackTriptych />
+      {/* `z-[1]`: el corte solapa esta sección con la de arriba, y `OwnYourOwn`
+          trae su propio `z-[1]`. Sin igualarlo, la que entra queda escondida
+          detrás de la que sale —gana por índice aunque venga después en el
+          DOM— y por los agujeros del velo se ve la sección equivocada. */}
+      <div className="relative z-[1]">
+        <StackTriptych />
+      </div>
 
       {/* La barra para saltar entre transiciones. Abajo y no arriba: el header
           del sitio es fijo y se pisarían. */}

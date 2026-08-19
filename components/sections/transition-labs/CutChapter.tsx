@@ -16,15 +16,16 @@ import SectionCut, { clamp01 } from "@/components/sections/transition-labs/Secti
 // parte del documento está, y la página gana un índice que no existía. Los
 // otros seis son un efecto; este es un sistema.
 //
-// Lo que cuesta —90svh— deja de ser coste por el mismo motivo: el tramo entrega
-// información, no solo un cambio de color.
+// Es el único que gasta el presupuesto grande del laboratorio —90svh netos
+// contra los 20 de los demás— y lo gasta en una pausa: sin ella el rótulo se ve
+// pasar y no se lee. El scroll acá compra información, no un cambio de color.
 //
 // ── Las tres fases ──────────────────────────────────────────────────────────
 //
 // 0.00–0.22  el fondo rueda a negro
 // 0.22–0.50  el rótulo entra: el número primero, la regla se abre después
 // 0.50–0.72  se queda quieto — un rótulo que nunca está en reposo no se lee
-// 0.72–1.00  se va hacia arriba, y detrás ya está la sección
+// 0.72–1.00  se va hacia arriba y el velo se retira: detrás ya está la sección
 //
 // La pausa del medio es la parte que más fácil se olvida y la que decide si el
 // rótulo se lee o solo se ve pasar.
@@ -60,7 +61,10 @@ export default function CutChapter({
     const ttl = titleRef.current;
     if (!ink || !card || !num || !rule || !ttl) return;
 
-    gsap.set(ink, { opacity: clamp01(p / 0.22) });
+    // El velo entra rápido y se RETIRA al final: el rótulo necesita fondo propio
+    // para leerse, pero el tramo tiene que terminar dejando ver la sección, no
+    // un negro que la anuncia.
+    gsap.set(ink, { opacity: clamp01(p / 0.22) * (1 - clamp01((p - 0.86) / 0.14)) });
 
     const inn = clamp01((p - 0.22) / 0.28);
     const out = clamp01((p - 0.72) / 0.28);
@@ -76,8 +80,11 @@ export default function CutChapter({
     gsap.set(card, { autoAlpha: 1 - out, y: -out * 90 });
   }, []);
 
+  // `to="transparent"`: es el único que NO empieza con el velo puesto —el fondo
+  // entra en el primer 22%—, así que el piso de destino lo dejaría negro desde
+  // el primer frame y se comería la entrada. Acá el velo hace de piso.
   return (
-    <SectionCut travel="190svh" settle={0.95} draw={draw}>
+    <SectionCut travel="230svh" to="transparent" draw={draw}>
       <div ref={inkRef} aria-hidden="true" className="absolute inset-0 bg-ink opacity-0" />
 
       <div className="absolute inset-0 flex items-center justify-center px-[60px]">

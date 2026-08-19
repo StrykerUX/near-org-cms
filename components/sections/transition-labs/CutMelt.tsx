@@ -2,13 +2,17 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { deviceRatio } from "@/components/primitives/motion/dpr";
-import SectionCut, { fitCanvas, noise } from "@/components/sections/transition-labs/SectionCut";
+import SectionCut, { CUT_FROM, fitCanvas, noise } from "@/components/sections/transition-labs/SectionCut";
 
 // ── J · Melt ─────────────────────────────────────────────────────────────────
 //
-// La tinta INUNDA la página desde abajo, pero su borde no es una línea: es un
-// frente irregular con dedos que se adelantan y bahías que se quedan atrás. Lo
-// que sube no parece un panel, parece líquido.
+// La sección de abajo INUNDA la página desde el pie, pero su borde no es una
+// línea: es un frente irregular con dedos que se adelantan y bahías que se
+// quedan atrás. Lo que sube no parece un panel, parece líquido.
+//
+// El frente BORRA el velo del color de la sección que sale (`destination-out`),
+// así que lo que aparece bajo el líquido es la sección siguiente en vivo, no un
+// negro que la anuncia.
 //
 // Es el único de los siete en el que el negro tiene materia. Los demás son
 // geometría —lamas, celdas, puntos, un pliegue—; este es un fluido.
@@ -76,8 +80,11 @@ export default function CutMelt() {
     const dpr = deviceRatio();
     const { w, h } = fitCanvas(canvas, dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#101010";
+    ctx.fillStyle = CUT_FROM;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "destination-out";
 
     // Altura base del frente, con el exceso que garantiza el cierre.
     const base = h * p * 1.25;
@@ -100,6 +107,7 @@ export default function CutMelt() {
     ctx.lineTo(w + STEP, h);
     ctx.closePath();
     ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
   }, []);
 
   const draw = useCallback(
@@ -119,7 +127,7 @@ export default function CutMelt() {
   }, [paint]);
 
   return (
-    <SectionCut travel="180svh" settle={0.88} draw={draw}>
+    <SectionCut draw={draw}>
       <canvas ref={canvasRef} aria-hidden="true" className="block size-full" />
     </SectionCut>
   );

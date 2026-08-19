@@ -35,7 +35,7 @@ export type TransitionSpec = {
   readonly id: TransitionId;
   readonly index: string;
   readonly title: string;
-  /** Coste NETO: el recorrido menos la pantalla que solapa. */
+  /** Coste NETO en scroll: el tramo menos el solape de atrás y el de adelante. */
   readonly cost: string;
   readonly stack: string;
   readonly pitch: string;
@@ -49,51 +49,51 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     id: "slats",
     index: "F",
     title: "Slats",
-    cost: "60svh",
+    cost: "20svh",
     stack: "CSS + GSAP",
     current: true,
     pitch:
-      "El corte se hace en doce lamas inclinadas a 30.79° — el ángulo real de la cara superior del cubo del stack, el mismo con el que está dibujado el isométrico. La geometría del corte es la del objeto al que lleva, y los doce bordes llegan a destiempo.",
+      "Doce lamas inclinadas a 30.79° — el ángulo real de la cara superior del cubo del stack— se retiran escalonadas y dejan ver la sección de abajo. La geometría del corte es la del objeto al que lleva, y los doce bordes llegan a destiempo.",
   },
   {
     id: "fold",
     index: "G",
     title: "Fold",
-    cost: "70svh",
+    cost: "20svh",
     stack: "CSS 3D + GSAP",
     current: true,
     pitch:
-      "La página se pliega hacia atrás sobre su borde inferior y detrás aparece el negro, que estaba ahí todo el tiempo. La cara se apaga con el coseno del giro, como una hoja real girando fuera de la luz: sin esa sombra se lee como un rectángulo achicándose.",
+      "La página se pliega hacia atrás sobre su borde inferior y detrás aparece la sección siguiente, que estaba ahí todo el tiempo. La cara se apaga con el coseno del giro, como una hoja real girando fuera de la luz: sin esa sombra se lee como un rectángulo achicándose.",
   },
   {
     id: "mosaic",
     index: "H",
     title: "Mosaic",
-    cost: "60svh",
+    cost: "20svh",
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La pantalla no se cubre: se reemplaza por partes. Una retícula de celdas y cada una se pinta cuando le toca, en un orden de ruido determinista — sube y baja y el mosaico se rearma igual, que es lo que un orden al azar no puede dar.",
+      "La pantalla no se cubre: se reemplaza por partes. Una retícula de celdas que se abren de abajo hacia arriba, en un orden de ruido determinista — sube y baja y el mosaico se rearma igual, que es lo que un orden al azar no puede dar.",
   },
   {
     id: "halftone",
     index: "I",
     title: "Halftone",
-    cost: "80svh",
+    cost: "20svh",
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La página se imprime. Trama de medio tono girada 45° como en imprenta de verdad, con los puntos engordando hasta tocarse. El gesto más editorial de los siete: habla el mismo idioma que el titular en serif, no el de la tecnología.",
+      "La página se imprime al revés: trama de medio tono girada 45° como en imprenta de verdad, con los puntos engordando hasta tocarse y abrir el velo entero. El gesto más editorial de los siete: habla el mismo idioma que el titular en serif, no el de la tecnología.",
   },
   {
     id: "melt",
     index: "J",
     title: "Melt",
-    cost: "80svh",
+    cost: "20svh",
     stack: "Canvas 2D",
     current: true,
     pitch:
-      "La tinta inunda la página desde abajo con un frente irregular: dedos que se adelantan, bahías que se quedan. El único de los siete en el que el negro tiene materia — los demás son geometría, este es un fluido.",
+      "La sección de abajo inunda la página desde el pie con un frente irregular: dedos que se adelantan, bahías que se quedan. El único de los siete en el que el corte tiene materia — los demás son geometría, este es un fluido.",
   },
   {
     id: "chapter",
@@ -109,11 +109,11 @@ export const TRANSITIONS: readonly TransitionSpec[] = [
     id: "sidestep",
     index: "L",
     title: "Sidestep",
-    cost: "100svh",
+    cost: "30svh",
     stack: "CSS + GSAP",
     current: true,
     pitch:
-      "La sección siguiente entra por el lado. Toda la página baja; en este corte, y solo en este, se mueve en horizontal. Sin secuestrar la rueda: lo que se desplaza es una tira de dos paneles dentro del viewport pegajoso.",
+      "La sección siguiente entra por el lado. Toda la página baja; en este corte, y solo en este, se mueve en horizontal. Sin secuestrar la rueda: lo que se desplaza es el velo, y detrás queda la sección.",
   },
 
   /* ── Primera tanda · descartadas ─────────────────────────────────────── */
