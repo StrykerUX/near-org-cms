@@ -214,10 +214,10 @@ const TAKEOVER_GAP_MAX = 72; // el aire entre los links y el logo, cuando hay lu
 const TAKEOVER_GAP_MIN = 40;
 const WORDMARK_MIN_H = 96;
 
-// El wordmark deja de ser a sangre pasados los 1920px: más ancho que eso, el
+// El wordmark deja de ser a sangre pasados los 2080px: más ancho que eso, el
 // alto que reclama (25% del ancho) le come la pantalla al panel sin que el
 // logo se lea mejor. Centrado, con el aire repartido a los dos lados.
-const WORDMARK_MAX_W = "mx-auto w-full max-w-[1920px]";
+const WORDMARK_MAX_W = "mx-auto w-full max-w-[2080px]";
 
 // ── El indicador con inercia ────────────────────────────────────────────────
 //
