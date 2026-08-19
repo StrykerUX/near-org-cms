@@ -266,7 +266,10 @@ export default function ExHero({ background, layout = "poster", tone = "ink" }: 
         <Container
           className={`relative flex h-full flex-col pt-[var(--site-header-block)] ${
             centered
-              ? "items-center justify-center gap-8 pb-[8svh] text-center"
+              ? // Padding simétrico al del header: el header es `fixed`, así que
+                // sin un `pb` que lo iguale el centro óptico del bloque queda
+                // por debajo del centro real de la pantalla.
+                "items-center justify-center gap-8 pb-[var(--site-header-block)] text-center"
               : "justify-end pb-[10svh]"
           }`}
         >
@@ -319,8 +322,13 @@ export default function ExHero({ background, layout = "poster", tone = "ink" }: 
               </p>
 
               {/* Las dos acciones, con su punto de color: la primaria en verde,
-                  la otra en gris. Es el patrón del prototipo de referencia. */}
-              <div data-rest className="mt-auto flex items-center gap-6">
+                  la otra en gris. Es el patrón del prototipo de referencia.
+
+                  Sin `mt-auto`: clavarlas al fondo del escenario anula el
+                  `justify-center` del contenedor y parte el bloque en dos
+                  —titular arriba, acciones abajo— con un hueco muerto en medio.
+                  Van pegadas al resto y el conjunto se centra entero. */}
+              <div data-rest className="mt-4 flex items-center gap-6">
                 {EX_COPY.actions.map((a, i) => (
                   <div key={a.label} className="flex items-center gap-6">
                     {i > 0 && (
