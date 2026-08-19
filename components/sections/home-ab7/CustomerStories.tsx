@@ -8,15 +8,40 @@ import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { CUSTOMER_STORIES as STORIES } from "@/components/sections/home-ab7/homeAb7Content";
 
-export default function CustomerStories() {
+// Las tres props son OPCIONALES y sus defaults son exactamente lo que la
+// sección hacía antes, así que `<CustomerStories />` en la homepage de ab7 no
+// cambia ni un píxel. Existen para que los drafts EX puedan variar la sección
+// sin forkearla: es la misma pieza, mirada de otra manera.
+export type CustomerStoriesProps = {
+  /** El rótulo de arriba. */
+  eyebrow?: string;
+  /** `mirror` pone la imagen a la izquierda y el texto a la derecha. */
+  mirror?: boolean;
+  /** El fondo de la sección. */
+  tone?: "cream" | "stone";
+};
+
+export default function CustomerStories({
+  eyebrow = "Customer stories",
+  mirror = false,
+  tone = "cream",
+}: CustomerStoriesProps = {}) {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="bg-cream text-foreground">
+    <section className={`${tone === "stone" ? "bg-stone" : "bg-cream"} text-foreground`}>
       <Container className="flex flex-col gap-14 py-20">
-        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+        {/* El espejado va por `order` en los hijos y no por `flex-row-reverse`:
+            esto es un grid, y en móvil las dos mitades se apilan — invertir el
+            orden ahí dejaría la imagen antes que el titular, que es justo lo
+            que no se quiere. De ahí el `lg:`. */}
+        <div
+          className={`grid grid-cols-1 items-center gap-16 lg:grid-cols-2 ${
+            mirror ? "lg:[&>*:first-child]:order-2" : ""
+          }`}
+        >
           <div className="flex flex-col gap-4">
-            <Eyebrow>Customer stories</Eyebrow>
+            <Eyebrow>{eyebrow}</Eyebrow>
             <h2 className="text-h2 text-pretty">
               What the world is building
               <br />

@@ -149,7 +149,19 @@ function PostCard({ post, ready }: { post: (typeof POSTS)[number]; ready: boolea
   );
 }
 
-export default function LatestUpdates() {
+// Props OPCIONALES con los defaults de siempre: la homepage de ab7 no cambia.
+// Existen para que los drafts EX puedan variar la sección sin forkearla.
+export type LatestUpdatesProps = {
+  /** El titular de la sección. */
+  title?: string;
+  /** Dónde se alinea ese titular. */
+  align?: "center" | "left";
+};
+
+export default function LatestUpdates({
+  title = "The latest from NEAR",
+  align = "center",
+}: LatestUpdatesProps = {}) {
   // El reveal de las cards al entrar en viewport. Es lo único que queda de la
   // maquinaria de motion propia: el material del cover ahora lo pinta el runtime
   // de Unicorn Studio, que trae su propio rAF por escena.
@@ -174,7 +186,11 @@ export default function LatestUpdates() {
   return (
     <section ref={gateRef} className="bg-cream text-foreground">
       <Container className="flex flex-col gap-20 py-28 md:gap-24 md:py-36">
-        <h2 className="text-center text-h1 text-pretty">The latest from NEAR</h2>
+        <h2
+          className={`text-h1 text-pretty ${align === "left" ? "text-left" : "text-center"}`}
+        >
+          {title}
+        </h2>
 
         <div className="flex flex-col gap-7">
           {/* justify-end: sin el label "Latest News" (removido a pedido), el

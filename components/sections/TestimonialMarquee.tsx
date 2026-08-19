@@ -54,7 +54,20 @@ const TESTIMONIALS = [
 // esto da ~48px/s: lento como para leer un quote entero al pasar.
 const LOOP_SECONDS = 45;
 
-export default function TestimonialMarquee() {
+// Las dos props son OPCIONALES y sus defaults son lo que la sección ya hacía,
+// así que la homepage de ab7 no cambia. Existen para que los drafts EX puedan
+// variar el mismo carrusel sin forkearlo.
+export type TestimonialMarqueeProps = {
+  /** Hacia dónde corre la cinta. */
+  direction?: "left" | "right";
+  /** Segundos de una vuelta completa. Más = más lento. */
+  loopSeconds?: number;
+};
+
+export default function TestimonialMarquee({
+  direction = "left",
+  loopSeconds = LOOP_SECONDS,
+}: TestimonialMarqueeProps = {}) {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
     const mm = gsap.matchMedia();
@@ -68,10 +81,16 @@ export default function TestimonialMarquee() {
       // salto, independiente del ancho de card. Por eso la separación entre
       // cards va como MARGEN DE CADA CARD y no como `gap` del track: un gap
       // agrega n-1 espacios y rompe justo esa exactitud.
+      // El sentido se invierte cambiando el ORIGEN, no el destino: partiendo de
+      // −50% y yendo a 0, la cinta corre hacia la derecha y el bucle sigue
+      // siendo exacto, porque el track son dos sets idénticos y el salto de
+      // −50% a 0 cae siempre en el mismo fotograma.
+      const from = direction === "right" ? -50 : 0;
+      const to = direction === "right" ? 0 : -50;
       const tween = gsap.fromTo(
         track,
-        { xPercent: 0 },
-        { xPercent: -50, duration: LOOP_SECONDS, ease: "none", repeat: -1, force3D: true }
+        { xPercent: from },
+        { xPercent: to, duration: loopSeconds, ease: "none", repeat: -1, force3D: true }
       );
       pauseOffscreen(tween, scope);
 
