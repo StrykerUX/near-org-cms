@@ -400,6 +400,22 @@
   --text-caption--font-weight: 400;
 
   /* Uppercase transform is applied via the `uppercase` utility, not baked into this token */
+  /* Un escalón por debajo de `caption`, que hasta ahora era el piso de la
+     escala. El rol es la letra chica que ACOMPAÑA a un bloque sin competir con
+     su cuerpo: las capacidades del stack bajo cada ficha de `StackAnchors`.
+
+     A tamaño caption esas etiquetas pesaban lo mismo que el párrafo de arriba y
+     la ficha se leía como dos bloques del mismo rango en vez de un texto y su
+     pie. No es un caption más chico por gusto: es el nivel que faltaba para que
+     "esto es secundario" se pueda decir con el tamaño.
+
+     No baja de 11px: por debajo de eso una mono en versalitas deja de leerse
+     cómodamente, y estas etiquetas son contenido, no textura. */
+  --text-micro: clamp(0.6875rem, 0.6723rem + 0.0647vw, 0.75rem);
+  --text-micro--line-height: 1.35;
+  --text-micro--letter-spacing: 0.01em;
+  --text-micro--font-weight: 400;
+
   --text-eyebrow: clamp(0.8125rem, 0.7973rem + 0.0647vw, 0.875rem);
   --text-eyebrow--line-height: 1.2;
   --text-eyebrow--letter-spacing: 0.2em;
@@ -675,6 +691,34 @@
   font-family: var(--font-mono);
   font-size: var(--text-caption);
   line-height: var(--text-caption--line-height);
+  letter-spacing: var(--text-mono--letter-spacing);
+  font-weight: var(--text-mono--font-weight);
+}
+
+/* Mono a escala de heading: el rótulo de una capa del stack ("NEAR Intents"),
+   donde la monoespaciada no es letra chica sino el titular mismo.
+
+   Las otras dos monos son letra pequeña —caption y body-sm—, así que la escala
+   no tenía ninguna a tamaño de heading y el rol se escribía `font-mono text-h4`:
+   dos clases donde una describe la intención, y con el tracking negativo que la
+   escala sans le pasa a la mono sin querer.
+
+   El tamaño sale del MISMO token que la sans (`--text-h4`), igual que las otras
+   dos, así que mover el nivel mueve los dos. */
+@utility text-h4-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  letter-spacing: var(--text-mono--letter-spacing);
+  font-weight: var(--text-mono--font-weight);
+}
+
+/* La mono del nivel `micro`. Mismo contrato que las otras dos: el tamaño sale
+   del token sans, así que mover `--text-micro` mueve las dos. */
+@utility text-micro-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
   letter-spacing: var(--text-mono--letter-spacing);
   font-weight: var(--text-mono--font-weight);
 }

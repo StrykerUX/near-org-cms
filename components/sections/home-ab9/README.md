@@ -75,6 +75,48 @@ el mínimo donde ese par entra sin desbordar.
 y los rótulos—, y se copiaron de `proofAltContent.ts` sin tres campos que allá
 existen para las otras dos versiones del lab (`plain`, `short`, `count`).
 
+### 4. `NearStackV2` → `StackAnchors`
+
+El mismo ensamble isométrico, pero con las cuatro capas escritas **en las cuatro
+esquinas**, cada una anclada a la pieza de la que habla, en vez de en una columna
+al lado del arte.
+
+Es la variante **C · Anchors** de [`../stack-labs/`](../stack-labs/README.md).
+**Copiada, no importada**, igual que `ProofDatum` — y acá la copia arrastra tres
+archivos más, que son la infraestructura de la escena:
+
+| Archivo | Qué es |
+|---|---|
+| `stackAssembly.tsx` | el ensamble isométrico (usa `stackArt.generated.tsx`, que ya estaba) |
+| `useStackScene.ts` | el recorrido de 200svh, el hover por delegación y el tag al cursor |
+| `StackCursorTag.tsx` | la tarjeta que sigue al puntero |
+
+Esos tres son idénticos a los del lab salvo por sus imports. El README del lab
+deja abierta la pregunta de si el arte y la escena se promueven a módulos
+compartidos de verdad; **acá no se decidió eso**, se copiaron. Si una segunda
+página los necesita, esa es la señal para promoverlos.
+
+`NearStackV2.tsx` ya no está en esta carpeta. `stackArt.generated.tsx` sí: lo
+sigue usando `stackAssembly`.
+
+**Lo que cambia respecto del lab**, y es el pedido del prototipo:
+
+1. **Sin titular.** El lab abre con "The NEAR Stack" centrado. Con cuatro fichas
+   en las esquinas y el arte en el medio, un quinto bloque de texto solo empuja
+   al resto contra los bordes.
+2. **La ficha es otra cosa.** Cuatro registros tipográficos, cada uno con su
+   trabajo: el nombre en mono a escala de heading, una regla con el destino
+   externo, el cuerpo en sans, y abajo las piezas de la capa y las capacidades
+   del stack en mono.
+3. **Copy nueva** en `nearStackContent.ts` para los cuatro cuerpos, más dos
+   constantes que el stack no tenía: `STACK_PIECES` (las piezas de Intents
+   y de AI, como etiquetas — Protocol no lleva: las suyas son los cubos de la
+   columna y cada uno se cuenta solo al pasar el puntero) y `STACK_CAPABILITIES` (las seis capacidades, iguales en las
+   cuatro fichas — la repetición es el mensaje).
+
+`--text-h4-mono` entra al DS: las otras dos monos son letra pequeña, y acá la
+monoespaciada es el titular.
+
 ## Lo heredado
 
 Todo lo que ab9 NO cambia está documentado en

@@ -1,7 +1,7 @@
 import HeroVideo from "@/components/sections/home-ab9/HeroVideo";
 import AgentEconomy from "@/components/sections/home-ab9/AgentEconomy";
 import OwnYourOwn from "@/components/sections/home-ab9/OwnYourOwn";
-import NearStackV2 from "@/components/sections/home-ab9/NearStackV2";
+import StackAnchors from "@/components/sections/home-ab9/StackAnchors";
 import ProofDatum from "@/components/sections/home-ab9/ProofDatum";
 import BelongsNewsletter from "@/components/sections/home-ab9/BelongsNewsletter";
 import CustomerStories from "@/components/sections/home-ab9/CustomerStories";
@@ -23,6 +23,11 @@ import UpdatesList from "@/components/sections/UpdatesList";
 //     pasando de a una por un carril sticky de 325svh. Es la versión B del
 //     laboratorio `sections/proof-alt/`, copiada acá con las fichas casi al
 //     doble de ancho — el detalle está en el archivo.
+//  4. Fuera `NearStackV2`, y en su lugar `StackAnchors`: el mismo ensamble
+//     isométrico, pero con las cuatro capas escritas en las cuatro esquinas,
+//     ancladas a la pieza de la que hablan, en vez de en una columna al lado.
+//     Es la variante C del laboratorio `sections/stack-labs/`, con la ficha
+//     rehecha según el prototipo.
 //
 // El PRIMITIVO no se tocó: `StairTransition` sigue en `components/primitives/` y
 // lo siguen montando ab6, ab7, home-v4 y los newsletter-labs. El detalle de qué
@@ -35,7 +40,7 @@ export default function HomepageAb9View() {
       <HeroVideo />
       <AgentEconomy />
       <OwnYourOwn />
-      <NearStackV2 />
+      <StackAnchors />
       <ProofDatum />
       <BelongsNewsletter />
       <CustomerStories />

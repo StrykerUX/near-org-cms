@@ -26,7 +26,7 @@ export type StackLeaf = {
 export const PROTOCOL_BLOCK: StackLeaf = {
   key: "protocol",
   name: "NEAR Protocol",
-  body: "The settlement layer at the center of the stack — everything else is built around it. Fully sharded and quantum-resistant, with five years on mainnet at 100% uptime, built to clear the agent economy at scale.",
+  body: "NEAR Protocol is a fully sharded, quantum-resistant blockchain that has operated on mainnet for over five years with 100% uptime, built to support the agent economy at scale.",
   // Destinos confirmados: intents.near.org, near.ai y near.com. No salen ni de
   // `main` ni de la rama del rediseño tal cual — la rama apuntaba este a
   // `/prototype/protocol`, ruta que ya no existe.
@@ -36,14 +36,14 @@ export const PROTOCOL_BLOCK: StackLeaf = {
 export const INTENTS_BLOCK: StackLeaf = {
   key: "intents",
   name: "NEAR Intents",
-  body: "The first ring out from the protocol. Intents deal in outcomes, not transactions: say what should happen — a swap, a transfer, a settlement across 30+ chains — and a network of solvers competes to make it true. No bridges, no juggling gas.",
+  body: "The universal liquidity protocol. NEAR Intents uses a novel transaction architecture to abstract away cross-chain complexity and maximize performance, security, and efficiency for DeFi apps, AI agents, and end users.",
   link: { label: "Visit intents.near.org", href: "https://intents.near.org" },
 };
 
 export const AI_BLOCK = {
   name: "NEAR AI",
   intro:
-    "Confidential AI infrastructure, wrapped around the core. Inference and agents run inside encrypted enclaves: requests stay private by design, and every output can be independently verified.",
+    "NEAR AI runs sensitive workloads for enterprises, governments, and AI applications. Inference and agents execute inside encrypted enclaves where requests are confidential by design and outputs are independently verifiable.",
   link: { label: "Visit near.ai", href: "https://near.ai" },
   subs: [
     {
@@ -67,7 +67,7 @@ export const AI_BLOCK = {
 export const NEARCOM_BLOCK: StackLeaf = {
   key: "nearcom",
   name: "near.com",
-  body: "The outer shell — one onchain account for everything. Confidential swaps, transfers, perps, yield, and RWAs across 30+ chains, with your assets in your control the whole way. The way crypto should work.",
+  body: "The only onchain account you need. Fully confidential swaps, transfers, deposits, and withdrawals. Trade perps, earn yield, and hold RWAs across 30+ chains, all from one account, your assets in your control. The way crypto should work.",
   link: { label: "Visit near.com", href: "https://near.com" },
 };
 
@@ -107,3 +107,52 @@ export const PROTOCOL_FEATURES: readonly { name: string; sub?: string; desc: str
     desc: "Through threshold MPC, a single NEAR account signs and triggers native transactions across 30+ chains, including Bitcoin, Ethereum, Solana, and more, with no bridge contracts. Support spans both ECDSA and EdDSA signature schemes.",
   },
 ];
+
+// ── Lo que agrega la composición de `StackAnchors` ──────────────────────────
+//
+// Las cuatro fichas de las esquinas llevan dos cosas que el stack no tenía:
+// una lista corta de piezas y una fila de capacidades.
+
+/**
+ * Las piezas que cada capa expone, como una lista de marcas.
+ *
+ * No es lo mismo que `AI_BLOCK.subs` ni que `PROTOCOL_FEATURES`, aunque se
+ * solapen: aquellos son entidades con cuerpo propio —los tres productos de AI
+ * viven en el arte y tienen su tarjeta al pasar el puntero; los seis features
+ * son el único texto de los cubos de la columna—, y estos son ETIQUETAS. Un
+ * nombre y nada más, para que la ficha diga de qué está hecha la capa sin
+ * gastar un párrafo.
+ *
+ * Solo la llevan `intents` y `ai`. Las otras dos no, y por motivos distintos:
+ *
+ *   · `nearcom` es la cáscara — lo que expone son las capacidades de abajo, no
+ *     piezas;
+ *   · `protocol` la tuvo (Dynamic Resharding, Post-Quantum Signing, Chain
+ *     Signatures, Private Shard, Top-Level Accounts) y se quitó. Sus piezas ya
+ *     están dichas donde importan: son los cubos de la columna central, y cada
+ *     uno cuenta la suya con su subhead al pasar el puntero, vía
+ *     `PROTOCOL_FEATURES`. Repetirlas como etiquetas planas debajo del cuerpo
+ *     duplicaba el contenido y le quitaba el motivo a explorar la columna.
+ */
+export const STACK_PIECES: Readonly<Record<string, readonly string[]>> = {
+  intents: ["Confidential Intents"],
+  ai: ["NEAR AI Cloud", "IronClaw", "Agent Market"],
+};
+
+/**
+ * Las capacidades, iguales en las cuatro fichas.
+ *
+ * Que se repitan es el mensaje, no un descuido de la copy: son propiedades del
+ * STACK, no de una capa. Da igual por dónde entres —la cuenta, los intents, la
+ * IA o el protocolo—, las seis siguen valiendo. Por eso son una constante
+ * compartida y no un campo por bloque: un campo invitaría a que alguna se
+ * quedara con cinco y la afirmación dejaría de ser cierta sin que nadie lo note.
+ */
+export const STACK_CAPABILITIES = [
+  "Confidential",
+  "Cross-chain",
+  "Permissionless",
+  "RWAs",
+  "Perps",
+  "Earn",
+] as const;
