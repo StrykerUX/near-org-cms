@@ -44,6 +44,37 @@ donde estaba y lo siguen montando `home-ab6`, `home-ab7`, `home-v4` y los
 `newsletter-labs`. Acá solo dejó de usarse — ab9 es la versión sin escaleras,
 no una poda del recurso.
 
+### 3. `ProofStepper` → `ProofDatum`
+
+Seis pruebas colgando de un eje que cruza el ancho, alternando arriba y abajo,
+en lugar del carril sticky que pasaba cinco de a una.
+
+Es la versión **B · Datum** de [`../proof-alt/`](../proof-alt/README.md), el
+laboratorio donde se compararon tres estructuras para estas mismas seis pruebas.
+**Copiada, no importada** — lo pide el README de esa carpeta: es un laboratorio,
+su contenido puede cambiar o borrarse sin aviso, y ya pasó dos veces.
+
+No es un reskin. El stepper gastaba 325svh para entregar cinco datos de a uno;
+esto mide lo que mide su contenido y muestra las seis desde el primer frame.
+
+**El cambio respecto del lab: fichas más anchas y desfasadas.** Allá la retícula
+es de seis columnas y cada ficha ocupa una (1/6 = 16.7%), y el propio README del
+lab anota que a esa medida la cifra queda apretada. Acá son **trece columnas con
+fichas de tres** (3/13 = 23%, ~365px contra ~250px), arrancando en 1/5/9 arriba
+y en 3/7/11 abajo: cada ficha de abajo empieza dos columnas después de la de
+arriba que la precede, así que se solapa con sus vecinas de la otra fila por un
+tercio de su ancho, sin colisionar con ellas.
+
+Lo que se calibra es el par **ancho/desfase**, no el ancho solo: con desfase de
+una columna el solape sube a dos tercios y las fichas se leen encimadas; con
+desfase de tres desaparece y vuelven a ser dos filas de tres. Trece columnas es
+el mínimo donde ese par entra sin desbordar.
+
+`ProofStepper.tsx` no está en esta carpeta, y `PROOF_STEPS` salió de
+`homeAb9Content.ts`. Los datos nuevos son otros —cambia la cantidad, las cifras
+y los rótulos—, y se copiaron de `proofAltContent.ts` sin tres campos que allá
+existen para las otras dos versiones del lab (`plain`, `short`, `count`).
+
 ## Lo heredado
 
 Todo lo que ab9 NO cambia está documentado en

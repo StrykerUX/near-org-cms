@@ -328,6 +328,37 @@
   --text-mural--letter-spacing: -0.04em;
   --text-mural--font-weight: 500;
 
+  /* Un statement de párrafo que se lee grande DENTRO de una caja: el manifiesto
+     de `home-ab9/AgentEconomy`, sobre su card negro.
+
+     Existe porque entre `h2` (3.75rem de tope) y `statement` (5.875rem) no hay
+     nada, y el rol necesita caer justo en el medio. Pero el problema de fondo no
+     era el tamaño sino la UNIDAD: `h1` y `h2` escalan con `vw`, y el card que
+     los contiene topa en el `max-width` del Container. Pasado ese punto el card
+     deja de crecer y el texto no, así que la proporción entre los dos —que es
+     lo que el diseño fija— se rompe justo en los monitores anchos.
+
+     En `cqw` eso no pasa: el cuerpo se mide contra el ancho del CARD, así que la
+     proporción entre los dos se mantiene igual a 1440 que a 2560. Mismo
+     criterio, y misma condición de uso, que `--text-mural`: quien lo use declara
+     `@container` en el bloque, porque sin contenedor `cqw` resuelve contra el
+     viewport y vuelve el problema.
+
+     El coeficiente arrancó en 4.6cqw —la proporción medida en la referencia,
+     76px sobre un card de 1660— y bajó a 3.4 en dos pasos, porque a ese cuerpo
+     el bloque se leía como un cartel y no como un párrafo. Lo que la referencia
+     fija bien es la PROPORCIÓN entre el texto y su caja; el cuerpo absoluto
+     salió de mirarlo en pantalla.
+
+     Los dos extremos del clamp son de encuadre: abajo, que en un teléfono
+     —donde el card mide ~330px y 3.4% serían 11px— no baje de un cuerpo
+     legible; arriba, que si algún día el bloque vive en una caja más ancha deje
+     de crecer antes de volverse un titular. */
+  --text-manifesto: clamp(1.5rem, 3.4cqw, 3.75rem);
+  --text-manifesto--line-height: 1.06;
+  --text-manifesto--letter-spacing: -0.015em;
+  --text-manifesto--font-weight: 500;
+
   --text-h1: clamp(2.75rem, 2.0825rem + 2.8479vw, 5.5rem);
   --text-h1--line-height: 1.05;
   --text-h1--letter-spacing: -0.015em;

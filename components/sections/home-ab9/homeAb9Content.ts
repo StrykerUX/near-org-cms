@@ -64,55 +64,87 @@ export const CUSTOMER_STORIES = [
   },
 ] as const;
 
-// ── de ProofStepper.tsx ──
-// Stepper de 5 pruebas. Sticky de CSS y un ScrollTrigger de SOLO LECTURA, nunca
-// `pin: true`; el porqué está en components/sections/README.md. Tres
-// diferencias de diseño respecto del rebuild:
+// ── de ProofDatum.tsx ──
+// Las seis pruebas que cuelgan del eje.
 //
-//  1. El carril alinea a la IZQUIERDA (todas las palabras arrancan en la misma
-//     X) en vez de a la derecha, y se desplaza en bloque para que la más ancha
-//     roce el borde del viewport. Como consecuencia el cursor queda FIJO en X:
-//     ya no tiene que perseguir el borde izquierdo de cada título.
-//  2. El recorrido es mucho más corto: 7svh por paso contra 65svh. Las cinco
-//     pruebas pasan casi al vuelo, a propósito.
-//  3. El cursor lleva el gradiente lima→verde en vez del verde plano.
-export const PROOF_STEPS = [
+// Antes esto era `PROOF_STEPS`: cinco pruebas que el `ProofStepper` pasaba de a
+// una, cada una con su `value` y su `label` sueltos para el cursor del carril.
+// Son OTROS datos, no los mismos con otro formato — cambia la cantidad, cambian
+// las cifras y cambian los rótulos.
+//
+// La copy es la de `proof-alt/proofAltContent.ts`, que es de donde viene la
+// estructura. Se copió y no se importa, por lo que dice el README de esa
+// carpeta: es un laboratorio y su contenido puede cambiar o borrarse sin aviso.
+// Lo que sí se dejó afuera son tres campos que allá existen para las OTRAS dos
+// versiones del lab (`plain`, `short`, `count`, para aria-labels, carriles y
+// contadores): acá no los lee nadie, y un campo que nadie lee es una promesa de
+// que alguien lo mantiene.
+export const PROOF_STATS = [
   {
-    word: "1+ Million",
-    eyebrow: "Built on Scale",
-    value: "1M+",
-    label: "daily wallets",
-    body: "Real people moving real value every day — not bots inflating a chart.",
+    id: "uptime",
+    eyebrow: "Built to last",
+    // La cifra viene partida en DOS tramos porque así está diseñada: el primero
+    // en tinta, el segundo en verde. El corte es ÓPTICO, no semántico, y en dos
+    // de los seis cae a mitad de palabra ("Confi" + "dential"). Por eso son
+    // `value`/`accent` y no `number`/`unit` — esos nombres prometerían una
+    // semántica que estos datos no tienen.
+    value: "100% ",
+    accent: "uptime",
+    body: "NEAR has run for more than five years on mainnet without a single outage. Every network upgrade has shipped without downtime.",
   },
   {
-    word: "$20B+",
-    eyebrow: "Built on Volume",
-    value: "$20B",
-    label: "settled",
-    body: "Cross-chain volume cleared on-chain, with finality in under a second.",
+    id: "tps",
+    eyebrow: "Built to scale",
+    value: "1 Million ",
+    accent: "TPS",
+    body: "NEAR's architecture handles over a million transactions per second on consumer-grade hardware and scales automatically through dynamic resharding.",
   },
   {
-    word: "100%",
-    eyebrow: "Built on Proof",
-    value: "100%",
-    label: "uptime",
-    body: "Move cross-chain, trade perps, hold RWAs, stay confidential, and access all of DeFi from your own wallet.",
+    id: "volume",
+    eyebrow: "Built to connect",
+    value: "$24 + ",
+    accent: "Billion",
+    body: "More than $24 billion in cross-chain volume has settled through NEAR Intents. Swaps clear in seconds for less than a cent, with no manual bridging required.",
   },
   {
-    word: "Quantum",
-    eyebrow: "Built on Math",
-    value: "0",
-    label: "quantum exposure",
-    body: "Post-quantum signatures from day one, so nothing you sign today expires tomorrow.",
+    id: "chains",
+    eyebrow: "Built to reach",
+    value: "30 + ",
+    accent: "Blockchains",
+    body: "A single integration reaches Bitcoin, Ethereum, Solana, and more than thirty other chains. Transactions execute natively, so users never hold a wrapped asset.",
   },
   {
-    word: "Confidential",
-    eyebrow: "Built on Privacy",
-    value: "TEE",
-    label: "on every node",
-    body: "Confidential compute by default: your data stays yours, even from the validators.",
+    id: "quantum",
+    eyebrow: "Built to resist",
+    value: "Quantum-",
+    accent: "ready",
+    body: "NEAR is one of the first blockchains to add a NIST-approved post-quantum signature scheme in production.",
+  },
+  {
+    id: "privacy",
+    eyebrow: "Built to privacy",
+    value: "Confi",
+    accent: "dential",
+    body: "Trades settle inside a private shard and AI workloads run inside encrypted enclaves, where no operator or outside observer can see them.",
   },
 ] as const;
+
+// ── de AgentEconomy.tsx ──
+// El statement va PARTIDO en cuatro porque dos de sus tramos son acentos serif
+// y esto es un módulo puro: no puede llevar el `<Accent>` que los pinta. Lo que
+// no puede pasar es que el texto se guarde entero y el componente lo re-parta
+// con un `split` o un índice — ahí la copy y su tratamiento quedan acoplados por
+// una posición de carácter, y cambiar una palabra rompe el acento en silencio.
+//
+// Es la misma frase que en ab7 pintaba `QuantumBars` (`BARS_STATEMENT`, en un
+// solo string porque ahí el acento no existía: lo que se movía era un barrido
+// de gradiente sobre la línea entera).
+export const AGENT_ECONOMY = {
+  lead: "NEAR is open infrastructure powering",
+  accentA: "the agent economy.",
+  body: "Quantum-resistant and confidential by design, NEAR empowers you to trade anything anywhere and",
+  accentB: "own your intelligence.",
+} as const;
 
 // ── de OwnYourOwn.tsx ──
 // Solo el CONTENIDO. Las clases de posición y tinte se quedaron en el componente
