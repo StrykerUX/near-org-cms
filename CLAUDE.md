@@ -267,7 +267,7 @@ de trabajo es visual, no de compilación.
 
 ## Contexto del proyecto (Regenta/Aura)
 
-Al iniciar una sesión en este repo, ANTES de explorar archivos corre `/aura near-ai-web` —
+Al iniciar una sesión en este repo, ANTES de explorar archivos corre `/aura near.org` —
 trae resumen, arquitectura, estructura, decisiones y estado en ~1-2k tokens.
 Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`.
 
