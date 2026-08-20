@@ -6,7 +6,11 @@ import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
-import { EASE_OUT, REVEAL, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import {
+  EASE_OUT,
+  REVEAL,
+  DEBUG_MARKERS,
+} from "@/components/primitives/motion/motionTokens";
 import { driftOffsets } from "@/components/primitives/motion/staggerDrift";
 import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-ab9/homeAb9Content";
 
@@ -214,19 +218,22 @@ const CARD_LAYOUT = [
   {
     // Assets — banda izquierda, fila 3. Llega después del salto largo (1.12):
     // es la que abre el grupo de abajo.
-    place: "lg:col-start-2 lg:col-span-2 lg:row-start-3 lg:-mt-[53%] lg:-ml-[40%] lg:mr-[10%]",
+    place:
+      "lg:col-start-2 lg:col-span-2 lg:row-start-3 lg:-mt-[53%] lg:-ml-[40%] lg:mr-[10%]",
     tint: "bg-white/50",
   },
   {
     // Intelligence — banda derecha, fila 2. El paso más corto (0.65) la deja
     // casi a la altura de Alpha: se leen como un par, no como escalones.
-    place: "lg:col-start-10 lg:col-span-2 lg:row-start-2 lg:-mt-[100%] lg:ml-[6%] lg:-mr-[36%]",
+    place:
+      "lg:col-start-10 lg:col-span-2 lg:row-start-2 lg:-mt-[100%] lg:ml-[6%] lg:-mr-[36%]",
     tint: "bg-card-tint/50",
   },
   {
     // Alpha — banda centro-izquierda, fila 1. Arriba del todo. Cruza el título
     // por delante.
-    place: "lg:col-start-5 lg:col-span-2 lg:row-start-1 lg:mt-[31%] lg:-ml-[37%] lg:mr-[7%]",
+    place:
+      "lg:col-start-5 lg:col-span-2 lg:row-start-1 lg:mt-[31%] lg:-ml-[37%] lg:mr-[7%]",
     tint: "bg-white/50",
   },
   {
@@ -237,13 +244,24 @@ const CARD_LAYOUT = [
     // calcula con `cards[cards.length - 1]`, o sea con el índice 3 de este
     // array. Si alguna vez la última fila la ocupa otra card, ese cálculo hay
     // que mover con ella.
-    place: "lg:col-start-7 lg:col-span-2 lg:row-start-4 lg:-mt-[90%] lg:ml-[10%] lg:-mr-[40%]",
+    place:
+      "lg:col-start-7 lg:col-span-2 lg:row-start-4 lg:-mt-[90%] lg:ml-[10%] lg:-mr-[40%]",
     tint: "bg-card-tint/50",
   },
 ] as const;
 
+/**
+ * Cuánto ANTES del fondo del grid se suelta el encabezado pegado, en px.
+ *
+ * Se compara contra el `mb-[200px]` del título, que es su equivalente: el
+ * título se despega 200px antes del fondo del grid. El encabezado tiene que
+ * hacerlo bastante antes —de ahí el margen— porque cuando el título se suelta
+ * sube, y sube justo hacia donde el encabezado está clavado.
+ */
+const HEAD_RELEASE = 600;
+
 export default function OwnYourOwn() {
-  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
+  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
     const cards = q("[data-own-card]");
     const stage = q("[data-own-stage]")[0];
     const title = q("[data-own-title]")[0];
@@ -263,7 +281,12 @@ export default function OwnYourOwn() {
         stagger: REVEAL.stagger,
         duration: REVEAL.duration,
         ease: EASE_OUT,
-        scrollTrigger: { trigger: stage, start: REVEAL.start, once: true, markers: DEBUG_MARKERS },
+        scrollTrigger: {
+          trigger: stage,
+          start: REVEAL.start,
+          once: true,
+          markers: DEBUG_MARKERS,
+        },
       });
       return;
     }
@@ -317,9 +340,32 @@ export default function OwnYourOwn() {
       const stageBottom = stage.getBoundingClientRect().bottom + window.scrollY;
       let overflow = 0;
       for (let i = 0; i < boxes.length; i++) {
-        overflow = Math.max(overflow, boxes[i].bottom + offsets[i] - stageBottom);
+        overflow = Math.max(
+          overflow,
+          boxes[i].bottom + offsets[i] - stageBottom,
+        );
       }
       stage.style.paddingBottom = `${Math.ceil(overflow)}px`;
+
+      // ── Cuánto dura pegado el encabezado ───────────────────────────────
+      //
+      // Tiene que quedarse mientras las cards avanzan y soltarse ANTES que el
+      // título, porque el título se despega hacia ARRIBA —sube hasta salir— y
+      // si el encabezado sigue clavado ahí arriba, se cruzan.
+      //
+      // El número no se puede escribir en CSS: es "el alto del grid menos un
+      // margen", y el alto del grid es el de cuatro filas de cards, que escala
+      // con el ANCHO de la ventana. Acá ya está medido.
+      //
+      // `HEAD_RELEASE` es ese margen, y su referencia es el `mb-[200px]` del
+      // título: el título se suelta 200px antes del fondo del grid, así que el
+      // encabezado tiene que soltarse bastante antes de eso. La diferencia
+      // absorbe además el alto del propio encabezado, que se descuenta de su
+      // pista.
+      scope.style.setProperty(
+        "--own-head-hold",
+        `${Math.max(0, Math.round(stage.getBoundingClientRect().height - HEAD_RELEASE))}px`,
+      );
     };
 
     measure();
@@ -413,7 +459,7 @@ export default function OwnYourOwn() {
     tl.fromTo(
       cards,
       { y: 0 },
-      { y: (i: number) => offsets[i], ease: "sine.inOut", duration: 1 }
+      { y: (i: number) => offsets[i], ease: "sine.inOut", duration: 1 },
     );
 
     return () => {
@@ -438,7 +484,48 @@ export default function OwnYourOwn() {
     // Nada de overflow-hidden en ningún ancestro: convertiría a este elemento en
     // el contenedor de scroll del título sticky y dejaría de pegarse, en
     // silencio.
-    <section ref={rootRef} className="relative z-[1] bg-cream text-foreground">
+    <section
+      ref={rootRef}
+      // Las medidas de la escena pegada, declaradas una vez acá para que el
+      // encabezado y el título no las repitan cada uno por su lado.
+      style={
+        {
+          // Dónde se planta el encabezado. Reserva la banda del header, que es
+          // `fixed`: sin ella se pega debajo y queda medio tapado.
+          "--own-head-top": "calc(var(--site-header-block) + 2rem)",
+          // Cuánto SCROLL se queda pegado el encabezado antes de soltarse. Es
+          // el alto extra de su pista: un sticky se despega cuando su borde
+          // inferior alcanza el fondo del elemento que lo contiene, así que ese
+          // número ES la duración.
+          //
+          // El valor REAL lo escribe `measure()` en cada refresh, porque
+          // depende del alto del grid de cards y ese alto escala con el ancho
+          // de la ventana. Este de acá es el que rige antes de la primera
+          // medida y con `prefers-reduced-motion`, donde el efecto no corre
+          // pero el sticky —que es CSS— sigue existiendo.
+          "--own-head-hold": "120svh",
+          // Dónde cae el título en el viewport, de 0 (borde de arriba) a 1
+          // (borde de abajo). 0.5 sería el centro matemático y se lee BAJO: el
+          // line-box de `--text-display` reserva el espacio de las descendentes
+          // —que en "Own Your Own" solo usa la "y"— así que la mancha de tinta
+          // queda por encima del centro de su propia caja, y centrar la caja
+          // empuja la mancha hacia abajo. 0.45 devuelve ese sesgo.
+          "--own-title-anchor": "0.45",
+          // Cuánto arrancan las cards POR DEBAJO del título. Sin esto, la
+          // primera card (Alpha) nace a la misma altura que el título y lo tapa
+          // desde el primer frame: la escena empieza con el cruce ya ocurrido,
+          // y no se llega a leer qué es lo que las cards cruzan.
+          //
+          // Va en `svh` a pesar de que el resto de las distancias de esta
+          // sección van en px o en % del layout —ver la nota de los márgenes de
+          // las cards—, y es por lo que mide: no es un hueco entre dos cajas,
+          // es cuánto scroll pasa entre que el título se planta y llega la
+          // primera card. Eso es distancia de VIEWPORT, y `svh` es su unidad.
+          "--own-card-lead": "38svh",
+        } as React.CSSProperties
+      }
+      className="relative z-[1] bg-cream text-foreground"
+    >
       {/* El `pb` es aire real, no compensación: separa la sección del corte con
           la siguiente (que es negra y entra a sangre). Lo que compensa el
           desvío de las cards es el `paddingBottom` que el efecto le escribe al
@@ -446,35 +533,66 @@ export default function OwnYourOwn() {
           un desborde de animación esconde el bug para un tamaño de ventana y lo
           deja intacto en el resto.
 
-          El gap separa tres hijos: encabezado → grid de cards → título de
-          mobile. El escalón de desktop solo actúa en el primer hueco: el tercer
-          hijo es `lg:hidden`, y un elemento oculto no genera caja ni gap. */}
+          El gap del Container ya solo separa DOS hijos —el wrapper de la escena
+          y el título de mobile—, y en desktop ese hueco no existe: el título es
+          `lg:hidden`, y un elemento oculto no genera caja ni gap. El gap entre
+          la pista del encabezado y el grid se mudó al wrapper de abajo. */}
       <Container className="flex flex-col gap-24 pb-32 pt-32 lg:gap-36">
-        <div className="grid grid-cols-1 gap-24 lg:grid-cols-2">
-          <div className="flex flex-col gap-5">
-            <Eyebrow>The future of finance is yours</Eyebrow>
-            <h2 className="text-h2 text-pretty">
-              Next gen
-              <br />
-              <Accent>self custody</Accent>
-            </h2>
-          </div>
-          <p className="text-body-lg text-muted-foreground text-pretty lg:pt-12">
-            Your keys, your assets, no compromises. NEAR accounts pair
-            programmable access keys with quantum-safe signing, so you get the
-            ease of a web login with the guarantees of true self custody. Trade,
-            stake, and move value across 30+ chains without ever handing your
-            assets to an exchange.
-          </p>
-        </div>
+        {/* El wrapper de la escena: la pista del encabezado y el grid de las
+            cards. Existe para llevar el `gap` entre los dos — el límite del
+            encabezado pegado NO es este elemento sino su propia pista, que es
+            la de adentro. */}
+        <div className="flex flex-col gap-24 lg:gap-36">
+          {/* La PISTA del encabezado, y su `pb` es todo lo que hace: un sticky
+              se despega cuando su borde inferior alcanza el fondo del elemento
+              que lo contiene, así que ese padding —y no un ScrollTrigger, ni un
+              alto declarado— es lo que decide cuánto dura pegado.
 
-        {/* El grid manda: su altura es la de las cards y sus márgenes, así que
+              La pista es ALTA: cubre casi todo el recorrido de las cards, así
+              que el encabezado se queda mientras ellas pasan. El grid de abajo
+              se come ese alto con un margen negativo del mismo valor, o sea que
+              la pista no ocupa espacio propio — solo define un tramo de scroll.
+
+              Sin pista, el contenedor del encabezado sería el wrapper que
+              también lleva el grid, y se quedaría clavado hasta el final: el
+              "Own Your Own" se despega hacia ARRIBA al terminar la escena, sube
+              justo hacia donde está el encabezado, y los dos se leen
+              encimados. */}
+          <div className="lg:pb-[var(--own-head-hold)]">
+            {/* `z-0`: las cards son `z-[2]` y le pasan POR ENCIMA al cruzarlo.
+                Es el mismo trato que ya recibe el "Own Your Own" (`z-[1]`), y
+                es lo que hace que la escena se lea como cards volando sobre un
+                texto quieto y no como un texto flotando sobre las cards. */}
+            <div
+              data-own-head
+              className="grid grid-cols-1 gap-24 lg:sticky lg:z-0 lg:grid-cols-2"
+              style={{ top: "var(--own-head-top)" }}
+            >
+              <div className="flex flex-col gap-5">
+                <Eyebrow>The future of finance is yours</Eyebrow>
+                <h2 className="text-h2 text-pretty">
+                  Next gen
+                  <br />
+                  <Accent>self custody</Accent>
+                </h2>
+              </div>
+              <p className="text-body-lg text-muted-foreground text-pretty lg:pt-12">
+                Your keys, your assets, no compromises. NEAR accounts pair
+                programmable access keys with quantum-safe signing, so you get
+                the ease of a web login with the guarantees of true self
+                custody. Trade, stake, and move value across 30+ chains without
+                ever handing your assets to an exchange.
+              </p>
+            </div>
+          </div>
+
+          {/* El grid manda: su altura es la de las cards y sus márgenes, así que
             no hay ninguna altura declarada que pueda quedarse corta o larga. */}
-        <div
-          data-own-stage
-          className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-0"
-        >
-          {/* El título ocupa las cuatro filas y se pega DENTRO de esa celda: por
+          <div
+            data-own-stage
+            className="grid grid-cols-1 gap-14 lg:-mt-[var(--own-head-hold)] lg:grid-cols-12 lg:gap-x-6 lg:gap-y-0 lg:pt-[var(--own-card-lead)]"
+          >
+            {/* El título ocupa las cuatro filas y se pega DENTRO de esa celda: por
               eso se queda centrado mientras las cards pasan, sin necesitar un
               track aparte.
 
@@ -487,6 +605,9 @@ export default function OwnYourOwn() {
               como clase arbitraria. En mobile el elemento es estático y `top` no
               tiene efecto, así que no hace falta condicionarlo.
 
+              Ese `top` no es el centro exacto: lleva la corrección óptica de
+              `--own-title-anchor`, declarada en la `<section>`.
+
               Los márgenes recortan el tramo pegado por sus dos puntas. Van como
               margen y no como padding a propósito: el padding agranda el
               elemento pegado y se llevaría al `h3` con él, moviendo también la
@@ -494,9 +615,12 @@ export default function OwnYourOwn() {
               sticky puede vivir —el área de grid del item, encogida por sus
               propios márgenes— y deja el anclaje intacto.
 
-              `mt` es la entrada: sin él el título nace exactamente a la altura
-              de la card Assets, la única sin `mt` y por lo tanto también pegada
-              al techo del grid, y las dos entran juntas.
+              `mt` es la entrada, y desde que existe `--own-card-lead` vive en
+              el `style` de abajo en vez de acá: el lead es padding del grid y
+              empujaría también al título, así que el margen tiene que restarlo.
+              Su valor sigue siendo el mismo — sin él el título nacería a la
+              altura de la card Assets, la única sin `mt` propio y por lo tanto
+              también pegada al techo del grid, y las dos entrarían juntas.
 
               `mb` es la salida: el título se despega cuando su borde inferior
               alcanza el fondo del grid menos este margen, así que estos 200px
@@ -509,57 +633,79 @@ export default function OwnYourOwn() {
               ancho. (Las cards ya pasaron a % de su celda, que es la versión
               buena de esa misma idea; acá el % no sirve porque el contenedor de
               este item es todo el grid, no una celda de card.) */}
-          <div
-            data-own-title
-            className="z-[1] hidden lg:mt-[150px] lg:mb-[200px] lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
-            style={{ top: "calc(50svh - var(--text-display) / 2)" }}
-          >
-            <h3 className="whitespace-nowrap text-center text-display">
-              Own Your <Accent display>Own</Accent>
-            </h3>
-          </div>
-
-          {CARDS.map((card, i) => (
-            <article
-              key={card.title}
-              data-own-card
-              // z-[2]: las cards cruzan el título por delante, como en la
-              // referencia. El resto sale de CARD_LAYOUT, emparejado por índice
-              // con el contenido — el `cards.length !== SPEEDS.length` del efecto
-              // ya falla si los tres arrays se desincronizan.
-              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
+            <div
+              data-own-title
+              className="z-[1] hidden lg:mb-[200px] lg:block lg:sticky lg:col-start-4 lg:col-span-6 lg:self-start lg:[grid-row:1/-1]"
+              style={{
+                // Un punto del viewport —cuál, lo dice `--own-title-anchor`—
+                // menos media altura del propio título. `--text-display` es su
+                // alto porque su line-height es 1.
+                //
+                // Se mide contra el viewport ENTERO y no contra el hueco bajo
+                // el encabezado, porque para cuando el título llega a pegarse
+                // el encabezado ya se soltó: su pista se agota antes. Medirlo
+                // contra un hueco que a esa altura ya no existe lo dejaba
+                // innecesariamente bajo.
+                top: "calc(100svh * var(--own-title-anchor) - var(--text-display) / 2)",
+                // El `--own-card-lead` que baja a las cards es padding del
+                // grid, así que empujaría también al título —es un item más de
+                // ese grid—. Este margen negativo lo devuelve a donde estaba:
+                // los 150px son su entrada de siempre, medidos desde el borde
+                // del grid y no desde el borde del padding.
+                //
+                // Sin variante `lg:` porque no la necesita: en mobile el
+                // elemento es `hidden`, y un elemento oculto no tiene margen
+                // que aplicar.
+                marginTop: "calc(150px - var(--own-card-lead))",
+              }}
             >
-              {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
+              <h3 className="whitespace-nowrap text-center text-display">
+                Own Your <Accent display>Own</Accent>
+              </h3>
+            </div>
+
+            {CARDS.map((card, i) => (
+              <article
+                key={card.title}
+                data-own-card
+                // z-[2]: las cards cruzan el título por delante, como en la
+                // referencia. El resto sale de CARD_LAYOUT, emparejado por índice
+                // con el contenido — el `cards.length !== SPEEDS.length` del efecto
+                // ya falla si los tres arrays se desincronizan.
+                className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
+              >
+                {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
                   `width`, Next genera el srcset pero el navegador asume que ocupa
                   el 100% del viewport y baja la variante más grande. La card vive
                   en `lg:col-span-2` de un grid de 12 y se ensancha un 30% con sus
                   márgenes, o sea ~19vw en desktop y ancho completo en móvil. */}
-              <Image
-                src={card.src}
-                alt=""
-                width={290}
-                height={267}
-                sizes="(min-width: 1024px) 19vw, 100vw"
-                className="block h-auto w-full rounded-[1.15rem]"
-              />
-              {/* El bloque de texto también se comprime en desktop. No es
+                <Image
+                  src={card.src}
+                  alt=""
+                  width={290}
+                  height={267}
+                  sizes="(min-width: 1024px) 19vw, 100vw"
+                  className="block h-auto w-full rounded-[1.15rem]"
+                />
+                {/* El bloque de texto también se comprime en desktop. No es
                   cosmética: con la card a `col-span-2` el cuerpo pasa a tres
                   líneas, y con el padding y la escala anteriores el texto pesaba
                   más que la imagen — la card quedaba casi tan alta como antes y
                   el objetivo (tres en pantalla) no se cumplía. En mobile la card
                   ocupa el ancho completo, así que ahí se queda la escala grande. */}
-              <div className="flex flex-col gap-3 px-3 py-7 lg:gap-2 lg:px-2.5 lg:py-4">
-                {/* `text-label-lg` y no `text-body-lg font-medium`: el peso lo
+                <div className="flex flex-col gap-3 px-3 py-7 lg:gap-2 lg:px-2.5 lg:py-4">
+                  {/* `text-label-lg` y no `text-body-lg font-medium`: el peso lo
                     define el token, no la clase. Ese rol —body en weight
                     medio— ya existe en la escala justamente porque se estaba
                     parcheando a mano en varios lugares. */}
-                <h4 className="text-h4 lg:text-label-lg">{card.title}</h4>
-                <p className="text-body text-foreground/75 text-pretty lg:text-body-sm">
-                  {card.body}
-                </p>
-              </div>
-            </article>
-          ))}
+                  <h4 className="text-h4 lg:text-label-lg">{card.title}</h4>
+                  <p className="text-body text-foreground/75 text-pretty lg:text-body-sm">
+                    {card.body}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
 
         {/* En mobile el título va después de las cards: sin el cruce no es un
