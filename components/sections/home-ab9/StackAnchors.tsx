@@ -38,10 +38,12 @@ import {
 //
 // ── Qué cambia respecto del lab ─────────────────────────────────────────────
 //
-//  1. **Sin titular.** El lab abre con "The NEAR Stack" centrado arriba. Acá no
-//     hay: con cuatro fichas ocupando las esquinas y el arte en el medio, un
-//     quinto bloque de texto solo empuja al resto contra los bordes. La sección
-//     se explica sola.
+//  1. **Sin titular.** El lab abre con "The NEAR Stack" centrado arriba. Acá
+//     ese titular vive AFUERA, en `StackIntro`, la sección inmediatamente
+//     anterior: con cuatro fichas ocupando las esquinas de un viewport pegado,
+//     un quinto bloque en el medio les come el alto justo donde son más
+//     frágiles. Las dos secciones comparten el `bg-ink`, así que la juntura no
+//     se ve.
 //  2. **La ficha es otra cosa.** El lab tenía rótulo + nombre + párrafo. Acá
 //     lleva cuatro registros tipográficos que hacen cuatro trabajos distintos:
 //     el nombre en mono a escala de heading, una regla con el destino externo,

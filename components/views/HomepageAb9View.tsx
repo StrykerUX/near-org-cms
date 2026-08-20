@@ -1,6 +1,7 @@
 import HeroVideo from "@/components/sections/home-ab9/HeroVideo";
 import AgentEconomy from "@/components/sections/home-ab9/AgentEconomy";
 import OwnYourOwn from "@/components/sections/home-ab9/OwnYourOwn";
+import StackIntro from "@/components/sections/home-ab9/StackIntro";
 import StackAnchors from "@/components/sections/home-ab9/StackAnchors";
 import ProofDatum from "@/components/sections/home-ab9/ProofDatum";
 import BelongsNewsletter from "@/components/sections/home-ab9/BelongsNewsletter";
@@ -27,7 +28,9 @@ import UpdatesList from "@/components/sections/UpdatesList";
 //     isométrico, pero con las cuatro capas escritas en las cuatro esquinas,
 //     ancladas a la pieza de la que hablan, en vez de en una columna al lado.
 //     Es la variante C del laboratorio `sections/stack-labs/`, con la ficha
-//     rehecha según el prototipo.
+//     rehecha según el prototipo. El titular sale de ahí y pasa a `StackIntro`,
+//     una sección propia encima: dentro de las anclas le comía el alto a las
+//     cuatro fichas justo donde son más frágiles.
 //
 // El PRIMITIVO no se tocó: `StairTransition` sigue en `components/primitives/` y
 // lo siguen montando ab6, ab7, home-v4 y los newsletter-labs. El detalle de qué
@@ -40,6 +43,7 @@ export default function HomepageAb9View() {
       <HeroVideo />
       <AgentEconomy />
       <OwnYourOwn />
+      <StackIntro />
       <StackAnchors />
       <ProofDatum />
       <BelongsNewsletter />

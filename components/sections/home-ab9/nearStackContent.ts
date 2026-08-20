@@ -108,6 +108,20 @@ export const PROTOCOL_FEATURES: readonly { name: string; sub?: string; desc: str
   },
 ];
 
+/**
+ * El titular de la sección, que vive en `StackIntro` y no en `StackAnchors`.
+ *
+ * `accent` es la palabra que va en serif itálica. Viene partida porque el
+ * `<Accent>` que la pinta es JSX y esto es un módulo puro — y porque el corte
+ * es del DISEÑO, no una regla que se pueda derivar del texto: es la última
+ * palabra acá, pero eso es una coincidencia de esta frase.
+ */
+export const STACK_INTRO = {
+  lead: "The NEAR",
+  accent: "Stack",
+  sub: "Open infrastructure powering the agent economy.",
+} as const;
+
 // ── Lo que agrega la composición de `StackAnchors` ──────────────────────────
 //
 // Las cuatro fichas de las esquinas llevan dos cosas que el stack no tenía:

@@ -101,9 +101,11 @@ sigue usando `stackAssembly`.
 
 **Lo que cambia respecto del lab**, y es el pedido del prototipo:
 
-1. **Sin titular.** El lab abre con "The NEAR Stack" centrado. Con cuatro fichas
-   en las esquinas y el arte en el medio, un quinto bloque de texto solo empuja
-   al resto contra los bordes.
+1. **El titular sale de la sección.** El lab abre con "The NEAR Stack" centrado
+   arriba del arte; acá vive en `StackIntro.tsx`, una sección propia justo
+   encima. Dentro de las anclas le comía el alto a las cuatro fichas justo donde
+   son más frágiles. Las dos comparten el `bg-ink`, así que se leen como un solo
+   tramo negro y la juntura no se ve.
 2. **La ficha es otra cosa.** Cuatro registros tipográficos, cada uno con su
    trabajo: el nombre en mono a escala de heading, una regla con el destino
    externo, el cuerpo en sans, y abajo las piezas de la capa y las capacidades
