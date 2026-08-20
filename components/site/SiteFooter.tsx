@@ -62,10 +62,14 @@ import { getLenis } from "@/components/site/providers/lenisInstance";
 // placeholder evidente. Al crear la página, esto es una línea.
 // ── Las variantes ───────────────────────────────────────────────────────────
 //
-// El footer de producción es `default` y es el que montan los tres layouts.
-// Las otras dos son las pruebas que viven en `/prototype/footer-labs`, y son
-// props de ESTE componente y no copias suyas: una copia se desincroniza al
-// primer cambio y la prueba deja de medir el footer real.
+// El footer de producción es `veil` —es el default de la prop, así que es el
+// que montan los tres layouts, que lo llaman sin argumentos. Las otras dos
+// siguen siendo props de ESTE componente y no copias suyas: una copia se
+// desincroniza al primer cambio y la prueba deja de medir el footer real.
+//
+//   default · el reparto vertical original: el logo cede alto cuando el panel
+//             de links no entra, y el copyright ocupa su propia línea debajo.
+//             Ya no lo monta ninguna página; queda como punto de comparación.
 //
 //   veil    · el logo se hunde detrás de la superficie del footer: un
 //             degradado del color del fondo lo cubre desde arriba y el logo
@@ -558,7 +562,7 @@ function StaticFooter({ variant }: { variant: SiteFooterVariant }) {
   );
 }
 
-export default function SiteFooter({ variant = "default" }: { variant?: SiteFooterVariant } = {}) {
+export default function SiteFooter({ variant = "veil" }: { variant?: SiteFooterVariant } = {}) {
   const veil = variant === "veil";
   const compact = variant === "compact";
 
