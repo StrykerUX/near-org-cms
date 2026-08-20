@@ -168,10 +168,10 @@ export default function RoadmapHorizontal() {
                         </span>
                       </div>
                       <div className="rm-row__body max-w-[62ch] pb-6 pt-1 lg:ml-[calc(var(--x,0%)+1.5rem)] lg:pb-0">
-                        <h3 className="rm-row__title mb-2 text-h3 text-ink lg:text-gray-intermediate">
+                        <h3 className="rm-row__title mb-2 text-h3 text-ink lg:text-[var(--rm-muted-text)]">
                           {step.title}
                         </h3>
-                        <p className="rm-row__text text-body text-ink lg:text-gray-intermediate">{step.body}</p>
+                        <p className="rm-row__text text-body text-ink lg:text-[var(--rm-muted-text)]">{step.body}</p>
                       </div>
                     </div>
                   );

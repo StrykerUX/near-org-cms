@@ -15,15 +15,20 @@
 .rm-scope {
   --rm-rule: #cfcec9;
   --rm-rule-soft: #d6d5d0;
-  --rm-muted-soft: #c9c8c3;
-  /* Was a local lime (#35d435) — confirmed with design: this should be the
-     site's actual brand green, not a comp-only color. `--near-green-dark` is
-     the only other tone the DS gives us, used as the gradient's deep stop;
-     no separate "light" brand tone exists, so the gradient's light stop
-     reuses --near-green itself. */
-  --rm-green: var(--near-green);
-  --rm-green-deep: var(--near-green-dark);
-  --rm-green-light: var(--near-green);
+  /* Exact hex from design for every "inactive" gray: the resting dot fill
+     and the resting title/text color (which used to lean on the DS's
+     --gray-intermediate via the `text-gray-intermediate` Tailwind class —
+     replaced with this local var so it doesn't touch that shared token). */
+  --rm-muted-soft: #c4c3c1;
+  --rm-muted-text: #c4c3c1;
+  /* Exact hexes from design, superseding the earlier "use the site's brand
+     green" pass: --rm-green is the rail fill + active-title color, and
+     --rm-dot-gradient is a two-stop gradient used for both the active dot's
+     fill AND the header CTA's background (same two colors, per feedback —
+     RoadmapHeader.tsx used to have its own separate --rm-green-light/-deep
+     pair for this, now gone since nothing else read them). */
+  --rm-green: #23bc2f;
+  --rm-dot-gradient: linear-gradient(135deg, #66cd4d 0%, #a9e776 100%);
   --rm-bg-fill: var(--cream);
   --rm-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --rail-x: 43.5%;
@@ -159,21 +164,41 @@
 [data-roadmap-v="on"] .rm-item.is-active .rm-item__title {
   color: var(--rm-green);
 }
+/* Restored — clarified feedback: the right-side description, once active,
+   should match the left-side label's color (--ink), not stay gray. */
 [data-roadmap-v="on"] .rm-item.is-active .rm-item__text {
   color: var(--ink);
 }
 [data-roadmap-v="on"] .rm-item.is-active .rm-item__dot {
-  background: var(--rm-green);
+  background: var(--rm-dot-gradient);
   transform: scale(1.05);
 }
-[data-roadmap-v="on"] .rm-item.is-active .rm-item__dot svg {
+/* is-past shares the icon's visibility/size with is-active on purpose — same
+   reasoning as the gradient fix below: once reached, a dot doesn't lose its
+   icon either, only the NEXT dot in line (not yet reached) keeps it hidden. */
+[data-roadmap-v="on"] .rm-item.is-active .rm-item__dot svg,
+[data-roadmap-v="on"] .rm-item.is-past .rm-item__dot svg {
   opacity: 1;
   transform: scale(1);
 }
+/* RoadmapVertical.tsx only (the `.rm-item__dot-icon` class), not
+   RoadmapVerticalV2.tsx: bigger icon, per feedback — 25% first, then another
+   15% on top (≈1.46), which also happens to be almost exactly what halving
+   the icon-to-border gap works out to (0.6 base size × 1.46 ≈ 0.875, vs.
+   0.75 before — half the remaining 0.25 gap). Higher specificity than the
+   plain `svg` rule above (tag + class beats tag alone), so it overrides just
+   for the icon that carries this class. */
+[data-roadmap-v="on"] .rm-item.is-active .rm-item__dot svg.rm-item__dot-icon,
+[data-roadmap-v="on"] .rm-item.is-past .rm-item__dot svg.rm-item__dot-icon {
+  transform: scale(1.46);
+}
 [data-roadmap-v="on"] .rm-item.is-past .rm-item__dot {
-  /* Was a separate hardcoded pale green (#a9dfa9) — derived from the brand
-     green now instead of its own unrelated hex. */
-  background: color-mix(in srgb, var(--rm-green) 55%, white);
+  /* A past item stays exactly as "reached" as an active one — same
+     gradient, not a paler color-mix fade. Without this rule the dot falls
+     back to the plain `.rm-item__dot` default (--rm-muted-soft, gray) the
+     moment it's no longer the CURRENT item, which read as the circle
+     "un-completing" itself while scrolling past it. */
+  background: var(--rm-dot-gradient);
 }
 
 /* ── Version B — split rule, one segment each side of the word ──────────── */
@@ -278,6 +303,8 @@
   color: var(--rm-green);
   font-weight: 600;
 }
+/* Restored, same as RoadmapVertical: active text matches the label's ink
+   color instead of staying gray. */
 [data-roadmap-h="on"] .rm-row.is-active .rm-row__text {
   color: var(--ink);
 }
