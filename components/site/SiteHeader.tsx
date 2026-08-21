@@ -162,49 +162,63 @@ function HeroImage({ hero, className }: { hero: string; className: string }) {
 }
 
 // The dropdown box (`data-q-surface`, rendered where this is used) has no
-// width of its own — it fills whatever its wrapper gives it. `min(Npx,100%)`
+// width of its own — it fills whatever its wrapper gives it. `min(720px,100%)`
 // is what keeps it at its natural size while the nav has room to spare, and
-// only shrinks it once the nav (which the wrapper is now pinned to) gets
-// narrower than that.
-export function panelWidth(link: Entry): string {
-  const groups = link.groups ?? [];
-  if (groups.length >= 3) return "w-[min(1199px,100%)]";
-  if (groups.length === 2) return "w-[min(1004px,100%)]";
-  return "w-[min(720px,100%)]";
-}
+// only shrinks it once the nav (which the wrapper is pinned to) gets narrower
+// than that.
+//
+// ── Un solo ancho para los cuatro paneles ──────────────────────────────────
+//
+// Esto devolvía tres anchos distintos según cuántos grupos tuviera el menú
+// (1199px para Resources, 1004px para About, 720px para Products y Stack), y
+// el resultado era que el panel cambiaba de tamaño al pasar de una pestaña a
+// otra. Vuelve al ancho único de antes del rediseño: los cuatro miden lo
+// mismo y, como el wrapper los centra contra el nav, tampoco se mueven.
+//
+// Es una constante y ya no una función de `Entry`: el ancho dejó de depender
+// del menú, y una función que ignora su argumento invita a creer que sigue
+// dependiendo. Volver a un ancho por menú es volver a hacerla función.
+//
+// El `min(...,100%)` NO es parte de lo que se revierte — es lo que evita que el
+// panel desborde en un viewport angosto, y eso vale con cualquier ancho.
+export const PANEL_WIDTH = "w-[min(720px,100%)]";
 
 /** The body of one menu. Rendered for every entry; only one is visible. */
 export function NavPanel({ link }: { link: Entry }) {
+  // Flat entries become a single unlabelled column so both shapes go through
+  // the same grid. Column A takes the first two groups; column B leads with the
+  // hero and picks up the rest — which reproduces the reference for Resources
+  // (Build and Learn left, hero above Connect right) and still does the
+  // sensible thing for a flat menu.
+  //
+  // ── Por qué se volvió a esta forma ─────────────────────────────────────────
+  //
+  // El rediseño le había dado una columna propia a cada grupo, en una sola
+  // fila, con `repeat(auto-fit,minmax(240px,1fr))`. Eso resolvía que el tercer
+  // grupo de Resources (Connect) quedara metido en la columna de 268px del
+  // hero, pero solo funcionaba porque el panel se ensanchaba hasta 1199px para
+  // hacerle sitio. Con un ancho único de 720px no hay lugar para tres columnas,
+  // así que `auto-fit` las apilaría en una sola y el panel de Resources
+  // quedaría el doble de alto que los demás.
+  //
+  // Este reparto sí entra en 720px, y el precio es conocido y aceptado:
+  // Connect vive en la columna del hero, más angosta que las otras dos. Lo que
+  // hace que eso se lea apretado en vez de roto es el `min-w-0` sin
+  // `whitespace-nowrap` de NavGroup — el label y la descripción envuelven en
+  // vez de desbordar. Ese detalle viene del rediseño y se queda a propósito.
   const groups = link.groups ?? [{ label: "", items: link.items ?? [] }];
-
-  // Resources (3 groups) and About (2 groups) used to fall into the same
-  // single 2-column grid as Products/Stack (1 group) — colA took the first
-  // two groups, colB led with the hero and picked up the rest, which left
-  // Resources' 3rd group (Connect) squeezed into the hero's own 268px
-  // column instead of getting its own room. Every group gets its own column
-  // now, all in one row, and the hero is a separate flex item pinned to the
-  // box's right edge. `repeat(auto-fit,minmax(...))` is what makes that
-  // survive `panelWidth` shrinking the box on a narrow viewport: columns
-  // hold their target width while there's room for all of them side by
-  // side, then drop to fewer per row — stacking, not overflowing — once
-  // there isn't.
-  if (groups.length > 1) {
-    return (
-      <div className="flex w-full flex-wrap items-start gap-x-8 gap-y-7 p-6">
-        <div className="grid min-w-0 flex-1 content-start gap-x-8 gap-y-7 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
-          {groups.map((g, i) => (
-            <NavGroup key={g.label || `g${i}`} group={g} />
-          ))}
-        </div>
-        <HeroImage hero={link.hero} className="h-[184px] w-[268px] shrink-0" />
-      </div>
-    );
-  }
-
+  const colA = groups.slice(0, 2);
+  const colB = groups.slice(2);
   return (
     <div className="grid w-full grid-cols-[1fr_268px] content-start items-start gap-x-8 gap-y-7 p-6">
-      <NavGroup group={groups[0]} />
+      <NavGroup group={colA[0]} />
       <HeroImage hero={link.hero} className="h-[184px] w-full" />
+      {colA.slice(1).map((g, i) => (
+        <NavGroup key={g.label || `a${i}`} group={g} />
+      ))}
+      {colB.map((g, i) => (
+        <NavGroup key={g.label || `b${i}`} group={g} />
+      ))}
     </div>
   );
 }
@@ -849,20 +863,24 @@ export default function SiteHeader() {
               active ? "pointer-events-auto" : "pointer-events-none"
             }`}
           >
-            {/* `w-full` above (not `w-max`) pins this to the nav's own width,
-                and `panelWidth` below caps the box at whichever panel is
-                `shown` (not `active` — the box stays mounted through the
-                close morph, still showing the last panel, after `active`
-                already went null) — same "natural size, only shrink once the
-                nav is narrower than that" rule as HeaderNavPanelV2.tsx in
-                the prototype this got ported from. */}
+            {/* `w-full` above (not `w-max`) pins this to the nav's own width, y
+                `PANEL_WIDTH` acota la caja a los 720px que miden los cuatro
+                paneles — misma regla de "su tamaño natural, y solo encoger
+                cuando el nav sea más angosto que eso".
+
+                El ancho ya no se consulta por panel, así que tampoco depende de
+                cuál esté `shown`: se aplica siempre y la caja deja de cambiar de
+                tamaño al pasar de una pestaña a otra. Antes tenía que mirar
+                `shown` y no `active` justamente porque el ancho variaba — la
+                caja sigue montada durante el morph de cierre, mostrando el
+                último panel, cuando `active` ya se fue a null, y usar `active`
+                la encogía a mitad de la animación. Ese problema desaparece con
+                un ancho único. */}
             <div
               ref={boxRef}
               data-q-surface
               style={{ opacity: 0, visibility: "hidden" }}
-              className={`mx-auto overflow-hidden rounded-[var(--q-nav-radius)] shadow-[0_28px_70px_-14px_rgba(0,0,0,0.55)] ${
-                shown ? panelWidth(LINKS.find((l) => l.label === shown)!) : ""
-              }`}
+              className={`mx-auto overflow-hidden rounded-[var(--q-nav-radius)] shadow-[0_28px_70px_-14px_rgba(0,0,0,0.55)] ${PANEL_WIDTH}`}
             >
               {/* The active panel is the only one in flow; it defines the
                   height. The others sit absolutely on top at opacity 0, so the
