@@ -123,7 +123,12 @@ export default function StackAnchors() {
             <h2 className="text-h2 text-balance">
               {INTRO.lead} <Accent>{INTRO.accent}</Accent>
             </h2>
-            <p className="mx-auto mt-3 max-w-[42ch] text-body text-cream/70 text-balance">
+            {/* Sin `mt`: el aire entre titular y subtítulo ya lo pone el
+                interlineado del `text-h2`, que a esta escala son ~14px de
+                descuelgue bajo la última línea. El `mt-3` que había acá se
+                sumaba a eso y separaba los dos como si fueran bloques
+                distintos, cuando son una sola entrada. */}
+            <p className="mx-auto max-w-[42ch] text-body text-cream/70 text-balance">
               {INTRO.sub}
             </p>
           </div>
