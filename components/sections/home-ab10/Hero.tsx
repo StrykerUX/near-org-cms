@@ -51,6 +51,7 @@ export default function Hero() {
       const cleanups: (() => void)[] = [];
 
       const wrap = q("[data-hero-wrap]")[0];
+      const bg = q("[data-hero-bg]")[0];
       const fade = q("[data-hero-topfade]")[0];
       const heading = q("[data-hero='heading']")[0];
       const rest = q("[data-hero='sub']");
@@ -80,24 +81,47 @@ export default function Hero() {
         );
       }
 
-      // ── 2. Parallax de la copy ────────────────────────────────────────────
-      // El texto sale ~20% más rápido que la página.
+      // ── 2. Parallax en CONTRA ─────────────────────────────────────────────
+      //
+      // El texto BAJA y el fondo SUBE. Los dos se mueven, en sentidos
+      // opuestos, y esa es toda la diferencia con lo que había antes: la copy
+      // subía un 20% de la altura del hero y el fondo estaba quieto, así que la
+      // separación entre los dos era ese 20% y nada más.
+      //
+      // Ahora la separación es la SUMA de los dos recorridos (25% + 15% = 40%
+      // de la altura del hero), o sea el doble, y encima repartida en dos
+      // direcciones — que es lo que se lee como profundidad y no como "el texto
+      // se despega". El texto yéndose hacia abajo mientras el fondo se va hacia
+      // arriba deja además el titular más tiempo en pantalla al empezar a
+      // scrollear, porque va A FAVOR de la dirección del scroll.
+      //
+      // `ease: "none"` en los dos: con scrub, la curva la pone el dedo del
+      // lector. Cualquier easing acá se lee como que el scroll "resbala".
+      const H = () => scope.getBoundingClientRect().height;
+      const track = {
+        trigger: scope,
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+        invalidateOnRefresh: true,
+      } as const;
+
       if (wrap) {
         gsap.fromTo(
           wrap,
-          { y: -20 },
-          {
-            y: () => -20 - 0.2 * scope.getBoundingClientRect().height,
-            ease: "none",
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: scope,
-              start: "top top",
-              end: "bottom top",
-              scrub: true,
-              invalidateOnRefresh: true,
-            },
-          }
+          { y: 0 },
+          { y: () => 0.25 * H(), ease: "none", immediateRender: false, scrollTrigger: track }
+        );
+      }
+
+      // El fondo va a la mitad del recorrido del texto: si los dos se movieran
+      // lo mismo, el contra-movimiento se leería como un corte, no como planos
+      // a distinta profundidad. Lo que está más lejos se mueve menos.
+      if (bg) {
+        gsap.fromTo(
+          bg,
+          { y: 0 },
+          { y: () => -0.15 * H(), ease: "none", immediateRender: false, scrollTrigger: track }
         );
       }
 
@@ -215,11 +239,25 @@ export default function Hero() {
       // crema de la sección siguiente.
       className="relative flex flex-col bg-cream text-foreground"
     >
-      {/* El fondo. Llena el hero y nada más: ya no hay que reservar sobrante
-          por abajo como con el <video>, porque un canvas no tiene "encuadre"
-          que pueda quedar cortado — el shader se dibuja para el tamaño que
-          tenga, sea cual sea. */}
-      <HeroFoliage className="pointer-events-none absolute inset-0 z-0 h-full w-full" />
+      {/* El fondo, en un wrapper que es lo que se anima.
+
+          `-inset-y-[20%]` lo hace un 40% más alto que el hero, y eso NO es
+          decorativo: el parallax lo sube un 15% de esa altura, y sin margen el
+          borde inferior del canvas se despegaría del final del hero y dejaría
+          una franja del crema de la página asomando. Con 20% arriba y abajo
+          sobra holgura para el recorrido.
+
+          El wrapper existe además para no animar el <canvas> en sí: moverlo con
+          transform no cuesta nada, pero cambiarle la caja obligaría a
+          `HeroFoliage` a re-dimensionar su buffer en cada frame del scroll —
+          su ResizeObserver mira el elemento, no el wrapper. */}
+      <div
+        data-hero-bg
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 -inset-y-[20%] z-0"
+      >
+        <HeroFoliage className="h-full w-full" />
+      </div>
 
       {/* Velo permanente: tapa con crema el 20% superior del video y lo suelta
           hacia abajo. Es lo que hace que la imagen "emerja" del fondo de la
