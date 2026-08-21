@@ -51,7 +51,7 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
 // Un `href` que empieza con `http` se trata como externo y se abre en pestaña
 // nueva. Se detecta por el valor y no con una bandera aparte: dos fuentes para
 // el mismo hecho es como se llega a un link externo sin `rel="noopener"`.
-type Leaf = {
+export type Leaf = {
   label: string;
   desc: string;
   href: string;
@@ -72,7 +72,7 @@ const isExternal = (href: string) => href.startsWith("http");
  * `rel="noopener noreferrer"`, que con `target="_blank"` no es opcional: sin él
  * la página destino recibe una referencia a esta por `window.opener`.
  */
-function NavLink({
+export function NavLink({
   href,
   className,
   onClick,
@@ -102,14 +102,14 @@ function NavLink({
     </Link>
   );
 }
-type Group = { label: string; items: Leaf[] };
+export type Group = { label: string; items: Leaf[] };
 // `hero` is the isometric still shown beside the menu — the same art family
 // as the Beyond-accounts cards, black-ground with one lit element, which is
 // why it sits on the dark panel without a seam.
-type Entry = { label: string; hero: string; items?: Leaf[]; groups?: Group[] };
+export type Entry = { label: string; hero: string; items?: Leaf[]; groups?: Group[] };
 
 /** One labelled column of menu entries, each with its icon slot. */
-function NavGroup({ group }: { group: Group }) {
+export function NavGroup({ group }: { group: Group }) {
   return (
     <div className="flex flex-col gap-1">
       {group.label && (
@@ -124,15 +124,23 @@ function NavGroup({ group }: { group: Group }) {
           href={item.href}
           className="group/item flex items-center gap-3.5 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/[0.09]"
         >
+          {/* Badge hover goes to the panel's own background (--q-nav-bg)
+              instead of inverting to solid white — the icon is already
+              white at rest, so a dark-on-dark badge keeps it legible
+              without needing a text-color flip. */}
           <span
             aria-hidden="true"
-            className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.06] text-white transition-colors duration-200 group-hover/item:bg-white group-hover/item:text-black"
+            className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.06] text-white transition-colors duration-200 group-hover/item:bg-[var(--q-nav-bg)]"
           >
             <item.icon className="size-5" />
           </span>
-          <span className="flex flex-col">
-            <span className="whitespace-nowrap text-label uppercase text-white">{item.label}</span>
-            <span className="whitespace-nowrap text-caption text-white/55">{item.desc}</span>
+          {/* `min-w-0` + no `whitespace-nowrap`: Resources/About's columns can
+              get narrower than a label/description's natural width once the
+              panel has to shrink with a narrow viewport (see NavPanel below)
+              — this lets them wrap instead of overflowing the column. */}
+          <span className="flex min-w-0 flex-col">
+            <span className="text-label uppercase text-white">{item.label}</span>
+            <span className="text-caption text-white/55">{item.desc}</span>
           </span>
         </NavLink>
       ))}
@@ -140,38 +148,63 @@ function NavGroup({ group }: { group: Group }) {
   );
 }
 
-/** The body of one menu. Rendered for every entry; only one is visible. */
-function NavPanel({ link }: { link: Entry }) {
-  // Flat entries become a single unlabelled column so both shapes go through
-  // the same grid. Column A takes the first two groups; column B leads with the
-  // hero and picks up the rest — which reproduces the reference for Resources
-  // (Build and Learn left, hero above Connect right) and still does the
-  // sensible thing for a flat menu.
-  const groups = link.groups ?? [{ label: "", items: link.items ?? [] }];
-  const colA = groups.slice(0, 2);
-  const colB = groups.slice(2);
+// The isometric stills are 500x500 with an alpha channel (the earlier set
+// was opaque, baked onto the same cream the panel used to sit on) —
+// `bg-[var(--q-nav-bg)]` matches the dark panel instead of a cream patch
+// showing through, and `object-contain` shows the whole square undistorted
+// instead of `object-cover` cropping it into a landscape box.
+function HeroImage({ hero, className }: { hero: string; className: string }) {
   return (
-    <div className="grid w-[720px] grid-cols-[1fr_268px] content-start items-start gap-x-8 gap-y-7 p-6">
-      <NavGroup group={colA[0]} />
-      {/* The isometric still. `bg-cream` is the exact ground the art is drawn
-          on (#F5F4F1), so the PNG's ground and the plate are the same value and
-          the seam disappears. */}
-      <div className="h-[184px] w-full overflow-hidden rounded-xl bg-cream">
-        <Image
-          src={link.hero}
-          alt=""
-          width={1200}
-          height={750}
-          sizes="268px"
-          className="h-full w-full object-cover"
-        />
+    <div className={`overflow-hidden rounded-xl bg-[var(--q-nav-bg)] ${className}`}>
+      <Image src={hero} alt="" width={500} height={500} sizes="240px" className="h-full w-full object-contain" />
+    </div>
+  );
+}
+
+// The dropdown box (`data-q-surface`, rendered where this is used) has no
+// width of its own — it fills whatever its wrapper gives it. `min(Npx,100%)`
+// is what keeps it at its natural size while the nav has room to spare, and
+// only shrinks it once the nav (which the wrapper is now pinned to) gets
+// narrower than that.
+export function panelWidth(link: Entry): string {
+  const groups = link.groups ?? [];
+  if (groups.length >= 3) return "w-[min(1199px,100%)]";
+  if (groups.length === 2) return "w-[min(1004px,100%)]";
+  return "w-[min(720px,100%)]";
+}
+
+/** The body of one menu. Rendered for every entry; only one is visible. */
+export function NavPanel({ link }: { link: Entry }) {
+  const groups = link.groups ?? [{ label: "", items: link.items ?? [] }];
+
+  // Resources (3 groups) and About (2 groups) used to fall into the same
+  // single 2-column grid as Products/Stack (1 group) — colA took the first
+  // two groups, colB led with the hero and picked up the rest, which left
+  // Resources' 3rd group (Connect) squeezed into the hero's own 268px
+  // column instead of getting its own room. Every group gets its own column
+  // now, all in one row, and the hero is a separate flex item pinned to the
+  // box's right edge. `repeat(auto-fit,minmax(...))` is what makes that
+  // survive `panelWidth` shrinking the box on a narrow viewport: columns
+  // hold their target width while there's room for all of them side by
+  // side, then drop to fewer per row — stacking, not overflowing — once
+  // there isn't.
+  if (groups.length > 1) {
+    return (
+      <div className="flex w-full flex-wrap items-start gap-x-8 gap-y-7 p-6">
+        <div className="grid min-w-0 flex-1 content-start gap-x-8 gap-y-7 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
+          {groups.map((g, i) => (
+            <NavGroup key={g.label || `g${i}`} group={g} />
+          ))}
+        </div>
+        <HeroImage hero={link.hero} className="h-[184px] w-[268px] shrink-0" />
       </div>
-      {colA.slice(1).map((g, i) => (
-        <NavGroup key={g.label || `a${i}`} group={g} />
-      ))}
-      {colB.map((g, i) => (
-        <NavGroup key={g.label || `b${i}`} group={g} />
-      ))}
+    );
+  }
+
+  return (
+    <div className="grid w-full grid-cols-[1fr_268px] content-start items-start gap-x-8 gap-y-7 p-6">
+      <NavGroup group={groups[0]} />
+      <HeroImage hero={link.hero} className="h-[184px] w-full" />
     </div>
   );
 }
@@ -186,7 +219,7 @@ function NavPanel({ link }: { link: Entry }) {
  * El `hero` de cada entrada no se dibuja: es un PNG de ~150KB para un ancho
  * donde no entra.
  */
-function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
+export function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
   const [open, setOpen] = useState<string | null>(null);
 
   return (
@@ -262,10 +295,10 @@ function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
 //
 // Al integrar, esto reemplazó a `quantumContent.NAV_LINKS`, que era la lista plana de
 // cuatro etiquetas del nav viejo y quedó sin consumidores.
-const LINKS: Entry[] = [
+export const LINKS: Entry[] = [
   {
     label: "Products",
-    hero: "/prototype/quantum/iso-22.png",
+    hero: "/prototype/quantum/menu-tab-1.png",
     items: [
       { label: "near.com", href: "https://near.com", desc: "One interface, 30+ chains, confidential by default", icon: IconInterface },
       { label: "Intents", href: "https://intents.near.org", desc: "The universal liquidity layer for onchain markets", icon: IconIntents },
@@ -274,7 +307,7 @@ const LINKS: Entry[] = [
   },
   {
     label: "Stack",
-    hero: "/prototype/quantum/iso-07-light.png",
+    hero: "/prototype/quantum/menu-tab-2.png",
     items: [
       { label: "Protocol", href: "/blockchain", desc: "The settlement layer for the agent economy", icon: IconLayers },
       { label: "Chain Abstraction", href: "/chain-abstraction", desc: "How NEAR connects any chain", icon: IconAbstraction },
@@ -283,7 +316,7 @@ const LINKS: Entry[] = [
   },
   {
     label: "Resources",
-    hero: "/prototype/quantum/iso-16-light.png",
+    hero: "/prototype/quantum/menu-tab-3.png",
     groups: [
       {
         label: "Build",
@@ -312,7 +345,7 @@ const LINKS: Entry[] = [
   },
   {
     label: "About",
-    hero: "/prototype/quantum/iso-07-light.png",
+    hero: "/prototype/quantum/menu-tab-4.png",
     groups: [
       {
         label: "Fundamentals",
@@ -780,22 +813,17 @@ export default function SiteHeader() {
               rel="noopener noreferrer"
               data-q-cta
               data-q-cta-sweep
-              // ── En móvil va CENTRADO en la barra ──────────────────────────
-              //
-              // `absolute left-1/2 -translate-x-1/2` sobre el `<nav>`, que ya es
-              // `relative`. Centrarlo con flex no era posible: es hermano de la
-              // hamburguesa dentro del grupo derecho, así que el centro que le
-              // tocaría sería el de ese grupo y no el de la barra. Sacarlo del
-              // flujo lo referencia a la barra entera sin reordenar el DOM ni
-              // duplicar el botón para cada breakpoint.
+              // En flujo normal en los dos breakpoints: pegado a la hamburguesa
+              // en móvil (comparten el mismo grupo `flex ... gap-2`) y a los
+              // tabs en desktop. Antes iba `absolute left-1/2 -translate-x-1/2`
+              // en móvil para centrarlo en la barra entera — deliberado en su
+              // momento, pero por feedback ahora debe ir junto al botón de
+              // menú en vez de centrado.
               //
               // `whitespace-nowrap` es lo que arregla la rotura: la caja tiene
               // `h-10` fija, así que al partir "Get started" en dos líneas el
               // texto se desbordaba por arriba y por abajo del botón.
-              //
-              // De `md` para arriba vuelve al flujo (`static`) y se acomoda solo
-              // junto a los tabs.
-              className="absolute left-1/2 inline-flex h-10 w-fit -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-[calc(var(--q-nav-radius)-var(--q-nav-pad)/2)] border border-transparent px-4 text-label md:static md:translate-x-0 md:px-5"
+              className="inline-flex h-10 w-fit items-center gap-2 whitespace-nowrap rounded-[calc(var(--q-nav-radius)-var(--q-nav-pad)/2)] border border-transparent px-4 text-label md:px-5"
             >
               Get started
             </a>
@@ -817,15 +845,24 @@ export default function SiteHeader() {
               stays centred, and `top-full` keeps the 10px gap correct however
               tall the bar becomes. */}
           <div
-            className={`absolute left-1/2 top-full z-50 w-max -translate-x-1/2 pt-2.5 ${
+            className={`absolute left-1/2 top-full z-50 w-full -translate-x-1/2 pt-2.5 ${
               active ? "pointer-events-auto" : "pointer-events-none"
             }`}
           >
+            {/* `w-full` above (not `w-max`) pins this to the nav's own width,
+                and `panelWidth` below caps the box at whichever panel is
+                `shown` (not `active` — the box stays mounted through the
+                close morph, still showing the last panel, after `active`
+                already went null) — same "natural size, only shrink once the
+                nav is narrower than that" rule as HeaderNavPanelV2.tsx in
+                the prototype this got ported from. */}
             <div
               ref={boxRef}
               data-q-surface
               style={{ opacity: 0, visibility: "hidden" }}
-              className="overflow-hidden rounded-[var(--q-nav-radius)] shadow-[0_28px_70px_-14px_rgba(0,0,0,0.55)]"
+              className={`mx-auto overflow-hidden rounded-[var(--q-nav-radius)] shadow-[0_28px_70px_-14px_rgba(0,0,0,0.55)] ${
+                shown ? panelWidth(LINKS.find((l) => l.label === shown)!) : ""
+              }`}
             >
               {/* The active panel is the only one in flow; it defines the
                   height. The others sit absolutely on top at opacity 0, so the
