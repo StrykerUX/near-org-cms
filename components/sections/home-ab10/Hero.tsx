@@ -3,8 +3,8 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
-import { createVideoScrub } from "@/components/primitives/motion/videoScrub";
+import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
+import HeroFoliage from "@/components/sections/home-ab10/HeroFoliage";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 
 // ── Geometría: el hero llena la pantalla ─────────────────────────────────────
@@ -25,40 +25,21 @@ import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 // bug; acá el hero llena el viewport y el problema desaparece en origen en vez
 // de parchearse con un `max()`.
 
-// ── Ajustes del scrub ────────────────────────────────────────────────────────
+// ── El fondo ────────────────────────────────────────────────────────────────
 //
-// Fracción del clip que se recorre en un scroll completo del hero (el
-// `data-hero-scrub` del original, que venía en 0.5).
+// Era un <video> de 19MB (`hero-descent-v2.mp4`, 1440p all-intra) scrubbeado
+// por scroll, con todo lo que eso arrastraba: snap a frame, tope por buffer
+// descargado, contrapresión de seeks y un lazo de persecución para disimular el
+// escalonado. Ahora es un shader — `HeroFoliage`, unos 8KB de GLSL— y nada de
+// eso hace falta: no hay frames que buscar ni red que esperar.
 //
-// Va en 1.0 = el clip entero, y eso es lo que más aporta a la fluidez. El hero
-// dura ~760px de scroll: con 0.5 se repartían ~96 frames sobre esa distancia
-// (uno cada ~7.9px) y el descenso se leía a pasos. Con el clip completo son 192
-// frames, uno cada ~4px. No cuesta un byte —el mp4 ya está descargado entero—
-// y el clip es un descenso continuo, así que no había ninguna razón de contenido
-// para usar solo la mitad.
-const SCRUB_RATE = 1;
+// Lo que se PIERDE con el cambio, y conviene tener presente: el fondo ya no
+// responde al scroll. El clip era un descenso continuo y el scrub lo ataba al
+// dedo del lector; el shader tiene una deriva lenta propia y nada más. Atarlo
+// al scroll es un uniforme más (la fase entra donde hoy entra `u_time`), pero
+// es una decisión de diseño que no se tomó todavía.
 
-// fps del asset. NO hay forma de leerlo desde el navegador: ningún API de
-// <video> lo expone. Está medido con `ffprobe` sobre
-// public/prototype/v2/hero-descent-v2.mp4 (24/1, 192 frames en 8.00s) y hay que
-// actualizarlo a mano si el archivo se re-encodea. Qué hace con esto el lazo de
-// scrub está documentado en `primitives/motion/videoScrub`.
-const FPS = 24;
-
-// Factor del lazo de persecución. Más alto = el video sigue al scroll más de
-// cerca, pero con saltos más secos entre frame y frame; más bajo = más suave y
-// más retrasado. Este amortiguado es justamente lo que disimula el escalonado,
-// así que subirlo de más lo devuelve.
-//
-// Van explícitos aunque coincidan con los defaults de `createVideoScrub`: están
-// calibrados contra ESTE clip (un descenso continuo de 8s) y no son un valor
-// genérico que convenga heredar sin mirar.
-const CHASE = 0.14;
-// Cerca del final se persigue más despacio, para que el último tramo "atraque"
-// en vez de frenar de golpe.
-const CHASE_DOCKING = 0.09;
-
-export default function HeroVideo() {
+export default function Hero() {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
     const mm = gsap.matchMedia();
@@ -69,7 +50,6 @@ export default function HeroVideo() {
       // no sabe nada.
       const cleanups: (() => void)[] = [];
 
-      const video = q("[data-hero-bg]")[0] as HTMLVideoElement | undefined;
       const wrap = q("[data-hero-wrap]")[0];
       const fade = q("[data-hero-topfade]")[0];
       const heading = q("[data-hero='heading']")[0];
@@ -121,49 +101,7 @@ export default function HeroVideo() {
         );
       }
 
-      // ── 3. El video, scrubbeado por scroll ────────────────────────────────
-      //
-      // El scroll NO escribe `currentTime` directamente: solo mueve un objetivo,
-      // y un lazo de rAF lo persigue. Eso deja el video un pelo por detrás del
-      // scroll, que es justo lo que se lee como movimiento de cámara suave en
-      // vez de como una diapositiva atada al dedo.
-      //
-      // Encima de ese lazo hay tres filtros —snap a frame, tope por buffer
-      // descargado y contrapresión de seeks— y los tres viven en
-      // `primitives/motion/videoScrub`, con el porqué de cada uno documentado ahí.
-      //
-      // El asset ya es all-intra (193 frames, 193 keyframes), así que el seek en
-      // sí es barato: lo que sobraba era la cantidad de seeks, no su coste.
-      //
-      // El original además descargaba el mp4 entero a un Blob antes de
-      // scrubbear, porque su servidor de preview no responde HTTP Range y sin
-      // eso el <video> no es seekable. Next sirve public/ con Range en dev y en
-      // producción, así que ese rodeo (y el mp4 completo en RAM) no hace falta.
-      //
-      // Este lazo nació inline acá, se extrajo cuando `quantum/FieldBreak`
-      // necesitó lo mismo, y esta llamada cierra la migración: eran ~95 líneas de
-      // lógica delicada duplicada, y la copia de acá arrastraba además una mezcla
-      // de unidades en `target` (a veces fracción de progreso, a veces segundos).
-      if (video) {
-        const scrub = createVideoScrub(video, {
-          fps: FPS,
-          chase: CHASE,
-          chaseDocking: CHASE_DOCKING,
-        });
-
-        ScrollTrigger.create({
-          trigger: scope,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => scrub.setProgress(self.progress * SCRUB_RATE),
-        });
-
-        cleanups.push(scrub.destroy);
-      }
-
-      // ── 4. Intro del titular ──────────────────────────────────────────────
+      // ── 3. Intro del titular ──────────────────────────────────────────────
       //
       // ⚠️ El gradiente del <h1> y SplitText NO PUEDEN convivir.
       //
@@ -277,42 +215,11 @@ export default function HeroVideo() {
       // crema de la sección siguiente.
       className="relative flex flex-col bg-cream text-foreground"
     >
-      {/* Sin `autoPlay`: es una textura conducida por el scroll.
-
-          `preload="metadata"` y no `auto`: el asset son 19MB (1440p all-intra,
-          el clip de v5) y con `auto` el navegador los baja ENTEROS antes de que
-          el lector haya scrolleado un píxel, compitiendo con las fuentes y el
-          resto del hero por ancho de banda. Con `metadata` baja la cabecera
-          —suficiente para saber duración y dimensiones, que es lo que el scrub
-          necesita para armarse— y el resto lo pide por rangos HTTP a medida que
-          hace seek. Next sirve public/ con Range
-          en dev y en producción, y `videoScrub` ya nunca pide más allá de lo
-          descargado (su `bufferedUntil`), así que el peor caso es que los primeros
-          seeks se queden en el último frame disponible en vez de bloquear el
-          decoder.
-
-          El `poster` es el primer frame del propio clip, extraído con ffmpeg
-          (216KB). Dos cosas se arreglan con él: el hero ya no arranca vacío
-          esperando que el video decodifique —el poster ES lo que se va a ver, así
-          que el reemplazo es invisible—, y sobre todo el caso
-          `prefers-reduced-motion`, donde el bloque de scrub no corre, `onMeta`
-          nunca se ejecuta, nunca se pide un primer frame y el hero se quedaba en
-          NEGRO. */}
-      <video
-        data-hero-bg
-        src="/prototype/v2/hero-descent-v2.mp4"
-        poster="/prototype/v2/hero-descent-v2-poster.jpg"
-        muted
-        playsInline
-        preload="metadata"
-        aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 z-0 w-full object-cover object-bottom"
-        // El video llena el hero, y punto. Como el hero mide 100svh y el bloque
-        // sólido de las barras arranca en `100svh − u·0.25`, el video ya pasa de
-        // largo ese punto y el gris lo tapa: no hay juntura que ajustar ni
-        // franja que pueda asomar. Ver la nota de geometría arriba.
-        style={{ height: "100%" }}
-      />
+      {/* El fondo. Llena el hero y nada más: ya no hay que reservar sobrante
+          por abajo como con el <video>, porque un canvas no tiene "encuadre"
+          que pueda quedar cortado — el shader se dibuja para el tamaño que
+          tenga, sea cual sea. */}
+      <HeroFoliage className="pointer-events-none absolute inset-0 z-0 h-full w-full" />
 
       {/* Velo permanente: tapa con crema el 20% superior del video y lo suelta
           hacia abajo. Es lo que hace que la imagen "emerja" del fondo de la

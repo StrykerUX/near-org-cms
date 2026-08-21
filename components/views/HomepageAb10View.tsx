@@ -1,4 +1,4 @@
-import HeroVideo from "@/components/sections/home-ab10/HeroVideo";
+import Hero from "@/components/sections/home-ab10/Hero";
 import AgentEconomy from "@/components/sections/home-ab10/AgentEconomy";
 import OwnYourOwn from "@/components/sections/home-ab10/OwnYourOwn";
 import StackAnchors from "@/components/sections/home-ab10/StackAnchors";
@@ -16,7 +16,7 @@ import UpdatesList from "@/components/sections/UpdatesList";
 export default function HomepageAb10View() {
   return (
     <main className="flex flex-col bg-cream">
-      <HeroVideo />
+      <Hero />
       <AgentEconomy />
       <OwnYourOwn />
       <StackAnchors />
