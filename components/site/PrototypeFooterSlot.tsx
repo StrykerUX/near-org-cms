@@ -57,6 +57,10 @@ import SiteFooter from "@/components/site/SiteFooter";
 const NO_FOOTER: string[] = [
   "/prototype/hero-alt",
   "/prototype/footer-labs",
+  // Mismo caso que `hero-alt`: el lab del hero de ab9 llena el viewport con
+  // canvas WebGL y su propio panel sticky. Un takeover detrás solo agrega
+  // scroll a una página que se mira quieta.
+  "/prototype/hero-ab9-gl",
 ];
 
 export default function PrototypeFooterSlot() {
