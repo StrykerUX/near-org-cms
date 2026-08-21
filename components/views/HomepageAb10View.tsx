@@ -1,7 +1,6 @@
 import HeroVideo from "@/components/sections/home-ab10/HeroVideo";
 import AgentEconomy from "@/components/sections/home-ab10/AgentEconomy";
 import OwnYourOwn from "@/components/sections/home-ab10/OwnYourOwn";
-import StackIntro from "@/components/sections/home-ab10/StackIntro";
 import StackAnchors from "@/components/sections/home-ab10/StackAnchors";
 import ProofDatum from "@/components/sections/home-ab10/ProofDatum";
 import BelongsNewsletter from "@/components/sections/home-ab10/BelongsNewsletter";
@@ -20,7 +19,6 @@ export default function HomepageAb10View() {
       <HeroVideo />
       <AgentEconomy />
       <OwnYourOwn />
-      <StackIntro />
       <StackAnchors />
       <ProofDatum />
       <BelongsNewsletter />

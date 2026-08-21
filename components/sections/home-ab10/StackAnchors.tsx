@@ -1,5 +1,6 @@
 "use client";
 
+import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import StackAssembly, { type StackStop } from "@/components/sections/home-ab10/stackAssembly";
 import StackCursorTag from "@/components/sections/home-ab10/StackCursorTag";
@@ -11,6 +12,7 @@ import {
   PROTOCOL_BLOCK,
   STACK_CAPABILITIES,
   STACK_PIECES,
+  STACK_INTRO as INTRO,
 } from "@/components/sections/home-ab10/nearStackContent";
 
 // El stack de ab10: el ensamble isométrico al centro y las cuatro capas escritas
@@ -38,12 +40,18 @@ import {
 //
 // ── Qué cambia respecto del lab ─────────────────────────────────────────────
 //
-//  1. **Sin titular.** El lab abre con "The NEAR Stack" centrado arriba. Acá
-//     ese titular vive AFUERA, en `StackIntro`, la sección inmediatamente
-//     anterior: con cuatro fichas ocupando las esquinas de un viewport pegado,
-//     un quinto bloque en el medio les come el alto justo donde son más
-//     frágiles. Las dos secciones comparten el `bg-ink`, así que la juntura no
-//     se ve.
+//  1. **El titular viaja con la escena.** El lab abre con "The NEAR Stack"
+//     centrado arriba, y por un tiempo acá vivió AFUERA, en una sección propia
+//     (`StackIntro`) inmediatamente anterior. El problema de eso era de lectura,
+//     no de layout: el titular se leía una vez y se iba con el scroll, así que
+//     cuando el arte terminaba de armarse ya no quedaba a la vista qué era lo
+//     que se estaba mirando.
+//
+//     Ahora está DENTRO del sticky, arriba del arte y en `text-h2`. La objeción
+//     que lo había echado afuera —que un bloque de texto le come el alto a las
+//     cuatro fichas— valía para un titular en el MEDIO y a escala de `h1`;
+//     arriba y dos escalones más chico, lo que descuenta es mucho menor, y el
+//     arte cede ese alto en vez de las fichas (ver el `shrink-0`).
 //  2. **La ficha es otra cosa.** El lab tenía rótulo + nombre + párrafo. Acá
 //     lleva cuatro registros tipográficos que hacen cuatro trabajos distintos:
 //     el nombre en mono a escala de heading, una regla con el destino externo,
@@ -98,6 +106,28 @@ export default function StackAnchors() {
         />
 
         <Container className="pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)]">
+          {/* El titular del stack, DENTRO de la escena pegada.
+
+              Vivía en su propia sección (`StackIntro`) justo encima, y por eso
+              se leía una vez y se iba con el scroll: cuando el arte se armaba,
+              el lector ya no tenía a la vista qué era lo que estaba mirando.
+              Acá viaja con el sticky y se queda mientras dura la escena.
+
+              `shrink-0` para que sea el arte —que está en el `flex-1` de
+              abajo— el que ceda alto, y no el titular. El razonamiento viejo
+              de `StackIntro` (que un bloque de texto en el medio le come el
+              alto a las cuatro fichas) sigue siendo cierto para el MEDIO; acá
+              está arriba y en `text-h2` en vez de `text-h1`, así que lo que
+              descuenta es bastante menos. */}
+          <div className="shrink-0 pb-6 text-center lg:pb-8">
+            <h2 className="text-h2 text-balance">
+              {INTRO.lead} <Accent>{INTRO.accent}</Accent>
+            </h2>
+            <p className="mx-auto mt-3 max-w-[42ch] text-body text-cream/70 text-balance">
+              {INTRO.sub}
+            </p>
+          </div>
+
           {/* El área de anclaje: el arte centrado y las cuatro fichas en las
               esquinas. `min-h-0` para que el arte pueda encogerse dentro del
               sticky en vez de desbordarlo. */}
