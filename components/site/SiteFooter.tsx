@@ -43,37 +43,57 @@ import { getLenis } from "@/components/site/providers/lenisInstance";
 // En una pantalla baja el takeover no entra completo en el viewport, y lo que
 // cede es el pie del logo y no el headline: ver "Pantallas bajas" más abajo.
 
-// Los grupos transcritos del tab Footer de "near.org - sitemap" (Google Doc) —
-// cuatro de ahí más "Terms and Policies", que el doc no tiene como columna.
-// Sin las descripciones por link, que el doc lista solo bajo Navigation.
-// Resources y About conservan sus sub-grupos (Build / Learn / Connect,
-// Fundamentals / Ecosystem), y por eso una columna es una lista de SECCIONES y
-// no una lista plana de links.
+// Los grupos transcritos del tab Footer de "near.org - sitemap" (Google Doc),
+// más "Terms and Policies", que el doc no tiene como columna. Sin las
+// descripciones por link, que el doc lista solo bajo Navigation.
+//
+// ── Ocho grupos planos, y antes eran cinco con sub-grupos ───────────────────
+//
+// "Resources" y "About" ya no existen como columnas: sus sub-grupos —Build,
+// Learn, Connect, Fundamentals, Ecosystem— subieron a grupos de primer nivel.
+// El footer pasó de cinco columnas con dos niveles a OCHO columnas planas.
+//
+// Lo que se pierde es la agrupación conceptual; lo que se gana es que todos los
+// rótulos pesan lo mismo. En la versión anterior el lector veía "Resources" en
+// un tamaño y "BUILD" en otro, y los dos eran igual de navegables — una
+// jerarquía visual que no correspondía a ninguna jerarquía real de destinos.
+//
+// Y en el código el efecto es mayor que en el diseño: un grupo es `{ title,
+// links }` y no `{ title, sections: [{ label, links }] }`. Con eso se fueron el
+// `ghostTitle` (el título repetido en invisible para alinear las columnas de un
+// mismo grupo), el aplanado que abría los grupos en celdas, y el emplazamiento
+// explícito de la quinta columna. Un nivel menos de datos es un nivel menos de
+// casos.
 //
 // ── Por qué el href va acá y no sale del manifiesto de rutas ────────────────
 //
-// `lib/routes.ts` da una lista PLANA de páginas; esta jerarquía de cuatro
-// columnas con sub-labels no es expresable en `PageMeta`. Mismo caso que
-// `SiteHeader`, que ya lleva su propia copy por la misma razón — el comentario
-// de `lib/routes.ts` lo documenta.
+// `lib/routes.ts` da una lista PLANA de páginas, pero plana en el otro sentido:
+// no tiene a qué columna pertenece cada una ni en qué orden van. Eso no es
+// expresable en `PageMeta`. Mismo caso que `SiteHeader`, que ya lleva su propia
+// copy por la misma razón — el comentario de `lib/routes.ts` lo documenta.
 //
 // `href: null` = la página todavía no existe. Se renderiza como link inerte a
 // "#" en vez de inventarle un destino: un link equivocado es peor que un
 // placeholder evidente. Al crear la página, esto es una línea.
 // ── Las variantes ───────────────────────────────────────────────────────────
 //
-// El footer de producción es `default` y es el que montan los tres layouts.
-// Las otras dos son las pruebas que viven en `/prototype/footer-labs`, y son
-// props de ESTE componente y no copias suyas: una copia se desincroniza al
-// primer cambio y la prueba deja de medir el footer real.
+// El footer de producción es `veil` —es el default de la prop, así que es el
+// que montan los tres layouts, que lo llaman sin argumentos. Las otras dos
+// siguen siendo props de ESTE componente y no copias suyas: una copia se
+// desincroniza al primer cambio y la prueba deja de medir el footer real.
+//
+//   default · el reparto vertical original: el logo cede alto cuando el panel
+//             de links no entra, y el copyright ocupa su propia línea debajo.
+//             Ya no lo monta ninguna página; queda como punto de comparación.
 //
 //   veil    · el logo se hunde detrás de la superficie del footer: un
 //             degradado del color del fondo lo cubre desde arriba y el logo
 //             queda pegado al borde inferior (el copyright vuelve a ser una
 //             capa suelta, para no empujarlo hacia arriba).
-//   compact · sin el headline, y los dos grupos con sub-secciones —Resources y
-//             About— se abren en dos columnas. Todo el alto que se ahorra se
-//             lo queda el logo: el reparto vertical ya le da lo que sobra.
+//   compact · sin el headline, y las ocho columnas en una sola fila de anchos
+//             iguales en vez de la retícula de dos filas. Todo el alto que se
+//             ahorra se lo queda el logo: el reparto vertical ya le da lo que
+//             sobra.
 export type SiteFooterVariant = "default" | "veil" | "compact";
 
 type FooterLink = { label: string; href: string | null };
@@ -83,108 +103,80 @@ type FooterLink = { label: string; href: string | null };
 // de actualizar el día que un link deja de ser interno.
 const isExternal = (href: string | null) => !!href && /^https?:\/\//.test(href);
 
-const GROUPS: {
-  title: string;
-  sections: { label: string; links: FooterLink[] }[];
-}[] = [
+const GROUPS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Products",
-    sections: [
-      {
-        label: "",
-        // Los tres productos viven FUERA del sitio, y estos son los mismos
-        // href que el menú Products del header — que los tiene transcritos del
-        // sitemap doc. Antes apuntaban a `/nearcom`, `/intents` y `/near-ai`:
-        // esas páginas existen, pero son las páginas SOBRE cada producto, no
-        // el producto. Desde el footer, "near.com" tiene que llevar a near.com.
-        links: [
-          { label: "near.com", href: "https://near.com" },
-          { label: "Intents", href: "https://intents.near.org" },
-          { label: "NEAR AI", href: "https://near.ai" },
-        ],
-      },
+    // Los tres productos viven FUERA del sitio, y estos son los mismos href
+    // que el menú Products del header — que los tiene transcritos del sitemap
+    // doc. Antes apuntaban a `/nearcom`, `/intents` y `/near-ai`: esas páginas
+    // existen, pero son las páginas SOBRE cada producto, no el producto. Desde
+    // el footer, "near.com" tiene que llevar a near.com.
+    links: [
+      { label: "near.com", href: "https://near.com" },
+      { label: "Intents", href: "https://intents.near.org" },
+      { label: "NEAR AI", href: "https://near.ai" },
     ],
   },
   {
     title: "Stack",
-    sections: [
-      {
-        label: "",
-        links: [
-          // "Protocol" es el label del sitemap doc; la ruta se llama
-          // /blockchain. Acá apuntaba a /prototype/protocol, que ya no existe.
-          { label: "Protocol", href: "/blockchain" },
-          { label: "Chain Abstraction", href: "/chain-abstraction" },
-          { label: "Quantum Security", href: "/quantum-security" },
-        ],
-      },
+    links: [
+      // "Protocol" es el label del sitemap doc; la ruta se llama /blockchain.
+      // Acá apuntaba a /prototype/protocol, que ya no existe.
+      { label: "Protocol", href: "/blockchain" },
+      { label: "Chain Abstraction", href: "/chain-abstraction" },
+      { label: "Quantum Security", href: "/quantum-security" },
     ],
   },
   {
-    title: "Resources",
-    sections: [
-      {
-        label: "Build",
-        links: [
-          { label: "Docs", href: null },
-          { label: "Solutions", href: "/solutions" },
-        ],
-      },
-      {
-        label: "Learn",
-        links: [
-          { label: "Research", href: "/research" },
-          { label: "Blog", href: "/blog" },
-          { label: "Analytics", href: "/analytics" },
-        ],
-      },
-      {
-        label: "Connect",
-        links: [
-          { label: "Brand", href: "/brand" },
-          { label: "Contact", href: "/contact-us" },
-          { label: "Careers", href: null },
-        ],
-      },
+    title: "Build",
+    links: [
+      { label: "Docs", href: null },
+      { label: "Solutions", href: "/solutions" },
     ],
   },
   {
-    title: "About",
-    sections: [
-      {
-        label: "Fundamentals",
-        links: [
-          { label: "History", href: null },
-          { label: "Roadmap", href: null },
-          { label: "Economics", href: "/economics" },
-        ],
-      },
-      {
-        label: "Ecosystem",
-        links: [
-          { label: "NEAR Foundation", href: "/near-foundation" },
-          { label: "Community", href: "/community" },
-          { label: "Governance", href: null },
-        ],
-      },
+    title: "Learn",
+    links: [
+      { label: "Research", href: "/research" },
+      { label: "Blog", href: "/blog" },
+      { label: "Analytics", href: "/analytics" },
     ],
   },
-  // La quinta columna no está en el tab Footer del sitemap doc: ahí lo legal
-  // vive como una fila al pie. Se sube a columna a pedido, y entonces la fila
-  // de abajo se queda solo con el copyright — los mismos tres links dos veces
-  // en la misma pantalla no son dos caminos, son ruido.
+  {
+    title: "Connect",
+    links: [
+      { label: "Brand", href: "/brand" },
+      { label: "Contact", href: "/contact-us" },
+      { label: "Careers", href: null },
+    ],
+  },
+  {
+    title: "Fundamentals",
+    links: [
+      { label: "History", href: null },
+      { label: "Roadmap", href: null },
+      { label: "Economics", href: "/economics" },
+    ],
+  },
+  {
+    title: "Ecosystem",
+    links: [
+      { label: "NEAR Foundation", href: "/near-foundation" },
+      { label: "Community", href: "/community" },
+      { label: "Governance", href: null },
+    ],
+  },
+  // Esta columna no está en el tab Footer del sitemap doc: ahí lo legal vive
+  // como una fila al pie. Se sube a columna a pedido, y entonces la fila de
+  // abajo se queda solo con el copyright — los mismos links dos veces en la
+  // misma pantalla no son dos caminos, son ruido.
   {
     title: "Terms and Policies",
-    sections: [
-      {
-        label: "",
-        links: [
-          { label: "Terms of Use", href: "/terms-of-use" },
-          { label: "Privacy Policy", href: "/privacy" },
-          { label: "Cookie Policy", href: "/cookie-policy" },
-          { label: "Official Rules", href: "/official-rules" },
-        ],
-      },
+    links: [
+      { label: "Terms of Use", href: "/terms-of-use" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Cookie Policy", href: "/cookie-policy" },
+      { label: "Official Rules", href: "/official-rules" },
     ],
   },
 ];
@@ -296,85 +288,61 @@ const VEIL_STYLE: React.CSSProperties = {
 
 function FooterColumn({
   title,
-  sections,
-  label,
-  ghostTitle = false,
+  links,
   dark,
   linkClass,
   className = "",
 }: {
   title: string;
-  sections: (typeof GROUPS)[number]["sections"];
-  /** El aria-label, que en una columna de continuación no es el título solo. */
-  label: string;
-  /**
-   * `compact`: las columnas 2ª y 3ª de un grupo repiten el título en
-   * INVISIBLE. Repetirlo visible sería mentira (no son tres grupos), y
-   * omitirlo desalinea los rótulos de sub-grupo contra los de las columnas
-   * vecinas — que es lo único que ata las ocho columnas a una misma retícula.
-   */
-  ghostTitle?: boolean;
+  links: FooterLink[];
   dark: boolean;
   linkClass: string;
   className?: string;
 }) {
   return (
-    <nav aria-label={label} className={className}>
-      {/* El título del grupo va en el GRIS y los links en blanco: la jerarquía
-          la da la posición (arriba, con aire debajo), no el contraste. Con el
-          título más claro que sus links, lo primero que pesaba en la columna
-          era el rótulo y no los destinos. */}
+    <nav aria-label={title} className={className}>
+      {/* El título del grupo va en MONO y en gris, y los links en sans blanca:
+          la jerarquía la da la posición (arriba, con aire debajo) y el cambio
+          de familia, no el contraste. Con el título más claro que sus links, lo
+          primero que pesaba en la columna era el rótulo y no los destinos.
+
+          La mono baja además de peso 500 a 400 —`text-body-sm-mono` toma el
+          weight de la escala mono— y eso es parte del efecto: un rótulo mono en
+          medium al lado de links en sans regular se lee como el elemento
+          principal de la columna, que es justo lo contrario de lo que es. */}
       <h2
-        aria-hidden={ghostTitle || undefined}
-        className={`text-label ${dark ? "text-cream/70" : "text-muted-foreground"} ${
-          ghostTitle ? "invisible" : ""
-        }`}
+        className={`text-body-sm-mono ${dark ? "text-cream/55" : "text-gray-intermediate"}`}
       >
         {title}
       </h2>
-      <div className="mt-3 flex flex-col gap-5">
-        {sections.map((section, i) => (
-          <div key={section.label || i} className="flex flex-col gap-1.5">
-            {section.label && (
-              <p
-                className={`text-caption uppercase ${
-                  dark ? "text-cream/50" : "text-gray-intermediate"
-                }`}
+      <ul className="mt-3 flex flex-col gap-1.5">
+        {links.map((link) => (
+          <li key={link.label}>
+            {isExternal(link.href) ? (
+              <a
+                href={link.href ?? "#"}
+                target="_blank"
+                rel="noreferrer"
+                className={`${linkClass} inline-flex items-center gap-1`}
               >
-                {section.label}
-              </p>
+                {link.label}
+                {/* `strokeWidth` 1.25 contra el 2 que trae lucide: al tamaño de
+                    un link, el trazo por defecto pesa más que la palabra que
+                    acompaña. */}
+                <ArrowUpRight aria-hidden="true" className="size-3.5" strokeWidth={1.25} />
+              </a>
+            ) : link.href ? (
+              <Link href={link.href} className={linkClass}>
+                {link.label}
+              </Link>
+            ) : (
+              <a href="#" className={linkClass}>
+                {link.label}
+              </a>
             )}
-            <ul className="flex flex-col gap-1.5">
-              {section.links.map((link) => (
-                <li key={link.label}>
-                  {isExternal(link.href) ? (
-                    <a
-                      href={link.href ?? "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`${linkClass} inline-flex items-center gap-1`}
-                    >
-                      {link.label}
-                      {/* `strokeWidth` 1.25 contra el 2 que trae lucide: al
-                          tamaño de un link, el trazo por defecto pesa más que
-                          la palabra que acompaña. */}
-                      <ArrowUpRight aria-hidden="true" className="size-3.5" strokeWidth={1.25} />
-                    </a>
-                  ) : link.href ? (
-                    <Link href={link.href} className={linkClass}>
-                      {link.label}
-                    </Link>
-                  ) : (
-                    <a href="#" className={linkClass}>
-                      {link.label}
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </nav>
   );
 }
@@ -396,70 +364,22 @@ function LinkColumns({
     dark ? "text-cream hover:text-cream/70" : "text-foreground hover:text-muted-foreground"
   }`;
 
-  // Mapas literales de clases: Tailwind v4 no detecta las que se arman con un
-  // template string.
-  const grid =
-    columns === "two"
-      ? "grid-cols-2 sm:grid-cols-3"
-      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
-
-  // A partir de sm —y hasta lg, que es donde esta versión deja de existir— la
-  // quinta columna se emplaza SOLA en la tercera, y las otras cuatro quedan de
-  // a dos en las dos primeras. Con el flujo automático caían 3 + 2 y "Terms
-  // and Policies" terminaba de vecina de "About" en la segunda fila; acá es un
-  // grupo aparte —lo legal, no navegación— y se lee mejor en su propia
-  // columna. Debajo de sm no aplica ninguna: ahí manda el flujo, en 2 columnas.
-  const PLACE = columns === "two"
-    ? [
-        "sm:col-start-1 sm:row-start-1",
-        "sm:col-start-2 sm:row-start-1",
-        "sm:col-start-1 sm:row-start-2",
-        "sm:col-start-2 sm:row-start-2",
-        "sm:col-start-3 sm:row-start-1",
-      ]
-    : [];
-
-  // ── `compact`: una columna por SUB-GRUPO, todas del mismo ancho ──────────
+  // ── `split`: las ocho en UNA fila, todas del mismo ancho ─────────────────
   //
-  // Resources se abre en sus tres (Build / Learn / Connect) y About en sus dos,
-  // así que las cinco columnas pasan a ser ocho. Y son ocho HERMANAS de una
-  // misma fila flex con `flex-1 basis-0`, no tres navs de anchos distintos con
-  // sub-columnas adentro: solo siendo hermanas del mismo flex el ancho sale
-  // idéntico: anidadas, cada nivel se come sus propios gaps y las columnas de
-  // un grupo de tres terminan más angostas que las de uno de uno.
+  // Son ocho HERMANAS de un mismo flex con `flex-1 basis-0`, y esa es la única
+  // forma de que el ancho salga idéntico: anidadas en sub-contenedores, cada
+  // nivel se come sus propios gaps y unas terminan más angostas que otras.
   //
   // Solo en el panel (`columns === "auto"`); en la versión estática de mobile
-  // ocho columnas no entran y manda la retícula de 2/3.
+  // ocho columnas no entran y manda la retícula de abajo.
   if (split && columns === "auto") {
-    const cells = GROUPS.flatMap((group) =>
-      group.sections.length > 1
-        ? group.sections.map((section, i) => ({
-            key: `${group.title}-${section.label || i}`,
-            title: group.title,
-            label: `${group.title} · ${section.label}`,
-            sections: [section],
-            ghostTitle: i > 0,
-          }))
-        : [
-            {
-              key: group.title,
-              title: group.title,
-              label: group.title,
-              sections: group.sections,
-              ghostTitle: false,
-            },
-          ]
-    );
-
     return (
       <div className="flex flex-wrap gap-x-8 gap-y-10">
-        {cells.map((cell) => (
+        {GROUPS.map((group) => (
           <FooterColumn
-            key={cell.key}
-            title={cell.title}
-            label={cell.label}
-            sections={cell.sections}
-            ghostTitle={cell.ghostTitle}
+            key={group.title}
+            title={group.title}
+            links={group.links}
             dark={dark}
             linkClass={linkClass}
             className="min-w-[7rem] flex-1 basis-0"
@@ -469,17 +389,26 @@ function LinkColumns({
     );
   }
 
+  // Mapas literales de clases: Tailwind v4 no detecta las que se arman con un
+  // template string.
+  //
+  // Ocho grupos en una retícula que crece 2 → 3 → 4: en `lg` quedan dos filas
+  // de cuatro, que es el reparto que deja las columnas de un ancho legible sin
+  // dejar huérfanas. Con cinco por fila la última fila se quedaba con tres.
+  const grid =
+    columns === "two"
+      ? "grid-cols-2 sm:grid-cols-3"
+      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
+
   return (
     <div className={`grid gap-x-12 gap-y-10 lg:gap-x-16 ${grid}`}>
-      {GROUPS.map((group, i) => (
+      {GROUPS.map((group) => (
         <FooterColumn
           key={group.title}
           title={group.title}
-          label={group.title}
-          sections={group.sections}
+          links={group.links}
           dark={dark}
           linkClass={linkClass}
-          className={PLACE[i] ?? ""}
         />
       ))}
     </div>
@@ -549,16 +478,16 @@ function StaticFooter({ variant }: { variant: SiteFooterVariant }) {
             <Accent>actually moves.</Accent>
           </p>
         )}
-        {/* Sin `split`: las ocho columnas de `compact` son cosa del panel. En
-            un teléfono no entran, y acá lo único que la variante cambia es que
-            no hay headline. */}
+        {/* Sin `split`: las ocho en una fila son cosa del panel. En un teléfono
+            no entran, y acá lo único que la variante cambia es que no hay
+            headline. */}
         <LinkColumns dark columns="two" />
       </Container>
     </div>
   );
 }
 
-export default function SiteFooter({ variant = "default" }: { variant?: SiteFooterVariant } = {}) {
+export default function SiteFooter({ variant = "veil" }: { variant?: SiteFooterVariant } = {}) {
   const veil = variant === "veil";
   const compact = variant === "compact";
 
