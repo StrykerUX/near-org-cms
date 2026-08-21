@@ -7,8 +7,9 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import { Observer } from "gsap/Observer";
 
-gsap.registerPlugin(ScrollTrigger, SplitText); // idempotente
+gsap.registerPlugin(ScrollTrigger, SplitText, Observer); // idempotente
 
 if (typeof window !== "undefined") {
   // iOS/Android colapsan la address bar al scrollear: eso dispara un resize
@@ -20,4 +21,12 @@ if (typeof window !== "undefined") {
   gsap.ticker.lagSmoothing(0);
 }
 
-export { gsap, ScrollTrigger, SplitText };
+// `Observer` se exporta desde acá por el mismo motivo que los otros dos, y no
+// por ninguno más: es la regla que este archivo declara arriba —un solo lugar
+// donde se registran los plugins— y el carrusel de historias la salteaba
+// importándolo de "gsap/Observer".
+//
+// Que quede claro qué NO arregla esto: no arregla ningún bug conocido. El
+// registro por subpath funcionaba. Se unifica por consistencia, para que
+// mañana no haya dos formas de traer un plugin según quién lo escribió.
+export { gsap, ScrollTrigger, SplitText, Observer };

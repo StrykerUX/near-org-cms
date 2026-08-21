@@ -6,7 +6,7 @@ import StackAnchors from "@/components/sections/home-ab10/StackAnchors";
 import ProofDatum from "@/components/sections/home-ab10/ProofDatum";
 import BelongsNewsletter from "@/components/sections/home-ab10/BelongsNewsletter";
 import CustomerStories from "@/components/sections/home-ab10/CustomerStories";
-import TestimonialMarquee from "@/components/sections/TestimonialMarquee";
+import PressCarousel from "@/components/sections/home-ab10/PressCarousel";
 import LatestUpdates from "@/components/sections/LatestUpdates";
 import UpdatesList from "@/components/sections/UpdatesList";
 
@@ -25,7 +25,7 @@ export default function HomepageAb10View() {
       <ProofDatum />
       <BelongsNewsletter />
       <CustomerStories />
-      <TestimonialMarquee />
+      <PressCarousel />
       <LatestUpdates />
       <UpdatesList />
     </main>

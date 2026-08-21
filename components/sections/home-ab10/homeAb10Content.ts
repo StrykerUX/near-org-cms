@@ -187,3 +187,58 @@ export const OWN_YOUR_OWN_CARDS = [
     body: "Run private inference, deploy agents in a secure harness, and keep real sovereignty over your AI.",
   },
 ] as const;
+
+// ── de PressCarousel.tsx ────────────────────────────────────────────────────
+// Los cinco testimonios, copiados del lab `/prototype/carousel-sections` junto
+// con la sección que los pinta. Son los MISMOS que muestra
+// `components/sections/TestimonialMarquee` —la sección compartida que este
+// carrusel reemplaza en ab10— pero no se importan de ahí: ese módulo lo montan
+// ocho views y su forma es suya, no de ab10.
+//
+// El tono es de PRESENTACIÓN y no del testimonio: se reparte en ciclo
+// (green, gray, dark, green, gray…) para que la fila alterne, no porque la
+// cita diga nada sobre el color.
+export type PressTone = "green" | "gray" | "dark";
+
+// Contenido: los 5 testimonios de TestimonialMarquee
+// (components/sections/TestimonialMarquee.tsx), no importados —mismo
+// criterio que CUSTOMER_STORIES abajo. Tono intercalado en ciclo de a tres
+// (green, gray, dark, green, gray…) — no el light/dark de la fuente. Sin
+// bandas de fondo: eso era decoración de TestimonialMarquee, no se pidió acá.
+export const PRESS_ITEMS = [
+  {
+    tone: "green",
+    logo: { src: "/logos/venice.png", width: 89, height: 40 },
+    body: "Near still feels like the most underrated team in crypto to me. New feature releases basically every other week on an actually scalable chain.",
+    name: "Mert Mumtaz",
+    role: "CEO of Helius",
+  },
+  {
+    tone: "gray",
+    logo: { src: "/logos/abound.png", width: 111, height: 24 },
+    body: "We shipped confidential payouts in a week. The part that surprised us was not needing a separate trust story to sell it.",
+    name: "Dana Ferris",
+    role: "CTO of Abound",
+  },
+  {
+    tone: "dark",
+    logo: { src: "/logos/brave.png", width: 86, height: 24 },
+    body: "Privacy that has to be explained is privacy nobody uses. Here it is the default, and that changed how we onboard.",
+    name: "Iris Kowalski",
+    role: "Head of Product, Brave",
+  },
+  {
+    tone: "green",
+    logo: { src: "/logos/zodl.png", width: 133, height: 27 },
+    body: "Cross-chain used to mean three integrations and a bridge we did not control. Now it is one account and it settles.",
+    name: "Tomás Rivera",
+    role: "Founder of ZODL",
+  },
+  {
+    tone: "gray",
+    logo: { src: "/logos/ledger.png", width: 117, height: 39 },
+    body: "Self custody stopped being the hard sell. Our users keep their keys and still get the experience they expected.",
+    name: "Amara Osei",
+    role: "VP Engineering, Ledger",
+  },
+] as const;

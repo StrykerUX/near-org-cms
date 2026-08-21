@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, type RefObject } from "react";
+import { useRef, useState, useCallback, type RefObject, type CSSProperties } from "react";
 import { gsap, Observer } from "@/components/primitives/motion/gsapClient";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { MQ } from "@/components/primitives/motion/motionTokens";
@@ -31,10 +31,45 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
  */
 
 const COPIES = 3;
+
+/** Espera entre pasos del autoplay. */
 const AUTOPLAY_MS = 7000;
-const SETTLE_DURATION = 0.85;
-const SETTLE_EASE = "power3.inOut";
+
+/**
+ * Duración de UN paso, en segundos. Es la fuente de verdad única del gesto.
+ *
+ * El consumidor la consume como `--step` (ver `stepStyle`) para que la
+ * transición CSS de la card use exactamente este número. Antes no era así y
+ * era el origen del movimiento inconsistente: el track lo movía GSAP en
+ * 0.85s con `power3.inOut`, mientras la card cambiaba de tamaño y el titular
+ * de cuerpo en 550ms con `cubic-bezier(.22,.61,.36,1)`. Dos duraciones y dos
+ * curvas para el MISMO gesto — la card terminaba de crecer cuando el track
+ * iba por la mitad, y el paso se leía en dos tiempos en vez de uno.
+ */
+const STEP_SECONDS = 1.75;
+
+/**
+ * El easing, en las dos sintaxis que hacen falta. Son la MISMA curva:
+ * `power2.inOut` de GSAP es `easeInOutCubic`, y su equivalente CSS exacto es
+ * el cubic-bezier de abajo. Si se cambia uno hay que cambiar el otro, o el
+ * desfase vuelve por la puerta de atrás.
+ *
+ * `power2` y no `power3`: a 1.75s la curva de power3 pasa demasiado tiempo
+ * casi quieta en los extremos y el paso se siente perezoso al arrancar.
+ */
+const SETTLE_EASE = "power2.inOut";
+const SETTLE_EASE_CSS = "cubic-bezier(0.645, 0.045, 0.355, 1)";
+
 const CLICK_GUARD_PX = 6;
+
+/**
+ * Lo que el consumidor pone en el `style` de su sección para que las
+ * transiciones CSS de las cards salgan del mismo reloj que el track.
+ */
+export const stepStyle = {
+  "--step": `${STEP_SECONDS}s`,
+  "--step-ease": SETTLE_EASE_CSS,
+} as CSSProperties;
 
 export type UseLoopCarouselResult<T extends HTMLElement> = {
   containerRef: RefObject<T | null>;
@@ -65,14 +100,23 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     if (!track) return;
 
     // `count` directo y no un ref: el efecto ya lo declara en sus
-    // dependencias, así que el valor que captura siempre es el vigente. El ref
-    // que había acá se escribía durante el render, que es lo que React
-    // desaconseja, y no compraba nada a cambio.
+    // dependencias, así que se rehace entero cuando cambia y el valor que
+    // captura siempre es el vigente. El ref que había acá se escribía durante
+    // el render —lo que React desaconseja, porque un render puede descartarse
+    // antes de commitearse— y no compraba nada a cambio.
     const N = count;
     const cells = Array.from(container.querySelectorAll<HTMLElement>("[data-cell]"));
     if (cells.length === 0) return;
 
-    const motionOkRef = { current: true };
+    // Arranca en FALSE, no en true.
+    //
+    // `mm.add(MQ.motion, ...)` solo corre su callback cuando la media query
+    // MATCHEA. Con `prefers-reduced-motion: reduce` no matchea nunca, así que
+    // el callback no corre — y con el valor inicial en `true` la bandera se
+    // quedaba en true para siempre: el carrusel animaba y hacía autoplay
+    // igual, justo para quien pidió que no. Empezando en false, el único que
+    // la enciende es el match.
+    const motionOkRef = { current: false };
     const hoverRef = { current: false };
     const focusRef = { current: false };
     const inViewRef = { current: true };
@@ -147,7 +191,7 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
         paint(((i % N) + N) % N);
         tweenRef.current = gsap.to(track, {
           x: target,
-          duration: SETTLE_DURATION,
+          duration: STEP_SECONDS,
           ease: SETTLE_EASE,
           onComplete: settle,
         });
@@ -167,8 +211,21 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     const mm = gsap.matchMedia();
     mm.add(MQ.motion, () => {
       motionOkRef.current = true;
+      // Arrancar el timer ACÁ y no solo abajo.
+      //
+      // `startTimer` es una de las cuatro cosas que miran `motionOkRef`, y con
+      // la bandera empezando en `false` (ver su declaración) el orden importa:
+      // si GSAP difiere este callback aunque sea un tick, el `startTimer()` de
+      // más abajo ya corrió con la bandera apagada y salió sin agendar nada —
+      // y nadie lo vuelve a intentar, así que el autoplay no arranca nunca.
+      //
+      // Llamarlo también desde acá lo deja correcto en los dos casos: si el
+      // callback es síncrono, el de abajo es un no-op (`startTimer` empieza
+      // matando el timer anterior); si es diferido, este es el que arranca.
+      startTimer();
       return () => {
         motionOkRef.current = false;
+        pause();
       };
     });
 

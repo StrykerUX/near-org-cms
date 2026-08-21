@@ -1,155 +1,200 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
 import Accent from "@/components/primitives/Accent";
-import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
+import { useLoopCarousel, buildLoopCells, stepStyle } from "./useLoopCarousel";
 import { CUSTOMER_STORIES as STORIES } from "@/components/sections/home-ab10/homeAb10Content";
 
-// Las tres props son OPCIONALES y sus defaults son exactamente lo que la
-// sección hacía antes, así que `<CustomerStories />` en la homepage de ab10 no
-// cambia ni un píxel. Existen para que los drafts EX puedan variar la sección
-// sin forkearla: es la misma pieza, mirada de otra manera.
-export type CustomerStoriesProps = {
-  /** El rótulo de arriba. */
-  eyebrow?: string;
-  /** `mirror` pone la imagen a la izquierda y el texto a la derecha. */
-  mirror?: boolean;
-  /** El fondo de la sección. */
-  tone?: "cream" | "stone";
-};
+// Carrusel de historias, portado del lab `/prototype/carousel-sections`.
+//
+// Reemplaza la versión anterior de esta sección —dos columnas fijas, imagen a
+// un lado y un crossfade de títulos apilados en la misma celda de grid—, que
+// mostraba UNA historia por vez sin pista de que hubiera más. Acá las vecinas
+// asoman a los costados y el paso se ve, que es lo que convierte la fila de
+// logos de abajo en una navegación evidente en vez de en un pie de página.
+//
+// El lab es un laboratorio, así que esto es una COPIA y no un import: es la
+// regla del README de sections para las carpetas de prototipo ("si una versión
+// gana, se COPIA a la carpeta de la página que la reciba"). Su contenido puede
+// cambiar o borrarse sin aviso, y esta sección ya no depende de eso.
+//
+// La copy sale de `homeAb10Content` y no del contenido del lab: son SEIS
+// historias con hrefs reales a los posts, contra las cuatro con `href: "#"`
+// que el lab traía de ejemplo. El motor es genérico en N, así que el cambio
+// de cantidad no lo toca.
+const N = STORIES.length;
+const cells = buildLoopCells(STORIES);
 
-export default function CustomerStories({
-  eyebrow = "Customer stories",
-  mirror = false,
-  tone = "cream",
-}: CustomerStoriesProps = {}) {
-  const [active, setActive] = useState(0);
+export default function CustomerStories() {
+  const { containerRef, trackRef, index, goTo, rootProps } =
+    useLoopCarousel<HTMLDivElement>(N);
 
   return (
-    <section className={`${tone === "stone" ? "bg-stone" : "bg-cream"} text-foreground`}>
-      <Container className="flex flex-col gap-14 py-20">
-        {/* El espejado va por `order` en los hijos y no por `flex-row-reverse`:
-            esto es un grid, y en móvil las dos mitades se apilan — invertir el
-            orden ahí dejaría la imagen antes que el titular, que es justo lo
-            que no se quiere. De ahí el `lg:`. */}
-        <div
-          className={`grid grid-cols-1 items-center gap-16 lg:grid-cols-2 ${
-            mirror ? "lg:[&>*:first-child]:order-2" : ""
-          }`}
-        >
-          <div className="flex flex-col gap-4">
-            <Eyebrow>{eyebrow}</Eyebrow>
-            <h2 className="text-h2 text-pretty">
-              What the world is building
-              <br />
-              <Accent>on NEAR</Accent>
-            </h2>
+    <section
+      // `stepStyle` baja `--step` y `--step-ease` desde el motor. Las
+      // transiciones CSS de las cards los consumen, así que el tamaño de la
+      // card y el desplazamiento del track salen del MISMO reloj y la MISMA
+      // curva. Ver la nota larga de `STEP_SECONDS` en useLoopCarousel.
+      style={stepStyle}
+      className="overflow-hidden bg-cream py-[clamp(40px,7vh,96px)] text-foreground"
+      aria-roledescription="carousel"
+      aria-label="What the world is building on NEAR"
+    >
+      <h2 className="mb-[clamp(30px,6vh,74px)] px-[clamp(24px,5vw,105px)] text-pretty text-h2">
+        What the world is
+        <br />
+        <Accent>building on NEAR</Accent>
+      </h2>
 
-            {/* Los 6 títulos apilados en la MISMA celda de grid. Así el bloque
-                mide siempre lo que el título más largo y no salta al cambiar de
-                historia — el original resolvía eso con un ResizeObserver que
-                escribía minHeight, acá lo hace el layout solo. */}
-            <div className="mt-4 grid">
-              {STORIES.map((story, i) => (
-                <div
-                  key={story.company}
-                  data-active={i === active}
-                  // invisible (no solo opacity-0) para que los títulos ocultos
-                  // no queden focuseables ni los lea un lector de pantalla.
-                  className="invisible flex translate-y-2.5 flex-col gap-6 opacity-0 transition-[opacity,transform] duration-[450ms] ease-out [grid-area:1/1] motion-reduce:transition-none data-[active=true]:visible data-[active=true]:translate-y-0 data-[active=true]:opacity-100"
-                >
-                  <h3 className="text-h3 text-pretty">{story.title}</h3>
-                  <a
-                    href={story.href}
-                    target="_blank"
-                    rel="noopener"
-                    className="group/cta flex w-fit items-center gap-3 text-label"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-near-green-accent text-black transition-transform duration-200 motion-reduce:transition-none group-hover/cta:translate-x-0.5">
-                      <ArrowRight className="size-4" />
-                    </span>
-                    Read the full story
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div
+        ref={containerRef}
+        {...rootProps}
+        aria-label="Customer stories. Usá las flechas para navegar."
+        className="relative w-full cursor-grab touch-pan-y select-none overflow-hidden py-[clamp(8px,1.4vh,18px)] outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+      >
+        <div ref={trackRef} className="flex items-stretch gap-[20px]">
+          {cells.map(({ item, key, logical, hidden }) => {
+            const delta = (((logical - index) % N) + N) % N;
+            const distance = Math.min(delta, N - delta);
+            const eager = !hidden && distance <= 1;
+            // La celda NUNCA cambia de tamaño (grilla uniforme, que es lo que
+            // el motor mide) — la card de adentro sí, y se pega al borde
+            // INTERNO de su celda: la vecina que va DESPUÉS de la activa se
+            // pega a la izquierda de su celda, mirando hacia la activa; la que
+            // va ANTES se pega a la derecha. El hueco queda del lado externo,
+            // hacia el borde de pantalla, donde no se ve.
+            const isAfterActive = delta !== 0 && delta <= N / 2;
 
-          {/* Las seis imágenes viven en el DOM porque el crossfade las necesita
-              todas ahí, pero solo la ACTIVA y sus vecinas se descargan.
+            return (
+              <div
+                key={key}
+                data-cell
+                data-logical={logical}
+                data-active={logical === 0}
+                aria-hidden={hidden || undefined}
+                className={`group flex min-h-0 flex-[0_0_min(84vw,460px)] items-end lg:min-h-[clamp(260px,30vw,495px)] lg:flex-[0_0_clamp(300px,62vw,1010px)] ${isAfterActive ? "lg:justify-start" : "lg:justify-end"}`}
+              >
+                {/* Las transiciones toman su duración y su curva de las vars de
+                    la sección, no de números propios. Antes eran 550ms con otra
+                    cubic-bezier mientras el track tardaba 850ms con otra curva
+                    más, y ese desfase era el movimiento "en dos tiempos". */}
+                <article className="grid h-full w-full grid-cols-1 overflow-hidden rounded-[18px] bg-ink-soft text-cream transition-[width,height,opacity] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:h-full! motion-reduce:w-full! motion-reduce:opacity-100! motion-reduce:transition-none! group-data-[active=false]:opacity-60 lg:grid-cols-[1fr_.78fr] lg:group-data-[active=false]:h-[62%] lg:group-data-[active=false]:w-[62%] lg:group-data-[active=false]:opacity-[.55] lg:group-data-[active=true]:opacity-100">
+                  <div className="flex flex-col p-[clamp(20px,2.4vw,44px)]">
+                    {/* Gov. of Bermuda no tiene logotipo en el contenido, y su
+                        `logo` es `null` a propósito. El fallback es el nombre en
+                        el mismo rol de rótulo, no un hueco: sin él la card se
+                        quedaría sin identificar. Lo mismo abajo, en la fila de
+                        navegación. */}
+                    {item.logo ? (
+                      <Image
+                        src={item.logo.src}
+                        alt={item.company}
+                        width={item.logo.width}
+                        height={item.logo.height}
+                        draggable={false}
+                        className="mb-auto h-[clamp(12px,1.2vw,22px)] w-auto self-start brightness-0 invert"
+                      />
+                    ) : (
+                      <span className="mb-auto self-start text-eyebrow uppercase text-cream">
+                        {item.company}
+                      </span>
+                    )}
 
-              Los originales son PNG de 0.87 a 1.24MB — unos 6MB en total. Con las
-              seis pedidas a la vez, el navegador abría seis descargas y seis
-              decodificaciones en paralelo cuando la sección se acercaba, para
-              mostrar una. `loading="lazy"` no alcanzaba por sí solo: las seis están
-              en el mismo contenedor, así que entran al viewport juntas.
+                    <p className="mb-[clamp(8px,1.4vh,18px)] mt-[clamp(18px,3vh,40px)] text-eyebrow uppercase text-cream/82">
+                      Customer stories
+                    </p>
+                    {/* El titular CRECE con la card, de 22px a 38px, y ese
+                        cambio de cuerpo es buena parte del gesto: no es que la
+                        card activa tenga otro estilo, es que el mismo titular se
+                        agranda. La escala no tiene un par de tokens que dé ese
+                        salto exacto, y meterlo a la fuerza en dos niveles
+                        rompería la interpolación — `transition-[font-size]`
+                        necesita dos valores en la misma unidad.
 
-              El criterio es la activa (`eager`, porque se va a ver ya) más la
-              anterior y la siguiente. Las otras tres van con `display: none`, que
-              es lo que impide la descarga: un `loading="lazy"` cuyo elemento no
-              entra al viewport no se pide. Al navegar de a un tab, la que entra ya
-              estaba descargada por ser vecina, así que el crossfade nunca espera
-              red. La vecindad es circular porque los logos permiten saltar del
-              último al primero. */}
-          <div className="relative aspect-[8/5] w-full overflow-hidden rounded-md border border-border bg-muted">
-            {STORIES.map((story, i) => {
-              const distance = Math.min(
-                Math.abs(i - active),
-                // Circular: desde el último, el siguiente es el primero.
-                STORIES.length - Math.abs(i - active)
-              );
-              const wanted = distance <= 1;
-              return (
-                <Image
-                  key={story.company}
-                  src={story.image}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  loading={i === active ? "eager" : "lazy"}
-                  data-active={i === active}
-                  className={`object-cover opacity-0 transition-opacity duration-500 data-[active=true]:opacity-100 ${
-                    wanted ? "" : "hidden"
-                  }`}
-                />
-              );
-            })}
-          </div>
+                        La duración y la curva sí salen de las vars, como todo lo
+                        demás de este paso. */}
+                    {/* ds-exempt: ver la nota de arriba — el salto 22→38px es el gesto y no hay tokens que lo cubran */}
+                    <h3 className="max-w-[18ch] text-pretty font-medium leading-[1.15] tracking-[-0.005em] text-[22px] transition-[font-size] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:transition-none group-data-[active=true]:text-[38px]">
+                      {item.title}
+                    </h3>
+
+                    <div className="mt-[clamp(20px,3.4vh,44px)]">
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener"
+                        // `tabIndex -1` en las copias: el loop renderiza 3 veces
+                        // la lista, así que sin esto el tabulador pasa por seis
+                        // enlaces repetidos. Solo la copia central es navegable.
+                        tabIndex={hidden ? -1 : undefined}
+                        className="inline-flex items-center rounded-full bg-[linear-gradient(100deg,#C4EE6E_0%,#4ECB59_100%)] px-[1.3em] py-[.66em] text-label text-ink transition-[filter,translate] duration-[250ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-px hover:brightness-105"
+                      >
+                        Read the full story
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="relative order-first aspect-[16/10] lg:order-none lg:aspect-auto">
+                    <Image
+                      src={item.image}
+                      alt=""
+                      fill
+                      // La card activa ocupa hasta 62vw y la imagen es su
+                      // columna derecha (.78fr de 1fr+.78fr ≈ 44%), o sea ~28vw
+                      // — no los 40vw que declaraba el lab, que hacía pedir una
+                      // variante más grande de la necesaria en cada paso.
+                      sizes="(min-width: 1024px) 28vw, 100vw"
+                      loading={eager ? "eager" : "lazy"}
+                      draggable={false}
+                      className="object-cover"
+                    />
+                  </div>
+                </article>
+              </div>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Los logos son la navegación real, no decoración: van como <button>
-            con el nombre accesible, no como <img> clickeable. */}
-        <div className="flex flex-wrap items-center justify-center gap-x-14 gap-y-6">
-          {STORIES.map((story, i) => (
-            <button
-              key={story.company}
-              type="button"
-              aria-pressed={i === active}
-              onClick={() => setActive(i)}
-              data-active={i === active}
-              className="flex items-center opacity-35 transition-opacity duration-300 data-[active=true]:opacity-100"
-            >
-              {story.logo ? (
-                <Image
-                  src={story.logo.src}
-                  alt={story.company}
-                  width={story.logo.width}
-                  height={story.logo.height}
-                  // grayscale → brightness-0: el activo pasa a negro sólido, el
-                  // resto queda desaturado. Los PNG de marca no comparten tono,
-                  // así que sin normalizar la fila se ve descoordinada.
-                  className={`h-6 w-auto ${i === active ? "brightness-0" : "grayscale"}`}
-                />
-              ) : (
-                <span className="text-eyebrow uppercase">{story.company}</span>
-              )}
-            </button>
-          ))}
-        </div>
-      </Container>
+      {/* Los logos son la navegación real, no decoración: van como <button> con
+          nombre accesible. `role="tab"` + `aria-selected` los ata a la historia
+          que está al frente. */}
+      <div
+        role="tablist"
+        aria-label="Elegir historia"
+        className="mt-[clamp(26px,4.5vh,58px)] flex flex-wrap items-center justify-center gap-[clamp(20px,4vw,80px)] px-[clamp(24px,5vw,105px)]"
+      >
+        {STORIES.map((story, i) => (
+          <button
+            key={story.company}
+            type="button"
+            role="tab"
+            aria-selected={i === index}
+            data-active={i === index}
+            onClick={() => goTo(i)}
+            className="relative px-[2px] pb-[12px] pt-[6px] opacity-[.28] transition-opacity duration-[400ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink data-[active=true]:opacity-100"
+          >
+            {story.logo ? (
+              <Image
+                src={story.logo.src}
+                alt={story.company}
+                width={story.logo.width}
+                height={story.logo.height}
+                draggable={false}
+                className="h-[1.2em] w-auto brightness-0"
+              />
+            ) : (
+              <span className="text-eyebrow uppercase">{story.company}</span>
+            )}
+            {/* El subrayado del activo. Se anima con `scale-x` y no con `width`
+                porque acá no hay nada que relayout-ear: es una barra suelta. */}
+            <span
+              data-active={i === index}
+              className="absolute bottom-[2px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-ink transition-transform duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:transition-none data-[active=true]:scale-x-100"
+            />
+          </button>
+        ))}
+      </div>
     </section>
   );
 }

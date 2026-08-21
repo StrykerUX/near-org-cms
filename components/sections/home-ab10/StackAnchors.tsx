@@ -102,10 +102,21 @@ export default function StackAnchors() {
               esquinas. `min-h-0` para que el arte pueda encogerse dentro del
               sticky en vez de desbordarlo. */}
           <div className="relative min-h-0 flex-1">
+            {/* `h-[80%]` y no `h-full`: el ensamble isométrico se pidió un 20%
+                más chico.
+
+                El tamaño se toca ACÁ, en el alto del stage, y no con un
+                `scale()` sobre el arte: el `w-auto` del SVG deriva su ancho de
+                este alto, así que la pieza sigue midiendo lo que ocupa de
+                verdad. Un `scale` la dejaría reservando el espacio del tamaño
+                original —y las cuatro fichas de las esquinas se anclan contra
+                esta caja, así que se habrían quedado separadas del arte. El
+                centrado no se toca: `left-1/2 top-1/2` con las traslaciones
+                sigue centrando la caja, mida lo que mida. */}
             <div
               ref={stageRef}
               {...stageProps}
-              className="pointer-events-auto absolute left-1/2 top-1/2 h-full -translate-x-1/2 -translate-y-1/2"
+              className="pointer-events-auto absolute left-1/2 top-1/2 h-[80%] -translate-x-1/2 -translate-y-1/2"
             >
               <StackAssembly stage={stage} hover={hover} className="h-full w-auto" />
               <StackCursorTag ref={tagRef} hover={hover} />
