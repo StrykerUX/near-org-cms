@@ -50,15 +50,25 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-ab10/hom
 // que después se formalizó en `primitives/motion/velocityRamp.ts`, y esta sección es
 // el precedente que cita.
 //
-// El reparto es por GRUPO, no por fila: las dos de arriba (Data 1.4,
-// Intelligence 1.5) van rápidas y suben, las dos de abajo (Assets 0.6,
-// Traces 0.5) van lentas y se quedan. Dentro de cada par la diferencia es
-// mínima, así que los pares no se deforman: lo que se abre es el hueco DEL
-// MEDIO, que ya era el salto largo del layout y con el scroll se estira de
-// ~287 a ~647px. Ese vacío creciente es el gesto de la sección.
+// Cuatro velocidades DISTINTAS, ninguna pareja: es lo que hace que el
+// destiempo se lea entre todas las cards y no solo en un hueco.
 //
-// Un reparto monótono con la fila daría un cizallamiento uniforme del grid —
-// las cuatro separándose parejo— que es un efecto distinto y más plano.
+// El reparto anterior era por GRUPO —dos rápidas casi idénticas arriba, dos
+// lentas casi idénticas abajo—, y eso tenía una consecuencia concreta: los
+// pares no se deformaban y lo único que se movía era el hueco DEL MEDIO. Un
+// gesto limpio, pero con tres de los cuatro saltos congelados.
+//
+// Ahora los desvíos normalizados son +0.92, −0.20, +0.28 y −1.0: Data se va
+// arriba, Intelligence se queda muy atrás, y las dos del medio se mueven poco
+// pero en sentidos opuestos. Los cuatro saltos cambian de largo durante el
+// scroll, cada uno a su ritmo.
+//
+// Lo que NO se toca es el signo por mitades: las dos de arriba (Data, Assets)
+// con desvío positivo y las dos de abajo (Traces, Intelligence) negativo. Eso
+// es lo que hace que el reparto EXPANDA el recorrido en vez de comprimirlo. Un
+// reparto monótono con la fila comprime, y ahí sí hay un punto de colapso donde
+// el escalonado del layout se come a sí mismo (es el techo de ~0.6 que menciona
+// DRIFT_K).
 //
 // Ampliar el rango NO agranda el movimiento: `driftOffsets` normaliza por el
 // swing (`max|media − speed|`), así que [0.3…1.7] da exactamente el mismo
@@ -69,7 +79,7 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-ab10/hom
 // participaba del efecto— porque el desvío se calculaba contra un 1 fijo. Ahora
 // se calcula contra la media, así que ese caso no puede repetirse por accidente,
 // pero igual conviene que estén repartidas.
-const SPEEDS = [0.6, 1.5, 1.4, 0.5] as const;
+const SPEEDS = [1.5, 0.8, 1.1, 0.3] as const;
 
 // Qué fracción de la amplitud máxima SEGURA se usa. `driftAmplitude` calcula, a
 // partir de los huecos reales del layout, la amplitud más grande con la que
@@ -106,7 +116,19 @@ const SPEEDS = [0.6, 1.5, 1.4, 0.5] as const;
 //     reparto por grupos (ver SPEEDS) hace lo contrario: EXPANDE. No hay punto
 //     de colapso, solo se estira.
 //
-// ── Qué se siente a 1.2 ─────────────────────────────────────────────────────
+// ── Qué se siente a 1.55 ────────────────────────────────────────────────────
+//
+// Subido de 1.2 a 1.55 para que el destiempo se note más, junto con el reparto
+// de velocidades menos agrupado de SPEEDS. Las dos palancas hacen cosas
+// distintas y hay que no confundirlas: SPEEDS decide QUIÉN se mueve y cuánto
+// respecto de los demás —cambiar sus números NO agranda el movimiento, porque
+// `driftOffsets` normaliza por el swing—, y DRIFT_K es la magnitud.
+//
+// El costo sigue siendo scroll, y sube con él: a 1.55 la sección pide bastante
+// más recorrido del que ocupa. Si empieza a sentirse larga, esta constante es
+// lo primero que hay que bajar.
+//
+// ── Qué se sentía a 1.2 ─────────────────────────────────────────────────────
 //
 // Lo que se percibe no es el desvío sino su DERIVADA respecto del scroll: qué
 // tan distinta es la velocidad de una card de la de la página. A 1.2 los
@@ -117,7 +139,7 @@ const SPEEDS = [0.6, 1.5, 1.4, 0.5] as const;
 //
 // El costo es scroll: el recorrido pasa de 647 a ~1.007px. La sección pide
 // ~55% más de scroll que su altura de layout.
-const DRIFT_K = 1.2;
+const DRIFT_K = 1.55;
 
 // Aire mínimo entre dos cards que puedan alcanzarse, en px.
 //
@@ -216,44 +238,38 @@ const MIN_GAP = 24;
 // antes de subirla.
 const CARD_LAYOUT = [
   {
-    // Assets — banda izquierda, fila 3. Llega después del salto largo (1.12):
-    // es la que abre el grupo de abajo. Sangra por el borde izquierdo del
-    // Container, como en la referencia.
-    place:
-      "lg:col-start-2 lg:col-span-2 lg:row-start-3 lg:-mt-[53%] lg:-ml-[40%] lg:mr-[10%]",
+    // Data — columnas 4-6, fila 1. Arriba del todo, justo debajo del
+    // encabezado. Cruza el título por delante.
+    place: "lg:col-start-4 lg:col-span-3 lg:row-start-1 lg:mt-[18%]",
     tint: "bg-white/50",
   },
   {
-    // Intelligence — banda derecha, fila 2. Corrida dos columnas a la
-    // izquierda respecto de la versión anterior (col-start-10 → 8) para que
-    // el cruce con la "y" de "own" sea el de la referencia: pegada al borde
-    // derecho, el título le pasaba por detrás sin que se notara el cruce.
-    // El `-mt` bajó de 100% a 70%: con 100% la card solo rozaba el borde
-    // superior del título; la referencia la cruza más al centro, a la altura
-    // de la "y" de "own".
-    place:
-      "lg:col-start-8 lg:col-span-2 lg:row-start-2 lg:-mt-[70%] lg:ml-[6%] lg:-mr-[36%]",
+    // Traces — columnas 7-9, fila 2.
+    //
+    // `mt` POSITIVO, el único de los cuatro: en el prototipo esta card arranca
+    // por debajo de donde termina Data, no encabalgada sobre ella. Es el paso
+    // largo de la composición.
+    place: "lg:col-start-7 lg:col-span-3 lg:row-start-2 lg:mt-[12%]",
     tint: "bg-card-tint/50",
   },
   {
-    // Data (ex Alpha) — banda centro-izquierda, fila 1. Arriba del todo, justo
-    // debajo del encabezado. Cruza el título por delante.
-    place:
-      "lg:col-start-5 lg:col-span-2 lg:row-start-1 lg:mt-[31%] lg:-ml-[37%] lg:mr-[7%]",
+    // Assets — columnas 1-3, fila 3. Pega al borde izquierdo del Container.
+    //
+    // El salto más corto de los tres: en el prototipo Assets asoma cuando
+    // Traces todavía está entera en pantalla. Se solapan en vertical y no pasa
+    // nada — viven en columnas opuestas (1-3 contra 7-9) y `driftOffsets` no
+    // acota los pares que no se cruzan en horizontal.
+    place: "lg:col-start-1 lg:col-span-3 lg:row-start-3 lg:-mt-[101%]",
     tint: "bg-white/50",
   },
   {
-    // Traces (ex Agents) — banda centro-derecha, fila 4. Corrida dos columnas
-    // a la derecha (col-start-7 → 9) para separarla de Assets y sangrar por
-    // el borde derecho, como en la referencia — antes quedaba pegada al
-    // centro y las dos de abajo se leían casi como un solo bloque.
+    // Intelligence — columnas 10-12, fila 4. Pega al borde derecho.
     //
     // Es la ÚLTIMA fila, y eso no es cosmético: el `end` del ScrollTrigger se
     // calcula con `cards[cards.length - 1]`, o sea con el índice 3 de este
     // array. Si alguna vez la última fila la ocupa otra card, ese cálculo hay
     // que mover con ella.
-    place:
-      "lg:col-start-9 lg:col-span-2 lg:row-start-4 lg:-mt-[90%] lg:ml-[10%] lg:-mr-[40%]",
+    place: "lg:col-start-10 lg:col-span-3 lg:row-start-4 lg:-mt-[27%]",
     tint: "bg-card-tint/50",
   },
 ] as const;
@@ -483,6 +499,24 @@ export default function OwnYourOwn() {
           // queda por encima del centro de su propia caja, y centrar la caja
           // empuja la mancha hacia abajo. 0.45 devuelve ese sesgo.
           "--own-title-anchor": "0.65",
+          // Piso del título: por debajo de esto no puede subir, pase lo que
+          // pase con el tamaño de la ventana.
+          //
+          // Hace falta porque el encabezado y el título se anclan con unidades
+          // que ESCALAN DISTINTO. El encabezado se pega a una distancia FIJA
+          // del top (`--own-head-top`); el título, a una FRACCIÓN del viewport
+          // (`100svh * anchor`). Al bajar el alto de ventana el título sube
+          // hacia el encabezado, que no se mueve — y al ENSANCHARLA es peor,
+          // porque `--text-display` crece con su clamp en `vw` y se le resta la
+          // mitad, empujándolo más arriba todavía. Ventana ancha y poco alta es
+          // la combinación que los hace chocar, y es de lo más común: un
+          // monitor panorámico, o media pantalla.
+          //
+          // 21rem es el alto que puede llegar a tener el encabezado en el peor
+          // caso (a 1024px, que es donde el título aparece, su párrafo ocupa
+          // más líneas), más aire. No se mide en JS a propósito: esta sección
+          // no calcula posiciones — ver la nota de arriba del archivo.
+          "--own-title-floor": "calc(var(--own-head-top) + 21rem)",
           // Cuánto arrancan las cards POR DEBAJO del título. Sin esto, la
           // primera card (Data) nace a la misma altura que el título y lo tapa
           // desde el primer frame: la escena empieza con el cruce ya ocurrido,
@@ -564,9 +598,11 @@ export default function OwnYourOwn() {
               </h2>
             </div>
             <p className="text-body-lg text-muted-foreground text-pretty lg:pt-12">
-              NEAR&apos;s architecture handles over a million transactions
-              per second on consumer-grade hardware and scales
-              automatically through dynamic resharding.
+              Your keys, your assets, no compromises. NEAR accounts pair
+              programmable access keys with quantum-safe signing, so you get
+              the ease of a web login with the guarantees of true self
+              custody. Trade, stake, and move value across 30+ chains without
+              ever handing your assets to an exchange.
             </p>
           </div>
 
@@ -624,7 +660,12 @@ export default function OwnYourOwn() {
               // el encabezado ya se soltó: su pista se agota antes. Medirlo
               // contra un hueco que a esa altura ya no existe lo dejaba
               // innecesariamente bajo.
-              top: "calc(100svh * var(--own-title-anchor) - var(--text-display) / 2)",
+              // `max()` y no el cálculo pelado: en ventanas cómodas gana el
+              // ancla del viewport y la composición es la de siempre; en las
+              // bajas gana el piso y el título deja de treparse encima del
+              // encabezado. No hay breakpoint de por medio — la transición
+              // entre los dos regímenes es continua.
+              top: "max(calc(100svh * var(--own-title-anchor) - var(--text-display) / 2), var(--own-title-floor))",
               // El `--own-card-lead` que baja a las cards es padding del
               // grid, así que empujaría también al título —es un item más de
               // ese grid—. Este margen negativo lo devuelve a donde estaba:
@@ -650,7 +691,19 @@ export default function OwnYourOwn() {
               // referencia. El resto sale de CARD_LAYOUT, emparejado por índice
               // con el contenido — el `cards.length !== SPEEDS.length` del efecto
               // ya falla si los tres arrays se desincronizan.
-              className={`z-[2] rounded-3xl p-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-[3px] ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
+              //
+              // `self-start` es imprescindible, por el mismo motivo que en el
+              // título y el encabezado: un grid item se estira por defecto a la
+              // altura de su celda, y acá las filas son MÁS ALTAS que las cards.
+              // No porque el contenido lo pida, sino porque el título y el
+              // encabezado abarcan `grid-row: 1/-1` y son mucho más altos que
+              // cualquier card: ese sobrante se reparte entre las cuatro filas,
+              // y sin `self-start` cada card lo rellena con un hueco muerto
+              // debajo de su párrafo.
+              //
+              // Sin variante `lg:`: en mobile cada card ya es la única de su
+              // fila y la fila mide su contenido, así que no cambia nada ahí.
+              className={`z-[2] self-start rounded-3xl p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-md ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
             >
               {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
                 `width`, Next genera el srcset pero el navegador asume que ocupa
@@ -660,24 +713,44 @@ export default function OwnYourOwn() {
               <Image
                 src={card.src}
                 alt=""
-                width={290}
-                height={267}
+                // 381x401 = el tamaño intrínseco de los glifos de
+                // `public/prototype/ab10/`. Next escribe estos dos valores como
+                // atributos del <img> y de ahí sale su `aspect-ratio`: con
+                // `h-auto w-full`, un par que no coincida con el archivo
+                // deforma el arte. Los PNG anteriores eran 290x267 (apaisados) y
+                // estos son verticales, así que había que moverlos con ellos.
+                width={381}
+                height={401}
                 sizes="(min-width: 1024px) 19vw, 100vw"
-                className="block h-auto w-full rounded-[1.15rem]"
+                className="block h-auto w-full rounded-xl"
               />
-              {/* El bloque de texto también se comprime en desktop. No es
-                cosmética: con la card a `col-span-2` el cuerpo pasa a tres
-                líneas, y con el padding y la escala anteriores el texto pesaba
-                más que la imagen — la card quedaba casi tan alta como antes y
-                el objetivo (tres en pantalla) no se cumplía. En mobile la card
-                ocupa el ancho completo, así que ahí se queda la escala grande. */}
-              <div className="flex flex-col gap-3 px-3 py-7 lg:gap-2 lg:px-2.5 lg:py-4">
-                {/* `text-label-lg` y no `text-body-lg font-medium`: el peso lo
-                  define el token, no la clase. Ese rol —body en weight
-                  medio— ya existe en la escala justamente porque se estaba
-                  parcheando a mano en varios lugares. */}
-                <h4 className="text-h4 lg:text-label-lg">{card.title}</h4>
-                <p className="text-body text-foreground/75 text-pretty lg:text-body-sm">
+              {/* Sin padding lateral propio ni `py`: los 24px de la card
+                (`p-6`) ya envuelven a los dos hijos por igual, y duplicarlos acá
+                metía al texto más adentro que a la imagen — que es lo que hacían
+                el `px-3 lg:px-2.5` y el `py-7 lg:py-4` anteriores, calibrados
+                para cuando la card llevaba `p-2.5`. Lo único que queda es el
+                `pt`, que es la separación imagen→texto. */}
+              <div className="flex flex-col gap-3 pt-6">
+                {/* `text-h3-serif` y no `text-h4 lg:text-label-lg`.
+                  
+                  Dos cosas cambian de una vez y van juntas: la familia pasa a
+                  Kepler y el nivel sube dos escalones. El rol serif a esta
+                  altura de la escala no existía —había display, h1, h2 y body,
+                  nada entre h2 y body— y se acaba de agregar en globals.css;
+                  escribirlo como `font-serif text-h3` acá habría sido el mismo
+                  parche de cuatro clases que esos roles existen para evitar.
+
+                  El `lg:` se fue a propósito. Antes el título ENCOGÍA en
+                  desktop (`text-h4` móvil → `text-label-lg`, que es body): el
+                  rótulo de la card terminaba del mismo tamaño que su cuerpo y
+                  solo se distinguía por el peso. Ahora es un titular en las
+                  dos anchuras y el clamp de `--text-h3` hace la transición. */}
+                <h4 className="text-h3-serif italic">{card.title}</h4>
+                {/* Sin `lg:text-body-sm`: el cuerpo se queda en `text-body` en
+                  todas las anchuras. Ese encogido venía de cuando la card era
+                  `col-span-2` y el texto se le iba a tres líneas; con las
+                  columnas de ahora ya no hace falta apretarlo. */}
+                <p className="text-body text-foreground/75 text-pretty">
                   {card.body}
                 </p>
               </div>

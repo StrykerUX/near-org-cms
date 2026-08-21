@@ -151,26 +151,39 @@ export const AGENT_ECONOMY = {
 // (`CARD_LAYOUT`), indexadas por el mismo orden: `place` decide en qué celda del
 // grid cae cada card y cuánto se separa de la anterior, y eso es composición, no
 // algo que un editor deba ver ni que un CMS deba guardar.
+// El arte vive en `public/prototype/ab10/` y no en `public/prototype/`, que es
+// donde están los `feature-*.png` de las versiones anteriores: esos cuatro los
+// comparten ab6, ab7, ab9, v2 y v4, así que no se podían reemplazar en su sitio
+// sin cambiarle las cards a cinco páginas de una vez.
+//
+// Cada card tiene AHORA su propio glifo. Antes Traces reusaba el de
+// Intelligence, y esa reutilización era el motivo de que las dos se leyeran como
+// la misma idea contada dos veces.
+//
+// ⚠️ El ORDEN de este array es el orden de FILAS en pantalla, no un orden de
+// lectura libre. Está emparejado por índice con `CARD_LAYOUT` y con `SPEEDS`, y
+// además el `end` del ScrollTrigger se calcula con `cards[cards.length - 1]`
+// asumiendo que el último elemento es el de la fila 4. Reordenar acá sin mover
+// los otros dos intercambia las cards de posición y descalibra ese `end`.
 export const OWN_YOUR_OWN_CARDS = [
   {
-    src: "/prototype/feature-assets.png",
-    title: "Assets",
-    body: "Move cross-chain, trade perps, earn yield, hold RWAs, and access all of DeFi from your own wallet.",
-  },
-  {
-    src: "/prototype/feature-intelligence.png",
-    title: "Intelligence",
-    body: "Run private inference, deploy agents in a secure harness, and keep real sovereignty over your AI.",
-  },
-  {
-    src: "/prototype/feature-alpha.png",
+    src: "/prototype/ab10/icon-data.webp",
     title: "Data",
     body: "Keep your transactions, prompts, and identity confidential, even from the infrastructure that runs them.",
   },
   {
-    // Reusa el arte de Intelligence: el mismo glifo de IA, otro titular.
-    src: "/prototype/feature-intelligence.png",
+    src: "/prototype/ab10/icon-traces.webp",
     title: "Traces",
     body: "Capture the value your agents create for labs and institutions while keeping your records confidential.",
+  },
+  {
+    src: "/prototype/ab10/icon-assets.webp",
+    title: "Assets",
+    body: "Move cross-chain, trade perps, earn yield, hold RWAs, and access all of DeFi from your own wallet.",
+  },
+  {
+    src: "/prototype/ab10/icon-intelligence.webp",
+    title: "Intelligence",
+    body: "Run private inference, deploy agents in a secure harness, and keep real sovereignty over your AI.",
   },
 ] as const;

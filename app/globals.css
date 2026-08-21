@@ -619,6 +619,21 @@
   font-weight: var(--text-serif--font-weight);
 }
 
+/* Serif at h3 size. The scale had serif roles for display, h1 and h2 but
+   nothing between h2 and body, so a heading at this level was written
+   `font-serif text-h3 font-normal tracking-normal` — four patches over the
+   token, which is exactly what the other `text-*-serif` roles exist to avoid.
+
+   Size comes from the SAME token as the sans (`--text-h3`), like every other
+   serif role here: moving the level moves both. */
+@utility text-h3-serif {
+  font-family: var(--font-serif);
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
 /* Serif at body size. Not a heading: it is the italic gloss that accompanies a
    fact ("Live on mainnet" under "Post-quantum signing"). Added for the same
    reason as the ones above — without it the usage is written
