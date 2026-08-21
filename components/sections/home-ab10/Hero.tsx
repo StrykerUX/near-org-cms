@@ -51,16 +51,22 @@ export default function Hero() {
       const cleanups: (() => void)[] = [];
 
       const wrap = q("[data-hero-wrap]")[0];
-      const bg = q("[data-hero-bg]")[0];
       const fade = q("[data-hero-topfade]")[0];
       const heading = q("[data-hero='heading']")[0];
       const rest = q("[data-hero='sub']");
 
       // ── 1. Fundido superior ligado al scroll ──────────────────────────────
-      // Empieza invisible y sube con el scroll, tapando el video contra el
-      // crema. Con reduced-motion este tween no se crea y el gradiente queda
-      // opaco (su valor CSS): la juntura sigue leyéndose, solo que sin
-      // transición.
+      //
+      // Empieza invisible y sube con el scroll, tapando el fondo contra el
+      // crema de la página. Es lo que hace que el hero "se vaya": cuanto antes
+      // llega a opaco, antes se cierra.
+      //
+      // Termina al 18% del recorrido y no al 40%: es lo que se pidió con "que
+      // el hero se haga chico más rápido". A 40% el hero seguía a media
+      // opacidad cuando ya se había ido casi medio viewport.
+      //
+      // Con reduced-motion este tween no se crea y el gradiente queda opaco (su
+      // valor CSS): la juntura sigue leyéndose, solo que sin transición.
       if (fade) {
         gsap.fromTo(
           fade,
@@ -72,7 +78,7 @@ export default function Hero() {
             scrollTrigger: {
               trigger: scope,
               start: "top top",
-              end: "40% top",
+              end: "18% top",
               scrub: true,
               invalidateOnRefresh: true,
               markers: DEBUG_MARKERS,
@@ -81,47 +87,33 @@ export default function Hero() {
         );
       }
 
-      // ── 2. Parallax en CONTRA ─────────────────────────────────────────────
+      // ── 2. Parallax de la copy, y NADA más ────────────────────────────────
       //
-      // El texto BAJA y el fondo SUBE. Los dos se mueven, en sentidos
-      // opuestos, y esa es toda la diferencia con lo que había antes: la copy
-      // subía un 20% de la altura del hero y el fondo estaba quieto, así que la
-      // separación entre los dos era ese 20% y nada más.
+      // Solo se mueve el texto, y poco: un 6% de la altura del hero.
       //
-      // Ahora la separación es la SUMA de los dos recorridos (25% + 15% = 40%
-      // de la altura del hero), o sea el doble, y encima repartida en dos
-      // direcciones — que es lo que se lee como profundidad y no como "el texto
-      // se despega". El texto yéndose hacia abajo mientras el fondo se va hacia
-      // arriba deja además el titular más tiempo en pantalla al empezar a
-      // scrollear, porque va A FAVOR de la dirección del scroll.
+      // Hubo una versión con contra-movimiento —el texto bajando un 25% y el
+      // fondo subiendo un 15%— y era demasiado: con el fondo desplazándose, el
+      // hero entero se leía como si se despegara de la página. Acá el fondo
+      // está QUIETO y el texto apenas se descuelga; lo que cierra el hero es el
+      // fundido de arriba, no el movimiento.
       //
-      // `ease: "none"` en los dos: con scrub, la curva la pone el dedo del
-      // lector. Cualquier easing acá se lee como que el scroll "resbala".
-      const H = () => scope.getBoundingClientRect().height;
-      const track = {
-        trigger: scope,
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-        invalidateOnRefresh: true,
-      } as const;
-
+      // `ease: "none"`: con scrub, la curva la pone el dedo del lector.
       if (wrap) {
         gsap.fromTo(
           wrap,
           { y: 0 },
-          { y: () => 0.25 * H(), ease: "none", immediateRender: false, scrollTrigger: track }
-        );
-      }
-
-      // El fondo va a la mitad del recorrido del texto: si los dos se movieran
-      // lo mismo, el contra-movimiento se leería como un corte, no como planos
-      // a distinta profundidad. Lo que está más lejos se mueve menos.
-      if (bg) {
-        gsap.fromTo(
-          bg,
-          { y: 0 },
-          { y: () => -0.15 * H(), ease: "none", immediateRender: false, scrollTrigger: track }
+          {
+            y: () => 0.06 * scope.getBoundingClientRect().height,
+            ease: "none",
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: scope,
+              start: "top top",
+              end: "bottom top",
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          }
         );
       }
 
@@ -239,25 +231,13 @@ export default function Hero() {
       // crema de la sección siguiente.
       className="relative flex flex-col bg-cream text-foreground"
     >
-      {/* El fondo, en un wrapper que es lo que se anima.
+      {/* El fondo. Llena el hero exacto y no se mueve.
 
-          `-inset-y-[20%]` lo hace un 40% más alto que el hero, y eso NO es
-          decorativo: el parallax lo sube un 15% de esa altura, y sin margen el
-          borde inferior del canvas se despegaría del final del hero y dejaría
-          una franja del crema de la página asomando. Con 20% arriba y abajo
-          sobra holgura para el recorrido.
-
-          El wrapper existe además para no animar el <canvas> en sí: moverlo con
-          transform no cuesta nada, pero cambiarle la caja obligaría a
-          `HeroFoliage` a re-dimensionar su buffer en cada frame del scroll —
-          su ResizeObserver mira el elemento, no el wrapper. */}
-      <div
-        data-hero-bg
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -inset-y-[20%] z-0"
-      >
-        <HeroFoliage className="h-full w-full" />
-      </div>
+          Tuvo un wrapper sobredimensionado (`-inset-y-[20%]`) cuando el fondo
+          hacía parallax: al subirlo, sin ese margen el borde inferior se
+          despegaba del final del hero y dejaba asomando el crema de la página.
+          Sin movimiento, ese margen solo pintaba píxeles que nadie ve. */}
+      <HeroFoliage className="pointer-events-none absolute inset-0 z-0 h-full w-full" />
 
       {/* Velo permanente: tapa con crema el 20% superior del video y lo suelta
           hacia abajo. Es lo que hace que la imagen "emerja" del fondo de la
