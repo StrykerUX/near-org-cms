@@ -120,62 +120,14 @@ const FEATURED: string[] = [];
 //
 // De esa cuenta salían nueve y el índice enlazaba tres: seis galerías existían,
 // se buildeaban y no había forma de llegar a ellas desde ningún sitio.
-const STATIC_GALLERIES: HomeViewLink[] = [
-  {
-    href: "/prototype/hero-gallery/index.html",
-    label: "Hero Lab",
-    blurb: "30 hero backgrounds, 6 text concepts",
-    external: true,
-  },
-  {
-    href: "/prototype/hero-descent/index.html",
-    label: "Hero Descent",
-    blurb: "Remake del hero, glass mountains",
-    external: true,
-  },
-  {
-    href: "/prototype/hero-gradient/index.html",
-    label: "Hero Gradient",
-    blurb: "8 candidatos de degradado",
-    external: true,
-  },
-  {
-    href: "/prototype/hero-mark/index.html",
-    label: "Hero Mark",
-    blurb: "12 rellenos del mark",
-    external: true,
-  },
-  {
-    href: "/prototype/moments/index.html",
-    label: "Statement Moments",
-    blurb: "30 statement moments, contact sheet",
-    external: true,
-  },
-  {
-    href: "/prototype/chainsig/index.html",
-    label: "Chain Signatures",
-    blurb: "20 conceptos de chain signatures",
-    external: true,
-  },
-  {
-    href: "/prototype/spine-cards/index.html",
-    label: "Spine Cards",
-    blurb: "36 isometric card concepts",
-    external: true,
-  },
-  {
-    href: "/prototype/spine-motion/index.html",
-    label: "Spine Motion",
-    blurb: "18 conceptos animados",
-    external: true,
-  },
-  {
-    href: "/prototype/spine-motion-v2/index.html",
-    label: "Spine Motion v2",
-    blurb: "La misma serie, glass & glow",
-    external: true,
-  },
-];
+// Vacío tras la limpieza: las nueve galerías HTML que listaba se archivaron —
+// 548 MB de contact sheets de exploración visual, el 90% de public/prototype/.
+// Qué había en cada una y cómo recuperarla: docs/labs-archivados.md.
+//
+// La constante se queda porque el mecanismo sigue siendo necesario: una galería
+// estática de public/ no puede derivarse del manifiesto de rutas, que solo
+// conoce páginas de Next.
+const STATIC_GALLERIES: { href: string; label: string; blurb: string }[] = [];
 
 // Laboratorios que NO tienen una ruta por variante: apilan sus versiones en una
 // sola página. Son laboratorios igual —se entra a comparar, no a ver una página

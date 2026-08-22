@@ -85,6 +85,58 @@ Rescatar una:
 git checkout v-pre-limpieza -- components/sections/home-ab7 components/views/HomepageAb7View.tsx app/prototype/homepage-ab7
 ```
 
+## Galerías estáticas de exploración visual
+
+Nueve galerías HTML autocontenidas —sin Next, sin build: `index.html` + sus
+imágenes— que vivían en `public/prototype/` y estaban enlazadas desde el índice
+del repo. Eran contact sheets de exploración: se abrían para elegir una
+dirección visual, no formaban parte del sitio.
+
+**Pesaban 548 MB entre las nueve**, el 90% de `public/prototype/`.
+
+| Galería | Qué contenía | Peso | Archivos |
+|---|---|---|---|
+| `moments` | Statement Moment — contact sheet de 30 | 185 MB | 152 |
+| `hero-gallery` | Hero Lab «Own Your World» — 30 fondos de hero, 6 conceptos de texto | 177 MB | 64 |
+| `hero-descent` | Hero Descent Remake — glass mountains | 124 MB | 23 |
+| `hero-mark` | Hero Mark — 12 rellenos del mark | 26 MB | 13 |
+| `chainsig` | Chain Signatures — 20 conceptos | 21 MB | 21 |
+| `hero-gradient` | Hero Gradient — 8 candidatos de degradé (Higgsfield) | 12 MB | 10 |
+| `spine-cards` | Spine Cards — 36 conceptos de card isométrica | 1 MB | 1 |
+| `spine-motion` | Spine Motion — 18 conceptos animados | 1 MB | 1 |
+| `spine-motion-v2` | Spine Motion v2 — la misma serie, glass & glow | 1 MB | 1 |
+
+Rescatar una:
+
+```bash
+git checkout v-pre-limpieza -- public/prototype/moments
+```
+
+Y volver a enlazarla desde `app/(site)/page.tsx`, en `STATIC_GALLERIES`.
+
+**Ojo con el peso.** Traer `moments` o `hero-gallery` de vuelta son ~180 MB en
+el árbol de trabajo. Si solo querés mirar una imagen, no hace falta el checkout:
+
+```bash
+git show v-pre-limpieza:public/prototype/moments/img/moment-07.png > /tmp/m07.png
+git ls-tree -r --name-only v-pre-limpieza public/prototype/hero-gallery   # ver qué hay
+```
+
+## La landing de `/prototype`
+
+`/prototype` era una landing de marketing («Own your Assets / Intelligence /
+Alpha»), no un índice — sus links eran todos `href="#"`. Se archivó junto con
+las tres secciones que solo ella montaba: `CompanyGrid`, `ProductStage` y
+`CustomerStory`.
+
+```bash
+git checkout v-pre-limpieza -- components/views/PrototypeLandingView.tsx \
+  components/sections/CompanyGrid.tsx components/sections/ProductStage.tsx \
+  components/sections/CustomerStory.tsx app/prototype/page.tsx app/prototype/page.meta.ts
+```
+
+El índice real del repo sigue siendo `app/(site)/page.tsx`, en la ruta `/`.
+
 ## Lo que NO se archivó
 
 Sigue vivo en el árbol, sin necesidad de rescate:
@@ -94,6 +146,7 @@ Sigue vivo en el árbol, sin necesidad de rescate:
 - **`/blockchain`**, **`/chain-abstraction`**, **`/quantum-security`** — páginas
   reales, con sus secciones `protocol/`, `chain/`, `quantum/`.
 - **`/prototype`** (landing) y **`/prototype/components`** (showcase del DS).
-- **`public/prototype/`** casi entero: el `SiteHeader` y el `SiteFooter` reales
-  sacan de ahí el wordmark y los iconos del megamenú, y la home enlaza nueve
-  galerías HTML estáticas.
+- **`public/prototype/`**, ya solo lo que alguien usa: `v2/near-wordmark.svg` y
+  `quantum/menu-tab-*.png` (los sacan el `SiteHeader` y el `SiteFooter` reales),
+  `quantum/` y `protocol/` (páginas reales), y `v2/stories/` +
+  `homepage-update/icon-*.webp` (la homepage viva).

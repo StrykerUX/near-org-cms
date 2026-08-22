@@ -86,9 +86,6 @@ const LEGACY = new Set([
   // a ROOTS, no porque haya empeorado.
   "app/(site)/blog/[slug]/page.tsx",
   // /prototype y /prototype/components (la landing anterior al homepage)
-  "components/sections/CompanyGrid.tsx",
-  "components/sections/ProductStage.tsx",
-  "components/views/PrototypeLandingView.tsx",
   "components/views/ComponentsShowcaseView.tsx",
 ]);
 

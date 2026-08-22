@@ -23,13 +23,12 @@ import m16 from "@/app/(site)/near-foundation/page.meta";
 import m17 from "@/app/(site)/nearcom/page.meta";
 import m18 from "@/app/(site)/official-rules/page.meta";
 import m19 from "@/app/(site)/privacy/page.meta";
-import m20 from "@/app/prototype/page.meta";
-import m21 from "@/app/prototype/components/page.meta";
-import m22 from "@/app/prototype/homepage-update/page.meta";
-import m23 from "@/app/(motion)/quantum-security/page.meta";
-import m24 from "@/app/(site)/research/page.meta";
-import m25 from "@/app/(site)/solutions/page.meta";
-import m26 from "@/app/(site)/terms-of-use/page.meta";
+import m20 from "@/app/prototype/components/page.meta";
+import m21 from "@/app/prototype/homepage-update/page.meta";
+import m22 from "@/app/(motion)/quantum-security/page.meta";
+import m23 from "@/app/(site)/research/page.meta";
+import m24 from "@/app/(site)/solutions/page.meta";
+import m25 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -52,11 +51,10 @@ export const ROUTES: RouteEntry[] = [
   { ...m17, route: "/nearcom", stub: true, file: "app/(site)/nearcom/page.meta.ts" },
   { ...m18, route: "/official-rules", stub: true, file: "app/(site)/official-rules/page.meta.ts" },
   { ...m19, route: "/privacy", stub: true, file: "app/(site)/privacy/page.meta.ts" },
-  { ...m20, route: "/prototype", stub: false, file: "app/prototype/page.meta.ts" },
-  { ...m21, route: "/prototype/components", stub: false, file: "app/prototype/components/page.meta.ts" },
-  { ...m22, route: "/prototype/homepage-update", stub: false, file: "app/prototype/homepage-update/page.meta.ts" },
-  { ...m23, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m24, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m25, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m26, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m20, route: "/prototype/components", stub: false, file: "app/prototype/components/page.meta.ts" },
+  { ...m21, route: "/prototype/homepage-update", stub: false, file: "app/prototype/homepage-update/page.meta.ts" },
+  { ...m22, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m23, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m24, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m25, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
