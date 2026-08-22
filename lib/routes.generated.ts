@@ -56,10 +56,15 @@ import m49 from "@/app/prototype/protocol-transitions/t6/page.meta";
 import m50 from "@/app/prototype/protocol-transitions/t7/page.meta";
 import m51 from "@/app/prototype/protocol-transitions/t8/page.meta";
 import m52 from "@/app/prototype/protocol-transitions/t9/page.meta";
-import m53 from "@/app/(motion)/quantum-security/page.meta";
-import m54 from "@/app/(site)/research/page.meta";
-import m55 from "@/app/(site)/solutions/page.meta";
-import m56 from "@/app/(site)/terms-of-use/page.meta";
+import m53 from "@/app/prototype/quantum-axis/page.meta";
+import m54 from "@/app/prototype/quantum-ledger/page.meta";
+import m55 from "@/app/prototype/quantum-manifesto/page.meta";
+import m56 from "@/app/prototype/quantum-security-copy/page.meta";
+import m57 from "@/app/prototype/scroll-sections/page.meta";
+import m58 from "@/app/(motion)/quantum-security/page.meta";
+import m59 from "@/app/(site)/research/page.meta";
+import m60 from "@/app/(site)/solutions/page.meta";
+import m61 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -115,8 +120,13 @@ export const ROUTES: RouteEntry[] = [
   { ...m50, route: "/prototype/protocol-transitions/t7", stub: false, file: "app/prototype/protocol-transitions/t7/page.meta.ts" },
   { ...m51, route: "/prototype/protocol-transitions/t8", stub: false, file: "app/prototype/protocol-transitions/t8/page.meta.ts" },
   { ...m52, route: "/prototype/protocol-transitions/t9", stub: false, file: "app/prototype/protocol-transitions/t9/page.meta.ts" },
-  { ...m53, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m54, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m55, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m56, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m53, route: "/prototype/quantum-axis", stub: false, file: "app/prototype/quantum-axis/page.meta.ts" },
+  { ...m54, route: "/prototype/quantum-ledger", stub: false, file: "app/prototype/quantum-ledger/page.meta.ts" },
+  { ...m55, route: "/prototype/quantum-manifesto", stub: false, file: "app/prototype/quantum-manifesto/page.meta.ts" },
+  { ...m56, route: "/prototype/quantum-security-copy", stub: false, file: "app/prototype/quantum-security-copy/page.meta.ts" },
+  { ...m57, route: "/prototype/scroll-sections", stub: false, file: "app/prototype/scroll-sections/page.meta.ts" },
+  { ...m58, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m59, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m60, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m61, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
