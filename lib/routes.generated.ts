@@ -35,19 +35,31 @@ import m28 from "@/app/prototype/protocol-heroes/h5/page.meta";
 import m29 from "@/app/prototype/protocol-heroes/h6/page.meta";
 import m30 from "@/app/prototype/protocol-heroes/h7/page.meta";
 import m31 from "@/app/prototype/protocol-heroes/h8/page.meta";
-import m32 from "@/app/prototype/protocol-proof/page.meta";
-import m33 from "@/app/prototype/protocol-proof/p1/page.meta";
-import m34 from "@/app/prototype/protocol-proof/p2/page.meta";
-import m35 from "@/app/prototype/protocol-proof/p3/page.meta";
-import m36 from "@/app/prototype/protocol-proof/p4/page.meta";
-import m37 from "@/app/prototype/protocol-proof/p5/page.meta";
-import m38 from "@/app/prototype/protocol-proof/p6/page.meta";
-import m39 from "@/app/prototype/protocol-proof/p7/page.meta";
-import m40 from "@/app/prototype/protocol-proof/p8/page.meta";
-import m41 from "@/app/(motion)/quantum-security/page.meta";
-import m42 from "@/app/(site)/research/page.meta";
-import m43 from "@/app/(site)/solutions/page.meta";
-import m44 from "@/app/(site)/terms-of-use/page.meta";
+import m32 from "@/app/prototype/protocol-opening/page.meta";
+import m33 from "@/app/prototype/protocol-opening/a/page.meta";
+import m34 from "@/app/prototype/protocol-opening/b/page.meta";
+import m35 from "@/app/prototype/protocol-opening/c/page.meta";
+import m36 from "@/app/prototype/protocol-opening/d/page.meta";
+import m37 from "@/app/prototype/protocol-opening/e/page.meta";
+import m38 from "@/app/prototype/protocol-opening/f/page.meta";
+import m39 from "@/app/prototype/protocol-opening/g/page.meta";
+import m40 from "@/app/prototype/protocol-transitions/page.meta";
+import m41 from "@/app/prototype/protocol-transitions/t1/page.meta";
+import m42 from "@/app/prototype/protocol-transitions/t10/page.meta";
+import m43 from "@/app/prototype/protocol-transitions/t11/page.meta";
+import m44 from "@/app/prototype/protocol-transitions/t12/page.meta";
+import m45 from "@/app/prototype/protocol-transitions/t2/page.meta";
+import m46 from "@/app/prototype/protocol-transitions/t3/page.meta";
+import m47 from "@/app/prototype/protocol-transitions/t4/page.meta";
+import m48 from "@/app/prototype/protocol-transitions/t5/page.meta";
+import m49 from "@/app/prototype/protocol-transitions/t6/page.meta";
+import m50 from "@/app/prototype/protocol-transitions/t7/page.meta";
+import m51 from "@/app/prototype/protocol-transitions/t8/page.meta";
+import m52 from "@/app/prototype/protocol-transitions/t9/page.meta";
+import m53 from "@/app/(motion)/quantum-security/page.meta";
+import m54 from "@/app/(site)/research/page.meta";
+import m55 from "@/app/(site)/solutions/page.meta";
+import m56 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -82,17 +94,29 @@ export const ROUTES: RouteEntry[] = [
   { ...m29, route: "/prototype/protocol-heroes/h6", stub: false, file: "app/prototype/protocol-heroes/h6/page.meta.ts" },
   { ...m30, route: "/prototype/protocol-heroes/h7", stub: false, file: "app/prototype/protocol-heroes/h7/page.meta.ts" },
   { ...m31, route: "/prototype/protocol-heroes/h8", stub: false, file: "app/prototype/protocol-heroes/h8/page.meta.ts" },
-  { ...m32, route: "/prototype/protocol-proof", stub: false, file: "app/prototype/protocol-proof/page.meta.ts" },
-  { ...m33, route: "/prototype/protocol-proof/p1", stub: false, file: "app/prototype/protocol-proof/p1/page.meta.ts" },
-  { ...m34, route: "/prototype/protocol-proof/p2", stub: false, file: "app/prototype/protocol-proof/p2/page.meta.ts" },
-  { ...m35, route: "/prototype/protocol-proof/p3", stub: false, file: "app/prototype/protocol-proof/p3/page.meta.ts" },
-  { ...m36, route: "/prototype/protocol-proof/p4", stub: false, file: "app/prototype/protocol-proof/p4/page.meta.ts" },
-  { ...m37, route: "/prototype/protocol-proof/p5", stub: false, file: "app/prototype/protocol-proof/p5/page.meta.ts" },
-  { ...m38, route: "/prototype/protocol-proof/p6", stub: false, file: "app/prototype/protocol-proof/p6/page.meta.ts" },
-  { ...m39, route: "/prototype/protocol-proof/p7", stub: false, file: "app/prototype/protocol-proof/p7/page.meta.ts" },
-  { ...m40, route: "/prototype/protocol-proof/p8", stub: false, file: "app/prototype/protocol-proof/p8/page.meta.ts" },
-  { ...m41, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m42, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m43, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m44, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m32, route: "/prototype/protocol-opening", stub: false, file: "app/prototype/protocol-opening/page.meta.ts" },
+  { ...m33, route: "/prototype/protocol-opening/a", stub: false, file: "app/prototype/protocol-opening/a/page.meta.ts" },
+  { ...m34, route: "/prototype/protocol-opening/b", stub: false, file: "app/prototype/protocol-opening/b/page.meta.ts" },
+  { ...m35, route: "/prototype/protocol-opening/c", stub: false, file: "app/prototype/protocol-opening/c/page.meta.ts" },
+  { ...m36, route: "/prototype/protocol-opening/d", stub: false, file: "app/prototype/protocol-opening/d/page.meta.ts" },
+  { ...m37, route: "/prototype/protocol-opening/e", stub: false, file: "app/prototype/protocol-opening/e/page.meta.ts" },
+  { ...m38, route: "/prototype/protocol-opening/f", stub: false, file: "app/prototype/protocol-opening/f/page.meta.ts" },
+  { ...m39, route: "/prototype/protocol-opening/g", stub: false, file: "app/prototype/protocol-opening/g/page.meta.ts" },
+  { ...m40, route: "/prototype/protocol-transitions", stub: false, file: "app/prototype/protocol-transitions/page.meta.ts" },
+  { ...m41, route: "/prototype/protocol-transitions/t1", stub: false, file: "app/prototype/protocol-transitions/t1/page.meta.ts" },
+  { ...m42, route: "/prototype/protocol-transitions/t10", stub: false, file: "app/prototype/protocol-transitions/t10/page.meta.ts" },
+  { ...m43, route: "/prototype/protocol-transitions/t11", stub: false, file: "app/prototype/protocol-transitions/t11/page.meta.ts" },
+  { ...m44, route: "/prototype/protocol-transitions/t12", stub: false, file: "app/prototype/protocol-transitions/t12/page.meta.ts" },
+  { ...m45, route: "/prototype/protocol-transitions/t2", stub: false, file: "app/prototype/protocol-transitions/t2/page.meta.ts" },
+  { ...m46, route: "/prototype/protocol-transitions/t3", stub: false, file: "app/prototype/protocol-transitions/t3/page.meta.ts" },
+  { ...m47, route: "/prototype/protocol-transitions/t4", stub: false, file: "app/prototype/protocol-transitions/t4/page.meta.ts" },
+  { ...m48, route: "/prototype/protocol-transitions/t5", stub: false, file: "app/prototype/protocol-transitions/t5/page.meta.ts" },
+  { ...m49, route: "/prototype/protocol-transitions/t6", stub: false, file: "app/prototype/protocol-transitions/t6/page.meta.ts" },
+  { ...m50, route: "/prototype/protocol-transitions/t7", stub: false, file: "app/prototype/protocol-transitions/t7/page.meta.ts" },
+  { ...m51, route: "/prototype/protocol-transitions/t8", stub: false, file: "app/prototype/protocol-transitions/t8/page.meta.ts" },
+  { ...m52, route: "/prototype/protocol-transitions/t9", stub: false, file: "app/prototype/protocol-transitions/t9/page.meta.ts" },
+  { ...m53, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m54, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m55, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m56, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];

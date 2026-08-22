@@ -8,9 +8,19 @@ Dos cosas:
 - **`hero-labs/`** — las ocho variantes de la primera pantalla contra las que se
   decidió, en `/prototype/protocol-heroes`. Ganó **H4 · Cut**, ya copiada en
   `a/Hero.tsx`. Tiene su propio [README](./hero-labs/README.md).
-- **`proof-labs/`** — ocho dividers para la juntura entre el hero y el resto de
-  la página, en `/prototype/protocol-proof` (+ una ruta por variante, en
-  contexto). Sin decidir. Tiene su propio [README](./proof-labs/README.md).
+- **`opening-labs/`** — seis aperturas completas (hero + las seis cifras +
+  «Built for AI scale»), en `/prototype/protocol-opening`. Cada una con su propia
+  superficie: cuatro shaders WebGL, un SVG con paralaje y un campo de caracteres
+  en canvas. Sin decidir. Tiene su propio [README](./opening-labs/README.md).
+- **`transition-labs/`** — doce secciones de transición para la juntura entre el
+  hero y el contenido, en `/prototype/protocol-transitions` (+ una ruta por
+  variante, en contexto). Agrupadas por altura: 25–30svh, ~50svh y 85–100svh. Sin
+  decidir. Tiene su propio [README](./transition-labs/README.md).
+
+  Reemplazan a `proof-labs/`, ocho dividers que trataban la franja de cifras como
+  un separador. Están en el commit anterior; se descartaron porque un separador no
+  hace lo que esta juntura necesita —introducir el contenido— y porque el rol se
+  estaba definiendo por lo que la franja NO debía ser.
 
 ## De dónde viene `a/`
 
