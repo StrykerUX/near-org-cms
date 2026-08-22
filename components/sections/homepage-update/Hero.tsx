@@ -53,7 +53,6 @@ export default function Hero() {
       const wrap = q("[data-hero-wrap]")[0];
       const fade = q("[data-hero-topfade]")[0];
       const heading = q("[data-hero='heading']")[0];
-      const rest = q("[data-hero='sub']");
 
       // ── 1. Fundido superior ligado al scroll ──────────────────────────────
       //
@@ -135,8 +134,6 @@ export default function Hero() {
       // animación el texto es negro sólido; el cambio no se nota porque el
       // gradiente TAMBIÉN es negro en su primer 55%.
       if (heading) {
-        gsap.set(rest, { autoAlpha: 0, y: 16 });
-
         let split: SplitText | null = null;
         // `fonts.ready` es una promesa, y el cleanup de abajo puede correr antes
         // de que resuelva: en dev pasa en cada mount por StrictMode, y en
@@ -155,8 +152,9 @@ export default function Hero() {
           // transparente-sin-fondo. Y `onSplit` deja a SplitText como dueño del
           // timeline que devuelve, lo que vuelve REENTRANTE llamar a `revert()`
           // desde su `onComplete`: el revert se come los tweens que ese mismo
-          // callback acababa de crear — así fue como el subtítulo se quedaba en
-          // `opacity: 0` para siempre mientras el título sí terminaba bien.
+          // callback acababa de crear. Así fue como, cuando el hero todavía
+          // tenía subtítulo, ese subtítulo se quedaba en `opacity: 0` para
+          // siempre mientras el título sí terminaba bien.
           //
           // Partir una vez, animar, y revertir al final. Sin callbacks anidados.
           split = SplitText.create(heading, { type: "words", mask: "words" });
@@ -184,10 +182,6 @@ export default function Hero() {
             duration: 0.9,
             ease: "power3.out",
           }, 0.42);
-          // El subtítulo entra montado sobre el final del titular, y va DENTRO
-          // del timeline: como paso de la coreografía, no como efecto colateral
-          // de un callback.
-          tl.to(rest, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.45");
           tl.call(() => {
             // Recién acá, con todo terminado: primero devolver el markup, y
             // DESPUÉS encender el gradiente. Al revés, el clip caería sobre las
@@ -268,9 +262,24 @@ export default function Hero() {
           en la referencia, donde el nav sí empuja. */}
       <div aria-hidden="true" className="h-[5.5rem] shrink-0" />
 
+      {/* El padding es asimétrico —más abajo que arriba— y eso es lo que sube
+          el titular: el bloque está centrado con `justify-center`, así que no se
+          lo puede mover con un `translate` sin pelearse con GSAP, que anima la
+          `y` de ESTE mismo elemento en el parallax. Un transform de Tailwind acá
+          lo pisa el tween y el titular vuelve solo a su sitio en el primer
+          frame. El padding, en cambio, mueve la caja de centrado y el tween
+          sigue midiendo desde donde quedó.
+
+          `text-display` vive acá y no en el `<h1>` para que el `em` de abajo
+          tenga contra qué medir: el token es el 1em del titular, y el `1.08em`
+          lo escala DESDE la escala en vez de reemplazarla. Puesto en el mismo
+          elemento, el `em` resolvería contra el body y el token quedaría
+          anulado. `line-height` (unitless) y `letter-spacing` (en em) heredan y
+          se recomputan contra el tamaño nuevo — que es exactamente lo que se
+          quiere: el titular crece sin desarmar su interlineado ni su tracking. */}
       <Container
         data-hero-wrap
-        className="relative z-[2] flex flex-1 flex-col items-center justify-center gap-6 py-14 text-center"
+        className="relative z-[2] flex flex-1 flex-col items-center justify-center pb-28 pt-14 text-center text-display"
       >
         {/* Fondo Y clip van SIEMPRE juntos, en la misma variante. El fondo sin
             el clip pinta un rectángulo negro detrás de un texto negro; el clip
@@ -278,17 +287,10 @@ export default function Hero() {
             se encienden juntos al terminar la intro — ver el bloque de motion. */}
         <h1
           data-hero="heading"
-          className="text-display text-pretty data-[intro=done]:bg-clip-text data-[intro=done]:text-transparent data-[intro=done]:[background-image:linear-gradient(135deg,#000_0%,#000_55%,var(--ink-deep)_100%)]"
+          className="text-[1.08em] text-pretty data-[intro=done]:bg-clip-text data-[intro=done]:text-transparent data-[intro=done]:[background-image:linear-gradient(135deg,#000_0%,#000_55%,var(--ink-deep)_100%)]"
         >
-          Own your
-          <br />
-          <Accent display>world.</Accent>
+          Own your <Accent display>world.</Accent>
         </h1>
-
-        <p data-hero="sub" className="max-w-xl text-body-lg text-muted-foreground text-pretty">
-          Move cross-chain, trade perps, hold RWAs, stay confidential, and access
-          all of DeFi from your own wallet.
-        </p>
       </Container>
     </section>
   );

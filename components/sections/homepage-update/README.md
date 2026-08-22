@@ -43,6 +43,31 @@ Lo que cambió, y por qué no es el mismo componente repintado:
 
 El arte del icono vive en `public/prototype/homepage-update/near-icon.png`.
 
+### `Hero` — sin subtítulo, titular en una línea (2026-08-22)
+
+El párrafo de apoyo ("Move cross-chain, trade perps…") salió del hero, y con él
+todo su rastro en la coreografía: el selector `[data-hero='sub']`, su
+`gsap.set` inicial y su paso del timeline. Dejarlo apuntando a un array vacío
+habría sido código muerto fingiendo coreografiar algo. Efecto lateral a tener
+presente: el `tl.call()` que hace el `split.revert()` y enciende el gradiente
+ahora corre al terminar la entrada de "world." y no cuando terminaba el
+subtítulo — que es lo correcto, porque el titular es todo lo que queda.
+
+`Own your world.` va en una sola línea (se fue el `<br />`); en móvil envuelve
+solo, que a 8rem es la única salida.
+
+Dos detalles de por qué el ajuste fino está donde está:
+
+- **El titular sube con `pb-28 pt-14`, no con un `translate`.** El bloque está
+  centrado con `justify-center` y GSAP anima la `y` de ESE mismo elemento en el
+  parallax: un transform de Tailwind acá lo pisa el tween en el primer frame.
+  El padding mueve la caja de centrado y el tween sigue midiendo desde ahí.
+- **`text-display` vive en el `Container` y el `<h1>` lleva `text-[1.08em]`.**
+  El `em` necesita un padre contra quien medir: en el mismo elemento resolvería
+  contra el body y anularía el token. Así el titular escala DESDE la escala —
+  `line-height` (unitless) y `letter-spacing` (em) heredan y se recomputan
+  contra el tamaño nuevo.
+
 ## Lo que NO se forkeó
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del
