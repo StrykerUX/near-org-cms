@@ -64,7 +64,8 @@ dar por terminado un cambio.
 | `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
-| `protocol-labs/*` | `ProtocolLabAView`, `ProtocolLabBView`, `ProtocolLabCView`, `ProtocolLabDView` | `/prototype/protocol-a`, `-b`, `-c`, `-d` — **laboratorio**: cuatro estructuras para la página de Protocol (D mezcla secciones de A y B), comparadas en `/prototype/protocol-labs`. Tiene su propio [README](./protocol-labs/README.md). Reusa `quantum/CtaPill` y `quantum/ArrowCircle`; **ninguna página real lo importa** |
+| `protocol-labs/a/*` | `ProtocolLabAView` | `/prototype/protocol-a` — la estructura elegida para la página de Protocol, salida de comparar cuatro. Tiene su propio [README](./protocol-labs/README.md) |
+| `protocol-labs/hero-labs/*` | `ProtocolHeroLabView` | `/prototype/protocol-heroes/h1…h8` — **laboratorio**: ocho variantes de la primera pantalla. Tiene su propio [README](./protocol-labs/hero-labs/README.md). Importa `shardField` de `protocol/`; **ninguna página real lo importa** |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
@@ -72,10 +73,14 @@ son laboratorios y no se tocan a la ligera.
 
 ## Laboratorios
 
-Hay uno vivo: `protocol-labs/`, con las tres alternativas de la página Protocol.
-La regla que gobierna a cualquiera: **un laboratorio alimenta una ruta de
-comparación, ninguna página real lo importa, y si una versión gana se COPIA** a
-la carpeta de la página que la reciba — no se importa desde ahí.
+Hay uno vivo: `protocol-labs/hero-labs/`, con ocho variantes de la primera
+pantalla de Protocol. La regla que gobierna a cualquiera: **un laboratorio
+alimenta una ruta de comparación, ninguna página real lo importa, y si una
+versión gana se COPIA** a la carpeta de la página que la reciba — no se importa
+desde ahí.
+
+`protocol-labs/a/` ya NO es un laboratorio: es la estructura elegida, esperando
+que se decida su hero.
 
 Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
 `transition-labs`, `newsletter-labs`, `mural-labs`, `footer-labs`) y ocho
