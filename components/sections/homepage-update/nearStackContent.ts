@@ -122,6 +122,26 @@ export const STACK_INTRO = {
   sub: "Open infrastructure powering the agent economy.",
 } as const;
 
+/**
+ * Las dos notas al pie de la escena: gobernanza y economía.
+ *
+ * No son fichas del stack y por eso no viven en `STACK_PIECES` ni tienen
+ * `StackKey`: las cuatro fichas de las esquinas nombran PIEZAS del ensamble y
+ * se encienden al pasar el puntero por su parte del arte. Estas dos hablan de
+ * cómo se gobierna y cómo se financia lo que el arte muestra — no hay cubo que
+ * señalar, así que no son anclas, son pie.
+ */
+export const STACK_NOTES: readonly { readonly label: string; readonly body: string }[] = [
+  {
+    label: "Governance",
+    body: "NEAR's House of Stake gives participants who generate value a proportional say in how the system runs. Live on mainnet, with binding proposals already passed.",
+  },
+  {
+    label: "Economics",
+    body: "NEAR is the coordination asset of the agent economy. As usage grows, product revenue feeds buybacks that offset emissions, accelerating NEAR's deflationary trajectory and strengthening the network as activity scales.",
+  },
+];
+
 // ── Lo que agrega la composición de `StackAnchors` ──────────────────────────
 //
 // Las cuatro fichas de las esquinas llevan dos cosas que el stack no tenía:

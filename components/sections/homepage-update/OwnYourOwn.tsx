@@ -150,9 +150,12 @@ const DRIFT_K = 1.55;
 // compartir columna esto es lo que evita que se toquen.
 const MIN_GAP = 24;
 
-// Posición de cada card en el grid y su tinte, en el MISMO orden que
+// Posición de cada card en el grid, en el MISMO orden que
 // `OWN_YOUR_OWN_CARDS`. Se queda acá y no en el módulo de contenido porque es
 // composición: en qué celda cae cada card y cuánto se separa de la anterior.
+//
+// Llevó también un `tint` por card mientras dos de las cuatro eran blancas y
+// dos crema. Ahora las cuatro comparten fondo y la clase vive en el `<article>`.
 //
 // Clases literales y no template strings: Tailwind v4 no detecta clases
 // construidas dinámicamente. Mismo criterio que el mapa WIDTH de Container.
@@ -241,7 +244,6 @@ const CARD_LAYOUT = [
     // Data — columnas 4-6, fila 1. Arriba del todo, justo debajo del
     // encabezado. Cruza el título por delante.
     place: "lg:col-start-4 lg:col-span-3 lg:row-start-1 lg:mt-[18%]",
-    tint: "bg-white/50",
   },
   {
     // Traces — columnas 7-9, fila 2.
@@ -250,7 +252,6 @@ const CARD_LAYOUT = [
     // por debajo de donde termina Data, no encabalgada sobre ella. Es el paso
     // largo de la composición.
     place: "lg:col-start-7 lg:col-span-3 lg:row-start-2 lg:mt-[12%]",
-    tint: "bg-card-tint/50",
   },
   {
     // Assets — columnas 1-3, fila 3. Pega al borde izquierdo del Container.
@@ -260,7 +261,6 @@ const CARD_LAYOUT = [
     // nada — viven en columnas opuestas (1-3 contra 7-9) y `driftOffsets` no
     // acota los pares que no se cruzan en horizontal.
     place: "lg:col-start-1 lg:col-span-3 lg:row-start-3 lg:-mt-[101%]",
-    tint: "bg-white/50",
   },
   {
     // Intelligence — columnas 10-12, fila 4. Pega al borde derecho.
@@ -270,7 +270,6 @@ const CARD_LAYOUT = [
     // array. Si alguna vez la última fila la ocupa otra card, ese cálculo hay
     // que mover con ella.
     place: "lg:col-start-10 lg:col-span-3 lg:row-start-4 lg:-mt-[27%]",
-    tint: "bg-card-tint/50",
   },
 ] as const;
 
@@ -493,12 +492,33 @@ export default function OwnYourOwn() {
           // `fixed`: sin ella se pega debajo y queda medio tapado.
           "--own-head-top": "calc(var(--site-header-block) + 2rem)",
           // Dónde cae el título en el viewport, de 0 (borde de arriba) a 1
-          // (borde de abajo). 0.5 sería el centro matemático y se lee BAJO: el
+          // (borde de abajo).
+          //
+          // 0.5 sería el centro matemático, y no es el que se ve centrado: el
           // line-box de `--text-display` reserva el espacio de las descendentes
           // —que en "Own Your Own" solo usa la "y"— así que la mancha de tinta
-          // queda por encima del centro de su propia caja, y centrar la caja
-          // empuja la mancha hacia abajo. 0.45 devuelve ese sesgo.
+          // queda por encima del centro de su propia caja. Corregir ESE sesgo
+          // pide bajar del 0.5; este 0.65 va en la otra dirección y es una
+          // decisión de composición, no una corrección óptica: planta el titular
+          // en el tercio bajo para que las cards lo crucen por arriba.
           "--own-title-anchor": "0.65",
+          // Cuánto alto se le reserva al encabezado: su peor caso más aire.
+          //
+          // Es UNA constante y no dos porque gobierna dos cosas que tienen que
+          // coincidir o el encabezado y el título se pisan: el PISO del título
+          // pegado (`--own-title-floor`) y dónde NACE el título en el flujo. Ese
+          // segundo uso es nuevo — antes el título nacía a 150px del borde del
+          // grid, con el encabezado naciendo a 0 y midiendo hasta 21rem, así que
+          // se solapaban en el flujo desde el primer frame y el cruce se veía
+          // durante toda la entrada de la sección, en cualquier tamaño de
+          // ventana. El piso solo cubría el tramo pegado; el tramo de ANTES no
+          // lo cubría nadie.
+          //
+          // 21rem es el alto que puede llegar a tener el encabezado en el peor
+          // caso (a 1024px, que es donde el título aparece, su párrafo ocupa más
+          // líneas), más aire. No se mide en JS a propósito: esta sección no
+          // calcula posiciones — ver la nota de arriba del archivo.
+          "--own-head-block": "21rem",
           // Piso del título: por debajo de esto no puede subir, pase lo que
           // pase con el tamaño de la ventana.
           //
@@ -512,11 +532,7 @@ export default function OwnYourOwn() {
           // la combinación que los hace chocar, y es de lo más común: un
           // monitor panorámico, o media pantalla.
           //
-          // 21rem es el alto que puede llegar a tener el encabezado en el peor
-          // caso (a 1024px, que es donde el título aparece, su párrafo ocupa
-          // más líneas), más aire. No se mide en JS a propósito: esta sección
-          // no calcula posiciones — ver la nota de arriba del archivo.
-          "--own-title-floor": "calc(var(--own-head-top) + 21rem)",
+          "--own-title-floor": "calc(var(--own-head-top) + var(--own-head-block))",
           // Cuánto arrancan las cards POR DEBAJO del título. Sin esto, la
           // primera card (Data) nace a la misma altura que el título y lo tapa
           // desde el primer frame: la escena empieza con el cruce ya ocurrido,
@@ -527,7 +543,15 @@ export default function OwnYourOwn() {
           // las cards—, y es por lo que mide: no es un hueco entre dos cajas,
           // es cuánto scroll pasa entre que el título se planta y llega la
           // primera card. Eso es distancia de VIEWPORT, y `svh` es su unidad.
-          "--own-card-lead": "38svh",
+          //
+          // Lleva `--own-head-block` sumado desde que el título nace por debajo
+          // del encabezado en vez de a 150px del borde del grid: el lead es
+          // padding del grid y las cards cuelgan de él, así que sin la suma el
+          // título se les habría acercado 21rem y la escena empezaría con la
+          // primera card ya encima. Sumándolo, la distancia título↔card sigue
+          // siendo exactamente los 38svh de siempre y lo único que se mueve es
+          // dónde empieza todo.
+          "--own-card-lead": "calc(var(--own-head-block) + 38svh)",
         } as React.CSSProperties
       }
       className="relative z-[1] bg-cream text-foreground"
@@ -632,9 +656,11 @@ export default function OwnYourOwn() {
             `mt` es la entrada, y desde que existe `--own-card-lead` vive en
             el `style` de abajo en vez de acá: el lead es padding del grid y
             empujaría también al título, así que el margen tiene que restarlo.
-            Su valor sigue siendo el mismo — sin él el título nacería a la
-            altura de la card Assets, la única sin `mt` propio y por lo tanto
-            también pegada al techo del grid, y las dos entrarían juntas.
+            Sin ese descuento el título nacería a la altura de la card Assets
+            —la única sin `mt` propio, y por lo tanto también pegada al techo
+            del grid— y las dos entrarían juntas. Lo que el margen deja después
+            del descuento es `--own-head-block`: el título nace justo debajo del
+            encabezado, no encima.
 
             `mb` es la salida: el título se despega cuando su borde inferior
             alcanza el fondo del grid menos este margen, así que estos 200px
@@ -668,14 +694,22 @@ export default function OwnYourOwn() {
               top: "max(calc(100svh * var(--own-title-anchor) - var(--text-display) / 2), var(--own-title-floor))",
               // El `--own-card-lead` que baja a las cards es padding del
               // grid, así que empujaría también al título —es un item más de
-              // ese grid—. Este margen negativo lo devuelve a donde estaba:
-              // los 150px son su entrada de siempre, medidos desde el borde
-              // del grid y no desde el borde del padding.
+              // ese grid—. Este margen negativo lo cancela y deja al título
+              // naciendo a `--own-head-block` del borde del grid: justo por
+              // DEBAJO del encabezado, que nace a 0 y mide como mucho eso.
+              //
+              // Eran 150px, y ese era el bug: el encabezado ocupa hasta 21rem,
+              // así que a 150px los dos se solapaban en el flujo desde el
+              // primer frame. Como comparten las columnas 7-9 del grid, el
+              // párrafo del encabezado y el titular gigante se leían encima
+              // durante toda la entrada de la sección — antes de que ninguno de
+              // los dos hubiera llegado a pegarse, que es cuando el `top` y el
+              // `--own-title-floor` recién empiezan a separarlos.
               //
               // Sin variante `lg:` porque no la necesita: en mobile el
               // elemento es `hidden`, y un elemento oculto no tiene margen
               // que aplicar.
-              marginTop: "calc(150px - var(--own-card-lead))",
+              marginTop: "calc(var(--own-head-block) - var(--own-card-lead))",
             }}
           >
             <h3 className="whitespace-nowrap text-center text-display">
@@ -703,7 +737,16 @@ export default function OwnYourOwn() {
               //
               // Sin variante `lg:`: en mobile cada card ya es la única de su
               // fila y la fila mide su contenido, así que no cambia nada ahí.
-              className={`z-[2] self-start rounded-3xl p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-md ${CARD_LAYOUT[i].tint} ${CARD_LAYOUT[i].place}`}
+              // El tinte es el MISMO para las cuatro, así que vive acá y no en
+              // `CARD_LAYOUT`: un campo por card que siempre vale lo mismo
+              // invita a que alguien lo desempareje sin querer.
+              //
+              // `bg-card-tint/50` (#eae9e6 al 50% sobre el crema de la sección,
+              // ≈ #efefec) las deja un escalón por debajo del fondo. Data y
+              // Assets llevaban `bg-white/50`, que compone ≈ #fafaf8 — más CLARO
+              // que el fondo, y por eso se leían como manchas blancuzcas en vez
+              // de como cards.
+              className={`z-[2] self-start rounded-3xl bg-card-tint/50 p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-md ${CARD_LAYOUT[i].place}`}
             >
               {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
                 `width`, Next genera el srcset pero el navegador asume que ocupa

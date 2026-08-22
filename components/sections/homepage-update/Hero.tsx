@@ -3,9 +3,16 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
+import { gsap, Observer, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import HeroFoliage from "@/components/sections/homepage-update/HeroFoliage";
-import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import { MQ } from "@/components/primitives/motion/motionTokens";
+import {
+  BEATS,
+  SEQUENCE_DURATION,
+  freezeScroll,
+  playSequence,
+  rewindSequence,
+} from "@/components/sections/homepage-update/heroSequence";
 
 // ── Geometría: el hero llena la pantalla ─────────────────────────────────────
 //
@@ -24,6 +31,32 @@ import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 // lo que siga, y se ve el crema de la página. El original arrastra ese mismo
 // bug; acá el hero llena el viewport y el problema desaparece en origen en vez
 // de parchearse con un `max()`.
+
+// ── El hero no cuesta scroll ────────────────────────────────────────────────
+//
+// Un `margin-bottom` de -100svh —su alto exacto— lo saca del cómputo y deja a
+// `AgentEconomy` empezando en el mismo punto del documento que él, solapados.
+// El hero se pinta encima (`z-10`) y el scroll de los dos lo aporta el track de
+// la sección de abajo.
+//
+// Eso no es un truco de layout, es lo que el efecto necesita: la sección de
+// abajo tiene su stage en `sticky top-0`, y un sticky solo se pega cuando su
+// contenedor llega al tope del viewport. Si el hero costara su alto, el track
+// arrancaría una pantalla más abajo y el icono que se revela detrás del recorte
+// llegaría al centro RECIÉN cuando el hero ya cerró — subiendo mientras el hero
+// se abre, que es lo contrario del gesto. Solapados, el stage está pegado desde
+// el primer píxel y el icono ya está centrado y quieto cuando el borde lo
+// empieza a descubrir.
+//
+// Y desde que la secuencia dejó de scrubbearse hay un segundo motivo, más duro:
+// durante la animación el scroll está CONGELADO. Si el hero costara scroll, ese
+// scroll no se podría gastar mientras corre la secuencia y la página quedaría
+// trabada con el hero todavía ocupando su lugar.
+//
+// El margen NO va en el JSX: lo pone `gsap.set` dentro del `matchMedia`, así
+// que existe solo cuando la secuencia existe. Con `prefers-reduced-motion` no
+// hay secuencia, el hero se ve entero, y un margen negativo ahí lo solaparía con
+// la sección siguiente sin nada que los separe.
 
 // ── El fondo ────────────────────────────────────────────────────────────────
 //
@@ -50,74 +83,181 @@ export default function Hero() {
       // no sabe nada.
       const cleanups: (() => void)[] = [];
 
+      // Va PRIMERO, antes de crear cualquier ScrollTrigger: cambia la altura
+      // del documento, y un trigger creado antes mediría contra el layout viejo.
+      // -100svh es el alto del propio hero: lo saca entero del flujo.
+      //
+      // `style.setProperty` y no `gsap.set`: la unidad es `svh`, la misma que el
+      // `height` del hero, y tiene que serlo —en móvil `vh` mide contra el
+      // viewport con la barra de URL colapsada y el margen dejaría de cancelar
+      // el alto exacto—. GSAP normaliza unidades al escribir y `svh` no está
+      // entre las que conoce; escribir el estilo directo no deja lugar a dudas.
+      // El cleanup lo saca a mano por lo mismo: `mm.revert()` solo deshace lo
+      // que GSAP escribió.
+      scope.style.setProperty("margin-bottom", "-100svh");
+      cleanups.push(() => scope.style.removeProperty("margin-bottom"));
+
       const wrap = q("[data-hero-wrap]")[0];
       const fade = q("[data-hero-topfade]")[0];
       const heading = q("[data-hero='heading']")[0];
-      const rest = q("[data-hero='sub']");
 
-      // ── 1. Fundido superior ligado al scroll ──────────────────────────────
+      // ── 1. La salida del hero, como UN timeline ───────────────────────────
       //
-      // Empieza invisible y sube con el scroll, tapando el fondo contra el
-      // crema de la página. Es lo que hace que el hero "se vaya": cuanto antes
-      // llega a opaco, antes se cierra.
+      // Los cuatro movimientos de la salida —el fundido superior, el descuelgue
+      // de la copy, su crecida y el recorte del borde inferior— viven en un solo
+      // timeline en pausa. Antes eran cuatro ScrollTriggers con `scrub`, cada
+      // uno leyendo la misma posición de scroll.
       //
-      // Termina al 18% del recorrido y no al 40%: es lo que se pidió con "que
-      // el hero se haga chico más rápido". A 40% el hero seguía a media
-      // opacidad cuando ya se había ido casi medio viewport.
+      // Lo que cambió no es el gesto sino de quién es: el lector lo DISPARA con
+      // el primer scroll y después no lo maneja. Un scrub le entrega la
+      // velocidad al dedo, y la velocidad del dedo depende del dispositivo —el
+      // mismo cierre salía a tirones en un trackpad y de golpe en una rueda con
+      // detentes. Con reloj propio, sale igual siempre.
       //
-      // Con reduced-motion este tween no se crea y el gradiente queda opaco (su
-      // valor CSS): la juntura sigue leyéndose, solo que sin transición.
+      // El otro motivo es que el statement de abajo tiene que engancharse a
+      // ESTO. Sincronizarlos por scroll funcionaba porque los dos leían la misma
+      // posición; sin esa referencia común, los tiempos tienen que ser
+      // explícitos y compartidos. Viven en `heroSequence.ts`.
+      const exit = gsap.timeline({ paused: true });
+
+      // El fundido superior tapa con crema desde arriba mientras el borde come
+      // desde abajo. Es la otra mitad del cierre — aquel corta, este tapa.
       if (fade) {
-        gsap.fromTo(
-          fade,
-          { opacity: 0 },
-          {
-            opacity: 1,
-            ease: "none",
-            immediateRender: true,
-            scrollTrigger: {
-              trigger: scope,
-              start: "top top",
-              end: "18% top",
-              scrub: true,
-              invalidateOnRefresh: true,
-              markers: DEBUG_MARKERS,
-            },
-          }
-        );
+        exit.fromTo(fade, { opacity: 0 }, { opacity: 1, duration: BEATS.clip, ease: "power1.out" }, 0);
       }
 
-      // ── 2. Parallax de la copy, y NADA más ────────────────────────────────
-      //
-      // Solo se mueve el texto, y poco: un 6% de la altura del hero.
+      // La copy se descuelga y CRECE. Van juntos en el mismo tween porque son
+      // dos props del mismo transform; separarlos no aporta nada ahora que
+      // comparten timing.
       //
       // Hubo una versión con contra-movimiento —el texto bajando un 25% y el
       // fondo subiendo un 15%— y era demasiado: con el fondo desplazándose, el
-      // hero entero se leía como si se despegara de la página. Acá el fondo
-      // está QUIETO y el texto apenas se descuelga; lo que cierra el hero es el
-      // fundido de arriba, no el movimiento.
-      //
-      // `ease: "none"`: con scrub, la curva la pone el dedo del lector.
+      // hero entero se leía como si se despegara de la página. Acá el fondo está
+      // QUIETO.
       if (wrap) {
-        gsap.fromTo(
+        exit.fromTo(
           wrap,
-          { y: 0 },
+          { y: 0, scale: 1 },
           {
             y: () => 0.06 * scope.getBoundingClientRect().height,
-            ease: "none",
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: scope,
-              start: "top top",
-              end: "bottom top",
-              scrub: true,
-              invalidateOnRefresh: true,
-            },
-          }
+            scale: 1.35,
+            duration: BEATS.clip,
+            ease: "power1.in",
+          },
+          0
         );
       }
 
-      // ── 3. Intro del titular ──────────────────────────────────────────────
+      // El borde inferior recorta el hero.
+      //
+      // Arranca en `0%` —el recorte responde desde el primer frame—. Hubo una
+      // versión que arrancaba en `-25%` (un rectángulo que excede el border box
+      // y por lo tanto no recorta) para proteger el sobrante del fondo. Ese
+      // sobrante ya no existe: era del `<video>` que sobresalía por abajo, y
+      // `HeroFoliage` va `inset-0`, encerrado en el hero.
+      //
+      // Los cuatro lados van en `%` y no mezclados con px: GSAP interpola
+      // `inset()` lado a lado, y una unidad distinta por lado le deja pares que
+      // no puede promediar.
+      //
+      // `power2.out` sale disparado y desacelera contra el final: suave sin
+      // hacerse esperar. Un `in` arrancaría plano y ese tramo muerto se lee como
+      // retardo aunque el timeline haya empezado.
+      exit.fromTo(
+        scope,
+        { clipPath: "inset(0% 0% 0% 0%)" },
+        { clipPath: "inset(0% 0% 100% 0%)", duration: BEATS.clip, ease: "power2.out" },
+        0
+      );
+
+      // ── 2. Quién aprieta el botón ─────────────────────────────────────────
+      //
+      // `Observer` y no un ScrollTrigger: lo que dispara la secuencia es el
+      // GESTO, no una posición. Con el scroll congelado durante la secuencia la
+      // página no se mueve, así que no hay posición que cruzar — un
+      // ScrollTrigger no llegaría a dispararse nunca.
+      //
+      // `onDown` cubre rueda, trackpad y swipe táctil bajo la misma firma.
+      //
+      // El guard de `scrollY` es para las recargas a media página: el navegador
+      // restaura la posición, el lector cae en cualquier lado y su primer scroll
+      // no tiene por qué reproducir una intro que ya se perdió. Por debajo de una
+      // pantalla el hero todavía manda; por encima, no.
+      let played = false;
+      let thawing: (() => void) | null = null;
+
+      const play = () => {
+        if (played) return;
+        played = true;
+        // El scroll se congela por la secuencia COMPLETA, no por la salida del
+        // hero: lo que tiene que quedar terminado en cuadro es el statement, que
+        // sigue después.
+        thawing = freezeScroll(SEQUENCE_DURATION);
+        exit.play();
+        playSequence();
+      };
+
+      const rewind = () => {
+        if (!played) return;
+        played = false;
+        thawing?.();
+        thawing = null;
+        exit.reverse();
+        rewindSequence();
+      };
+
+      const observer = Observer.create({
+        type: "wheel,touch",
+        onDown: () => {
+          if (window.scrollY > window.innerHeight) return;
+          play();
+        },
+        // La vuelta también es un GESTO, y tiene que poder interrumpir.
+        //
+        // Esto faltaba y el síntoma era exacto: "puedo volver al hero, pero
+        // después de un delay". El delay eran los ~2.2s de scroll congelado. El
+        // lector subía, Lenis estaba parado, la página no se movía, y recién
+        // cuando el `setTimeout` soltaba el freno el gesto empezaba a contar.
+        // Un `ScrollTrigger` sobre la posición no podía cubrirlo: la posición no
+        // cambia mientras el scroll está congelado.
+        //
+        // `Observer` sí ve el evento nativo aunque Lenis esté parado, así que el
+        // gesto hacia arriba rebobina en el acto — incluso a mitad de la
+        // secuencia, que es cuando más se nota que no responde.
+        //
+        // El guard es `scrollY <= 1` y no `=== 0` por el redondeo subpíxel de
+        // Lenis: al terminar la secuencia el scroll quedó en cero, y "cero" para
+        // un scroll interpolado es cualquier cosa por debajo de un píxel.
+        onUp: () => {
+          if (window.scrollY > 1) return;
+          rewind();
+        },
+      });
+      cleanups.push(() => observer.kill());
+
+      // El otro camino de vuelta: el lector que bajó varias pantallas y sube de
+      // corrido hasta el tope. Ahí el gesto de arriba no alcanza —el `onUp` se
+      // ignora mientras `scrollY` sea grande— y lo que cuenta es cruzar la
+      // posición.
+      //
+      // `1` es una posición de scroll absoluta y acá eso es literalmente lo que
+      // se quiere: un píxel, o sea "volvió al tope". Es el único punto donde
+      // rebobinar tiene sentido — a media página el hero ya no está y rearmarlo
+      // sería un salto.
+      //
+      // `rewind()` se autoignora si ya corrió, así que los dos caminos pueden
+      // dispararse juntos sin pisarse.
+      const top = ScrollTrigger.create({
+        trigger: scope,
+        start: 1,
+        onLeaveBack: rewind,
+      });
+      cleanups.push(() => top.kill());
+
+      // Si el componente se desmonta a mitad, el scroll se devuelve igual.
+      cleanups.push(() => thawing?.());
+
+      // ── 5. Intro del titular ──────────────────────────────────────────────
       //
       // ⚠️ El gradiente del <h1> y SplitText NO PUEDEN convivir.
       //
@@ -135,8 +275,6 @@ export default function Hero() {
       // animación el texto es negro sólido; el cambio no se nota porque el
       // gradiente TAMBIÉN es negro en su primer 55%.
       if (heading) {
-        gsap.set(rest, { autoAlpha: 0, y: 16 });
-
         let split: SplitText | null = null;
         // `fonts.ready` es una promesa, y el cleanup de abajo puede correr antes
         // de que resuelva: en dev pasa en cada mount por StrictMode, y en
@@ -155,8 +293,9 @@ export default function Hero() {
           // transparente-sin-fondo. Y `onSplit` deja a SplitText como dueño del
           // timeline que devuelve, lo que vuelve REENTRANTE llamar a `revert()`
           // desde su `onComplete`: el revert se come los tweens que ese mismo
-          // callback acababa de crear — así fue como el subtítulo se quedaba en
-          // `opacity: 0` para siempre mientras el título sí terminaba bien.
+          // callback acababa de crear. Así fue como, cuando el hero todavía
+          // tenía subtítulo, ese subtítulo se quedaba en `opacity: 0` para
+          // siempre mientras el título sí terminaba bien.
           //
           // Partir una vez, animar, y revertir al final. Sin callbacks anidados.
           split = SplitText.create(heading, { type: "words", mask: "words" });
@@ -184,10 +323,6 @@ export default function Hero() {
             duration: 0.9,
             ease: "power3.out",
           }, 0.42);
-          // El subtítulo entra montado sobre el final del titular, y va DENTRO
-          // del timeline: como paso de la coreografía, no como efecto colateral
-          // de un callback.
-          tl.to(rest, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.45");
           tl.call(() => {
             // Recién acá, con todo terminado: primero devolver el markup, y
             // DESPUÉS encender el gradiente. Al revés, el clip caería sobre las
@@ -224,12 +359,21 @@ export default function Hero() {
       // colapsada, así que el hero sobresale y salta al scrollear. Mismo criterio
       // que NearStack y ProofStepper.
       style={{ height: "100svh" } as React.CSSProperties}
-      // Sin `overflow-hidden`: el video SOBRESALE del hero por abajo a
-      // propósito. En ab7 eso hacía que la imagen continuara por debajo de los
-      // escalones de QuantumBars en vez de morir en un corte recto; acá abajo no
-      // hay escalera, pero el sobrante sigue evitando el borde duro contra el
-      // crema de la sección siguiente.
-      className="relative flex flex-col bg-cream text-foreground"
+      // `overflow-hidden`, y hasta agosto de 2026 NO lo tenía: el `<video>` del
+      // hero sobresalía por abajo a propósito, para que la imagen no muriera en
+      // un corte recto contra el crema de la sección siguiente. Ese video ya no
+      // existe —`HeroFoliage` va `inset-0`, encerrado— y el corte lo hace ahora
+      // el `clip-path` de la salida.
+      //
+      // Volvió porque hacía falta: la copy se escala a 1.35 al salir, y un
+      // `Container` de 1780px escalado desborda el ancho del viewport. Sin
+      // recorte eso es scroll LATERAL en toda la página — el síntoma aparece a
+      // mitad de la animación y no se parece en nada a su causa.
+      // `z-10`: el `margin-bottom` negativo mete la sección siguiente DEBAJO del
+      // hero en el flujo, y sin z el orden de pintado la dejaría encima —
+      // taparía el hero en vez de asomar por el recorte. El hero va arriba y lo
+      // que se ve en la zona recortada es lo que hay atrás.
+      className="relative z-10 flex flex-col overflow-hidden bg-cream text-foreground"
     >
       {/* El fondo. Llena el hero exacto y no se mueve.
 
@@ -268,9 +412,24 @@ export default function Hero() {
           en la referencia, donde el nav sí empuja. */}
       <div aria-hidden="true" className="h-[5.5rem] shrink-0" />
 
+      {/* El padding es asimétrico —más abajo que arriba— y eso es lo que sube
+          el titular: el bloque está centrado con `justify-center`, así que no se
+          lo puede mover con un `translate` sin pelearse con GSAP, que anima la
+          `y` de ESTE mismo elemento en el parallax. Un transform de Tailwind acá
+          lo pisa el tween y el titular vuelve solo a su sitio en el primer
+          frame. El padding, en cambio, mueve la caja de centrado y el tween
+          sigue midiendo desde donde quedó.
+
+          `text-display` vive acá y no en el `<h1>` para que el `em` de abajo
+          tenga contra qué medir: el token es el 1em del titular, y el `1.08em`
+          lo escala DESDE la escala en vez de reemplazarla. Puesto en el mismo
+          elemento, el `em` resolvería contra el body y el token quedaría
+          anulado. `line-height` (unitless) y `letter-spacing` (en em) heredan y
+          se recomputan contra el tamaño nuevo — que es exactamente lo que se
+          quiere: el titular crece sin desarmar su interlineado ni su tracking. */}
       <Container
         data-hero-wrap
-        className="relative z-[2] flex flex-1 flex-col items-center justify-center gap-6 py-14 text-center"
+        className="relative z-[2] flex flex-1 flex-col items-center justify-center pb-28 pt-14 text-center text-display"
       >
         {/* Fondo Y clip van SIEMPRE juntos, en la misma variante. El fondo sin
             el clip pinta un rectángulo negro detrás de un texto negro; el clip
@@ -278,17 +437,10 @@ export default function Hero() {
             se encienden juntos al terminar la intro — ver el bloque de motion. */}
         <h1
           data-hero="heading"
-          className="text-display text-pretty data-[intro=done]:bg-clip-text data-[intro=done]:text-transparent data-[intro=done]:[background-image:linear-gradient(135deg,#000_0%,#000_55%,var(--ink-deep)_100%)]"
+          className="text-[1.08em] text-pretty data-[intro=done]:bg-clip-text data-[intro=done]:text-transparent data-[intro=done]:[background-image:linear-gradient(135deg,#000_0%,#000_55%,var(--ink-deep)_100%)]"
         >
-          Own your
-          <br />
-          <Accent display>world.</Accent>
+          Own your <Accent display>world.</Accent>
         </h1>
-
-        <p data-hero="sub" className="max-w-xl text-body-lg text-muted-foreground text-pretty">
-          Move cross-chain, trade perps, hold RWAs, stay confidential, and access
-          all of DeFi from your own wallet.
-        </p>
       </Container>
     </section>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Accent from "@/components/primitives/Accent";
 import { useLoopCarousel, buildLoopCells, stepStyle } from "./useLoopCarousel";
 import { PRESS_ITEMS, type PressTone } from "@/components/sections/homepage-update/homepageUpdateContent";
 
@@ -48,14 +47,11 @@ export default function PressCarousel() {
       style={stepStyle}
       className="overflow-hidden bg-cream py-[clamp(40px,7vh,96px)] text-foreground"
       aria-roledescription="carousel"
+      // Sin titular visible, este `aria-label` es la única etiqueta de la
+      // sección: quien navega por landmarks o por lista de regiones no tiene
+      // otra cosa que la nombre. Por eso se queda aunque el `<h2>` se haya ido.
       aria-label="Blockchain quantum security in the news"
     >
-      <h2 className="whitespace-nowrap px-[clamp(24px,5vw,105px)] text-left text-h2 lg:mx-auto lg:text-center">
-        Blockchain quantum security <Accent>in the news</Accent>
-      </h2>
-
-      <div className="mt-[clamp(28px,5vh,64px)]" />
-
       <div
         ref={containerRef}
         {...rootProps}
