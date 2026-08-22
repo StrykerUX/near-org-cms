@@ -64,12 +64,18 @@ dar por terminado un cambio.
 | `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
+| `protocol-labs/*` | `ProtocolLabAView`, `ProtocolLabBView`, `ProtocolLabCView`, `ProtocolLabDView` | `/prototype/protocol-a`, `-b`, `-c`, `-d` — **laboratorio**: cuatro estructuras para la página de Protocol (D mezcla secciones de A y B), comparadas en `/prototype/protocol-labs`. Tiene su propio [README](./protocol-labs/README.md). Reusa `quantum/CtaPill` y `quantum/ArrowCircle`; **ninguna página real lo importa** |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
 son laboratorios y no se tocan a la ligera.
 
-## Ya no hay laboratorios
+## Laboratorios
+
+Hay uno vivo: `protocol-labs/`, con las tres alternativas de la página Protocol.
+La regla que gobierna a cualquiera: **un laboratorio alimenta una ruta de
+comparación, ninguna página real lo importa, y si una versión gana se COPIA** a
+la carpeta de la página que la reciba — no se importa desde ahí.
 
 Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
 `transition-labs`, `newsletter-labs`, `mural-labs`, `footer-labs`) y ocho
@@ -78,11 +84,6 @@ homepages en paralelo. Se archivaron todos el 2026-08-21 al quedar
 
 Están completos en el tag `v-pre-limpieza` y en la rama `Respaldo`, y
 **`docs/labs-archivados.md`** dice qué era cada uno y cómo traerlo de vuelta.
-
-La regla que los gobernaba sigue en pie por si vuelve a haber uno: un
-laboratorio alimenta una ruta de comparación, ninguna página real lo importa, y
-si una versión gana **se COPIA** a la carpeta de la página que la reciba — no se
-importa desde ahí.
 
 ## El footer NO está acá
 
