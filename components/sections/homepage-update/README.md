@@ -118,6 +118,60 @@ Dos detalles de por qué el ajuste fino está donde está:
   `line-height` (unitless) y `letter-spacing` (em) heredan y se recomputan
   contra el tamaño nuevo.
 
+### `OwnYourOwn` — el titular ya no se cruza con el encabezado (2026-08-22)
+
+El titular gigante nacía a **150px** del borde del grid y el encabezado nace a
+**0** midiendo hasta 21rem. Se solapaban en el flujo desde el primer frame, y
+como comparten las columnas 7–9, el párrafo del encabezado y "Own Your Own" se
+leían encima durante toda la entrada de la sección. `--own-title-floor` solo
+cubría el tramo **pegado**; el tramo de antes no lo cubría nadie.
+
+El arreglo son tres piezas que se sostienen entre sí:
+
+- **`--own-head-block: 21rem`** — el alto reservado al encabezado deja de estar
+  escrito dos veces. Gobierna el piso del título pegado *y* dónde nace en el
+  flujo; si esos dos números se separan, vuelven a pisarse.
+- **El título nace a `--own-head-block`**, justo debajo del encabezado.
+- **`--own-card-lead` suma `--own-head-block`.** El lead es padding del grid y
+  las cards cuelgan de él: sin la suma el título se les habría acercado 21rem y
+  la escena empezaría con la primera card ya encima. Con la suma, la distancia
+  título↔card sigue siendo los mismos 38svh y lo único que se mueve es dónde
+  empieza todo.
+
+Aparte, las cuatro cards comparten fondo. Data y Assets llevaban `bg-white/50`,
+que sobre el crema compone ≈`#fafaf8` — más **claro** que el fondo, y por eso se
+leían como manchas blancuzcas. Ahora las cuatro van `bg-card-tint/50` (≈`#efefec`,
+un escalón por debajo). Como el tinte dejó de variar, salió de `CARD_LAYOUT` y
+vive en el `<article>`: un campo por card que siempre vale lo mismo invita a que
+alguien lo desempareje sin querer.
+
+### `StackAnchors` — el pie de gobernanza y economía (2026-08-22)
+
+Dos notas nuevas (`STACK_NOTES`) al pie de la escena. No viven en `STACK_PIECES`
+ni tienen `StackKey`: las fichas de las esquinas nombran **piezas del ensamble** y
+se encienden al pasar el puntero por su parte del arte, y estas dos no tienen
+cubo que señalar.
+
+Se montan en dos sitios según el alto de ventana, con el **mismo** componente:
+
+- **≥ 900px** — dentro de la escena, como pie del sticky. Va `shrink-0`, así que
+  lo que cede alto es el `flex-1` del medio: el ensamble deriva su ancho del alto
+  del stage (`h-[80%]` + `w-auto`), se achica y sube solo, y las cuatro fichas se
+  anclan contra esa misma caja y lo acompañan.
+- **< 900px** — en una `<section>` **hermana**, debajo del gráfico.
+
+Que la de abajo sea hermana y no un bloque más adentro no es estilo. El
+ScrollTrigger de la escena usa `end: "bottom bottom"` y mide la sección entera:
+cualquier alto agregado ahí estira el recorrido de las seis etapas del ensamble y
+las separa entre sí. Y en modo track esa sección tiene alto **fijo**
+(`--travel` + 100svh), así que un hijo después del sticky se le sale por abajo.
+
+Los dos montajes se excluyen por `display` y no por opacidad ni visibilidad: un
+`display: none` no lo lee ningún lector de pantalla, así que el contenido nunca se
+anuncia dos veces aunque esté dos veces en el árbol. El umbral va como clase
+literal en los dos lugares porque Tailwind no detecta clases dinámicas — si se
+mueve, se mueve en ambos.
+
 ## Lo que NO se forkeó
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del
