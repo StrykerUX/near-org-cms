@@ -124,23 +124,116 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     const tweenRef: { current: gsap.core.Tween | null } = { current: null };
     const timerRef: { current: ReturnType<typeof gsap.delayedCall> | null } = { current: null };
 
-    let stepW = 0;
+    // ── La geometría de la fila ───────────────────────────────────────────
+    //
+    // La grilla NO es uniforme: la celda activa mide `activeW` y las demás
+    // `idleW`, y esa diferencia es el gesto de la sección. Lo fue siempre en
+    // `CustomerStories`; lo que cambió es de quién es el ancho. Antes la celda
+    // era fija y la card de adentro ocupaba el 62% de ella, alineada al borde
+    // interno — o sea que cada vecina cargaba un hueco del 38% escondido hacia
+    // afuera. En reposo eso cierra; durante el paso no, porque el borde de la
+    // card y el track viajan a distinta velocidad y el hueco entra en cuadro.
+    // Ahora encoge la CELDA y flex corre a las vecinas: el hueco no existe.
+    //
+    // `PressCarousel` no encoge nada, así que ahí `activeW === idleW` y todo
+    // esto se reduce a la grilla uniforme de antes. No hace falta un caso
+    // aparte.
+    let activeW = 0;
+    let idleW = 0;
+    let gap = 0;
 
     // offsetLeft/offsetWidth, no getBoundingClientRect(): el rect refleja
-    // cualquier transform de la celda, y acá la grilla es uniforme — todas
-    // las celdas miden y espacian igual, la diferencia activa/vecina es
-    // interna a la card, no de la celda. offsetWidth es el layout box.
+    // cualquier transform de la celda, y lo que hace falta es el layout box.
+    //
+    // Las transiciones se apagan para medir. Sin eso, medir a mitad de un paso
+    // devuelve anchos EN TRÁNSITO —la activa a medio encoger, la entrante a
+    // medio crecer— y la fila entera queda calibrada contra un estado que no
+    // existe en reposo. Apagarlas hace que el ancho salte a su valor de
+    // destino, que es el que la fórmula necesita. Se restauran después: como
+    // el cambio ya se aplicó sin transición, restaurarlas no dispara nada.
+    //
+    // Va inline y no por una clase del consumidor a propósito: esto es del
+    // motor, y un hook que depende de que su consumidor recuerde declarar una
+    // clase se rompe en silencio en el segundo consumidor.
     function measure() {
-      const a = cells[0].offsetLeft;
-      const b = cells[1]?.offsetLeft ?? a;
-      stepW = b - a;
+      const restore = cells.map((cell) => cell.style.transition);
+      cells.forEach((cell) => {
+        cell.style.transition = "none";
+      });
+      void container.offsetWidth; // fuerza el reflow con las transiciones apagadas
+
+      const active = cells.find((c) => c.dataset.active === "true") ?? cells[0];
+      const idle = cells.find((c) => c.dataset.active !== "true") ?? cells[0];
+      activeW = active.offsetWidth;
+      idleW = idle.offsetWidth;
+      gap = cells[1] ? cells[1].offsetLeft - cells[0].offsetLeft - cells[0].offsetWidth : 0;
+
+      cells.forEach((cell, i) => {
+        cell.style.transition = restore[i];
+      });
+    }
+
+    /**
+     * Cuántas celdas a tamaño ACTIVO quedan a la izquierda de `pos`.
+     *
+     * No es siempre cero, y ese descuido costó que la card destacada apareciera
+     * ~`activeW - idleW` corrida a la derecha —384px a tamaño máximo— saliéndose
+     * del viewport hasta que el siguiente reposicionamiento la acomodaba.
+     *
+     * `paint()` marca `data-active` en TODAS las celdas con el mismo `logical`,
+     * o sea una por copia, y tiene que hacerlo: el loop salta entre copias en
+     * `settle()` y ese salto solo es invisible si las tres son pixel-idénticas.
+     * Así que a la izquierda de la copia central siempre hay al menos una celda
+     * ancha, y la cuenta cambia según a qué copia apunte `pos`.
+     */
+    function activesBefore(pos: number, norm: number) {
+      let n = 0;
+      for (let c = 0; c < COPIES; c++) if (N * c + norm < pos) n++;
+      return n;
+    }
+
+    /** Borde izquierdo de la celda ABSOLUTA `pos`, con `norm` al frente. */
+    function leftOf(pos: number, norm: number) {
+      return pos * (idleW + gap) + activesBefore(pos, norm) * (activeW - idleW);
     }
 
     // x para que la celda ABSOLUTA `pos` quede centrada en el viewport.
-    function xFor(pos: number) {
+    //
+    // Todo se calcula, no se lee del DOM, y eso importa más de lo que parece:
+    // durante el paso los anchos están cambiando, así que un `offsetLeft` leído
+    // a mitad de vuelo daría un destino que se mueve solo.
+    //
+    // Y la fórmula tiene una propiedad que es la que hace que todo cierre: si se
+    // desarrolla el centro real de la celda entrante en función del progreso
+    // `q`, sale `C ± (activeW - idleW) * q / 2` — LINEAL en q. O sea que animar
+    // `x` linealmente entre el x de origen y el de destino coincide exactamente
+    // con el centro real en todo instante, siempre que el ancho de las celdas
+    // interpole con la misma curva y la misma duración. De eso se encargan
+    // `--step` y `--step-ease`, que salen de acá mismo.
+    function xFor(pos: number, norm: number) {
       const vw = container.getBoundingClientRect().width;
-      const cardW = cells[0].offsetWidth;
-      return vw / 2 - (pos * stepW + cardW / 2);
+      return vw / 2 - (leftOf(pos, norm) + activeW / 2);
+    }
+
+    /**
+     * La inversa de `xFor`, redondeada a la celda más cercana. Para el drag.
+     *
+     * No se despeja de una: `activesBefore` es escalonada, así que `pos` aparece
+     * a los dos lados de la ecuación. Se prueban las tres cuentas posibles —hay
+     * tres copias, así que no puede haber más— y gana la que es consistente
+     * consigo misma. Con celdas uniformes (`PressCarousel`) el término se anula
+     * y acierta en la primera vuelta.
+     */
+    function posFor(x: number, norm: number) {
+      const vw = container.getBoundingClientRect().width;
+      const rhs = vw / 2 - x - activeW / 2;
+      const delta = activeW - idleW;
+      let pos = 0;
+      for (let a = 0; a <= COPIES; a++) {
+        pos = Math.round((rhs - a * delta) / (idleW + gap));
+        if (activesBefore(pos, norm) === a) return pos;
+      }
+      return pos;
     }
 
     const absPos = (i: number) => N + i; // copia central
@@ -170,13 +263,16 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
 
     function goTo(i: number, immediate = false) {
       tweenRef.current?.kill();
-      const target = xFor(absPos(i));
+      // El `norm` de DESTINO, no el actual: es el que va a estar pintado cuando
+      // el layout se asiente, y por lo tanto el que decide dónde quedan las
+      // celdas anchas que `xFor` tiene que saltear.
+      const norm = ((i % N) + N) % N;
+      const target = xFor(absPos(i), norm);
 
       function settle() {
-        const norm = ((i % N) + N) % N;
         if (norm !== i) {
           indexRef.current = norm;
-          gsap.set(track, { x: xFor(absPos(norm)) });
+          gsap.set(track, { x: xFor(absPos(norm), norm) });
         } else {
           indexRef.current = i;
         }
@@ -188,7 +284,21 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
         gsap.set(track, { x: target });
         settle();
       } else {
-        paint(((i % N) + N) % N);
+        paint(norm);
+        // `setIndex` ACÁ y no solo en `settle`, y esto era un bug de verdad.
+        //
+        // `paint` escribe `data-active` directo en el DOM; `index` es estado de
+        // React. Mientras el segundo se actualizara recién al terminar el tween,
+        // los dos vivían desincronizados 1.75s enteros — y todo lo que el
+        // consumidor derive de `index` quedaba pintando el paso ANTERIOR: el
+        // subrayado del logo activo se quedaba en el logo viejo y saltaba al
+        // final, y en `CustomerStories` la alineación de cada card salía del
+        // índice equivocado, lo que en saltos de más de una card dejaba un hueco
+        // enorme a los dos lados de la activa.
+        //
+        // El re-render no interrumpe el tween: React no toca el `transform` del
+        // track, que es inline y de GSAP.
+        setIndex(norm);
         tweenRef.current = gsap.to(track, {
           x: target,
           duration: STEP_SECONDS,
@@ -233,8 +343,9 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     goTo(0, true);
     startTimer();
 
-    // Reposicionar tras un cambio de breakpoint o de fuente: --card-w/--gap
-    // cambian de ancho, así que stepW/cardW quedan viejos si no se remide.
+    // Reposicionar tras un cambio de breakpoint o de fuente: los anchos de celda
+    // son clamps contra el viewport, así que `activeW`/`idleW`/`gap` quedan
+    // viejos si no se remide.
     let resizeId: ReturnType<typeof setTimeout> | undefined;
     const onResize = () => {
       clearTimeout(resizeId);
@@ -327,13 +438,17 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
         self.event?.preventDefault?.();
         const dx = (self.x ?? 0) - (self.startX ?? 0);
         if (Math.abs(dx) > CLICK_GUARD_PX) draggedRef.current = true;
-        const x = pressX + dx;
-        gsap.set(track, { x });
+        gsap.set(track, { x: pressX + dx });
 
-        const cardW = cells[0].offsetWidth;
-        const vw = container.getBoundingClientRect().width;
-        const pos = Math.round((vw / 2 - x - cardW / 2) / stepW);
-        paint((((pos - N) % N) + N) % N);
+        // Acá había un `paint()` por frame, para adelantar cuál iba a quedar al
+        // frente. Se fue cuando el ancho de la celda pasó a depender de
+        // `data-active`: repintarlo mientras el dedo arrastra reacomoda la fila
+        // ENTERA —la celda entrante crece, todas las siguientes se corren— y el
+        // contenido se escapa de debajo del dedo. Mientras el atributo solo
+        // cambiaba el interior de una card, esto no se notaba.
+        //
+        // El destino se pinta al soltar, en el `goTo` de `onRelease`, y ahí el
+        // ancho y el track viajan juntos con la misma curva.
       },
       onRelease: (self) => {
         container.classList.replace("cursor-grabbing", "cursor-grab");
@@ -341,11 +456,11 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
           resume();
           return;
         }
+        // `indexRef.current` como `norm`: durante el drag el estado activo no
+        // cambia —ver la nota del `onDrag`— así que el layout que se está
+        // midiendo es el que corresponde al índice vigente.
         const x = Number(gsap.getProperty(track, "x"));
-        const cardW = cells[0].offsetWidth;
-        const vw = container.getBoundingClientRect().width;
-        const pos = Math.round((vw / 2 - x - cardW / 2) / stepW);
-        goTo(pos - N);
+        goTo(posFor(x, indexRef.current) - N);
         resume();
       },
     };

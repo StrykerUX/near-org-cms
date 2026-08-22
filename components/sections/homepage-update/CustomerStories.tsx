@@ -35,7 +35,18 @@ export default function CustomerStories() {
       // transiciones CSS de las cards los consumen, así que el tamaño de la
       // card y el desplazamiento del track salen del MISMO reloj y la MISMA
       // curva. Ver la nota larga de `STEP_SECONDS` en useLoopCarousel.
-      style={stepStyle}
+      style={{
+        ...stepStyle,
+        // El ancho de una celda al frente, y cuánto queda cuando no lo está.
+        //
+        // Van como custom properties y no sueltos en la clase porque el ancho
+        // encogido se DERIVA del otro (`calc(var(--cell-w) * var(--cell-idle))`)
+        // y los dos tienen que salir del mismo lugar: si el clamp y su fracción
+        // viven en clases separadas, la primera vez que alguien mueva el clamp
+        // se olvida de la otra y la fila queda descalibrada sin síntoma obvio.
+        "--cell-w": "clamp(300px, 62vw, 1010px)",
+        "--cell-idle": "0.62",
+      } as React.CSSProperties}
       className="overflow-hidden bg-cream py-[clamp(40px,7vh,96px)] text-foreground"
       aria-roledescription="carousel"
       aria-label="What the world is building on NEAR"
@@ -57,28 +68,50 @@ export default function CustomerStories() {
             const delta = (((logical - index) % N) + N) % N;
             const distance = Math.min(delta, N - delta);
             const eager = !hidden && distance <= 1;
-            // La celda NUNCA cambia de tamaño (grilla uniforme, que es lo que
-            // el motor mide) — la card de adentro sí, y se pega al borde
-            // INTERNO de su celda: la vecina que va DESPUÉS de la activa se
-            // pega a la izquierda de su celda, mirando hacia la activa; la que
-            // va ANTES se pega a la derecha. El hueco queda del lado externo,
-            // hacia el borde de pantalla, donde no se ve.
-            const isAfterActive = delta !== 0 && delta <= N / 2;
 
             return (
+              // La que cambia de ancho es la CELDA, no la card de adentro.
+              //
+              // Fue al revés hasta el 2026-08-22: celda de ancho fijo, card al
+              // 62% de ella, alineada al borde interno de su celda para que el
+              // 38% sobrante quedara hacia el borde de pantalla. En reposo eso
+              // cierra. Durante el paso no: el borde de la card se desplaza a
+              // distinta velocidad que el track, así que el hueco entra en cuadro
+              // y se abre hasta ~200px de crema entre dos cards. Y en los saltos
+              // de más de una card el efecto era peor, porque la alineación se
+              // calculaba contra un `index` que no se actualizaba hasta terminar
+              // el paso — las dos vecinas se pegaban al borde equivocado y el
+              // hueco aparecía a los dos lados de la activa.
+              //
+              // Encogiendo la celda, flex corre a las vecinas y el hueco no
+              // existe en ningún instante. `data-active` es lo único que lo
+              // gobierna, y sale del mismo sitio que el `paint()` del motor.
+              //
+              // `flex-[0_0_auto]` en vez de una base: el ancho lo pone `width`,
+              // que es lo que transiciona. Una `flex-basis` animada obliga al
+              // padre a repartir en cada frame.
               <div
                 key={key}
                 data-cell
                 data-logical={logical}
-                data-active={logical === 0}
+                // `logical === index` y no `logical === 0`: React tiene que
+                // coincidir con lo que `paint()` escribe, o el primer re-render
+                // a mitad de paso pisa el atributo y devuelve la fila al estado
+                // inicial. Con el `setIndex` temprano del motor, los dos dicen lo
+                // mismo desde el primer frame.
+                data-active={logical === index}
                 aria-hidden={hidden || undefined}
-                className={`group flex min-h-0 flex-[0_0_min(84vw,460px)] items-end lg:min-h-[clamp(260px,30vw,495px)] lg:flex-[0_0_clamp(300px,62vw,1010px)] ${isAfterActive ? "lg:justify-start" : "lg:justify-end"}`}
+                className="group flex min-h-0 w-[min(84vw,460px)] flex-[0_0_auto] items-end transition-[width] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:transition-none lg:min-h-[clamp(260px,30vw,495px)] lg:w-[var(--cell-w)] lg:data-[active=false]:w-[calc(var(--cell-w)*var(--cell-idle))]"
               >
                 {/* Las transiciones toman su duración y su curva de las vars de
                     la sección, no de números propios. Antes eran 550ms con otra
                     cubic-bezier mientras el track tardaba 850ms con otra curva
                     más, y ese desfase era el movimiento "en dos tiempos". */}
-                <article className="grid h-full w-full grid-cols-1 overflow-hidden rounded-[18px] bg-ink-soft text-cream transition-[width,height,opacity] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:h-full! motion-reduce:w-full! motion-reduce:opacity-100! motion-reduce:transition-none! group-data-[active=false]:opacity-60 lg:grid-cols-[1fr_.78fr] lg:group-data-[active=false]:h-[62%] lg:group-data-[active=false]:w-[62%] lg:group-data-[active=false]:opacity-[.55] lg:group-data-[active=true]:opacity-100">
+                {/* La card llena su celda SIEMPRE. El ancho lo maneja la celda
+                    —ver su nota— y acá quedan el alto y la opacidad, que no
+                    generan hueco horizontal: el alto lo absorbe el `items-end`
+                    de la celda y la card inactiva se apoya abajo. */}
+                <article className="grid h-full w-full grid-cols-1 overflow-hidden rounded-[18px] bg-ink-soft text-cream transition-[height,opacity] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:h-full! motion-reduce:opacity-100! motion-reduce:transition-none! group-data-[active=false]:opacity-60 lg:grid-cols-[1fr_.78fr] lg:group-data-[active=false]:h-[62%] lg:group-data-[active=false]:opacity-[.55] lg:group-data-[active=true]:opacity-100">
                   <div className="flex flex-col p-[clamp(20px,2.4vw,44px)]">
                     {/* Gov. of Bermuda no tiene logotipo en el contenido, y su
                         `logo` es `null` a propósito. El fallback es el nombre en

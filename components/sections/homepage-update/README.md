@@ -251,6 +251,65 @@ gradiente de la marca con texto negro. Blanco sobre ese verde da ~2.1:1 y no pas
 AA ni para texto grande; negro sobre el gradiente da ~9:1 en su punto más oscuro.
 Se tocó el primitivo directamente porque esta sección es su único consumidor.
 
+### `CustomerStories` — el ancho pasa de la card a la celda (2026-08-22)
+
+Refactor del modelo de layout del carrusel, motivado por dos bugs visuales que
+tenían la misma raíz.
+
+**Antes:** celda de ancho fijo, card al 62% de ella, alineada al borde interno
+para que el 38% sobrante quedara escondido hacia el borde de pantalla. **Ahora:**
+encoge la CELDA y flex corre a las vecinas. El hueco no existe, no está escondido
+en otro lado.
+
+**Los tres bugs, y por qué eran el mismo problema:**
+
+1. *Hueco al saltar más de una card.* `isAfterActive` (de qué lado se pega la
+   card) se calculaba en el render de React a partir de `index`, que solo se
+   actualizaba en `settle()` — o sea al TERMINAR el tween, 1.75s después de que
+   `paint()` ya había movido `data-active` en el DOM. Con saltos de 3+, las dos
+   vecinas de la nueva activa se pegaban al borde equivocado y el hueco de ~384px
+   aparecía a los dos lados.
+2. *Hueco durante la transición.* Estructural: el borde de la card y el track
+   viajan a distinta velocidad, así que a mitad de paso el hueco entra en cuadro
+   y se abre hasta ~200px de crema.
+3. *El subrayado del logo activo* se quedaba 1.75s en el logo viejo y saltaba al
+   final. Mismo desfase `paint()` / `index`.
+
+Encoger la celda mata el 1 y el 2 (ya no hay hueco ni `isAfterActive`), y mover
+`setIndex` al INICIO del tween mata el 3.
+
+**Lo que el refactor obligó a cambiar en el motor** (`useLoopCarousel.ts`):
+
+- **`stepW` no existe más.** La fila dejó de ser uniforme, así que la distancia
+  entre celdas ya no es constante. En su lugar hay geometría analítica:
+  `xFor(pos, norm) = vw/2 − (leftOf(pos, norm) + activeW/2)`.
+- **Se calcula, no se lee del DOM.** Durante el paso los anchos están cambiando,
+  y un `offsetLeft` leído a mitad de vuelo daría un destino que se mueve solo.
+- **Por qué la animación lineal coincide:** desarrollando el centro real de la
+  celda entrante en función del progreso `q` sale `C ± (activeW − idleW)·q/2` —
+  lineal en q. Animar `x` linealmente coincide EXACTAMENTE con el centro real en
+  todo instante, siempre que los anchos interpolen con la misma curva y duración.
+  De eso ya se encargaban `--step` y `--step-ease`.
+- **`activesBefore()`, y no es un detalle.** `paint()` marca `data-active` en las
+  TRES copias del loop —tiene que hacerlo, o el salto de `settle()` se vería— así
+  que a la izquierda de la celda destino siempre hay al menos una celda a tamaño
+  activo. Contarlas como encogidas corría la card destacada `activeW − idleW`
+  (~384px) a la derecha, saliéndose del viewport.
+- **`posFor()` prueba las tres cuentas.** `activesBefore` es escalonada, así que
+  `pos` aparece a los dos lados de la ecuación y no se despeja de una. Con celdas
+  uniformes (`PressCarousel`) el término se anula y acierta en la primera vuelta.
+- **`measure()` apaga las transiciones para leer.** Medir a mitad de un paso
+  devuelve anchos EN TRÁNSITO y calibra la fila contra un estado que no existe en
+  reposo. Va inline y no por una clase del consumidor: un hook que depende de que
+  su consumidor recuerde declarar una clase se rompe en silencio en el segundo.
+- **Se fue el `paint()` por frame del drag.** Ahora `data-active` mueve el
+  layout, así que repintarlo mientras el dedo arrastra reacomoda la fila entera y
+  el contenido se escapa de debajo del dedo.
+
+`PressCarousel` usa el mismo motor y no encoge nada, así que ahí
+`activeW === idleW` y todo se reduce a la grilla uniforme de antes. Sin caso
+especial.
+
 ## Lo que NO se forkeó
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del
