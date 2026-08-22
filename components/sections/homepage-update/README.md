@@ -345,6 +345,75 @@ logo activo. La de la celda es la que *tiene* que compartirla: la fórmula del
 centrado solo coincide con el layout real si el ancho y el `x` interpolan con la
 misma curva y duración.
 
+### El loop del carrusel: rebase antes del viaje (2026-08-22)
+
+Se veía el final del track en blanco y, un par de segundos después, aparecían
+cards de golpe. Y el drag "funcionaba hacia un lado y hacia el otro a veces".
+
+**Era el mismo bug.** El motor sabía saltar de copia —`settle()` lo hacía, porque
+las tres copias son pixel-idénticas— pero lo hacía **tarde**: el tween viajaba a
+`absPos(i)` con el `i` crudo, que con `i` fuera de `[0, N)` cae cerca del borde de
+las tres copias.
+
+```
+PressCarousel: N=5, COPIES=3 → 15 celdas, activa en absPos(i) = 5 + i
+drag de 3 celdas desde index 4:
+  i   = 7  →  pos = 12 de 15  →  2 celdas a la derecha  →  borde visible
+  settle() corrige recién al terminar el tween
+```
+
+Y la asimetría del drag es medible: desde `absPos(i)` quedan `N + i` celdas a la
+izquierda y `2N − i − 1` a la derecha. Con N=5 e i=4 son **9 contra 5** — por eso
+dependía de en qué card estuvieras.
+
+**Los cuatro arreglos, todos en el hook:**
+
+1. **Rebase antes del tween.** El destino es siempre la copia central; lo que se
+   corre es el punto de partida. `k = floor(absPos(i)/N) − 1` sale de `absPos(i)`
+   y no del camino más corto, a propósito: preserva la DIRECCIÓN y la DISTANCIA
+   que pidió el llamador. Avanzar +1 desde la última va una celda hacia adelante,
+   no rebobina N−1.
+2. **Rebase en vivo durante el drag.** Al alejarse más de media copia del centro,
+   se corre una copia entera — y `pressX` se corre CON él. Esa segunda parte es la
+   que importa: es la referencia contra la que se suma `dx`, y dejarla atrás haría
+   saltar el contenido bajo el dedo en el frame siguiente.
+3. **`dragMinimum`.** `lockAxis` decide el eje con el primer movimiento y todo lo
+   que no sea `"x"` se descarta; con el default de 0px, un arrastre que arranca
+   con dos píxeles verticales —normal en trackpad— quedaba marcado como `"y"` y se
+   ignoraba entero.
+4. **`posFor` con fallback seguro.** Si ninguna cuenta de `activesBefore`
+   converge, cae en la del estado actual en vez del último intento del bucle.
+   Error máximo: una celda, contra una copia entera.
+
+Todo se apoya en **`copyShift()`**, que sale de `leftOf`: al avanzar N posiciones
+el término lineal suma `N·(idleW + gap)` y `activesBefore` sube exactamente en 1,
+así que la diferencia es CONSTANTE. Eso es lo que permite saltar de copia con una
+suma. `settle()` quedó reducido a fijar el índice: ya no tiene nada que corregir.
+
+**Sobre el término extra del rebase.** En el caso rebasado el delta de `x` incluye
+un `(activeW − idleW)` de más, y es correcto: al cambiar `norm`, la celda ancha se
+muda de copia y eso reacomoda el layout fuera de pantalla. El track compensa ese
+reacomodo, y lo que se ve en el centro se mueve exactamente `idleW + gap`.
+
+### El autoplay: 5s, y un cooldown al interactuar (2026-08-22)
+
+`AUTOPLAY_MS` bajó de 7000 a **5000**. Sale del contenido: las cards llevan 25–40
+palabras, que a velocidad de escaneo en pantalla son ~4–5s. Siete segundos es
+tiempo de presentación, no de carrusel — alcanza para leer y también para
+olvidarse de que se mueve, que es lo peor de los dos mundos.
+
+`AUTOPLAY_ENGAGED_MS = 15000` rige en cuanto el lector navega a propósito: drag,
+flechas o click en un logo. Es permanente dentro de la vida del componente, no un
+respiro único, porque quien tomó el control una vez lo va a querer de nuevo.
+
+Dos cosas que deliberadamente NO lo disparan: el **hover**, que ya pausa por su
+cuenta y volver a acelerar al salir sería castigar pasar el mouse por encima; y un
+**press sin movimiento**, porque un click en una card no es navegar el carrusel.
+
+Nota de accesibilidad: los dos valores cruzan los 5s del criterio WCAG 2.2.2
+(Pause, Stop, Hide). El mecanismo de pausa son el hover y el foco de teclado, que
+pausan de verdad. Un control explícito sería mejor.
+
 ## Lo que NO se forkeó
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del

@@ -32,8 +32,31 @@ import { MQ } from "@/components/primitives/motion/motionTokens";
 
 const COPIES = 3;
 
-/** Espera entre pasos del autoplay. */
-const AUTOPLAY_MS = 7000;
+/**
+ * Espera entre pasos del autoplay, y la espera MÁS LARGA que rige una vez que el
+ * lector tocó el carrusel.
+ *
+ * Los 5s salen del contenido, no de una cifra redonda: las cards llevan entre 25
+ * y 40 palabras, que a velocidad de escaneo en pantalla son unos 4–5 segundos.
+ * Estuvo en 7s, que es tiempo de presentación y no de carrusel — alcanza para
+ * leer y también para olvidarse de que la cosa se mueve, que es lo peor de los
+ * dos mundos: el paso llega cuando el lector ya se fue a otra parte de la página
+ * y lo que hace es distraerlo.
+ *
+ * El segundo número es la parte que importa. En cuanto alguien arrastra, usa las
+ * flechas o elige una card, el autoplay deja de ser una sugerencia y pasa a ser
+ * una interrupción: el lector ya dijo qué quería ver. Triplicar la espera lo
+ * deja seguir a su ritmo sin apagar del todo el recorrido — y es permanente
+ * dentro de la vida del componente, no un respiro único, porque quien tomó el
+ * control una vez lo va a querer de nuevo.
+ *
+ * Nota de accesibilidad: cualquiera de los dos cruza los 5s del criterio WCAG
+ * 2.2.2 (Pause, Stop, Hide), que pide un mecanismo para detener el movimiento.
+ * Acá ese mecanismo son el hover y el foco de teclado, que pausan de verdad —
+ * ver `startTimer`. Un control explícito de pausa sería mejor todavía.
+ */
+const AUTOPLAY_MS = 5000;
+const AUTOPLAY_ENGAGED_MS = 15000;
 
 /**
  * Duración de UN paso, en segundos. Es la fuente de verdad única del gesto.
@@ -153,6 +176,11 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     const focusRef = { current: false };
     const inViewRef = { current: true };
     const draggedRef = { current: false };
+    // Se enciende cuando el lector NAVEGA a propósito —drag, flechas, click en un
+    // logo— y no vuelve a apagarse. El hover no cuenta: ese ya pausa por su
+    // cuenta y volver a acelerar al salir sería castigar el simple hecho de
+    // pasar el mouse por encima.
+    const engagedRef = { current: false };
     const tweenRef: { current: gsap.core.Tween | null } = { current: null };
     const timerRef: { current: ReturnType<typeof gsap.delayedCall> | null } = { current: null };
 
@@ -248,6 +276,20 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     }
 
     /**
+     * Cuánto `x` vale UNA copia completa de la lista.
+     *
+     * Es la pieza que hace posible el rebase, y sale de `leftOf`: al avanzar N
+     * posiciones el término lineal suma `N * (idleW + gap)` y `activesBefore`
+     * sube exactamente en 1 —una copia más de la celda ancha queda atrás—, así
+     * que la diferencia es CONSTANTE y no depende de dónde estés. Eso es lo que
+     * permite saltar de copia con una suma, sin recalcular nada y sin que se
+     * note: el contenido a `x` y a `x ± copyShift()` es idéntico píxel a píxel.
+     */
+    function copyShift() {
+      return N * (idleW + gap) + (activeW - idleW);
+    }
+
+    /**
      * La inversa de `xFor`, redondeada a la celda más cercana. Para el drag.
      *
      * No se despeja de una: `activesBefore` es escalonada, así que `pos` aparece
@@ -260,12 +302,15 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
       const vw = container.getBoundingClientRect().width;
       const rhs = vw / 2 - x - activeW / 2;
       const delta = activeW - idleW;
-      let pos = 0;
       for (let a = 0; a <= COPIES; a++) {
-        pos = Math.round((rhs - a * delta) / (idleW + gap));
+        const pos = Math.round((rhs - a * delta) / (idleW + gap));
         if (activesBefore(pos, norm) === a) return pos;
       }
-      return pos;
+      // Sin solución consistente —puede pasar justo en el borde entre dos
+      // cuentas— cae en la del estado ACTUAL en vez de en el último intento del
+      // bucle, que es el más alejado y el que peor aproxima. Así el error máximo
+      // es de una celda; con el último intento podía ser de una copia entera.
+      return Math.round((rhs - activesBefore(absPos(norm), norm) * delta) / (idleW + gap));
     }
 
     const absPos = (i: number) => N + i; // copia central
@@ -284,7 +329,8 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     function startTimer() {
       pause();
       if (!motionOkRef.current || hoverRef.current || focusRef.current || !inViewRef.current) return;
-      timerRef.current = gsap.delayedCall(AUTOPLAY_MS / 1000, () => {
+      const wait = engagedRef.current ? AUTOPLAY_ENGAGED_MS : AUTOPLAY_MS;
+      timerRef.current = gsap.delayedCall(wait / 1000, () => {
         goTo(indexRef.current + 1);
         startTimer();
       });
@@ -299,23 +345,42 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
       // el layout se asiente, y por lo tanto el que decide dónde quedan las
       // celdas anchas que `xFor` tiene que saltear.
       const norm = ((i % N) + N) % N;
-      const target = xFor(absPos(i), norm);
+
+      // ── Rebase: el salto de copia va ANTES del viaje, no después ──────────
+      //
+      // Este mecanismo ya existía —`settle()` saltaba de copia al terminar el
+      // tween— y ahí estaba el bug: mientras el tween corría, el track viajaba a
+      // `absPos(i)` con el `i` CRUDO, que con `i` fuera de [0, N) cae cerca del
+      // borde de las tres copias. Con N=5 y un drag de tres celdas desde el
+      // índice 4, el destino era la celda 12 de 15: quedaban dos celdas a la
+      // derecha del centro y se veía el final del track en blanco. La corrección
+      // llegaba recién al completar el paso, y por eso las cards "aparecían de
+      // golpe" un par de segundos después.
+      //
+      // Ahora el destino es SIEMPRE la copia central (`absPos(norm)`), y lo que
+      // se corre es el punto de partida: el track salta `k` copias enteras antes
+      // de arrancar. El salto es invisible —las copias son idénticas— y deja el
+      // viaje con N celdas de margen a cada lado, mida lo que mida.
+      //
+      // `k` sale de `absPos(i)` y no del camino más corto a propósito: preserva
+      // la DIRECCIÓN y la DISTANCIA que pidió el llamador. Avanzar +1 desde la
+      // última tiene que ir hacia adelante una celda, no rebobinar N-1.
+      const target = xFor(absPos(norm), norm);
 
       function settle() {
-        if (norm !== i) {
-          indexRef.current = norm;
-          gsap.set(track, { x: xFor(absPos(norm), norm) });
-        } else {
-          indexRef.current = i;
-        }
-        setIndex(indexRef.current);
-        paint(indexRef.current);
+        indexRef.current = norm;
+        setIndex(norm);
+        paint(norm);
       }
 
       if (immediate || !motionOkRef.current) {
         gsap.set(track, { x: target });
         settle();
       } else {
+        const k = Math.floor(absPos(i) / N) - 1;
+        if (k !== 0) {
+          gsap.set(track, { x: Number(gsap.getProperty(track, "x")) + k * copyShift() });
+        }
         paint(norm);
         // `setIndex` ACÁ y no solo en `settle`, y esto era un bug de verdad.
         //
@@ -343,6 +408,7 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
 
     // Nav externa: camino más corto, no rebobina — igual que el prototipo.
     goToExternalRef.current = (target: number) => {
+      engagedRef.current = true;
       const total = N;
       let diff = ((target - indexRef.current + total) % total);
       if (diff > total / 2) diff -= total;
@@ -395,11 +461,13 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
         e.preventDefault();
+        engagedRef.current = true;
         pause();
         goTo(indexRef.current + 1);
         startTimer();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
+        engagedRef.current = true;
         pause();
         goTo(indexRef.current - 1);
         startTimer();
@@ -456,6 +524,15 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
       target: container,
       type: "touch,pointer",
       lockAxis: true,
+      // `lockAxis` decide el eje con el PRIMER movimiento, y tanto `onDrag` como
+      // `onRelease` descartan todo lo que no sea "x". Con el default de 0px, un
+      // arrastre que arranca con dos píxeles de componente vertical —cosa normal
+      // en trackpad— queda marcado como "y" y se ignora entero: el carrusel no
+      // responde y no hay nada que lo explique en pantalla.
+      //
+      // Con un mínimo, la decisión se toma sobre un vector ya formado. Es el
+      // mismo umbral que separa un click de un drag, y por el mismo motivo.
+      dragMinimum: CLICK_GUARD_PX,
       preventDefault: false,
       passive: false,
       onPress: () => {
@@ -470,7 +547,35 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
         self.event?.preventDefault?.();
         const dx = (self.x ?? 0) - (self.startX ?? 0);
         if (Math.abs(dx) > CLICK_GUARD_PX) draggedRef.current = true;
-        gsap.set(track, { x: pressX + dx });
+
+        // Rebase EN VIVO. Sin esto, arrastrar lo suficiente destapa el borde de
+        // las tres copias y se ve el final del track en blanco — y el margen es
+        // asimétrico, porque desde `absPos(i) = N + i` quedan `N + i` celdas a
+        // la izquierda y `2N - i - 1` a la derecha. Con N=5 e i=4 eso es 9 contra
+        // 5: por eso arrastrar hacia un lado "funcionaba" y hacia el otro no,
+        // según en qué card estuvieras.
+        //
+        // Cuando el track se aleja más de media copia del centro, se lo corre
+        // una copia entera. `pressX` se corre con él: es la referencia contra la
+        // que se suma `dx`, y dejarla atrás haría saltar el contenido bajo el
+        // dedo en el frame siguiente. Con las dos corridas juntas el arrastre es
+        // infinito de verdad, en las dos direcciones.
+        const shift = copyShift();
+        const centerX = xFor(absPos(indexRef.current), indexRef.current);
+        let x = pressX + dx;
+        if (shift > 0) {
+          // `if` y no `while`: un salto por frame alcanza —nadie arrastra una
+          // copia entera entre dos frames— y no hay forma de colgar el hilo si
+          // `shift` quedara mal medido.
+          if (centerX - x > shift / 2) {
+            x += shift;
+            pressX += shift;
+          } else if (x - centerX > shift / 2) {
+            x -= shift;
+            pressX -= shift;
+          }
+        }
+        gsap.set(track, { x });
 
         // Acá había un `paint()` por frame, para adelantar cuál iba a quedar al
         // frente. Se fue cuando el ancho de la celda pasó a depender de
@@ -491,6 +596,10 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
         // `indexRef.current` como `norm`: durante el drag el estado activo no
         // cambia —ver la nota del `onDrag`— así que el layout que se está
         // midiendo es el que corresponde al índice vigente.
+        // `draggedRef` y no el mero hecho de haber soltado: un press sin
+        // movimiento es un click, y un click en una card no es navegar el
+        // carrusel — no tiene por qué frenarle el paso.
+        if (draggedRef.current) engagedRef.current = true;
         const x = Number(gsap.getProperty(track, "x"));
         goTo(posFor(x, indexRef.current) - N);
         resume();
