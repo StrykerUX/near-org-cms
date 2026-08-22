@@ -43,7 +43,7 @@ const VARIANTS = [
     proof: "fuera · banda asomando",
     motion: "ninguno",
     thesis: "El hero mide 78svh y la banda de cifras asoma cortada por el borde.",
-    note: "El corte reemplaza a la flecha que rebota: no agrega un elemento para anunciar el contenido, deja que el contenido se anuncie.",
+    note: "ELEGIDA — es el hero de /prototype/protocol-a. El corte reemplaza a la flecha que rebota: no agrega un elemento para anunciar el contenido, deja que el contenido se anuncie.",
   },
   {
     id: "h5",
@@ -147,8 +147,8 @@ export default function ProtocolHeroesIndexView() {
           <Link href="/prototype/protocol-a" className="underline underline-offset-4">
             /prototype/protocol-a
           </Link>
-          , y su hero es una novena composición que no está en esta lista: titular a la izquierda
-          y las seis cifras abajo a la derecha, cada una con su regla. La página publicada hoy es{" "}
+          , y su hero es <strong>H4 · Cut</strong>, copiado de acá al elegirse — desde ese momento
+          deja de moverse con este laboratorio. La página publicada hoy es{" "}
           <code className="text-caption-mono">/blockchain</code>.
         </p>
       </Container>

@@ -6,7 +6,7 @@ import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import CtaPill from "@/components/sections/quantum/CtaPill";
-import ColumnRule from "@/components/sections/protocol-labs/a/ColumnRule";
+import ColumnRule from "@/components/sections/protocol-labs/ColumnRule";
 import { HERO, PROOF } from "@/components/sections/protocol-labs/protocolContent";
 
 // H8 · Terminal — prueba DENTRO, con movimiento continuo sobre el titular.

@@ -3,6 +3,24 @@
 Laboratorio de la sección 1. Índice en `/prototype/protocol-heroes`; cada
 variante en `/prototype/protocol-heroes/h1` … `h8`.
 
+## Elegida: H4 · Cut
+
+Está copiada en `../a/Hero.tsx` y desde ahí no se mueve con este laboratorio.
+
+**Dos cosas cambiaron al llevarla a la página**, y conviene saberlas antes de
+comparar esta ruta con `/prototype/protocol-a`:
+
+1. **El hero pasó a altura completa.** O sea que la página se quedó con la
+   composición de H4 —titular a la izquierda, cifras fuera— pero sin el corte que
+   le daba nombre. Se ganó presencia y consistencia con los heroes del resto del
+   sitio; se perdió la única variante que resolvía el paso al contenido sin un
+   elemento extra. La versión con el corte sigue viva acá.
+2. **La franja no es una sección aparte**: abre `ScaleClaim` con `proof="top"`,
+   porque la evidencia tiene que llegar antes que la explicación.
+
+El laboratorio se conserva: las otras siete siguen siendo las alternativas contra
+las que se decidió, y sirven si el corte no convence en pantalla.
+
 ## Qué se compara
 
 No "cuál se ve mejor". Tres decisiones, que cada variante toma distinto:
@@ -16,7 +34,7 @@ No "cuál se ve mejor". Tres decisiones, que cada variante toma distinto:
 | **H1 · Ledger** | Dentro, en columna | La afirmación | **Ninguno** — ni entrada |
 | **H2 · Count** | Dentro, marcador a sangre | La afirmación | Las cifras cuentan |
 | **H3 · Threshold** | **Fuera** — barra pegada bajo el nav | La afirmación | El hero se despide con el scroll |
-| **H4 · Cut** | **Fuera** — banda asomando por el corte | La afirmación | Ninguno |
+| **H4 · Cut** ✅ | **Fuera** — franja asomando por el corte | La afirmación | Ninguno |
 | **H5 · Index** | **Fuera** — banda | El índice de la página | El cubo se enciende al recorrer |
 | **H6 · Field** | Dentro, a los costados | La afirmación | El campo de shards, continuo |
 | **H7 · Mural** | **Fuera** — banda | **La categoría** | Ninguno |
@@ -64,9 +82,10 @@ es `band` — afinar el umbral no arregla un patrón que no cabe.
 
 Prototipos, **sin ver en navegador**. Lo que hay que verificar antes de elegir:
 
-- **H4** — el corte es un porcentaje (78svh), así que lo que asoma de la banda no
-  es lo mismo en un portátil que en un monitor. Si tiene que asomar siempre por
-  su primera línea, hay que medir contra el alto de la banda, y eso ya es JS.
+- **H4 (la elegida)** — el corte es un porcentaje (78svh), así que lo que asoma
+  de la franja no es lo mismo en un portátil de 800px que en un monitor de 1200.
+  Si tiene que asomar siempre por su primera línea de cifras, hay que medir
+  contra el alto real de la franja, y eso ya es JS. Es lo primero a mirar.
 - **H6** — si el campo con textura se come seis datos chicos. El velo de crema
   está calibrado para el titular, no para ellos.
 - **H8** — si gana, hay que rehacer el ritmo de la página entera: con el hero en

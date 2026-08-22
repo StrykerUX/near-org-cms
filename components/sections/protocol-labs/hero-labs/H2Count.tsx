@@ -5,6 +5,7 @@ import Container from "@/components/primitives/Container";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
+import { useCountUp } from "@/components/sections/protocol-labs/countUp";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { HERO, PROOF } from "@/components/sections/protocol-labs/protocolContent";
 
@@ -29,21 +30,16 @@ import { HERO, PROOF } from "@/components/sections/protocol-labs/protocolContent
 // segundo y medio, y con `prefers-reduced-motion` los números salen directamente
 // en su valor final — no hay una versión "suave", hay valor final.
 //
-// El detalle que lo hace legible y no un borrón: cada cifra conserva su prefijo,
-// su sufijo y su número de decimales durante toda la animación, así que el ancho
-// del texto no salta. Un contador que cambia de largo mientras corre arrastra a
-// sus vecinos y es lo que hace que el recurso se vea barato.
-
-/** Parte un valor en prefijo, número y sufijo: `"<$0.002"` → `["<$", 0.002, ""]`. */
-const parseStat = (value: string): [string, number, string, number] | null => {
-  const m = value.match(/^(\D*)([\d.]+)(.*)$/);
-  if (!m) return null;
-  const [, prefix, digits, suffix] = m;
-  const decimals = digits.includes(".") ? digits.split(".")[1].length : 0;
-  return [prefix, Number(digits), suffix, decimals];
-};
+// El mecanismo vive en `../countUp.ts` y no acá: nació en este archivo y salió
+// cuando las ocho franjas de `proof-labs/` lo necesitaron. Ahí está documentado
+// por qué conserva el formato y por qué reserva el ancho antes de contar.
+//
+// `immediate: true` porque este contador está sobre la línea de flotación: con
+// el trigger de viewport ya habría terminado antes de que el lector mire.
 
 export default function H2Count() {
+  const countRef = useCountUp<HTMLDListElement>({ immediate: true });
+
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
     const mm = gsap.matchMedia();
@@ -51,29 +47,6 @@ export default function H2Count() {
     mm.add(MQ.motion, () => {
       const tl = gsap.timeline({ defaults: { ease: EASE_OUT } });
       tl.from(q("[data-hero-item]"), { autoAlpha: 0, y: 22, duration: 0.9, stagger: 0.1 }, 0);
-
-      q("[data-count]").forEach((el, i) => {
-        const parsed = parseStat(el.dataset.count ?? "");
-        if (!parsed) return;
-        const [prefix, target, suffix, decimals] = parsed;
-        const counter = { n: 0 };
-        tl.to(
-          counter,
-          {
-            n: target,
-            duration: 1.4,
-            ease: "power2.out",
-            onUpdate: () => {
-              el.textContent = `${prefix}${counter.n.toFixed(decimals)}${suffix}`;
-            },
-          },
-          // Escalonadas pero solapadas: en secuencia estricta la última
-          // arrancaría casi un segundo después de la primera y la banda se leería
-          // como seis animaciones en vez de una.
-          0.35 + i * 0.08
-        );
-      });
-
       return () => tl.kill();
     });
 
@@ -105,7 +78,7 @@ export default function H2Count() {
           el filete. Seis cajas con borde completo serían seis cards. */}
       <div className="border-t border-ink">
         <Container>
-          <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+          <dl ref={countRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             {PROOF.map((stat) => (
               <div
                 key={stat.id}

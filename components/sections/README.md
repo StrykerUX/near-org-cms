@@ -66,6 +66,7 @@ dar por terminado un cambio.
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
 | `protocol-labs/a/*` | `ProtocolLabAView` | `/prototype/protocol-a` — la estructura elegida para la página de Protocol, salida de comparar cuatro. Tiene su propio [README](./protocol-labs/README.md) |
 | `protocol-labs/hero-labs/*` | `ProtocolHeroLabView` | `/prototype/protocol-heroes/h1…h8` — **laboratorio**: ocho variantes de la primera pantalla. Tiene su propio [README](./protocol-labs/hero-labs/README.md). Importa `shardField` de `protocol/`; **ninguna página real lo importa** |
+| `protocol-labs/proof-labs/*` | `ProtocolProofLabsView`, `ProtocolProofLabView` | `/prototype/protocol-proof` (+ `/p1…p8` en contexto) — **laboratorio**: ocho dividers para la juntura hero → contenido. Tiene su propio [README](./protocol-labs/proof-labs/README.md); su copy propuesta vive aparte de la transcripción del doc |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
@@ -73,8 +74,9 @@ son laboratorios y no se tocan a la ligera.
 
 ## Laboratorios
 
-Hay uno vivo: `protocol-labs/hero-labs/`, con ocho variantes de la primera
-pantalla de Protocol. La regla que gobierna a cualquiera: **un laboratorio
+Hay dos vivos: `protocol-labs/hero-labs/` (ocho variantes de la primera pantalla,
+ya decidida) y `protocol-labs/proof-labs/` (ocho tratamientos de la franja de
+prueba, sin decidir). La regla que gobierna a cualquiera: **un laboratorio
 alimenta una ruta de comparación, ninguna página real lo importa, y si una
 versión gana se COPIA** a la carpeta de la página que la reciba — no se importa
 desde ahí.

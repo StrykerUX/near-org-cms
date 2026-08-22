@@ -5,8 +5,12 @@ Dos cosas:
 - **`a/`** — la estructura elegida para `near.org/protocol`, en
   `/prototype/protocol-a`. Su razonamiento completo está en
   `components/views/ProtocolLabAView.tsx`.
-- **`hero-labs/`** — ocho variantes de la primera pantalla, en
-  `/prototype/protocol-heroes`. Tiene su propio [README](./hero-labs/README.md).
+- **`hero-labs/`** — las ocho variantes de la primera pantalla contra las que se
+  decidió, en `/prototype/protocol-heroes`. Ganó **H4 · Cut**, ya copiada en
+  `a/Hero.tsx`. Tiene su propio [README](./hero-labs/README.md).
+- **`proof-labs/`** — ocho dividers para la juntura entre el hero y el resto de
+  la página, en `/prototype/protocol-proof` (+ una ruta por variante, en
+  contexto). Sin decidir. Tiene su propio [README](./proof-labs/README.md).
 
 ## De dónde viene `a/`
 
@@ -64,8 +68,9 @@ propios sobre el eje isométrico del sitio.
 
 Lo que falta antes de que esto pueda pasar a página real:
 
-- **Elegir el hero.** Las ocho variantes de `hero-labs/` ponen a prueba la
-  primera pantalla, incluidas las que sacan las cifras de ahí.
+- **Verificar el asomo del hero.** Mide 78svh para que la franja de cifras
+  asome cortada por el borde inferior; a distintas alturas de pantalla no asoma
+  lo mismo. Es un porcentaje, no una medida contra la franja.
 - **Mirarla en el navegador a 390, 1024 y 1920.** Todas las mediciones de acá
   salieron de la escala del DS, no de una pantalla — que es exactamente cómo el
   primer hero de la página viva terminó métricamente correcto y visualmente

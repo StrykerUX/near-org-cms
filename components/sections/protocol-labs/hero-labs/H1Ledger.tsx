@@ -1,7 +1,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import CtaPill from "@/components/sections/quantum/CtaPill";
-import ColumnRule from "@/components/sections/protocol-labs/a/ColumnRule";
+import ColumnRule from "@/components/sections/protocol-labs/ColumnRule";
 import { HERO, PROOF } from "@/components/sections/protocol-labs/protocolContent";
 
 // H1 · Ledger — prueba DENTRO, sin movimiento.

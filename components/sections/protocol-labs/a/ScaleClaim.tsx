@@ -8,18 +8,28 @@ import { AI_SCALE, PROOF } from "@/components/sections/protocol-labs/protocolCon
 
 // Alternativa B · secciones 3 y 2, en ese orden.
 //
-// ── La prop `proof` ────────────────────────────────────────────────────────
+// ── La prop `proof`: dónde caen las seis cifras ───────────────────────────
 //
-// Enciende o apaga la banda de seis cifras. Existe por la alternativa D, que
-// monta esta sección detrás del hero de A — y ese hero YA presenta las seis
-// fundidas con el titular. Con la banda encendida, las mismas seis cifras
-// aparecerían dos pantallas seguidas y una tercera vez como telemetría del acto:
-// a la tercera dejan de leerse como prueba y pasan a leerse como relleno.
+// Tres valores, y ninguno es una preferencia visual — cada uno responde a qué
+// otra parte de la página se hace cargo de la evidencia:
 //
-// El default es `true` porque en B la banda es la ÚNICA aparición completa de
-// las seis antes del acto — apagarla ahí dejaría a quien no llega al acto sin
-// ver ninguna. O sea: la prop no es una preferencia visual, es qué otra sección
-// de la página se hace cargo de las cifras.
+//   · `"top"`    — la franja ABRE la sección. Es lo que la página usa hoy: el
+//                  hero afirma sin probar nada, así que la evidencia tiene que
+//                  ser lo primero que aparece al moverse — antes que las tres
+//                  propiedades, que son la explicación y no la prueba.
+//   · `"bottom"` — la franja CIERRA la sección, subordinada a las tres
+//                  propiedades. Para un hero que ya afirmó pero no probó nada.
+//   · `false`    — sin franja. Para un hero que ya trae las seis cifras adentro.
+//
+// El aire de arriba NO cambia con el valor, y eso es deliberado: la prop dice
+// dónde cae la franja, no cuánto respira la sección.
+//
+// Hubo una versión en que `"top"` recortaba el `pt` a un tercio, y tenía un
+// motivo concreto: el hero medía 78svh y la franja tenía que asomar cortada por
+// el borde inferior del viewport, así que cada píxel de padding la empujaba
+// fuera del asomo. Con el hero a pantalla completa ya no hay nada que asomar y
+// ese recorte solo dejaba la sección apretada contra el hero. Si alguna vez
+// vuelve un hero más corto que la pantalla, esto vuelve con él.
 //
 // ── Por qué la franja de prueba baja hasta acá y en este tamaño ───────────
 //
@@ -41,7 +51,30 @@ import { AI_SCALE, PROOF } from "@/components/sections/protocol-labs/protocolCon
 // para que las tres propiedades se lean como partes de la máquina que la página
 // va a mostrar, y no como tres bullets de marketing.
 
+export type ProofSlot = "top" | "bottom" | false;
+
 const iso = isoAt(16, 20);
+
+// La franja de seis cifras. Una sola regla arriba y nada más: seis reglas —una
+// por cifra— la convertirían en una tabla, y una tabla vuelve a subirle el rango
+// que esta sección le está bajando a propósito.
+//
+// Un componente y no dos bloques de JSX condicionados: arriba y abajo tiene que
+// ser la MISMA franja, o la prop deja de ser "dónde cae" y pasa a ser "cuál de
+// las dos versiones".
+function ProofStrip() {
+  return (
+    <dl className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-rule pt-6 sm:grid-cols-3 lg:grid-cols-6">
+      {PROOF.map((stat) => (
+        <div key={stat.id} className="flex flex-col gap-1">
+          <dd className="text-h4">{stat.value}</dd>
+          <dt className="uppercase text-micro-mono text-gray-intermediate">{stat.label}</dt>
+          {stat.note && <dd className="text-micro-mono text-gray-intermediate">{stat.note}</dd>}
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 function CubeBullet() {
   return (
@@ -51,12 +84,13 @@ function CubeBullet() {
   );
 }
 
-export default function ScaleClaim({ proof = true }: { proof?: boolean }) {
+export default function ScaleClaim({ proof = "bottom" }: { proof?: ProofSlot }) {
   const ref = useScrollReveal<HTMLDivElement>({ y: 20, stagger: 0.08 });
 
   return (
     <section className="bg-background text-foreground">
       <Container className="flex flex-col gap-16 py-28 lg:py-36">
+        {proof === "top" && <ProofStrip />}
         <div ref={ref} className="flex flex-col gap-12">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-24">
             <h2 data-reveal className="text-h2 text-pretty">
@@ -85,22 +119,7 @@ export default function ScaleClaim({ proof = true }: { proof?: boolean }) {
           </ul>
         </div>
 
-        {/* La banda de prueba. Una sola regla arriba y nada más: seis reglas
-            —una por cifra— la convertirían en una tabla, y una tabla acá vuelve
-            a subirle el rango que esta sección le está bajando a propósito. */}
-        {proof && (
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-rule pt-6 sm:grid-cols-3 lg:grid-cols-6">
-            {PROOF.map((stat) => (
-              <div key={stat.id} className="flex flex-col gap-1">
-                <dd className="text-h4">{stat.value}</dd>
-                <dt className="uppercase text-micro-mono text-gray-intermediate">{stat.label}</dt>
-                {stat.note && (
-                  <dd className="text-micro-mono text-gray-intermediate">{stat.note}</dd>
-                )}
-              </div>
-            ))}
-          </dl>
-        )}
+        {proof === "bottom" && <ProofStrip />}
       </Container>
     </section>
   );

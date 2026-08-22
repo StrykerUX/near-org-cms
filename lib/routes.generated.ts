@@ -35,10 +35,19 @@ import m28 from "@/app/prototype/protocol-heroes/h5/page.meta";
 import m29 from "@/app/prototype/protocol-heroes/h6/page.meta";
 import m30 from "@/app/prototype/protocol-heroes/h7/page.meta";
 import m31 from "@/app/prototype/protocol-heroes/h8/page.meta";
-import m32 from "@/app/(motion)/quantum-security/page.meta";
-import m33 from "@/app/(site)/research/page.meta";
-import m34 from "@/app/(site)/solutions/page.meta";
-import m35 from "@/app/(site)/terms-of-use/page.meta";
+import m32 from "@/app/prototype/protocol-proof/page.meta";
+import m33 from "@/app/prototype/protocol-proof/p1/page.meta";
+import m34 from "@/app/prototype/protocol-proof/p2/page.meta";
+import m35 from "@/app/prototype/protocol-proof/p3/page.meta";
+import m36 from "@/app/prototype/protocol-proof/p4/page.meta";
+import m37 from "@/app/prototype/protocol-proof/p5/page.meta";
+import m38 from "@/app/prototype/protocol-proof/p6/page.meta";
+import m39 from "@/app/prototype/protocol-proof/p7/page.meta";
+import m40 from "@/app/prototype/protocol-proof/p8/page.meta";
+import m41 from "@/app/(motion)/quantum-security/page.meta";
+import m42 from "@/app/(site)/research/page.meta";
+import m43 from "@/app/(site)/solutions/page.meta";
+import m44 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -73,8 +82,17 @@ export const ROUTES: RouteEntry[] = [
   { ...m29, route: "/prototype/protocol-heroes/h6", stub: false, file: "app/prototype/protocol-heroes/h6/page.meta.ts" },
   { ...m30, route: "/prototype/protocol-heroes/h7", stub: false, file: "app/prototype/protocol-heroes/h7/page.meta.ts" },
   { ...m31, route: "/prototype/protocol-heroes/h8", stub: false, file: "app/prototype/protocol-heroes/h8/page.meta.ts" },
-  { ...m32, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m33, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m34, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m35, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m32, route: "/prototype/protocol-proof", stub: false, file: "app/prototype/protocol-proof/page.meta.ts" },
+  { ...m33, route: "/prototype/protocol-proof/p1", stub: false, file: "app/prototype/protocol-proof/p1/page.meta.ts" },
+  { ...m34, route: "/prototype/protocol-proof/p2", stub: false, file: "app/prototype/protocol-proof/p2/page.meta.ts" },
+  { ...m35, route: "/prototype/protocol-proof/p3", stub: false, file: "app/prototype/protocol-proof/p3/page.meta.ts" },
+  { ...m36, route: "/prototype/protocol-proof/p4", stub: false, file: "app/prototype/protocol-proof/p4/page.meta.ts" },
+  { ...m37, route: "/prototype/protocol-proof/p5", stub: false, file: "app/prototype/protocol-proof/p5/page.meta.ts" },
+  { ...m38, route: "/prototype/protocol-proof/p6", stub: false, file: "app/prototype/protocol-proof/p6/page.meta.ts" },
+  { ...m39, route: "/prototype/protocol-proof/p7", stub: false, file: "app/prototype/protocol-proof/p7/page.meta.ts" },
+  { ...m40, route: "/prototype/protocol-proof/p8", stub: false, file: "app/prototype/protocol-proof/p8/page.meta.ts" },
+  { ...m41, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m42, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m43, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m44, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];

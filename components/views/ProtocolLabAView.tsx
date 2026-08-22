@@ -1,5 +1,5 @@
 import { GridOverlay } from "@/components/primitives/Grid";
-import DatasheetHero from "@/components/sections/protocol-labs/a/DatasheetHero";
+import Hero from "@/components/sections/protocol-labs/a/Hero";
 import ScaleClaim from "@/components/sections/protocol-labs/a/ScaleClaim";
 import Assembly from "@/components/sections/protocol-labs/a/Assembly";
 import DevRuntime from "@/components/sections/protocol-labs/a/DevRuntime";
@@ -20,18 +20,25 @@ import MachineClose from "@/components/sections/protocol-labs/a/MachineClose";
 //
 // ── La tesis ────────────────────────────────────────────────────────────────
 //
-// **Afirmar con datos, después demostrar.** El hero no separa la afirmación de
-// su prueba: el titular comparte pantalla con las seis cifras. Lo que sigue no
-// las repite — las explica, con un acto pegado donde una sola pieza isométrica
-// cambia de estado seis veces, una por capacidad del protocolo, y cada beat
-// muestra la cifra que sostiene.
+// **Afirmar, probar en el primer movimiento, después demostrar.** El hero
+// afirma y no argumenta: una pantalla completa con la frase, el cuerpo y la
+// salida, sin una sola cifra. La prueba llega entera al primer scroll, abriendo
+// la sección siguiente. Lo que viene después no la repite — la explica, con un
+// acto pegado donde una sola pieza isométrica cambia de estado seis veces, una
+// por capacidad del protocolo, y cada beat muestra la cifra que sostiene.
 //
 // La lectura que ofrece: primero por qué creerle, después cómo funciona.
 //
+// El hero salió de comparar ocho variantes en `/prototype/protocol-heroes` — era
+// la H4, "Cut", después llevada a altura completa (ver la nota en `a/Hero.tsx`
+// sobre qué se ganó y qué se dejó ir con ese cambio). Está copiado y no
+// importado desde el lab: desde que se eligió, deja de moverse con él.
+//
 // ── El ritmo ────────────────────────────────────────────────────────────────
 //
-//   hero            crema     titular + las seis cifras, retícula de 12 columnas
-//   propiedades     blanco    tres puntos con viñeta de cubo (banda apagada)
+//   hero            crema     pantalla completa, sin cifras
+//   propiedades     blanco    las seis cifras ARRIBA —la prueba primero— y
+//                             debajo los tres puntos con viñeta de cubo
 //   ACTO            INK       seis pantallas, panel pegado, un objeto que muta
 //   developers      crema     centrado — el corte contra el compás del acto
 //   ecosistema      blanco    tres columnas cortas, numeradas 11 / 12 / 13
@@ -41,29 +48,36 @@ import MachineClose from "@/components/sections/protocol-labs/a/MachineClose";
 // Claro · claro · OSCURO · claro · claro · claro · OSCURO. Nada fuerte sigue a
 // nada fuerte, que es la regla de ritmo que traen quantum y la página viva.
 //
-// ── `ScaleClaim` va con `proof={false}` ────────────────────────────────────
+// ── Por qué `ScaleClaim` va con `proof="top"` ─────────────────────────────
 //
-// Su banda de seis cifras queda apagada porque el hero ya las presenta y el acto
-// las reparte como telemetría: encendida, las mismas seis saldrían tres veces y
-// a la tercera dejarían de leerse como prueba. La prop existe por eso.
+// Porque el hero no prueba nada. Con la franja al pie de esa sección, el lector
+// atraviesa una pantalla de afirmación y otra de explicación antes de ver el
+// primer dato duro; arriba, la evidencia es lo primero que aparece al moverse.
+//
+// Es la mitad que le falta al hero, no una decisión de layout suya: si algún día
+// el hero vuelve a traer las seis cifras adentro, esto pasa a `false` en el
+// mismo cambio.
 //
 // ── Lo que sigue abierto ───────────────────────────────────────────────────
 //
-// 1. **El hero está en revisión.** Ocho variantes en `/prototype/protocol-heroes`
-//    ponen a prueba justamente esta composición, incluidas las que sacan las
-//    cifras del hero. Si gana otra, es la sección que cambia.
+// 1. **La primera pantalla ya no anuncia lo que sigue.** Era lo que hacía el
+//    hero recortado de H4, y se cambió por presencia y por consistencia con los
+//    heroes de altura completa del resto del sitio. Si el arranque se siente
+//    cerrado, es esto — y `hero-labs/H4Cut` conserva la versión con el corte.
 // 2. **Dos ejes de composición conviven.** El hero, el ecosistema y el apéndice
 //    alinean a la izquierda; developers y el cierre centran, y el cambio de eje
 //    cae justo después del acto. Puede leerse como el corte que el acto pedía o
 //    como dos plantillas pegadas.
-// 3. **La retícula aparece una sola vez.** `ColumnRule` firma el hero y no vuelve
-//    en el cierre.
+// 3. **La página se quedó sin retícula.** `ColumnRule` era la textura del hero
+//    anterior; el nuevo no la lleva, así que las doce columnas siguen gobernando
+//    el layout pero ya no se ven en ningún lado. O se acepta, o vuelve en alguna
+//    otra sección.
 export default function ProtocolLabAView() {
   return (
     <>
       <main>
-        <DatasheetHero />
-        <ScaleClaim proof={false} />
+        <Hero />
+        <ScaleClaim proof="top" />
         <Assembly />
         <DevRuntime />
         <Deployment />

@@ -1,4 +1,6 @@
-import ScaleClaim from "@/components/sections/protocol-labs/a/ScaleClaim";
+import ScaleClaim, {
+  type ProofSlot,
+} from "@/components/sections/protocol-labs/a/ScaleClaim";
 import ProofBand from "@/components/sections/protocol-labs/hero-labs/ProofBand";
 import H1Ledger from "@/components/sections/protocol-labs/hero-labs/H1Ledger";
 import H2Count from "@/components/sections/protocol-labs/hero-labs/H2Count";
@@ -33,34 +35,47 @@ import H8Terminal from "@/components/sections/protocol-labs/hero-labs/H8Terminal
 
 export type HeroLabId = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "h7" | "h8";
 
-// Dónde viven las cifras en cada variante, y qué banda le corresponde. `null`
-// significa que la variante las lleva DENTRO del hero y no monta banda.
+// Dónde viven las cifras en cada variante. Dos lugares posibles fuera del hero, y
+// no son intercambiables:
+//
+//   · `band`  — `ProofBand`, una sección propia entre el hero y el contenido.
+//   · `claim` — la franja ABRE `ScaleClaim`, o sea que no hay sección intermedia.
+//
+// H4 usa `claim` y las otras dos de "fuera" usan `band`, y la diferencia importa:
+// el hero de H4 mide 78svh para que la franja asome cortada por el borde del
+// viewport, y una sección intermedia con su propio padding la empuja fuera de
+// ese asomo. En H5 y H7 el hero llena la pantalla y no hay nada que asomar, así
+// que la banda puede ser su propia sección.
+//
+// `band: null` + `claim: false` significa que la variante lleva las seis cifras
+// DENTRO del hero.
 const STAGE: Record<
   HeroLabId,
-  { hero: () => React.ReactElement; band: "band" | "sticky" | null }
+  { hero: () => React.ReactElement; band: "band" | "sticky" | null; claim: ProofSlot }
 > = {
-  h1: { hero: H1Ledger, band: null },
-  h2: { hero: H2Count, band: null },
-  h3: { hero: H3Threshold, band: "sticky" },
-  h4: { hero: H4Cut, band: "band" },
-  h5: { hero: H5Index, band: "band" },
-  h6: { hero: H6Field, band: null },
-  h7: { hero: H7Mural, band: "band" },
-  h8: { hero: H8Terminal, band: null },
+  h1: { hero: H1Ledger, band: null, claim: false },
+  h2: { hero: H2Count, band: null, claim: false },
+  h3: { hero: H3Threshold, band: "sticky", claim: false },
+  h4: { hero: H4Cut, band: null, claim: "top" },
+  h5: { hero: H5Index, band: "band", claim: false },
+  h6: { hero: H6Field, band: null, claim: false },
+  h7: { hero: H7Mural, band: "band", claim: false },
+  h8: { hero: H8Terminal, band: null, claim: false },
 };
 
 export default function ProtocolHeroLabView({ id }: { id: HeroLabId }) {
-  const { hero: Hero, band } = STAGE[id];
+  const { hero: Hero, band, claim } = STAGE[id];
 
   return (
     <main>
       <Hero />
       {band && <ProofBand mode={band} />}
       {/* La sección que sigue en la página real. Va acá y no como decorado: es
-          contra ella que se mide si el hero cierra bien. `proof={false}` porque
-          las cifras ya aparecieron —dentro del hero o en la banda— y repetirlas
-          rompería la lectura que cada variante propone. */}
-      <ScaleClaim proof={false} />
+          contra ella que se mide si el hero cierra bien. Su `proof` es `false` en
+          todas las variantes salvo H4, porque en las demás las cifras ya
+          aparecieron —dentro del hero o en su banda— y repetirlas rompería la
+          lectura que cada una propone. */}
+      <ScaleClaim proof={claim} />
     </main>
   );
 }
