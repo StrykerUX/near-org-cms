@@ -16,8 +16,32 @@ mismo texto divergen en silencio.
 
 ## Lo que esta rama cambia
 
-Todavía nada — se documenta acá a medida que los cambios de layout y sticky
-entren.
+### `AgentEconomy` — del card negro al statement sobre crema (2026-08-22)
+
+El statement dejó de ser una caja negra flotando sobre el crema y pasó a ser
+tipografía apoyada sobre el mismo crema que traen las secciones vecinas, con el
+icono de NEAR abriendo la frase.
+
+Lo que cambió, y por qué no es el mismo componente repintado:
+
+- **Composición.** Antes: card `rounded-[32px]`, texto centrado, aire vertical
+  en `%` del ancho para conservar la proporción de la caja. Ahora: sin caja ni
+  fondo propio, el texto se alinea a la izquierda y el aire lo pone la sección.
+- **Anclaje del icono.** Va por `items-baseline`, no por `items-start`: una
+  imagen en flexbox no tiene baseline tipográfica, la suya es su borde inferior,
+  que es justo donde la referencia lo apoya (sobresale por encima de la altura
+  de mayúscula y baja hasta la baseline de la primera línea). Alinearlo por el
+  top exigiría un `margin` negativo calculado contra las métricas de Montreal,
+  que se desalinea solo el día que cambie la fuente.
+- **Acentos.** Eran dos tramos en itálica serif (`the agent economy.` y
+  `own your intelligence.`). Ahora es uno solo, en el mismo sans, verde y bold.
+  Por eso `AGENT_ECONOMY` pasó de cuatro tramos (`lead`/`accentA`/`body`/
+  `accentB`) a dos (`body`/`accent`).
+- **Fondo.** `GlyphField` —el canvas de caracteres— salió de la composición y
+  **quedó sin usar**: hoy no lo importa nadie. Se dejó en la carpeta a
+  propósito, no por olvido; si el campo no vuelve, se borra.
+
+El arte del icono vive en `public/prototype/homepage-update/near-icon.png`.
 
 ## Lo que NO se forkeó
 

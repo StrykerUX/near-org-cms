@@ -1,96 +1,88 @@
-import Accent from "@/components/primitives/Accent";
+import Image from "next/image";
+
 import Container from "@/components/primitives/Container";
 import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-update/homepageUpdateContent";
-import GlyphField from "@/components/sections/homepage-update/GlyphField";
 
-// El statement, sobre un card negro con un campo de caracteres detrás.
+// El statement, en negro sobre el crema, con el icono de NEAR abriendo la frase.
 //
 // Ocupa el lugar que en ab7 tenía `QuantumBars` —justo después del hero— y dice
-// la misma frase, pero no es esa sección con otra piel: aquella era una escalera
-// de siete columnas encastrada al hero por geometría compartida, y esta es una
-// caja suelta que flota sobre el crema. Nada acá mide contra la vecina.
+// la misma frase que decía el card negro que estuvo acá hasta el 2026-08-22.
+// No es ese card repintado: aquel era una caja `rounded-[32px]` flotando sobre
+// el crema, con su campo de glifos detrás y el texto centrado. Este no tiene
+// caja ni fondo propio; es tipografía apoyada sobre el mismo crema que traen las
+// secciones vecinas, alineada a la izquierda. Lo único que sobrevivió es la
+// frase.
 //
-// ── Los tres colores son literales, y es a propósito ─────────────────────────
+// ── Por qué el verde es literal ──────────────────────────────────────────────
 //
-// El negro del card, el blanco del texto y el verde de los acentos NO salen de
-// los tokens del DS, porque ninguno de los tres existe ahí:
-//
-//   · el card es más negro que `--ink` (#101010) — sobre crema, #101010 se lee
-//     gris carbón y el borde del card se ablanda;
-//   · el texto es blanco puro, no `--cream` (#f5f4f1), que sobre negro tira a
-//     hueso y le saca el filo a la tipografía;
-//   · el verde es lima, no `--near-green` (#00ec97), que es turquesa. Es el
-//     verde de la referencia y no tiene token.
-//
-// Van declarados como custom properties del `<section>` —no repartidos por el
-// JSX— para que las tres piezas que los usan (el card, la itálica y el canvas)
-// se tuneen desde un solo lugar. `--glyph-ink` va en canal RGB suelto porque el
-// canvas compone su propio alpha por celda.
+// No sale de los tokens del DS porque no existe ahí: `--near-green` (#00ec97)
+// es turquesa y sobre crema se lava hasta perder el filo. Este es hoja, tomado
+// del medio del gradiente del icono para que el acento y el glifo se lean como
+// la misma tinta. Va como custom property del `<section>` —no suelto en el
+// JSX— para tunearlo desde un solo lugar.
 const PALETTE = {
-  "--card-ink": "#080808",
-  "--statement-accent": "#78c552",
-  "--glyph-ink": "120, 197, 82",
+  "--statement-accent": "#5cb946",
 } as React.CSSProperties;
 
 export default function AgentEconomy() {
   return (
-    <section className="bg-cream py-16 text-foreground lg:py-24" style={PALETTE}>
+    <section className="bg-cream py-24 text-foreground lg:py-36" style={PALETTE}>
       <Container>
-        {/* `isolate`: el canvas es `absolute` dentro de este card y el radio lo
-            recorta con `overflow-hidden`. Sin el stacking context propio, el
-            `border-radius` no recorta al canvas en Safari cuando algún ancestro
-            promueve capa. */}
-        <div className="relative isolate @container overflow-hidden rounded-[32px] bg-[var(--card-ink)]">
-          <GlyphField />
+        {/* El `@container` es la mitad de un acuerdo con `--text-manifesto`, que
+            mide su cuerpo en `cqw`: sin contenedor declarado resolvería contra
+            el viewport y el texto seguiría creciendo cuando el `Container` ya
+            topó en su `max-width`. */}
+        <div className="@container">
+          {/* `items-baseline` y no `items-start` ni `items-center`: en la
+              referencia el icono se apoya sobre la BASELINE de la primera línea
+              —sobresale por encima de la altura de mayúscula y baja justo hasta
+              donde se sienta la N de "NEAR"—. Una imagen en flexbox no tiene
+              baseline tipográfica: la suya es su borde inferior, que es
+              exactamente el anclaje que hace falta. Alinearlo por el top exige
+              un `margin` negativo calculado contra las métricas de Montreal, y
+              eso se desalinea solo el día que cambie la fuente.
 
-          {/* El campo llega hasta el centro del card y le pelea contraste al
-              statement. En vez de bajarle el alpha en todo el canvas —que lo
-              apagaría también en los bordes, que es donde se tiene que ver— se
-              apoya el color del card sobre la zona del texto y se desvanece
-              antes de llegar al borde.
+              El icono va FUERA del `<h2>` y no como span inline al principio de
+              la frase, porque el texto tiene que sangrar parejo en las seis
+              líneas: inline, las líneas 2 a 6 volverían al margen y el icono
+              quedaría flotando en un hueco.
 
-              Es un velo, no una tapa: los glifos SE VEN detrás de las letras, y
-              tienen que verse. Subirlo hasta opacar el centro deja un óvalo
-              liso en medio del card que se lee como un error de composición. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse 58% 42% at 50% 48%, color-mix(in srgb, var(--card-ink) 78%, transparent) 0%, color-mix(in srgb, var(--card-ink) 45%, transparent) 55%, transparent 80%)",
-            }}
-          />
+              `w-fit mx-auto` centra el CONJUNTO —icono más columna de texto— en
+              el ancho del `Container`, sin tocar la alineación interna: las seis
+              líneas siguen arrancando todas en el mismo margen izquierdo y
+              cerrando desparejas a la derecha. `justify-center` no serviría: el
+              `<h2>` es un flex item que se estira hasta sus 17em aunque la línea
+              más larga mida menos, así que centraría la caja y no el texto. */}
+          <div className="mx-auto flex w-fit items-baseline gap-[0.52em] text-manifesto">
+            <Image
+              src="/prototype/homepage-update/near-icon.png"
+              alt=""
+              aria-hidden="true"
+              width={296}
+              height={296}
+              className="h-[1.07em] w-[1.07em] shrink-0"
+            />
 
-          {/* El aire vertical es asimétrico —más arriba que abajo— porque el
-              campo de glifos se densifica en el tercio inferior: con el bloque
-              centrado a ojo, el texto queda apoyado sobre la parte cargada. Va
-              en % del ANCHO y no en rem para que el card conserve su proporción
-              a cualquier tamaño en vez de achatarse al ensanchar.
-
-              El `max-w` va en **em**, y esa unidad es el punto entero: en em, la
-              medida de línea escala con el font-size, así que el reparto en seis
-              líneas —y sobre todo dónde caen los dos acentos serif— es el mismo
-              en cualquier viewport. En rem o en % el bloque se ensancharía por su
-              cuenta y el quiebre se movería con el ancho de la ventana: la línea
-              más larga ("Quantum-resistant and confidential") se comería la
-              siguiente y los acentos dejarían de cerrar sus líneas. 16em son
-              ~36 caracteres: un poco más que esa línea, que es lo que le deja
-              aire al reparto sin que ninguna otra se le suba encima.
-
-              El `@container` del card es la otra mitad del mismo acuerdo:
-              `--text-manifesto` mide su cuerpo en `cqw`, así que sin contenedor
-              declarado resolvería contra el viewport y el texto crecería
-              mientras el card ya topó en su `max-width`. */}
-          <div className="relative flex flex-col items-center px-6 pb-[9%] pt-[11%] sm:px-10">
-            <h2 className="max-w-[16em] text-center text-manifesto text-pretty text-white">
-              {COPY.lead}{" "}
-              <span className="text-[color:var(--statement-accent)]">
-                <Accent>{COPY.accentA}</Accent>
-              </span>{" "}
+            {/* El `max-w` va en **em**, y esa unidad es el punto entero: en em
+                la medida de línea escala con el font-size, así que el reparto en
+                seis líneas —y sobre todo dónde cae el acento, que tiene que
+                cerrar la última— es el mismo en cualquier viewport. En rem o en
+                % el bloque se ensancharía por su cuenta y el quiebre se movería
+                con el ancho de la ventana: la línea más larga ("Quantum-
+                resistant and confidential") se comería la siguiente y el acento
+                dejaría de quedar solo. 17em son ~38 caracteres: un poco más que
+                esa línea, que es lo que le deja aire al reparto sin que ninguna
+                otra se le suba encima. */}
+            <h2 className="max-w-[17em]">
               {COPY.body}{" "}
-              <span className="text-[color:var(--statement-accent)]">
-                <Accent>{COPY.accentB}</Accent>
-              </span>
+              {/* El token `--text-manifesto` define un solo peso (500) para todo
+                  el rol, y acá el acento pesa MÁS que el cuerpo dentro de la misma
+                  frase. No es un rol tipográfico nuevo que merezca su token: es el
+                  contraste interno del statement, y vive con él. */}
+              {/* ds-exempt: acento más pesado que su propia frase */}
+              <strong className="font-bold text-[color:var(--statement-accent)]">
+                {COPY.accent}
+              </strong>
             </h2>
           </div>
         </div>
