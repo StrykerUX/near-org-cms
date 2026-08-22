@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, type RefObject, type CSSProperties } from "react";
-import { gsap, Observer } from "@/components/primitives/motion/gsapClient";
+import { gsap, CustomEase, Observer } from "@/components/primitives/motion/gsapClient";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { MQ } from "@/components/primitives/motion/motionTokens";
 
@@ -46,19 +46,51 @@ const AUTOPLAY_MS = 7000;
  * curvas para el MISMO gesto — la card terminaba de crecer cuando el track
  * iba por la mitad, y el paso se leía en dos tiempos en vez de uno.
  */
-const STEP_SECONDS = 1.75;
+const STEP_SECONDS = 1.25;
 
 /**
- * El easing, en las dos sintaxis que hacen falta. Son la MISMA curva:
- * `power2.inOut` de GSAP es `easeInOutCubic`, y su equivalente CSS exacto es
- * el cubic-bezier de abajo. Si se cambia uno hay que cambiar el otro, o el
- * desfase vuelve por la puerta de atrás.
+ * El easing, en las dos sintaxis que hacen falta — y esta vez es literalmente la
+ * misma curva, no dos aproximaciones que se parecen.
  *
- * `power2` y no `power3`: a 1.75s la curva de power3 pasa demasiado tiempo
- * casi quieta en los extremos y el paso se siente perezoso al arrancar.
+ * ── El gesto ────────────────────────────────────────────────────────────────
+ *
+ * Sale rápido y se posa despacio, con mucho contraste entre las dos mitades:
+ *
+ *   t = 0.09  →  10% del recorrido   (ya está a velocidad)
+ *   t = 0.19  →  35%
+ *   t = 0.35  →  65%                 (dos tercios del camino en un tercio del tiempo)
+ *   t = 0.60  →  90%
+ *   t = 0.78  →  97%                 (posándose)
+ *   t = 1.00  →  100%
+ *
+ * O sea: los dos tercios del recorrido se hacen en el primer tercio del tiempo, y
+ * el último 3% se toma el 22% restante. Eso es lo que hace que la card no
+ * "llegue" sino que se ACOMODE.
+ *
+ * `P1.y = 0` mantiene el arranque desde reposo —no hay tirón en el frame 1— pero
+ * con `P1.x` bajo la curva sube a velocidad casi enseguida. Las dos cosas no se
+ * pelean: una es cómo empieza, la otra cuánto tarda en estar rápida.
+ *
+ * ── Por qué CustomEase y no un ease nombrado ────────────────────────────────
+ *
+ * La curva es ASIMÉTRICA: frena durante más tiempo del que acelera. Todos los
+ * `power*.inOut` son simétricos, así que ninguno la expresa — y sus equivalentes
+ * CSS tabulados (`power2.inOut` ↔ `cubic-bezier(0.645, 0.045, 0.355, 1)`) solo
+ * existen para los simétricos. Con `CustomEase` el bezier se declara UNA vez y
+ * se le da a los dos motores, así que no hay dos curvas que mantener
+ * sincronizadas a mano: hay una sola, escrita abajo.
+ *
+ * `P1 = (0.16, 0)` es el arranque; `P2 = (0.2, 1)` es la cola. Subir P2.x acorta
+ * la cola y adelanta el frenado; subir P1.x contiene más el arranque. Bajar los
+ * dos juntos pronuncia la curva — el límite es `(0, 0, 0, 1)`, que es un salto
+ * seguido de una cola infinita.
  */
-const SETTLE_EASE = "power2.inOut";
-const SETTLE_EASE_CSS = "cubic-bezier(0.645, 0.045, 0.355, 1)";
+const SETTLE_BEZIER = [0.16, 0, 0.2, 1] as const;
+const SETTLE_EASE = CustomEase.create(
+  "loopStep",
+  `M0,0 C${SETTLE_BEZIER[0]},${SETTLE_BEZIER[1]} ${SETTLE_BEZIER[2]},${SETTLE_BEZIER[3]} 1,1`
+);
+const SETTLE_EASE_CSS = `cubic-bezier(${SETTLE_BEZIER.join(", ")})`;
 
 const CLICK_GUARD_PX = 6;
 
@@ -289,7 +321,7 @@ export function useLoopCarousel<T extends HTMLElement = HTMLDivElement>(
         //
         // `paint` escribe `data-active` directo en el DOM; `index` es estado de
         // React. Mientras el segundo se actualizara recién al terminar el tween,
-        // los dos vivían desincronizados 1.75s enteros — y todo lo que el
+        // los dos vivían desincronizados un paso ENTERO — y todo lo que el
         // consumidor derive de `index` quedaba pintando el paso ANTERIOR: el
         // subrayado del logo activo se quedaba en el logo viejo y saltaba al
         // final, y en `CustomerStories` la alineación de cada card salía del

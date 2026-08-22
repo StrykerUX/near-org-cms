@@ -265,15 +265,15 @@ en otro lado.
 
 1. *Hueco al saltar más de una card.* `isAfterActive` (de qué lado se pega la
    card) se calculaba en el render de React a partir de `index`, que solo se
-   actualizaba en `settle()` — o sea al TERMINAR el tween, 1.75s después de que
-   `paint()` ya había movido `data-active` en el DOM. Con saltos de 3+, las dos
+   actualizaba en `settle()` — o sea al TERMINAR el tween, un paso entero después
+   de que `paint()` ya hubiera movido `data-active` en el DOM. Con saltos de 3+, las dos
    vecinas de la nueva activa se pegaban al borde equivocado y el hueco de ~384px
    aparecía a los dos lados.
 2. *Hueco durante la transición.* Estructural: el borde de la card y el track
    viajan a distinta velocidad, así que a mitad de paso el hueco entra en cuadro
    y se abre hasta ~200px de crema.
-3. *El subrayado del logo activo* se quedaba 1.75s en el logo viejo y saltaba al
-   final. Mismo desfase `paint()` / `index`.
+3. *El subrayado del logo activo* se quedaba un paso entero en el logo viejo y
+   saltaba al final. Mismo desfase `paint()` / `index`.
 
 Encoger la celda mata el 1 y el 2 (ya no hay hueco ni `isAfterActive`), y mover
 `setIndex` al INICIO del tween mata el 3.
@@ -309,6 +309,41 @@ Encoger la celda mata el 1 y el 2 (ya no hay hueco ni `isAfterActive`), y mover
 `PressCarousel` usa el mismo motor y no encoge nada, así que ahí
 `activeW === idleW` y todo se reduce a la grilla uniforme de antes. Sin caso
 especial.
+
+### El paso del carrusel: curva propia y 1.25s (2026-08-22)
+
+`STEP_SECONDS` bajó de 1.75s a **1.25s**. Es un solo número: baja como `--step` a
+las cuatro transiciones CSS y al tween del track, así que todo el paso se acorta
+junto y la sincronía que el refactor de la celda necesita se mantiene.
+
+La curva pasó de `power2.inOut` a un **`CustomEase` propio**,
+`cubic-bezier(0.16, 0, 0.2, 1)`:
+
+```
+t = 0.09  →  10% del recorrido
+t = 0.35  →  65%      (dos tercios del camino en un tercio del tiempo)
+t = 0.60  →  90%
+t = 1.00  →  100%     (el último 3% se toma el 22% del tiempo)
+```
+
+**Por qué `CustomEase` y no un ease nombrado.** La curva es asimétrica: frena
+durante más tiempo del que acelera. Todos los `power*.inOut` son simétricos, y
+sus equivalencias CSS tabuladas (`power2.inOut` ↔
+`cubic-bezier(0.645, 0.045, 0.355, 1)`) solo existen para esos. Antes había dos
+declaraciones que había que mantener sincronizadas a mano — la trampa que el
+propio comentario del archivo advertía. Ahora el bezier se declara UNA vez, en
+`SETTLE_BEZIER`, y de ahí salen tanto el ease de GSAP como el string CSS.
+
+`CustomEase` quedó registrado en `gsapClient` con el resto de los plugins, que es
+donde este repo los registra. Era plugin de club hasta GSAP 3.11; desde entonces
+viene en el paquete.
+
+**Quiénes consumen la curva:** el tween del `x` del track (GSAP) y cuatro
+transiciones CSS de `CustomerStories` vía `--step-ease` — el `width` de la celda,
+el `height`/`opacity` de la card, el `font-size` del titular y el subrayado del
+logo activo. La de la celda es la que *tiene* que compartirla: la fórmula del
+centrado solo coincide con el layout real si el ancho y el `x` interpolan con la
+misma curva y duración.
 
 ## Lo que NO se forkeó
 

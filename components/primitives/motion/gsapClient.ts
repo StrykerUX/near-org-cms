@@ -8,8 +8,9 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Observer } from "gsap/Observer";
+import { CustomEase } from "gsap/CustomEase";
 
-gsap.registerPlugin(ScrollTrigger, SplitText, Observer); // idempotente
+gsap.registerPlugin(ScrollTrigger, SplitText, Observer, CustomEase); // idempotente
 
 if (typeof window !== "undefined") {
   // iOS/Android colapsan la address bar al scrollear: eso dispara un resize
@@ -29,4 +30,12 @@ if (typeof window !== "undefined") {
 // Que quede claro qué NO arregla esto: no arregla ningún bug conocido. El
 // registro por subpath funcionaba. Se unifica por consistencia, para que
 // mañana no haya dos formas de traer un plugin según quién lo escribió.
-export { gsap, ScrollTrigger, SplitText, Observer };
+//
+// `CustomEase` está acá por una razón concreta y no por si acaso: es la única
+// forma de que una curva sea LA MISMA en GSAP y en CSS. Los `power*.inOut` son
+// simétricos —mismo tiempo de arranque que de frenado— y tienen equivalentes
+// cubic-bezier tabulados; en cuanto una curva es asimétrica, no hay ease
+// nombrado que la exprese y la única salida es declarar el bezier una vez y
+// dárselo a los dos. Era plugin de club hasta GSAP 3.11; desde entonces viene
+// en el paquete.
+export { gsap, ScrollTrigger, SplitText, Observer, CustomEase };
