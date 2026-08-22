@@ -16,32 +16,82 @@ mismo texto divergen en silencio.
 
 ## Lo que esta rama cambia
 
-### `AgentEconomy` — del card negro al statement sobre crema (2026-08-22)
+### `Hero` + `AgentEconomy` — una secuencia, dos componentes (2026-08-22)
 
-El statement dejó de ser una caja negra flotando sobre el crema y pasó a ser
-tipografía apoyada sobre el mismo crema que traen las secciones vecinas, con el
-icono de NEAR abriendo la frase.
+La salida del hero y la entrada del statement son **un solo gesto** contado por
+dos componentes, y el reloj que los sincroniza vive en
+[`heroSequence.ts`](./heroSequence.ts).
 
-Lo que cambió, y por qué no es el mismo componente repintado:
+**Qué pasa, en orden:**
 
-- **Composición.** Antes: card `rounded-[32px]`, texto centrado, aire vertical
-  en `%` del ancho para conservar la proporción de la caja. Ahora: sin caja ni
-  fondo propio, el texto se alinea a la izquierda y el aire lo pone la sección.
-- **Anclaje del icono.** Va por `items-baseline`, no por `items-start`: una
-  imagen en flexbox no tiene baseline tipográfica, la suya es su borde inferior,
-  que es justo donde la referencia lo apoya (sobresale por encima de la altura
-  de mayúscula y baja hasta la baseline de la primera línea). Alinearlo por el
-  top exigiría un `margin` negativo calculado contra las métricas de Montreal,
-  que se desalinea solo el día que cambie la fuente.
-- **Acentos.** Eran dos tramos en itálica serif (`the agent economy.` y
-  `own your intelligence.`). Ahora es uno solo, en el mismo sans, verde y bold.
-  Por eso `AGENT_ECONOMY` pasó de cuatro tramos (`lead`/`accentA`/`body`/
-  `accentB`) a dos (`body`/`accent`).
-- **Fondo.** `GlyphField` —el canvas de caracteres— salió de la composición y
-  **quedó sin usar**: hoy no lo importa nadie. Se dejó en la carpeta a
-  propósito, no por olvido; si el campo no vuelve, se borra.
+```
+antes del gesto   hero tapando la pantalla. El stage del statement YA está
+                  pegado detrás, con el icono centrado y quieto.
+primer scroll     el scroll se CONGELA y arranca la secuencia.
+0.0 → 0.9s        el borde inferior del hero se come el hero; la copy se
+                  descuelga y crece a 1.35.
+0.45 → 1.55s      el icono viaja desde el centro hasta su sitio junto al texto.
+1.15 → ~2.2s      el texto entra línea por línea.
+fin               el scroll se devuelve, con el statement terminado en cuadro.
+```
 
-El arte del icono vive en `public/prototype/homepage-update/near-icon.png`.
+**Las decisiones que no son obvias, y por qué:**
+
+- **El hero no cuesta scroll.** `margin-bottom: -100svh` lo saca del flujo y deja
+  a `AgentEconomy` empezando en el mismo punto del documento, ya a pantalla
+  completa en el scroll 0. Sin eso, el statement arrancaría una pantalla más
+  abajo y el icono estaría *entrando en cuadro* mientras el hero se abre, en vez
+  de esperarlo ya centrado. Además, con el scroll congelado durante la secuencia,
+  un hero que costara scroll dejaría la página trabada con él todavía en su
+  lugar. El margen se escribe con `style.setProperty` y no con `gsap.set`: GSAP
+  normaliza unidades y `svh` no está entre las que conoce.
+- **`AgentEconomy` NO es sticky, y lo fue.** Mientras la coreografía se
+  scrubbeaba, el stage vivía en `sticky top-0` dentro de un track más alto para
+  quedarse quieto mientras el scroll la avanzaba. Con la secuencia corriendo con
+  el scroll congelado el sticky no aporta nada —nada se mueve durante la
+  animación— y lo único que quedaba de él era su recorrido: media pantalla de
+  scroll, después del statement, donde la página no subía y la sección siguiente
+  no llegaba. Hoy la sección mide una pantalla exacta y sube como cualquier otra.
+- **La secuencia no se scrubbea.** Fueron cuatro ScrollTriggers con `scrub` hasta
+  que quedó claro que el pedido era otro: el lector la DISPARA y no la maneja. Un
+  scrub le entrega la velocidad al dedo, y la velocidad del dedo depende del
+  dispositivo — el mismo cierre salía a tirones en un trackpad y de golpe en una
+  rueda con detentes.
+- **El disparo es `Observer`, no `ScrollTrigger`.** Lo que dispara es el gesto,
+  no una posición: con el scroll congelado la página no se mueve, así que no hay
+  posición que cruzar. Esto vale también para la vuelta — ver abajo.
+- **Es un scroll-jack de ~2.2s**, vía `lenis.stop()`. No `overflow: hidden` en el
+  body: Lenis escribe `scrollTop` cada frame y taparle el overflow por debajo lo
+  deja escribiendo contra un contenedor que ya no scrollea, con un salto al
+  soltar. `SEQUENCE_DURATION` se calcula desde los beats y no se escribe a mano.
+- **El icono se pinta GRANDE y se escala hacia abajo.** Al revés se ve pixelado
+  aunque la fuente sea un SVG: `transform: scale()` rasteriza el elemento a su
+  tamaño de layout y estira ese bitmap, y con `will-change: transform` la capa ni
+  siquiera se re-rasteriza. Por eso el tamaño grande vive en CSS (`--icon-big`) y
+  no en JS: tiene que estar aplicado antes del primer paint.
+- **Son dos nodos de icono.** `data-agent-slot` es el del flujo (1.07em, apoyado
+  en la baseline, lo único que se ve sin JS o con `prefers-reduced-motion`) y
+  `data-agent-icon` es el que viaja. El grande aterriza exactamente encima del
+  chico apagado, así que no hay swap ni frame de corte.
+
+**Dos bugs que costaron y conviene no reintroducir:**
+
+- *"Se puede volver al hero, pero después de un delay"* — eran los 2.2s de scroll
+  congelado. El `ScrollTrigger` de la vuelta no podía cubrirlo por definición: la
+  posición no cambia mientras el scroll está parado. Lo resuelve el `onUp` del
+  mismo `Observer`, que ve el evento nativo aunque Lenis esté quieto.
+- *Scroll lateral* — la copy del hero escala a 1.35 y un `Container` de 1780px
+  escalado desborda el viewport. El hero no tenía `overflow-hidden`, a propósito,
+  desde cuando el `<video>` sobresalía por abajo. Ese video ya no existe y el
+  corte lo hace el `clip-path`, así que el recorte volvió sin costo.
+
+**Lo que además cambió en el statement respecto del card negro:** el acento pasó
+de dos tramos en itálica serif a uno solo en el mismo sans, verde y bold (por eso
+`AGENT_ECONOMY` tiene dos tramos y no cuatro), y `GlyphField` —el canvas de
+caracteres— **quedó sin usar**: hoy no lo importa nadie. Se dejó en la carpeta a
+propósito; si el campo no vuelve, se borra.
+
+El arte del icono vive en `public/prototype/homepage-update/near-icon.svg`.
 
 ### `Hero` — sin subtítulo, titular en una línea (2026-08-22)
 
