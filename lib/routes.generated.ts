@@ -36,14 +36,14 @@ import m29 from "@/app/prototype/header-nav/page.meta";
 import m30 from "@/app/prototype/hero-ab9-gl/page.meta";
 import m31 from "@/app/prototype/hero-alt/page.meta";
 import m32 from "@/app/prototype/hero-burst/page.meta";
-import m33 from "@/app/prototype/homepage-ab10/page.meta";
-import m34 from "@/app/prototype/homepage-ab6/page.meta";
-import m35 from "@/app/prototype/homepage-ab7/page.meta";
-import m36 from "@/app/prototype/homepage-ab9/page.meta";
-import m37 from "@/app/prototype/homepage-exploration/page.meta";
-import m38 from "@/app/prototype/homepage-proof/columns/page.meta";
-import m39 from "@/app/prototype/homepage-proof/datum/page.meta";
-import m40 from "@/app/prototype/homepage-proof/index/page.meta";
+import m33 from "@/app/prototype/homepage-ab6/page.meta";
+import m34 from "@/app/prototype/homepage-ab7/page.meta";
+import m35 from "@/app/prototype/homepage-ab9/page.meta";
+import m36 from "@/app/prototype/homepage-exploration/page.meta";
+import m37 from "@/app/prototype/homepage-proof/columns/page.meta";
+import m38 from "@/app/prototype/homepage-proof/datum/page.meta";
+import m39 from "@/app/prototype/homepage-proof/index/page.meta";
+import m40 from "@/app/prototype/homepage-update/page.meta";
 import m41 from "@/app/prototype/homepage-v2/page.meta";
 import m42 from "@/app/prototype/homepage-v4/page.meta";
 import m43 from "@/app/prototype/homepage-v5/page.meta";
@@ -115,14 +115,14 @@ export const ROUTES: RouteEntry[] = [
   { ...m30, route: "/prototype/hero-ab9-gl", stub: false, file: "app/prototype/hero-ab9-gl/page.meta.ts" },
   { ...m31, route: "/prototype/hero-alt", stub: false, file: "app/prototype/hero-alt/page.meta.ts" },
   { ...m32, route: "/prototype/hero-burst", stub: false, file: "app/prototype/hero-burst/page.meta.ts" },
-  { ...m33, route: "/prototype/homepage-ab10", stub: false, file: "app/prototype/homepage-ab10/page.meta.ts" },
-  { ...m34, route: "/prototype/homepage-ab6", stub: false, file: "app/prototype/homepage-ab6/page.meta.ts" },
-  { ...m35, route: "/prototype/homepage-ab7", stub: false, file: "app/prototype/homepage-ab7/page.meta.ts" },
-  { ...m36, route: "/prototype/homepage-ab9", stub: false, file: "app/prototype/homepage-ab9/page.meta.ts" },
-  { ...m37, route: "/prototype/homepage-exploration", stub: false, file: "app/prototype/homepage-exploration/page.meta.ts" },
-  { ...m38, route: "/prototype/homepage-proof/columns", stub: false, file: "app/prototype/homepage-proof/columns/page.meta.ts" },
-  { ...m39, route: "/prototype/homepage-proof/datum", stub: false, file: "app/prototype/homepage-proof/datum/page.meta.ts" },
-  { ...m40, route: "/prototype/homepage-proof/index", stub: false, file: "app/prototype/homepage-proof/index/page.meta.ts" },
+  { ...m33, route: "/prototype/homepage-ab6", stub: false, file: "app/prototype/homepage-ab6/page.meta.ts" },
+  { ...m34, route: "/prototype/homepage-ab7", stub: false, file: "app/prototype/homepage-ab7/page.meta.ts" },
+  { ...m35, route: "/prototype/homepage-ab9", stub: false, file: "app/prototype/homepage-ab9/page.meta.ts" },
+  { ...m36, route: "/prototype/homepage-exploration", stub: false, file: "app/prototype/homepage-exploration/page.meta.ts" },
+  { ...m37, route: "/prototype/homepage-proof/columns", stub: false, file: "app/prototype/homepage-proof/columns/page.meta.ts" },
+  { ...m38, route: "/prototype/homepage-proof/datum", stub: false, file: "app/prototype/homepage-proof/datum/page.meta.ts" },
+  { ...m39, route: "/prototype/homepage-proof/index", stub: false, file: "app/prototype/homepage-proof/index/page.meta.ts" },
+  { ...m40, route: "/prototype/homepage-update", stub: false, file: "app/prototype/homepage-update/page.meta.ts" },
   { ...m41, route: "/prototype/homepage-v2", stub: false, file: "app/prototype/homepage-v2/page.meta.ts" },
   { ...m42, route: "/prototype/homepage-v4", stub: false, file: "app/prototype/homepage-v4/page.meta.ts" },
   { ...m43, route: "/prototype/homepage-v5", stub: false, file: "app/prototype/homepage-v5/page.meta.ts" },

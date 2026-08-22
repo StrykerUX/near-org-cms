@@ -2,9 +2,9 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import StackAssembly, { type StackStop } from "@/components/sections/home-ab10/stackAssembly";
-import StackCursorTag from "@/components/sections/home-ab10/StackCursorTag";
-import { useStackScene } from "@/components/sections/home-ab10/useStackScene";
+import StackAssembly, { type StackStop } from "@/components/sections/homepage-update/stackAssembly";
+import StackCursorTag from "@/components/sections/homepage-update/StackCursorTag";
+import { useStackScene } from "@/components/sections/homepage-update/useStackScene";
 import {
   AI_BLOCK,
   INTENTS_BLOCK,
@@ -13,7 +13,7 @@ import {
   STACK_CAPABILITIES,
   STACK_PIECES,
   STACK_INTRO as INTRO,
-} from "@/components/sections/home-ab10/nearStackContent";
+} from "@/components/sections/homepage-update/nearStackContent";
 
 // El stack de ab10: el ensamble isométrico al centro y las cuatro capas escritas
 // en las cuatro esquinas, cada una pegada a la pieza de la que habla.

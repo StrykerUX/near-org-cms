@@ -12,7 +12,7 @@ import {
   DEBUG_MARKERS,
 } from "@/components/primitives/motion/motionTokens";
 import { driftOffsets } from "@/components/primitives/motion/staggerDrift";
-import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/home-ab10/homeAb10Content";
+import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/homepage-update/homepageUpdateContent";
 
 // ── "Own Your Own": el título se queda quieto y las cards lo atraviesan ──────
 //

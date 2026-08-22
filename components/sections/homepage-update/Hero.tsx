@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
-import HeroFoliage from "@/components/sections/home-ab10/HeroFoliage";
+import HeroFoliage from "@/components/sections/homepage-update/HeroFoliage";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 
 // ── Geometría: el hero llena la pantalla ─────────────────────────────────────

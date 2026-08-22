@@ -1,4 +1,4 @@
-# `home-ab10` — secciones de `/prototype/homepage-ab10`
+# `homepage-update` — secciones de `/prototype/homepage-update`
 
 **Clon exacto de `home-ab9/`**, byte a byte salvo los imports y nombres
 propios (`ab9` → `ab10`). Es el punto de partida de la rama
@@ -23,5 +23,5 @@ entren.
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del
 catálogo compartido de `sections/`, y el header y el footer los monta
-`app/prototype/layout.tsx`. Si alguna diverge, se copia a `home-ab10/` en ese
+`app/prototype/layout.tsx`. Si alguna diverge, se copia a `homepage-update/` en ese
 momento — no antes.

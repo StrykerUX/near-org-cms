@@ -1,4 +1,4 @@
-// La copy de /prototype/homepage-ab10, fuera de los componentes que la pintan.
+// La copy de /prototype/homepage-update, fuera de los componentes que la pintan.
 //
 // Mismo criterio que `quantum/quantumContent.ts` — el razonamiento largo está ahí.
 // El precedente en esta carpeta es `nearStackContent.ts`, que ya lo hacía bien: un

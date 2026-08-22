@@ -1,7 +1,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import { AGENT_ECONOMY as COPY } from "@/components/sections/home-ab10/homeAb10Content";
-import GlyphField from "@/components/sections/home-ab10/GlyphField";
+import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-update/homepageUpdateContent";
+import GlyphField from "@/components/sections/homepage-update/GlyphField";
 
 // El statement, sobre un card negro con un campo de caracteres detrás.
 //

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { getGl2, buildProgram } from "@/components/primitives/motion/glContext";
 import { deviceRatio } from "@/components/primitives/motion/dpr";
-import { FOLIAGE_VERT, FOLIAGE_FRAG } from "@/components/sections/home-ab10/gl/foliage";
+import { FOLIAGE_VERT, FOLIAGE_FRAG } from "@/components/sections/homepage-update/gl/foliage";
 
 // El canvas del fondo del hero. Versión de producción del que vive en el lab
 // `/prototype/hero-ab9-gl`: mismo shader, sin el panel de sliders ni la

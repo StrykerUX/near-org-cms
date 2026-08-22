@@ -5,7 +5,7 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
-import { PROOF_STATS } from "@/components/sections/home-ab10/homeAb10Content";
+import { PROOF_STATS } from "@/components/sections/homepage-update/homepageUpdateContent";
 
 // Un eje y seis marcas. Las pruebas cuelgan de una línea que cruza el ancho
 // completo, alternando arriba y abajo, y cada una baja hasta el eje por su
@@ -21,7 +21,7 @@ import { PROOF_STATS } from "@/components/sections/home-ab10/homeAb10Content";
 // laboratorio donde se compararon tres estructuras para estas mismas seis
 // pruebas. Se copió y no se importa, y eso lo pide el README de esa carpeta:
 // es un laboratorio, su contenido puede cambiar o borrarse sin aviso, y ya pasó
-// dos veces. Los datos vienen de `homeAb10Content.ts` por el mismo motivo.
+// dos veces. Los datos vienen de `homepageUpdateContent.ts` por el mismo motivo.
 //
 // ── El cambio respecto del lab: las fichas son más anchas, y desfasadas ─────
 //

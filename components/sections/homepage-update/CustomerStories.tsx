@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Accent from "@/components/primitives/Accent";
 import { useLoopCarousel, buildLoopCells, stepStyle } from "./useLoopCarousel";
-import { CUSTOMER_STORIES as STORIES } from "@/components/sections/home-ab10/homeAb10Content";
+import { CUSTOMER_STORIES as STORIES } from "@/components/sections/homepage-update/homepageUpdateContent";
 
 // Carrusel de historias, portado del lab `/prototype/carousel-sections`.
 //
@@ -18,7 +18,7 @@ import { CUSTOMER_STORIES as STORIES } from "@/components/sections/home-ab10/hom
 // gana, se COPIA a la carpeta de la página que la reciba"). Su contenido puede
 // cambiar o borrarse sin aviso, y esta sección ya no depende de eso.
 //
-// La copy sale de `homeAb10Content` y no del contenido del lab: son SEIS
+// La copy sale de `homepageUpdateContent` y no del contenido del lab: son SEIS
 // historias con hrefs reales a los posts, contra las cuatro con `href: "#"`
 // que el lab traía de ejemplo. El motor es genérico en N, así que el cambio
 // de cantidad no lo toca.

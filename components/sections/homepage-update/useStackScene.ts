@@ -8,7 +8,7 @@ import {
   STAGE_ORDER,
   type StackHover,
   type StackStop,
-} from "@/components/sections/home-ab10/stackAssembly";
+} from "@/components/sections/homepage-update/stackAssembly";
 
 // La MECÁNICA que las cinco variantes comparten: el build-in de la columna, el
 // recorrido por paradas, la iluminación por segmento y el hover por delegación.

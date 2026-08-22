@@ -10,7 +10,7 @@ import PrototypeMotionProvider from "@/components/site/providers/PrototypeMotion
 // isométrico). QuantumBars y ProofStepper ya no están en la lista porque ab10 no
 // las monta: la primera se fue del todo, y a la segunda la reemplazó
 // `ProofDatum`, que se arma con la retícula y no mide contra el viewport.
-export default function HomepageAb10Layout({
+export default function HomepageUpdateLayout({
   children,
 }: {
   children: React.ReactNode;

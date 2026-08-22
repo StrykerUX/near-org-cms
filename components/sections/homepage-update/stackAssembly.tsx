@@ -9,7 +9,7 @@ import {
   IntentsWire,
   NearcomGreen,
   NearcomWire,
-} from "@/components/sections/home-ab10/stackArt.generated";
+} from "@/components/sections/homepage-update/stackArt.generated";
 
 // El ENSAMBLE, sin layout y sin escena: las cuatro capas, sus sombras, el mark
 // de NEAR y las reglas de iluminación. Es lo único que las cinco variantes de

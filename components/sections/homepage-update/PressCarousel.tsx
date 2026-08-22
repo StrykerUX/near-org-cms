@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Accent from "@/components/primitives/Accent";
 import { useLoopCarousel, buildLoopCells, stepStyle } from "./useLoopCarousel";
-import { PRESS_ITEMS, type PressTone } from "@/components/sections/home-ab10/homeAb10Content";
+import { PRESS_ITEMS, type PressTone } from "@/components/sections/homepage-update/homepageUpdateContent";
 
 // Carrusel de prensa, portado del lab `/prototype/carousel-sections`.
 //

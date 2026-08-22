@@ -3,11 +3,11 @@ import {
   LAYER_NAMES,
   SEG_NAMES,
   type StackHover,
-} from "@/components/sections/home-ab10/stackAssembly";
+} from "@/components/sections/homepage-update/stackAssembly";
 import {
   AI_BLOCK,
   PROTOCOL_FEATURES,
-} from "@/components/sections/home-ab10/nearStackContent";
+} from "@/components/sections/homepage-update/nearStackContent";
 
 // El tag de la pieza hovereada, clavado al cursor.
 //
