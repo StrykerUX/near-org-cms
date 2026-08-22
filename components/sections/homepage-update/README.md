@@ -204,6 +204,53 @@ Dos cosas que el cambio arrastró:
   estilos inline es cada `<p>`; limpiar los `<article>` dejaría seis fichas en
   `opacity: 0` para siempre, y en dev eso pasa en cada mount por StrictMode.
 
+### El cierre de la página: orden, prensa y newsletter (2026-08-22)
+
+**Orden.** `BelongsNewsletter` bajó de estar entre `ProofDatum` y las historias
+de clientes —partiendo en dos el tramo de prueba social— a cerrarlo, justo antes
+del blog:
+
+```
+… ProofDatum → CustomerStories → PressCarousel → BelongsNewsletter
+→ LatestUpdates → UpdatesList
+```
+
+`Hero` y `AgentEconomy` **no** son intercambiables con el resto: están solapados
+por diseño y comparten la secuencia del primer gesto. Cualquier cosa metida entre
+los dos rompe el efecto. Queda anotado en el propio `HomepageUpdateView`.
+
+**`PressCarousel`.** Salió el `<h2>` "Blockchain quantum security in the news", y
+con él el espaciador que lo separaba del carrusel y el import de `Accent`. El
+`aria-label` de la sección se queda: sin titular visible es la **única** etiqueta
+que la nombra para quien navega por landmarks.
+
+**`BelongsNewsletter` — de banda a card.** Era `bg-stone` de borde a borde del
+viewport, con el wordmark "near" como primera línea de "belongs to you". Ahora es
+una caja de ancho contenido con el glifo de marca arriba y "Join our Newsletter".
+
+Tres cosas que el cambio se llevó, y por qué:
+
+- **El wordmark como titular.** Vivía dentro del `<h2>` porque era parte de la
+  frase — su `alt` aportaba la palabra que faltaba. El titular nuevo se lee solo,
+  así que el glifo de arriba es marca y no oración: `aria-hidden`, fuera del
+  heading. Usa `near-squircle.svg` y no `near-icon.svg`, que es la N sola.
+- **`bg-stone`.** `#d8d6d0` es el gris de una banda a ancho completo; en una card
+  sobre crema se lee sucio, porque ahora hay un borde contra el que compararlo.
+  `--card-surface: #e2e1de` queda a mitad de camino entre `--cream` y `--stone`:
+  más contraste que el `--card-tint` de `OwnYourOwn`, menos peso que la banda.
+- **El corte duro contra las vecinas**, deliberado mientras fuera banda. Con
+  card, lo que separa es el aire.
+
+Sobre el espaciado interno: `mb-9` bajo el icono contra `mt-1` sobre el párrafo.
+La asimetría es el punto — el titular tiene aire heredado por abajo (el line-box
+reserva las descendentes, que "Join our Newsletter" casi no usa) y nada por
+arriba, porque la caja de una imagen termina donde termina el dibujo.
+
+**El botón de `ShineField`** pasó de `bg-near-green-dark` con texto blanco al
+gradiente de la marca con texto negro. Blanco sobre ese verde da ~2.1:1 y no pasa
+AA ni para texto grande; negro sobre el gradiente da ~9:1 en su punto más oscuro.
+Se tocó el primitivo directamente porque esta sección es su único consumidor.
+
 ## Lo que NO se forkeó
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del

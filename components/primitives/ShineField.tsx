@@ -218,9 +218,21 @@ export default function ShineField({
         />
       </div>
 
+      {/* El botón lleva el gradiente de la marca —el mismo del glifo NEAR, de
+          lima a verde— y texto NEGRO, no blanco.
+
+          Era `bg-near-green-dark` (#00c97f) con texto blanco. Blanco sobre ese
+          verde da ~2.1:1 de contraste y no pasa AA ni para texto grande; negro
+          sobre el gradiente da ~9:1 en su punto más oscuro. O sea que acá lo
+          legible y lo pedido coinciden, que no siempre pasa.
+
+          El gradiente va literal y no como token: `--near-green` es turquesa
+          (#00ec97) y no aparece en él. Los dos extremos son los del glifo,
+          acotados por arriba para que el botón no se lave contra el blanco del
+          campo. */}
       <button
         type="submit"
-        className="shrink-0 rounded-full bg-near-green-dark px-5 py-2 text-label text-white transition-opacity hover:opacity-90"
+        className="shrink-0 rounded-full bg-[linear-gradient(100deg,#bbef7f_0%,#6cc24a_100%)] px-5 py-2 text-label text-ink transition-opacity hover:opacity-90"
       >
         {buttonLabel}
       </button>
