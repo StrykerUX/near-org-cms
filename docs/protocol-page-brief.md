@@ -1,5 +1,11 @@
 # Protocol page — design brief
 
+> **Nota (2026-08-21).** Este documento menciona rutas de `/prototype/` que ya
+> no existen: se archivaron en la limpieza que dejó `homepage-update` como única
+> línea viva. El registro se conserva tal cual porque describe mediciones y
+> decisiones de su momento. Para ver qué era cada ruta y cómo recuperarla:
+> `docs/labs-archivados.md`.
+
 Source copy: **"near.org - sitemap"** Google Doc → **Protocol** tab
 (`near.org/protocol`). Route: `/prototype/protocol`.
 

@@ -1,5 +1,11 @@
 # Baseline de performance — antes del refactor
 
+> **Nota (2026-08-21).** Este documento menciona rutas de `/prototype/` que ya
+> no existen: se archivaron en la limpieza que dejó `homepage-update` como única
+> línea viva. El registro se conserva tal cual porque describe mediciones y
+> decisiones de su momento. Para ver qué era cada ruta y cómo recuperarla:
+> `docs/labs-archivados.md`.
+
 Medido el 2026-08-11 sobre `main` en el commit `4fbd24d`, con `pnpm build`
 (Next 16.1.6, Turbopack). Sirve como punto de comparación para las fases del
 refactor de `/prototype/homepage-v2` y `/prototype/quantum-security`.

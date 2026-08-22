@@ -58,17 +58,31 @@ dar por terminado un cambio.
 | `EmptyState` | idem | `docs/fase0-divergencias-blog.md` #7 |
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
-| `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` |
-| `TestimonialMarquee`, `LatestUpdates`, `UpdatesList` | `HomepageV2View` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado; sobrevivieron porque el port de home-v2 las reusa tal cual. |
-| `home-v2/*` | `HomepageV2View` | `/prototype/homepage-v2` — port del rebuild recibido como paquete de design canvas. Tiene su propio [README](./home-v2/README.md). Reusa `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` tal cual. |
-| `quantum/*` | `QuantumSecurityView` | `/prototype/quantum-security` — port del rebuild de quantum-security, mismo origen de design canvas. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
-| `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — página real, no laboratorio. Tiene su propio [README](./chain/README.md) (en inglés, misma nota de idioma que `quantum`). Reusa `quantum/CtaPill` tal cual. |
-| `hero-alt/*` | `HeroAltView` | `/prototype/hero-alt` — **laboratorio**: seis versiones de las dos primeras secciones de la homepage, misma copy en las seis. Tiene su propio [README](./hero-alt/README.md). |
-| `proof-alt/*` | `ProofAltView`, `HomepageProofDemoView` | `/prototype/proof-alt` — **laboratorio**: tres estructuras para la sección de pruebas, para elegir una que no gaste los 325svh del `ProofStepper` de ab7. Las tres entregan las seis cifras sin pedir interacción. Las mismas tres, dentro de la homepage entera, en `/prototype/homepage-proof/{datum,index,columns}` — **composiciones, no forks**: reusan `home-ab7/*` sin copiar un archivo. Tiene su propio [README](./proof-alt/README.md). |
-| `stack-labs/*` | `StackLabIndexView` | `/prototype/stack-labs/*` — **laboratorio**: cinco layouts para la sección del NEAR Stack sobre el MISMO ensamble (importado de `home-ab7`, no duplicado), para decidir un layout que no desaproveche el arte ni gaste los 320svh de `NearStackV2`. Tiene su propio [README](./stack-labs/README.md). |
-| `newsletter-labs/*` | `NewsletterLabView` | `/prototype/newsletter-labs` — **laboratorio**: catorce versiones de la banda «NEAR belongs to you» con la misma copy, sin las `StairTransition` de la sección actual. Cuatro estrenan formas de campo que el `ShineField` no cubre (y pierden su brillo); las seis últimas agregan movimiento — una de ellas, el único gesto del lab que dispara el lector. Tiene su propio [README](./newsletter-labs/README.md). |
+| `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` — la landing de marketing, no un índice |
+| `LatestUpdates`, `UpdatesList` | `HomepageUpdateView` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado. Sobrevivieron a la limpieza porque la homepage viva las sigue montando. |
+| `homepage-update/*` | `HomepageUpdateView` | `/prototype/homepage-update` — **la línea de diseño viva**. Única superviviente de nueve homepages; ver `docs/labs-archivados.md` para las ocho archivadas. Tiene su propio [README](./homepage-update/README.md). |
+| `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
+| `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
+| `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
 
-Las dos últimas son **laboratorios**: alimentan una ruta de comparación y ninguna página real las importa. Su contenido puede cambiar o borrarse sin aviso — si una versión gana, se COPIA a la carpeta de la página que la reciba, no se importa desde ahí.
+Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
+entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
+son laboratorios y no se tocan a la ligera.
+
+## Ya no hay laboratorios
+
+Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
+`transition-labs`, `newsletter-labs`, `mural-labs`, `footer-labs`) y ocho
+homepages en paralelo. Se archivaron todos el 2026-08-21 al quedar
+`homepage-update` como la única línea viva.
+
+Están completos en el tag `v-pre-limpieza` y en la rama `Respaldo`, y
+**`docs/labs-archivados.md`** dice qué era cada uno y cómo traerlo de vuelta.
+
+La regla que los gobernaba sigue en pie por si vuelve a haber uno: un
+laboratorio alimenta una ruta de comparación, ninguna página real lo importa, y
+si una versión gana **se COPIA** a la carpeta de la página que la reciba — no se
+importa desde ahí.
 
 ## El footer NO está acá
 

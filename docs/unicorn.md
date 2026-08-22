@@ -1,5 +1,11 @@
 # Unicorn Studio
 
+> **Nota (2026-08-21).** Este documento menciona rutas de `/prototype/` que ya
+> no existen: se archivaron en la limpieza que dejó `homepage-update` como única
+> línea viva. El registro se conserva tal cual porque describe mediciones y
+> decisiones de su momento. Para ver qué era cada ruta y cómo recuperarla:
+> `docs/labs-archivados.md`.
+
 Los covers de `components/sections/LatestUpdates.tsx` los pintan escenas hechas
 en [Unicorn Studio](https://unicorn.studio). Son tres, una por color.
 

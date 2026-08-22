@@ -252,6 +252,17 @@ con `pathname` y se re-mide con un `ResizeObserver` propio — el detalle está
 comentado en el archivo, junto con por qué usa `st.refresh()` de la instancia y
 nunca el `ScrollTrigger.refresh()` global (congela Lenis).
 
+**Una sola línea de diseño viva.** Hasta el 2026-08-21 el repo tenía nueve
+homepages en paralelo y siete laboratorios de secciones. Se archivaron todos:
+queda `components/sections/homepage-update/` (montada en
+`/prototype/homepage-update`), más las tres páginas reales — `protocol/`,
+`chain/` y `quantum/`, que se importan entre sí y no son laboratorios.
+
+Lo archivado está completo en el tag `v-pre-limpieza` y en la rama `Respaldo`;
+**`docs/labs-archivados.md`** dice qué era cada lab y el comando para traerlo de
+vuelta. Antes de dar por perdido un efecto (transiciones, murales, shaders de
+hero, las catorce bandas de newsletter), mirá ahí.
+
 **Página nueva:** la skill `/new-page <slug> "<Título>"` (o
 `node scripts/new-page.mjs <slug> "<Título>"` a mano) es un atajo — genera
 `page.tsx`/`page.meta.ts`/View coherentes y regenera el manifiesto en un paso.
@@ -273,4 +284,4 @@ Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`
 
 ---
 
-*Last updated: refactor de frontend de marketing en capas (ver docs/fase0-divergencias-blog.md)*
+*Last updated: 2026-08-21 — limpieza del árbol; `homepage-update` queda como única línea de diseño viva (ver docs/labs-archivados.md)*

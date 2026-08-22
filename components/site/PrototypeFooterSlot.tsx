@@ -54,14 +54,14 @@ import SiteFooter from "@/components/site/SiteFooter";
 // hicieron los route groups igual porque el lab es temporal por definición:
 // cuando el equipo elija una versión, la carpeta se borra y esto vuelve a ser
 // una línea. Reestructurar `app/prototype/` para algo que se va no paga.
-const NO_FOOTER: string[] = [
-  "/prototype/hero-alt",
-  "/prototype/footer-labs",
-  // Mismo caso que `hero-alt`: el lab del hero de ab9 llena el viewport con
-  // canvas WebGL y su propio panel sticky. Un takeover detrás solo agrega
-  // scroll a una página que se mira quieta.
-  "/prototype/hero-ab9-gl",
-];
+// Vacía tras la limpieza: sus tres entradas (hero-alt, footer-labs y
+// hero-ab9-gl) eran laboratorios archivados — ver docs/labs-archivados.md.
+//
+// El comentario largo de arriba anticipaba justamente esto ("cuando el equipo
+// elija una versión, la carpeta se borra y esto vuelve a ser una línea"), y por
+// eso el archivo se queda en vez de borrarse: el mecanismo sigue siendo el que
+// hay que usar si una ruta de prototipo vuelve a necesitar el layout sin footer.
+const NO_FOOTER: string[] = [];
 
 export default function PrototypeFooterSlot() {
   const pathname = usePathname();

@@ -58,12 +58,12 @@ function groupOf(route: string, nav: (typeof ROUTES)[number]["nav"]) {
 // limpio ("Transiciones · índice" contra "Transición · C · ASCII" comparten
 // "Transici", que corta a mitad de palabra). Agregar un laboratorio es agregar
 // una línea acá.
-const STRIP = [
-  /^Stack lab · /,
-  /^Transición · /,
-  /^Footer /,
-  /^Homepage · proof /,
-];
+// Quedó vacío: los cuatro prefijos que había ("Stack lab · ", "Transición · ",
+// "Footer ", "Homepage · proof ") eran de laboratorios archivados en la
+// limpieza — ver docs/labs-archivados.md. La constante se queda porque el
+// mecanismo sigue siendo el correcto: si vuelve a haber un lab con variantes,
+// agregar su prefijo acá es una línea.
+const STRIP: RegExp[] = [];
 
 const shortLabel = (title: string) =>
   STRIP.reduce((t, re) => t.replace(re, ""), title);
@@ -103,17 +103,10 @@ const UNLINKED: string[] = [
 // Entre ab6 y v5 el orden NO es prioridad: siguen siendo trabajo al mismo nivel
 // y cada una es el rollback de una mitad de ab7. Cuando ab7 se confirme, las
 // dos bajan con v4.
-const FEATURED = [
-  // El lab de heroes va primero: es donde se está decidiendo qué reemplaza a
-  // las dos primeras secciones, así que manda sobre las homepages completas,
-  // que hoy montan la versión que se quiere cambiar.
-  "/prototype/hero-alt",
-  "/prototype/homepage-ab7",
-  "/prototype/homepage-ab6",
-  "/prototype/homepage-v5",
-  "/prototype/homepage-v4",
-  "/prototype/homepage-v2",
-];
+// Vacío tras la limpieza: las seis rutas que destacaba (hero-alt y las cinco
+// homepages viejas) se archivaron. `homepage-update` no va acá — con una sola
+// línea de diseño viva, "destacada" no distingue nada.
+const FEATURED: string[] = [];
 
 // Las galerías de imágenes de public/ no pueden derivarse del manifiesto: son
 // HTML autocontenidos (viewers con sus propios assets), no páginas de Next con
@@ -191,10 +184,8 @@ const STATIC_GALLERIES: HomeViewLink[] = [
 // Lista a mano porque no hay nada en el manifiesto que lo diga: una ruta de un
 // segmento con seis diseños dentro se ve idéntica a una página normal.
 const STACKED_LABS = [
-  "/prototype/hero-alt",
-  "/prototype/newsletter-labs",
-  "/prototype/proof-alt",
-  "/prototype/hover-lab",
+  // De los cinco que había sobrevive uno: los otros cuatro (hero-alt,
+  // newsletter-labs, proof-alt, hover-lab) se archivaron.
   "/prototype/components",
 ];
 
