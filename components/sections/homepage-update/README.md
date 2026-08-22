@@ -172,6 +172,38 @@ anuncia dos veces aunque esté dos veces en el árbol. El umbral va como clase
 literal en los dos lugares porque Tailwind no detecta clases dinámicas — si se
 mueve, se mueve en ambos.
 
+### `ProofDatum` — la entrada pasa a ser por renglón (2026-08-22)
+
+Salió el eyebrow "Built to": las seis fichas ya empiezan con esas mismas dos
+palabras. Con él se fue el `flex flex-col gap-10` del `Container`, que separaba
+dos hijos y ahora tiene uno.
+
+La entrada dejó de mover el `<article>` y mueve sus **renglones**. Animar la
+ficha entera desplazaba también su tallo —que ya tiene su propio tween— y sobre
+todo movía una caja: se leía como un panel entrando. Por renglón se lee como un
+dato que se escribe.
+
+Hay dos escalonados anidados y la diferencia entre ellos es el punto: `0.07`
+dentro de la ficha (las tres piezas son *una* ficha) y `0.18` entre fichas, que
+tiene que ser claramente mayor o las seis se funden en una cortina.
+
+El ease de los renglones es `expo.out` y no el `EASE_OUT` del timeline
+(`power3.out`): `expo` gasta más de la mitad del recorrido en el primer 20% del
+tiempo y el resto es cola, que es el gesto pedido — salir disparado y frenar
+largo. Va con `duration: 1.2` porque en 0.7s el tramo lento no se llega a ver. El
+eje y los tallos conservan `power3.out`, que es lo correcto para una línea que se
+traza.
+
+Dos cosas que el cambio arrastró:
+
+- **`data-line` va en el JSX**, no un selector estructural (`article > p`). Ese
+  selector se rompe solo el día que alguien agregue un cuarto párrafo o envuelva
+  alguno en un div, y lo hace en silencio: la animación sigue corriendo con una
+  pieza de menos.
+- **El `clearProps` del cleanup pasó de `cards` a `lines`.** La que queda con
+  estilos inline es cada `<p>`; limpiar los `<article>` dejaría seis fichas en
+  `opacity: 0` para siempre, y en dev eso pasa en cada mount por StrictMode.
+
 ## Lo que NO se forkeó
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del

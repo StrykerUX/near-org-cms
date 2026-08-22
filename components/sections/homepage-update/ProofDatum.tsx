@@ -1,7 +1,6 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
-import Eyebrow from "@/components/primitives/Eyebrow";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
@@ -126,11 +125,40 @@ export default function ProofDatum() {
     // Cada ficha entra HACIA el eje: las de arriba bajan, las de abajo suben.
     // Signo por índice y no un valor único — con el mismo `y` para las seis,
     // tres de ellas se alejarían del eje al entrar.
+    //
+    // Lo que se mueve son los RENGLONES, no la ficha. Animar el `<article>`
+    // entero desplaza también su tallo —el `data-stem`, que ya tiene su propio
+    // tween— y sobre todo mueve una caja: se lee como un panel entrando. Por
+    // renglón se lee como un dato que se escribe, que es lo que estas fichas
+    // son. El escalonado interno es corto (0.07) porque las tres piezas son UNA
+    // ficha; el que separa fichas entre sí es el de abajo, y tiene que ser
+    // claramente mayor o las seis se funden en una cortina.
+    //
+    // `expo.out` y no el `EASE_OUT` del timeline (`power3.out`): el renglón sale
+    // disparado y frena largo, casi deteniéndose antes de llegar. `power3`
+    // reparte el frenado de forma más pareja y la entrada se lee como un
+    // desplazamiento; `expo` gasta más de la mitad del recorrido en el primer
+    // 20% del tiempo, y lo que queda es la cola. Va con `duration` alta a
+    // propósito: el tramo lento ES el gesto, y en 0.7s no se llega a ver.
+    //
+    // 0.18 entre fichas —más del doble que antes— para que se lean como seis
+    // llegadas y no como una sola cosa que aparece de a partes.
+    const lines: HTMLElement[] = [];
     cards.forEach((card, i) => {
+      const rows = Array.from(card.querySelectorAll<HTMLElement>("[data-line]"));
+      if (rows.length === 0) return;
+      lines.push(...rows);
+
       tl.from(
-        card,
-        { autoAlpha: 0, y: i % 2 === 0 ? -20 : 20, duration: 0.7 },
-        0.25 + i * 0.08
+        rows,
+        {
+          autoAlpha: 0,
+          y: i % 2 === 0 ? -20 : 20,
+          duration: 1.2,
+          ease: "expo.out",
+          stagger: 0.07,
+        },
+        0.25 + i * 0.18
       );
     });
 
@@ -139,7 +167,11 @@ export default function ProofDatum() {
     return () => {
       tl.scrollTrigger?.kill();
       tl.kill();
-      gsap.set([...cards, ...stems, ...(axis ? [axis] : [])], { clearProps: "all" });
+      // `lines` y no `cards`: desde que la entrada mueve los renglones, la que
+      // queda con estilos inline es cada `<p>`. Limpiar los `<article>` dejaría
+      // seis fichas en `opacity: 0` para siempre — y en dev pasa en cada mount
+      // por StrictMode, no solo al navegar.
+      gsap.set([...lines, ...stems, ...(axis ? [axis] : [])], { clearProps: "all" });
     };
   });
 
@@ -150,9 +182,11 @@ export default function ProofDatum() {
       ref={rootRef}
       className="flex flex-col justify-center bg-background py-24 text-ink lg:py-28"
     >
-      <Container className="flex flex-col gap-10">
-        <Eyebrow className="text-gray-intermediate">Built to</Eyebrow>
-
+      {/* Sin `flex flex-col gap-10`: el `Container` tuvo dos hijos mientras el
+          eyebrow "Built to" estaba arriba, y un gap entre un solo hijo y nada no
+          separa nada. El "Built to" salió porque las seis fichas ya lo dicen —
+          cada una empieza con esas mismas dos palabras. */}
+      <Container>
         {/* En móvil el contenedor ES el eje: su borde izquierdo. En desktop ese
             borde desaparece y el eje pasa a ser el span horizontal de la fila 2. */}
         <div className="flex flex-col gap-10 border-l border-ink pl-6 lg:grid lg:grid-cols-[repeat(13,minmax(0,1fr))] lg:grid-rows-[1fr_1px_1fr] lg:gap-x-6 lg:gap-y-0 lg:border-l-0 lg:pl-0">
@@ -173,12 +207,23 @@ export default function ProofDatum() {
                 aria-hidden="true"
                 className={`hidden h-5 w-px origin-center bg-rule lg:block ${STEM[i]}`}
               />
-              <p className="text-h4 text-gray-intermediate">{stat.eyebrow}</p>
-              <p className="text-h2-serif italic text-balance">
+              {/* `data-line` en las tres: la entrada ya no mueve la ficha como
+                  un bloque, mueve sus renglones uno detrás de otro. Van marcados
+                  desde el JSX y no buscados con un selector estructural
+                  (`article > p`) porque ese selector se rompe solo el día que
+                  alguien agregue un cuarto párrafo o envuelva alguno en un div,
+                  y lo hace en silencio: la animación sigue corriendo, con una
+                  pieza de menos. */}
+              <p data-line className="text-h4 text-gray-intermediate">
+                {stat.eyebrow}
+              </p>
+              <p data-line className="text-h2-serif italic text-balance">
                 {stat.value}
                 <span className="text-green-ink">{stat.accent}</span>
               </p>
-              <p className="text-body-sm text-gray-intermediate text-pretty">{stat.body}</p>
+              <p data-line className="text-body-sm text-gray-intermediate text-pretty">
+                {stat.body}
+              </p>
             </article>
           ))}
         </div>
