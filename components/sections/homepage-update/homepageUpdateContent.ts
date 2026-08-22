@@ -151,7 +151,7 @@ export const AGENT_ECONOMY = {
 // (`CARD_LAYOUT`), indexadas por el mismo orden: `place` decide en qué celda del
 // grid cae cada card y cuánto se separa de la anterior, y eso es composición, no
 // algo que un editor deba ver ni que un CMS deba guardar.
-// El arte vive en `public/prototype/ab10/` y no en `public/prototype/`, que es
+// El arte vive en `public/prototype/homepage-update/` y no en `public/prototype/`, que es
 // donde están los `feature-*.png` de las versiones anteriores: esos cuatro los
 // comparten ab6, ab7, ab9, v2 y v4, así que no se podían reemplazar en su sitio
 // sin cambiarle las cards a cinco páginas de una vez.
@@ -167,22 +167,22 @@ export const AGENT_ECONOMY = {
 // los otros dos intercambia las cards de posición y descalibra ese `end`.
 export const OWN_YOUR_OWN_CARDS = [
   {
-    src: "/prototype/ab10/icon-data.webp",
+    src: "/prototype/homepage-update/icon-data.webp",
     title: "Data",
     body: "Keep your transactions, prompts, and identity confidential, even from the infrastructure that runs them.",
   },
   {
-    src: "/prototype/ab10/icon-traces.webp",
+    src: "/prototype/homepage-update/icon-traces.webp",
     title: "Traces",
     body: "Capture the value your agents create for labs and institutions while keeping your records confidential.",
   },
   {
-    src: "/prototype/ab10/icon-assets.webp",
+    src: "/prototype/homepage-update/icon-assets.webp",
     title: "Assets",
     body: "Move cross-chain, trade perps, earn yield, hold RWAs, and access all of DeFi from your own wallet.",
   },
   {
-    src: "/prototype/ab10/icon-intelligence.webp",
+    src: "/prototype/homepage-update/icon-intelligence.webp",
     title: "Intelligence",
     body: "Run private inference, deploy agents in a secure harness, and keep real sovereignty over your AI.",
   },
