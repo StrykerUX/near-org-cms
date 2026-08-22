@@ -414,6 +414,51 @@ Nota de accesibilidad: los dos valores cruzan los 5s del criterio WCAG 2.2.2
 (Pause, Stop, Hide). El mecanismo de pausa son el hover y el foco de teclado, que
 pausan de verdad. Un control explícito sería mejor.
 
+### `CustomerStories` — la card escala, no encoge su caja (2026-08-22)
+
+Las cards laterales se veían apretadas: encogía la CAJA pero no el contenido. El
+eyebrow, el logo, el botón y el padding quedaban a tamaño completo dentro de un
+contenedor al 62%. El titular sí menguaba —tenía su propia transición de
+`font-size`— y eso hacía el desajuste más visible todavía, porque encogía solo.
+
+Ahora la card se dibuja SIEMPRE a tamaño completo y se reduce con `transform`,
+que baja todo en la misma proporción: tipografía, espaciados, radios e imagen. Es
+la misma card, más chica.
+
+Cuatro cosas que el cambio necesita, y dos de ellas costaron una vuelta:
+
+- **Ancho en `var(--cell-w)` fijo, no `w-full`.** Al 62% la celda mide menos que
+  la card, así que un ancho relativo la haría recalcular su layout interno —el
+  grid de dos columnas, los paddings en `vw`— y volveríamos al problema por otra
+  puerta. Con ancho fijo, el layout interno es idéntico en los dos estados.
+- **`origin-bottom-left`** es lo que la hace calzar con su celda: escalando desde
+  esa esquina ocupa exactamente el 62% izquierdo —lo que mide la celda inactiva—
+  y se apoya abajo, como antes hacía el `items-end`.
+- **`lg:shrink-0`, y sin esto no funciona nada.** La celda es un contenedor flex
+  y la card su item: con el `flex-shrink: 1` por defecto, un `width` MAYOR que el
+  contenedor no se respeta y flex lo comprime hasta el ancho de la celda. La card
+  volvía a recalcular su layout contra el 62% y el `transform` operaba sobre una
+  caja ya comprimida.
+- **`[transform:scale()]` y NO la utilidad `scale-*`.** En Tailwind v4 esa
+  utilidad emite la propiedad independiente `scale`, no `transform` — verificado
+  en el CSS compilado: `{scale:.62}`. Con `transition-[transform,opacity]`, la
+  propiedad que cambiaba y la que se animaba eran distintas. La base explícita
+  `[transform:scale(1)]` le da a la interpolación un punto de partida en vez de
+  `none`.
+
+La fracción sale de `--cell-idle`, la misma variable que usa la celda para su
+ancho: tienen que ser el mismo número o la card deja de calzar, y escritos dos
+veces se separan a la primera.
+
+**El titular perdió su transición de `font-size`** (22px ↔ 38px) y con ella su
+`ds-exempt`: ahora es `text-h3`, un token de la escala. Ese salto existía porque
+era la única parte que menguaba.
+
+**Y cambió qué hace `prefers-reduced-motion`:** antes había `motion-reduce:w-full!`
+y `motion-reduce:opacity-100!`, que dejaban las seis cards idénticas y el
+carrusel ilegible. Ahora se apaga la TRANSICIÓN, no el estado — el criterio pide
+reducir movimiento, no borrar la jerarquía que hace entender que hay un carrusel.
+
 ## Lo que NO se forkeó
 
 `TestimonialMarquee`, `LatestUpdates` y `UpdatesList` siguen viniendo del

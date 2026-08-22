@@ -107,11 +107,71 @@ export default function CustomerStories() {
                     la sección, no de números propios. Antes eran 550ms con otra
                     cubic-bezier mientras el track tardaba 850ms con otra curva
                     más, y ese desfase era el movimiento "en dos tiempos". */}
-                {/* La card llena su celda SIEMPRE. El ancho lo maneja la celda
-                    —ver su nota— y acá quedan el alto y la opacidad, que no
-                    generan hueco horizontal: el alto lo absorbe el `items-end`
-                    de la celda y la card inactiva se apoya abajo. */}
-                <article className="grid h-full w-full grid-cols-1 overflow-hidden rounded-[18px] bg-ink-soft text-cream transition-[height,opacity] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:h-full! motion-reduce:opacity-100! motion-reduce:transition-none! group-data-[active=false]:opacity-60 lg:grid-cols-[1fr_.78fr] lg:group-data-[active=false]:h-[62%] lg:group-data-[active=false]:opacity-[.55] lg:group-data-[active=true]:opacity-100">
+                {/* La card se dibuja SIEMPRE a tamaño completo y se reduce con
+                    `scale`. No con `width`/`height`.
+
+                    Encogiendo la caja, lo único que se achicaba era la caja: el
+                    eyebrow, el logo, el botón y el padding conservaban su tamaño
+                    dentro de un contenedor al 62%, y el resultado era una card
+                    apretada en vez de una card chica. El titular sí menguaba
+                    —tenía su propia transición de `font-size`— y eso hacía el
+                    desajuste todavía más visible, porque encogía solo.
+
+                    Un `scale` reduce TODO en la misma proporción: tipografía,
+                    espaciados, radios y la imagen. Es la misma card, más chica.
+
+                    El ancho va en `var(--cell-w)` fijo y no en `w-full`: al 62%
+                    la celda mide menos que la card, así que un ancho relativo la
+                    haría recalcular su layout interno —el grid de dos columnas,
+                    los paddings en `vw`— y volveríamos al problema por otra
+                    puerta. Con ancho fijo, el layout interno es idéntico en los
+                    dos estados y lo único que cambia es la escala a la que se
+                    pinta.
+
+                    `origin-bottom-left` es lo que hace que calce con su celda:
+                    escalando desde esa esquina, la card ocupa exactamente el 62%
+                    izquierdo del ancho —que es lo que mide la celda inactiva— y
+                    se apoya abajo, como antes hacía el `items-end` con la altura
+                    al 62%.
+
+                    El ancho fijo y el `scale` van los dos en `lg:`. En mobile no
+                    hay estado activo/inactivo —la celda es `min(84vw,460px)` y
+                    todas miden igual— así que ahí la card vuelve a `w-full` y no
+                    escala. Con `var(--cell-w)` suelto desbordaría, porque ese
+                    clamp llega a 1010px.
+
+                    Dos detalles sin los cuales nada de esto funciona, y que
+                    costaron una vuelta:
+
+                    · **`lg:shrink-0`.** La celda es un contenedor flex y la card
+                      su item. Con el `flex-shrink: 1` que traen por defecto, un
+                      `width` MAYOR que el contenedor no se respeta: flex lo
+                      comprime hasta el ancho de la celda. O sea que la card
+                      volvía a recalcular su layout interno contra 62% del ancho
+                      —el problema original— y el `scale` operaba sobre una caja
+                      ya comprimida.
+
+                    · **`[transform:scale()]` y no la utilidad `scale-*`.** En
+                      Tailwind v4 esa utilidad emite la propiedad INDEPENDIENTE
+                      `scale`, no `transform`. Y la transición de acá declara
+                      `transition-[transform,opacity]`: la propiedad que cambia y
+                      la que se anima eran distintas. Escrito como `transform`,
+                      las dos coinciden — y la base explícita `[transform:scale(1)]`
+                      le da a la interpolación un punto de partida en vez de
+                      `none`.
+
+                    La fracción sale de `--cell-idle`, la misma que usa la celda
+                    para su ancho. Tienen que ser el mismo número o la card deja
+                    de calzar con su celda; escrito dos veces, se separan a la
+                    primera.
+
+                    Con `prefers-reduced-motion` lo que se apaga es la TRANSICIÓN,
+                    no el estado: las cards laterales siguen chicas y tenues. El
+                    criterio pide reducir movimiento, no borrar la jerarquía que
+                    hace entender que hay un carrusel. Antes acá había además
+                    `motion-reduce:w-full!` y `motion-reduce:opacity-100!`, que
+                    dejaban las seis cards idénticas y el carrusel ilegible. */}
+                <article className="grid h-full w-full origin-bottom-left grid-cols-1 overflow-hidden rounded-[18px] bg-ink-soft text-cream [transform:scale(1)] transition-[transform,opacity] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:transition-none! group-data-[active=false]:opacity-60 lg:w-[var(--cell-w)] lg:shrink-0 lg:grid-cols-[1fr_.78fr] lg:group-data-[active=false]:[transform:scale(var(--cell-idle))] lg:group-data-[active=false]:opacity-[.55] lg:group-data-[active=true]:opacity-100">
                   <div className="flex flex-col p-[clamp(20px,2.4vw,44px)]">
                     {/* Gov. of Bermuda no tiene logotipo en el contenido, y su
                         `logo` es `null` a propósito. El fallback es el nombre en
@@ -136,20 +196,15 @@ export default function CustomerStories() {
                     <p className="mb-[clamp(8px,1.4vh,18px)] mt-[clamp(18px,3vh,40px)] text-eyebrow uppercase text-cream/82">
                       Customer stories
                     </p>
-                    {/* El titular CRECE con la card, de 22px a 38px, y ese
-                        cambio de cuerpo es buena parte del gesto: no es que la
-                        card activa tenga otro estilo, es que el mismo titular se
-                        agranda. La escala no tiene un par de tokens que dé ese
-                        salto exacto, y meterlo a la fuerza en dos niveles
-                        rompería la interpolación — `transition-[font-size]`
-                        necesita dos valores en la misma unidad.
+                    {/* Un solo cuerpo, y de la escala del DS.
 
-                        La duración y la curva sí salen de las vars, como todo lo
-                        demás de este paso. */}
-                    {/* ds-exempt: ver la nota de arriba — el salto 22→38px es el gesto y no hay tokens que lo cubran */}
-                    <h3 className="max-w-[18ch] text-pretty font-medium leading-[1.15] tracking-[-0.005em] text-[22px] transition-[font-size] duration-[var(--step)] ease-[var(--step-ease)] motion-reduce:transition-none group-data-[active=true]:text-[38px]">
-                      {item.title}
-                    </h3>
+                        Tuvo una transición propia de `font-size` (22px ↔ 38px)
+                        con su `ds-exempt`, porque el salto era el gesto y ningún
+                        par de tokens lo cubría. Desde que la card entera escala
+                        con `transform`, el titular mengua con ella y en la misma
+                        proporción que todo lo demás — que es justamente lo que la
+                        transición de cuerpo no lograba, y por eso desentonaba. */}
+                    <h3 className="max-w-[18ch] text-h3 text-pretty">{item.title}</h3>
 
                     <div className="mt-[clamp(20px,3.4vh,44px)]">
                       <a
