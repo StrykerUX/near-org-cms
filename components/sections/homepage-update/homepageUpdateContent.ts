@@ -130,20 +130,19 @@ export const PROOF_STATS = [
 ] as const;
 
 // ── de AgentEconomy.tsx ──
-// El statement va PARTIDO en cuatro porque dos de sus tramos son acentos serif
-// y esto es un módulo puro: no puede llevar el `<Accent>` que los pinta. Lo que
-// no puede pasar es que el texto se guarde entero y el componente lo re-parta
-// con un `split` o un índice — ahí la copy y su tratamiento quedan acoplados por
+// El statement va PARTIDO en dos porque su tramo final es el único acentuado
+// y esto es un módulo puro: no puede llevar el markup que lo pinta. Lo que no
+// puede pasar es que el texto se guarde entero y el componente lo re-parta con
+// un `split` o un índice — ahí la copy y su tratamiento quedan acoplados por
 // una posición de carácter, y cambiar una palabra rompe el acento en silencio.
 //
-// Es la misma frase que en ab7 pintaba `QuantumBars` (`BARS_STATEMENT`, en un
-// solo string porque ahí el acento no existía: lo que se movía era un barrido
-// de gradiente sobre la línea entera).
+// Eran cuatro tramos cuando la sección era el card negro: ahí "the agent
+// economy." también iba en itálica serif. En la versión clara solo cierra el
+// acento —verde y bold, en el mismo sans— así que el tramo del medio volvió al
+// cuerpo. La frase es la misma; lo que cambió es cuántos tratamientos lleva.
 export const AGENT_ECONOMY = {
-  lead: "NEAR is open infrastructure powering",
-  accentA: "the agent economy.",
-  body: "Quantum-resistant and confidential by design, NEAR empowers you to trade anything anywhere and",
-  accentB: "own your intelligence.",
+  body: "NEAR is open infrastructure powering the agent economy. Quantum-resistant and confidential by design, NEAR empowers you to trade anything anywhere and",
+  accent: "own your intelligence.",
 } as const;
 
 // ── de OwnYourOwn.tsx ──

@@ -2,6 +2,7 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import Eyebrow from "@/components/primitives/Eyebrow";
 import StackAssembly, { type StackStop } from "@/components/sections/homepage-update/stackAssembly";
 import StackCursorTag from "@/components/sections/homepage-update/StackCursorTag";
 import { useStackScene } from "@/components/sections/homepage-update/useStackScene";
@@ -11,6 +12,7 @@ import {
   NEARCOM_BLOCK,
   PROTOCOL_BLOCK,
   STACK_CAPABILITIES,
+  STACK_NOTES,
   STACK_PIECES,
   STACK_INTRO as INTRO,
 } from "@/components/sections/homepage-update/nearStackContent";
@@ -92,111 +94,202 @@ export default function StackAnchors() {
   };
 
   return (
-    <section
-      ref={rootRef}
-      style={{ "--travel": TRAVEL } as React.CSSProperties}
-      className="group/anchors relative bg-ink text-cream data-[mode=track]:h-[calc(var(--travel)+100svh)]"
-    >
-      <div className="relative overflow-hidden group-data-[mode=track]/anchors:sticky group-data-[mode=track]/anchors:top-0 group-data-[mode=track]/anchors:h-svh">
-        {/* El halo. `inset` negativo y el degradado apagándose antes del borde:
-            si el radial termina dentro de su propia caja, se ve el rectángulo. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-[30svh] bg-[radial-gradient(circle_at_50%_50%,rgba(0,220,141,0.13)_0%,rgba(0,220,141,0.05)_22%,rgba(0,220,141,0.015)_34%,rgba(16,16,16,0)_46%)]"
-        />
+    <>
+      <section
+        ref={rootRef}
+        style={{ "--travel": TRAVEL } as React.CSSProperties}
+        className="group/anchors relative bg-ink text-cream data-[mode=track]:h-[calc(var(--travel)+100svh)]"
+      >
+        <div className="relative overflow-hidden group-data-[mode=track]/anchors:sticky group-data-[mode=track]/anchors:top-0 group-data-[mode=track]/anchors:h-svh">
+          {/* El halo. `inset` negativo y el degradado apagándose antes del borde:
+              si el radial termina dentro de su propia caja, se ve el rectángulo. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-[30svh] bg-[radial-gradient(circle_at_50%_50%,rgba(0,220,141,0.13)_0%,rgba(0,220,141,0.05)_22%,rgba(0,220,141,0.015)_34%,rgba(16,16,16,0)_46%)]"
+          />
 
-        <Container className="pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)]">
-          {/* El titular del stack, DENTRO de la escena pegada.
+          <Container className="pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)]">
+            {/* El titular del stack, DENTRO de la escena pegada.
 
-              Vivía en su propia sección (`StackIntro`) justo encima, y por eso
-              se leía una vez y se iba con el scroll: cuando el arte se armaba,
-              el lector ya no tenía a la vista qué era lo que estaba mirando.
-              Acá viaja con el sticky y se queda mientras dura la escena.
+                Vivía en su propia sección (`StackIntro`) justo encima, y por eso
+                se leía una vez y se iba con el scroll: cuando el arte se armaba,
+                el lector ya no tenía a la vista qué era lo que estaba mirando.
+                Acá viaja con el sticky y se queda mientras dura la escena.
 
-              `shrink-0` para que sea el arte —que está en el `flex-1` de
-              abajo— el que ceda alto, y no el titular. El razonamiento viejo
-              de `StackIntro` (que un bloque de texto en el medio le come el
-              alto a las cuatro fichas) sigue siendo cierto para el MEDIO; acá
-              está arriba y en `text-h2` en vez de `text-h1`, así que lo que
-              descuenta es bastante menos. */}
-          <div className="shrink-0 pb-6 text-center lg:pb-8">
-            <h2 className="text-h2 text-balance">
-              {INTRO.lead} <Accent>{INTRO.accent}</Accent>
-            </h2>
-            {/* Sin `mt`: el aire entre titular y subtítulo ya lo pone el
-                interlineado del `text-h2`, que a esta escala son ~14px de
-                descuelgue bajo la última línea. El `mt-3` que había acá se
-                sumaba a eso y separaba los dos como si fueran bloques
-                distintos, cuando son una sola entrada. */}
-            <p className="mx-auto max-w-[42ch] text-body text-cream/70 text-balance">
-              {INTRO.sub}
-            </p>
-          </div>
-
-          {/* El área de anclaje: el arte centrado y las cuatro fichas en las
-              esquinas. `min-h-0` para que el arte pueda encogerse dentro del
-              sticky en vez de desbordarlo. */}
-          <div className="relative min-h-0 flex-1">
-            {/* `h-[80%]` y no `h-full`: el ensamble isométrico se pidió un 20%
-                más chico.
-
-                El tamaño se toca ACÁ, en el alto del stage, y no con un
-                `scale()` sobre el arte: el `w-auto` del SVG deriva su ancho de
-                este alto, así que la pieza sigue midiendo lo que ocupa de
-                verdad. Un `scale` la dejaría reservando el espacio del tamaño
-                original —y las cuatro fichas de las esquinas se anclan contra
-                esta caja, así que se habrían quedado separadas del arte. El
-                centrado no se toca: `left-1/2 top-1/2` con las traslaciones
-                sigue centrando la caja, mida lo que mida. */}
-            <div
-              ref={stageRef}
-              {...stageProps}
-              className="pointer-events-auto absolute left-1/2 top-1/2 h-[80%] -translate-x-1/2 -translate-y-1/2"
-            >
-              <StackAssembly stage={stage} hover={hover} className="h-full w-auto" />
-              <StackCursorTag ref={tagRef} hover={hover} />
+                `shrink-0` para que sea el arte —que está en el `flex-1` de
+                abajo— el que ceda alto, y no el titular. El razonamiento viejo
+                de `StackIntro` (que un bloque de texto en el medio le come el
+                alto a las cuatro fichas) sigue siendo cierto para el MEDIO; acá
+                está arriba y en `text-h2` en vez de `text-h1`, así que lo que
+                descuenta es bastante menos. */}
+            <div className="shrink-0 pb-6 text-center lg:pb-8">
+              <h2 className="text-h2 text-balance">
+                {INTRO.lead} <Accent>{INTRO.accent}</Accent>
+              </h2>
+              {/* Sin `mt`: el aire entre titular y subtítulo ya lo pone el
+                  interlineado del `text-h2`, que a esta escala son ~14px de
+                  descuelgue bajo la última línea. El `mt-3` que había acá se
+                  sumaba a eso y separaba los dos como si fueran bloques
+                  distintos, cuando son una sola entrada. */}
+              <p className="mx-auto max-w-[42ch] text-body text-cream/70 text-balance">
+                {INTRO.sub}
+              </p>
             </div>
 
-            {/* Sin `pieces`: las del protocolo son los cubos de la columna, y
-                cada uno se cuenta solo al pasar el puntero. Ver el docblock de
-                `STACK_PIECES`. */}
-            <Anchor
-              side="left"
-              leaf={PROTOCOL_BLOCK}
-              on={on("protocol")}
-              onSelect={() => goTo("protocol")}
-              className="left-0 top-0"
-            />
-            <Anchor
-              side="right"
-              leaf={INTENTS_BLOCK}
-              pieces={STACK_PIECES.intents}
-              on={on("intents")}
-              onSelect={() => goTo("intents")}
-              className="right-0 top-0"
-            />
-            <Anchor
-              side="left"
-              leaf={{ ...AI_BLOCK, body: AI_BLOCK.intro }}
-              pieces={STACK_PIECES.ai}
-              on={on("ai")}
-              onSelect={() => goTo("ai")}
-              className="bottom-0 left-0"
-            />
-            <Anchor
-              side="right"
-              leaf={NEARCOM_BLOCK}
-              // El único nombre partido en dos colores: "NEAR" es la marca y
-              // ".com" el dominio, y el prototipo tiñe solo la marca. Los otros
-              // tres van enteros porque no tienen esa costura.
-              tint="NEAR"
-              on={on("nearcom")}
-              onSelect={() => goTo("nearcom")}
-              className="bottom-0 right-0"
-            />
-          </div>
-        </Container>
-      </div>
+            {/* El área de anclaje: el arte centrado y las cuatro fichas en las
+                esquinas. `min-h-0` para que el arte pueda encogerse dentro del
+                sticky en vez de desbordarlo. */}
+            <div className="relative min-h-0 flex-1">
+              {/* `h-[80%]` y no `h-full`: el ensamble isométrico se pidió un 20%
+                  más chico.
+
+                  El tamaño se toca ACÁ, en el alto del stage, y no con un
+                  `scale()` sobre el arte: el `w-auto` del SVG deriva su ancho de
+                  este alto, así que la pieza sigue midiendo lo que ocupa de
+                  verdad. Un `scale` la dejaría reservando el espacio del tamaño
+                  original —y las cuatro fichas de las esquinas se anclan contra
+                  esta caja, así que se habrían quedado separadas del arte. El
+                  centrado no se toca: `left-1/2 top-1/2` con las traslaciones
+                  sigue centrando la caja, mida lo que mida. */}
+              <div
+                ref={stageRef}
+                {...stageProps}
+                className="pointer-events-auto absolute left-1/2 top-1/2 h-[80%] -translate-x-1/2 -translate-y-1/2"
+              >
+                <StackAssembly stage={stage} hover={hover} className="h-full w-auto" />
+                <StackCursorTag ref={tagRef} hover={hover} />
+              </div>
+
+              {/* Sin `pieces`: las del protocolo son los cubos de la columna, y
+                  cada uno se cuenta solo al pasar el puntero. Ver el docblock de
+                  `STACK_PIECES`. */}
+              <Anchor
+                side="left"
+                leaf={PROTOCOL_BLOCK}
+                on={on("protocol")}
+                onSelect={() => goTo("protocol")}
+                className="left-0 top-0"
+              />
+              <Anchor
+                side="right"
+                leaf={INTENTS_BLOCK}
+                pieces={STACK_PIECES.intents}
+                on={on("intents")}
+                onSelect={() => goTo("intents")}
+                className="right-0 top-0"
+              />
+              <Anchor
+                side="left"
+                leaf={{ ...AI_BLOCK, body: AI_BLOCK.intro }}
+                pieces={STACK_PIECES.ai}
+                on={on("ai")}
+                onSelect={() => goTo("ai")}
+                className="bottom-0 left-0"
+              />
+              <Anchor
+                side="right"
+                leaf={NEARCOM_BLOCK}
+                // El único nombre partido en dos colores: "NEAR" es la marca y
+                // ".com" el dominio, y el prototipo tiñe solo la marca. Los otros
+                // tres van enteros porque no tienen esa costura.
+                tint="NEAR"
+                on={on("nearcom")}
+                onSelect={() => goTo("nearcom")}
+                className="bottom-0 right-0"
+              />
+            </div>
+
+            {/* El pie DENTRO de la escena. Solo en pantallas altas — ver el
+                docblock de `StackNotes`.
+
+                `shrink-0`, como el titular de arriba: lo que cede alto es el
+                `flex-1` del medio, o sea el arte. Eso es lo que lo empuja todo
+                hacia arriba sin tocar ningún número: el ensamble deriva su ancho
+                del alto del stage (`h-[80%]` + `w-auto`), así que se achica y sube
+                solo, y las cuatro fichas se anclan contra esa misma caja y lo
+                acompañan.
+
+                `pointer-events-none` lo hereda del `Container` y no se revierte:
+                estas dos notas no son interactivas, y devolverles el puntero les
+                robaría hover al arte, que ocupa el centro y llega hasta acá
+                abajo. */}
+            <StackNotes className="hidden shrink-0 pt-8 [@media(min-height:900px)]:grid lg:pt-10" />
+          </Container>
+        </div>
+      </section>
+
+      {/* El pie FUERA de la escena, para cuando adentro no entra.
+
+          Hermano de la `<section>` de arriba y no un bloque más adentro de ella,
+          por dos razones que apuntan al mismo lado. La primera es el
+          `end: "bottom bottom"` del ScrollTrigger de la escena: mide la sección
+          ENTERA, así que cualquier alto agregado ahí estira el recorrido de las
+          seis etapas del ensamble — el texto tardaría en aparecer y, peor, las
+          etapas se separarían entre sí. La segunda es que en modo track esa
+          sección tiene alto FIJO (`--travel` + 100svh), y un hijo después del
+          sticky se le sale por abajo. */}
+      <StackNotesSection />
+    </>
+  );
+}
+
+/* ── El pie: gobernanza y economía ────────────────────────────────────────── */
+
+// A partir de qué alto de ventana el pie entra DENTRO de la escena: 900px.
+//
+// La escena reparte una pantalla entre el titular, el arte y este pie, y el arte
+// se lleva lo que sobra. Por debajo de este alto lo que sobra no alcanza: el
+// ensamble queda tan chico que las cuatro fichas de las esquinas se le acercan
+// hasta tocarlo y el gesto de "el arte en el centro, anclado" se pierde.
+//
+// Está escrito como clase literal en los dos lugares y no como constante porque
+// Tailwind no detecta clases construidas dinámicamente — mismo criterio que el
+// mapa WIDTH de `Container` y el `CARD_LAYOUT` de `OwnYourOwn`. Si se mueve, se
+// mueve en los dos: son el mismo `min-height:900px`, uno encendiendo el pie de
+// adentro y el otro apagando el de afuera.
+
+function StackNotes({ className = "" }: { className?: string }) {
+  return (
+    // `max-w` en `ch` y no en px: son dos bloques de TEXTO y lo que tiene que
+    // quedar constante es la medida de línea, no el ancho de la caja.
+    <div className={`mx-auto max-w-5xl grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-16 ${className}`}>
+      {STACK_NOTES.map((note) => (
+        <div key={note.label} className="flex max-w-[52ch] flex-col gap-3">
+          <Eyebrow className="text-cream/70">{note.label}</Eyebrow>
+          {/* `text-body-sm` y no `text-body`: son pie de la escena, no su
+              contenido. Al tamaño del cuerpo competían con el subtítulo del
+              titular, que es lo que sí tiene que leerse primero. La opacidad
+              dice lo mismo por otra vía.
+
+              50% es el piso, no una preferencia: `--cream` (#f5f4f1) a esa
+              opacidad compone ~#828180 sobre el `--ink` de la sección, que da
+              ~5.5:1 de contraste. El escalón siguiente (40%) cae a ~3.9:1 y deja
+              de pasar AA para texto de este tamaño. */}
+          <p className="text-body-sm text-cream/50 text-pretty">{note.body}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * El pie cuando la ventana es baja: debajo del gráfico, en el último scroll.
+ *
+ * Los dos montajes son el MISMO componente y se excluyen por media query de
+ * `display`, no por opacidad ni por visibilidad: un `display: none` no lo lee
+ * ningún lector de pantalla, así que el contenido nunca se anuncia dos veces
+ * aunque esté dos veces en el árbol.
+ *
+ * `bg-ink` propio: la escena de arriba lo trae de su `<section>`, y esta es otra
+ * — sin él, el pie caería sobre el fondo de la página y el negro se cortaría
+ * justo donde termina el sticky.
+ */
+function StackNotesSection() {
+  return (
+    <section className="bg-ink py-20 text-cream [@media(min-height:900px)]:hidden">
+      <Container>
+        <StackNotes className="grid" />
+      </Container>
     </section>
   );
 }
