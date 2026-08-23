@@ -23,14 +23,18 @@ import m16 from "@/app/(site)/near-foundation/page.meta";
 import m17 from "@/app/(site)/nearcom/page.meta";
 import m18 from "@/app/(site)/official-rules/page.meta";
 import m19 from "@/app/(site)/privacy/page.meta";
-import m20 from "@/app/prototype/chain-ab-propuesta-a/page.meta";
-import m21 from "@/app/prototype/chain-ab-propuesta-b/page.meta";
-import m22 from "@/app/prototype/components/page.meta";
-import m23 from "@/app/prototype/homepage-update/page.meta";
-import m24 from "@/app/(motion)/quantum-security/page.meta";
-import m25 from "@/app/(site)/research/page.meta";
-import m26 from "@/app/(site)/solutions/page.meta";
-import m27 from "@/app/(site)/terms-of-use/page.meta";
+import m20 from "@/app/prototype/chain-ab-opcion-1/page.meta";
+import m21 from "@/app/prototype/chain-ab-opcion-2/page.meta";
+import m22 from "@/app/prototype/chain-ab-opcion-3/page.meta";
+import m23 from "@/app/prototype/chain-ab-propuesta-a/page.meta";
+import m24 from "@/app/prototype/chain-ab-propuesta-b/page.meta";
+import m25 from "@/app/prototype/chain-ab-propuesta-c/page.meta";
+import m26 from "@/app/prototype/components/page.meta";
+import m27 from "@/app/prototype/homepage-update/page.meta";
+import m28 from "@/app/(motion)/quantum-security/page.meta";
+import m29 from "@/app/(site)/research/page.meta";
+import m30 from "@/app/(site)/solutions/page.meta";
+import m31 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -53,12 +57,16 @@ export const ROUTES: RouteEntry[] = [
   { ...m17, route: "/nearcom", stub: true, file: "app/(site)/nearcom/page.meta.ts" },
   { ...m18, route: "/official-rules", stub: true, file: "app/(site)/official-rules/page.meta.ts" },
   { ...m19, route: "/privacy", stub: true, file: "app/(site)/privacy/page.meta.ts" },
-  { ...m20, route: "/prototype/chain-ab-propuesta-a", stub: false, file: "app/prototype/chain-ab-propuesta-a/page.meta.ts" },
-  { ...m21, route: "/prototype/chain-ab-propuesta-b", stub: false, file: "app/prototype/chain-ab-propuesta-b/page.meta.ts" },
-  { ...m22, route: "/prototype/components", stub: false, file: "app/prototype/components/page.meta.ts" },
-  { ...m23, route: "/prototype/homepage-update", stub: false, file: "app/prototype/homepage-update/page.meta.ts" },
-  { ...m24, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m25, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m26, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m27, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m20, route: "/prototype/chain-ab-opcion-1", stub: false, file: "app/prototype/chain-ab-opcion-1/page.meta.ts" },
+  { ...m21, route: "/prototype/chain-ab-opcion-2", stub: false, file: "app/prototype/chain-ab-opcion-2/page.meta.ts" },
+  { ...m22, route: "/prototype/chain-ab-opcion-3", stub: false, file: "app/prototype/chain-ab-opcion-3/page.meta.ts" },
+  { ...m23, route: "/prototype/chain-ab-propuesta-a", stub: false, file: "app/prototype/chain-ab-propuesta-a/page.meta.ts" },
+  { ...m24, route: "/prototype/chain-ab-propuesta-b", stub: false, file: "app/prototype/chain-ab-propuesta-b/page.meta.ts" },
+  { ...m25, route: "/prototype/chain-ab-propuesta-c", stub: false, file: "app/prototype/chain-ab-propuesta-c/page.meta.ts" },
+  { ...m26, route: "/prototype/components", stub: false, file: "app/prototype/components/page.meta.ts" },
+  { ...m27, route: "/prototype/homepage-update", stub: false, file: "app/prototype/homepage-update/page.meta.ts" },
+  { ...m28, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m29, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m30, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m31, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
