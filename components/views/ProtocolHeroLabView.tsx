@@ -10,9 +10,11 @@ import H2Count from "@/components/sections/protocol-labs/hero-labs/H2Count";
 // siguiente pelea con el suyo. Por eso debajo va `ScaleClaim`, la sección real
 // que lo sigue en `/prototype/protocol-a`, y no un placeholder.
 //
-// Su `proof` es `false`: H2 lleva las seis cifras DENTRO del hero, en el
-// marcador a sangre del borde inferior, y repetirlas acá abajo rompería la
-// lectura que la variante propone.
+// `ScaleClaim` ya no muestra las seis cifras: en la página tienen su propia
+// sección (`ProofRow`) entre el hero y ésta. Acá abajo no se monta, y está
+// bien — H2 las lleva DENTRO del hero, en el marcador a sangre del borde
+// inferior, así que la juntura que este lab tiene que dejar juzgar es hero →
+// explicación, sin la evidencia repetida en medio.
 //
 // ── Qué había acá antes ────────────────────────────────────────────────────
 //
@@ -33,7 +35,7 @@ export default function ProtocolHeroLabView() {
   return (
     <main>
       <H2Count />
-      <ScaleClaim proof={false} />
+      <ScaleClaim />
     </main>
   );
 }

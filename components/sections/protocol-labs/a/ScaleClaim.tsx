@@ -4,101 +4,76 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import ScaleCard from "@/components/sections/protocol-labs/a/ScaleCard";
-import { AI_SCALE, PROOF } from "@/components/sections/protocol-labs/protocolContent";
+import { AI_SCALE } from "@/components/sections/protocol-labs/protocolContent";
 
-// Sección 3 — «Built for AI scale».
+// Sección 3 — «Built for AI scale», en cuatro columnas.
 //
-// ── La sección es un bloque, no dos ───────────────────────────────────────
+// El texto en la primera y una card en cada una de las otras tres, todo en una
+// sola fila. Ganó a otras dos disposiciones que se montaron a la vez para
+// compararlas y están en el historial de git:
 //
-// El titular, el cuerpo y las tres propiedades viven dentro del MISMO contenedor
-// y comparten su aire. Antes el par titular/cuerpo flotaba arriba con un hueco
-// grande y las tres propiedades colgaban debajo como una lista suelta: se leían
-// como dos cosas puestas una encima de la otra en vez de como una afirmación y
-// sus tres condiciones.
+//   · una con el titular y el cuerpo en su propia fila y las cards debajo en
+//     tres columnas anchas, con el arte apilado sobre el texto dentro de cada
+//     card;
+//   · la misma, con las cajas ACOSTADAS —panel a la izquierda, texto a su
+//     derecha— para que no crecieran de alto.
 //
-// ── Las tres propiedades son cards ────────────────────────────────────────
+// ── Qué gana este reparto ─────────────────────────────────────────────────
 //
-// El mismo objeto que las cards de «Own Your Own» en la home: esquina de 24px,
-// tinte un escalón por debajo del fondo, sombra de un píxel, desenfoque de
-// fondo. No es una cita estética — es el único componente-caja que la línea de
-// diseño viva tiene, y una página nueva que invente el suyo obliga a mantener
-// dos.
+// Las cards se achican: pasan de un tercio del contenedor a un cuarto —de ~380px
+// a ~285px en un desktop de 1200— y con ellas su panel de arte, porque el alto
+// del panel sale de una proporción y no de un valor fijo. La sección pierde una
+// fila entera y queda bastante más compacta, que en una página que ya carga un
+// acto de seis pantallas es alto que se paga dos veces.
 //
-// El objeto de la card vive en `ScaleCard`, compartido con la otra versión de
-// esta sección: el detalle de por qué es un componente y no markup repetido está
-// ahí. Su arte son tres figuras isométricas de `scaleArt.tsx`.
+// ── Qué paga, y hay que saberlo ───────────────────────────────────────────
 //
-// ── La prop `proof`: dónde caen las seis cifras ───────────────────────────
+//   · **El titular está un escalón abajo.** `text-h2` en una columna de 285px
+//     quiebra en cuatro o cinco renglones y deja de leerse como titular, así que
+//     va en `text-h3`. Este reparto no sólo achica las cards: también achica la
+//     afirmación que las introduce.
+//   · **El texto no gobierna la sección.** Es una columna más, la primera de
+//     cuatro, y se lee como un rótulo al margen antes que como una tesis. Es el
+//     precio de que las cuatro piezas quepan en una fila.
 //
-// Tres valores, y ninguno es una preferencia visual — cada uno responde a qué
-// otra parte de la página se hace cargo de la evidencia:
+// ── El texto va arriba de su columna, no centrado ─────────────────────────
 //
-//   · `"top"`    — la franja ABRE la sección.
-//   · `"bottom"` — la franja CIERRA la sección, subordinada a las propiedades.
-//   · `false`    — sin franja. Es lo que usa la página hoy: las seis cifras
-//                  tienen su propia sección (`ProofRow`) justo encima, y
-//                  repetirlas acá sería decir dos veces lo mismo con dos formas
-//                  distintas.
-
-export type ProofSlot = "top" | "bottom" | false;
-
-// La franja de seis cifras. Una sola regla arriba y nada más: seis reglas —una
-// por cifra— la convertirían en una tabla, y una tabla vuelve a subirle el rango
-// que esta sección le está bajando a propósito.
-//
-// Un componente y no dos bloques de JSX condicionados: arriba y abajo tiene que
-// ser la MISMA franja, o la prop deja de ser "dónde cae" y pasa a ser "cuál de
-// las dos versiones".
-function ProofStrip() {
-  return (
-    <dl className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-rule pt-6 sm:grid-cols-3 lg:grid-cols-6">
-      {PROOF.map((stat) => (
-        <div key={stat.id} className="flex flex-col gap-1">
-          <dd className="text-h4">{stat.value}</dd>
-          <dt className="uppercase text-micro-mono text-gray-intermediate">{stat.label}</dt>
-          {stat.note && <dd className="text-micro-mono text-gray-intermediate">{stat.note}</dd>}
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-export default function ScaleClaim({ proof = "bottom" }: { proof?: ProofSlot }) {
+// `self-start`. Centrarlo verticalmente contra unas cards que miden bastante más
+// que él lo dejaría flotando a media altura, sin alinearse con nada; arriba, su
+// primera línea arranca a la misma altura que el borde superior de las cards y
+// esa coincidencia es lo único que ata las cuatro columnas entre sí.
+export default function ScaleClaim() {
   const ref = useScrollReveal<HTMLDivElement>({ y: 20, stagger: 0.08 });
 
   return (
     <section className="bg-background text-foreground">
-      <Container className="flex flex-col gap-16 py-28 lg:py-36">
-        {proof === "top" && <ProofStrip />}
-
-        <div ref={ref} className="flex flex-col gap-12 lg:gap-16">
-          {/* Titular y cuerpo sobre la retícula de doce, no en dos mitades: el
-              cuerpo arranca en la columna 7 y así queda alineado con el borde
-              izquierdo de la segunda card, que es lo que ata el bloque de arriba
-              con el de abajo. Con `lg:grid-cols-2` caía en la mitad exacta, que
-              no coincide con ninguna de las tres columnas de cards. */}
-          <div className="grid-ds gap-y-6">
-            <h2 data-reveal className="col-span-full text-h2 text-pretty lg:col-span-5">
+      <Container className="py-28 lg:py-36">
+        <div ref={ref} className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {/* La primera columna. En tablet ocupa las dos de la fila para no
+              quedar más estrecha que una card; el reparto a cuatro sólo tiene
+              sentido cuando hay ancho para cuatro. */}
+          <div data-reveal className="flex flex-col gap-5 self-start md:col-span-2 lg:col-span-1">
+            <h2 className="text-h3 text-pretty">
               {AI_SCALE.title.lead}
               <br />
               <Accent>{AI_SCALE.title.accent}</Accent>
             </h2>
-            <p
-              data-reveal
-              className="col-span-full max-w-[40ch] text-body-lg text-ink-soft text-pretty lg:col-start-7 lg:col-span-5 lg:pt-2"
-            >
-              {AI_SCALE.body}
-            </p>
+            <p className="max-w-[34ch] text-body text-ink-soft text-pretty">{AI_SCALE.body}</p>
           </div>
 
-          <ul className="grid gap-6 md:grid-cols-3">
+          {/* Las tres cards, cada una en su columna. `contents` y no un `<ul>`
+              con su propio grid: envolverlas en una lista las metería en una sola
+              celda de la retícula de cuatro y volverían a repartirse entre ellas,
+              que es exactamente el layout del que esta variante quiere salir.
+              Con `display: contents` la lista existe para el lector de pantalla y
+              no para el layout, y las cards se colocan contra la retícula de la
+              sección. */}
+          <ul className="contents">
             {AI_SCALE.points.map((p, i) => (
               <ScaleCard key={p.title} index={i} title={p.title} body={p.body} />
             ))}
           </ul>
         </div>
-
-        {proof === "bottom" && <ProofStrip />}
       </Container>
     </section>
   );
