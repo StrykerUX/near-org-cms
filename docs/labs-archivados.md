@@ -150,3 +150,72 @@ Sigue vivo en el árbol, sin necesidad de rescate:
   `quantum/menu-tab-*.png` (los sacan el `SiteHeader` y el `SiteFooter` reales),
   `quantum/` y `protocol/` (páginas reales), y `v2/stories/` +
   `homepage-update/icon-*.webp` (la homepage viva).
+
+---
+
+## Rediseños descartados del homepage — B, C y D (2026-08-22)
+
+Tres rediseños completos del homepage, montados en `/prototype/homepage-b`,
+`-c` y `-d` sobre un laboratorio propio (`components/sections/homepage-labs/`)
+que copiaba las secciones de `homepage-update` sin tocarla. Salieron de un audit
+de UX/UI y **se rechazaron las tres el mismo día**, antes de commitearse.
+
+**No están en `v-pre-limpieza` ni en `Respaldo`** — nunca entraron al historial.
+Quedaron en un stash local, que es efímero y no viaja al remoto:
+
+```bash
+git stash list                     # buscar "homepage b/c/d descartadas"
+git stash show -p stash@{0}        # mirar
+git stash pop stash@{0}            # traer de vuelta al árbol
+```
+
+El valor de esta entrada no es el rescate: es **no volver a proponer esto**.
+
+### Qué era cada una
+
+| Ruta | Tesis | Sección propia |
+|---|---|---|
+| `homepage-b` | «Una sola revista» — todo en crema, el negro solo en el footer | Stack en capítulos verticales con rail pegado |
+| `homepage-c` | «Dos actos» — claro/oscuro como estructura narrativa | Puentes de gradiente, stack por turnos, proof oscuro 2+4 |
+| `homepage-d` | «El hilo verde» — un hilo vertical firma que ensarta la página | Espaciadores con el hilo scrubbed, stack con cuentas |
+
+### Por qué no gustaron
+
+**El rechazo de fondo, y vale para las tres:** eran *cambios* cuando lo que
+falta es *ejecución*. Las tres reestructuraron el homepage —orden de secciones,
+jerarquía tipográfica, fondos, composición— partiendo de que el problema era la
+estructura. No lo era. Lo que se siente incoherente es el **motion**: las
+animaciones, las microinteracciones y, sobre todo, cómo se ENTRA y se SALE de
+las secciones. Mover muebles no lo arregla, y encima tira lo que ya funcionaba.
+
+Punto por punto:
+
+- **Los gradientes no aplican.** Los puentes de C —bandas de medio viewport en
+  degradé crema→tinta para bajar al acto oscuro— se ven mal, sin vuelta. Un
+  degradé entre dos fondos planos no es una transición: es un parche que hace
+  evidente la costura que quiere tapar. Vale para todo el sitio, no solo para C:
+  los duotonos que se habían metido en las cards del blog caen en lo mismo.
+- **Sacarle el negro al stack no lo arregla (B).** Pasar «The NEAR Stack» a
+  crema por capítulos elimina el corte, pero también el peso: la sección queda
+  como una lista larga y el ensamble isométrico —cuyos trazos son claros, hechos
+  para fondo tinta— casi no se lee. Si el stack se conserva, se conserva oscuro;
+  lo que le falta es un **efecto transitorio** (GSAP) que justifique el cambio de
+  mundo, no un cambio de paleta.
+- **El hilo verde es un elemento más (D).** Agregar una firma vertical nueva
+  para coser la página es sumar decoración encima del problema en vez de
+  resolverlo. La cohesión tiene que salir de lo que ya está.
+- **El statement perdió su evento.** Las tres sacaron el scroll-jack del hero
+  (`Hero` + `AgentEconomy`) y pusieron la frase del agent economy como sección
+  normal. Resuelve la objeción del audit —que se veía una vez y no se podía
+  releer— pero deja el homepage sin ningún momento. Quitar no era la respuesta:
+  faltaba con qué reemplazarlo.
+- **La intro del hero seguía sin gustar.** Ninguna de las tres la tocó de
+  verdad: heredaron el titular entrando por palabras. Sigue pendiente.
+
+### Lo que sí quedó confirmado
+
+Del audit sobrevive el inventario de lo que **no** desentona y no se toca: el
+hero («Own your world.»), `OwnYourOwn`, `CustomerStories` y `PressCarousel`.
+Y una corrección de copy detectada de paso: **"Built for privacy"**, que en
+`homepageUpdateContent.ts` está como "Built to privacy" (pendiente de confirmar
+contra el doc maestro de copy, que todavía no llegó).
