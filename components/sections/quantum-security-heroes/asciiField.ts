@@ -1,7 +1,7 @@
 // Piezas compartidas por los dos fondos ASCII hechos a medida — las
 // "tuberías" de HeroH2 y el rain de HeroH3. Lo que es idéntico entre los dos
 // vive acá: el pool de dígitos, la declaración de fuente del canvas (misma
-// convención que protocol-labs/opening-labs/GlyphField.tsx — el setter
+// convención que protocol-labs/GlyphField.tsx — el setter
 // `font` de Canvas 2D SÍ resuelve custom properties de CSS contra el estilo
 // computado del propio elemento canvas, así que esto usa la fuente mono real
 // en vez de duplicar su fallback stack a mano) y el dimensionado de un canvas

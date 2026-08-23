@@ -1,12 +1,12 @@
 import { GridOverlay } from "@/components/primitives/Grid";
-import Hero from "@/components/sections/protocol-labs/a/Hero";
-import ProofRow from "@/components/sections/protocol-labs/a/ProofRow";
-import ScaleClaim from "@/components/sections/protocol-labs/a/ScaleClaim";
-import Assembly from "@/components/sections/protocol-labs/a/Assembly";
-import DevRuntime from "@/components/sections/protocol-labs/a/DevRuntime";
-import Deployment from "@/components/sections/protocol-labs/a/Deployment";
-import Appendix from "@/components/sections/protocol-labs/a/Appendix";
-import MachineClose from "@/components/sections/protocol-labs/a/MachineClose";
+import Hero from "@/components/sections/protocol-labs/heroes/HeroLayerflow";
+import ProofRow from "@/components/sections/protocol-labs/ProofRow";
+import ScaleClaim from "@/components/sections/protocol-labs/ScaleClaim";
+import Assembly from "@/components/sections/protocol-labs/Assembly";
+import DevRuntime from "@/components/sections/protocol-labs/DevRuntime";
+import Deployment from "@/components/sections/protocol-labs/Deployment";
+import Appendix from "@/components/sections/protocol-labs/Appendix";
+import MachineClose from "@/components/sections/protocol-labs/MachineClose";
 
 // La estructura elegida para la página Protocol — /prototype/protocol-a
 //

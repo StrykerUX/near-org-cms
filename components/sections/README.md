@@ -64,11 +64,8 @@ dar por terminado un cambio.
 | `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
-| `protocol-labs/a/*` | `ProtocolLabAView` | `/prototype/protocol-a` — la estructura elegida para la página de Protocol, salida de comparar cuatro. Tiene su propio [README](./protocol-labs/README.md) |
-| `protocol-labs/hero-labs/*` | `ProtocolHeroesIndexView`, `ProtocolHeroLabView` | `/prototype/protocol-heroes` (+ `/h2`) — **laboratorio**: la alternativa viva para la primera pantalla. Eran ocho; ganó H4 · Cut, ya copiada en `protocol-labs/a/Hero.tsx`. Tiene su propio [README](./protocol-labs/hero-labs/README.md); **ninguna página real lo importa** |
-| `quantum-security-heroes/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` (+ `-h3`) — **laboratorio**: dos heroes para `/quantum-security`, cada uno con el acomodo de un hero de `protocol-labs/hero-labs/` (h2/h3) y su propio fondo ASCII. El resto de cada página reusa `quantum-security-copy/*` sin modificar. Tiene su propio [README](./quantum-security-heroes/README.md) |
-| `protocol-labs/opening-labs/*` | `ProtocolOpeningsIndexView`, `ProtocolOpeningLabView` | `/prototype/protocol-opening` (+ `/c`, `/e`, `/g`) — **laboratorio**: tres aperturas completas (hero + cifras + «Built for AI scale») con superficie propia — un shader WebGL y dos campos de caracteres en canvas. Tiene su propio [README](./protocol-labs/opening-labs/README.md) |
-| `protocol-labs/combo-labs/*` | `ProtocolCombosIndexView`, `ProtocolComboLabView` | `/prototype/protocol-combo` (+ `/h4`, `/h2`, `/c`, `/e`, `/g`) — **laboratorio**: qué va debajo de cada hero superviviente. Cinco propuestas para las secciones 2 y 3, una por hero; cada ruta monta la página entera. Tiene su propio [README](./protocol-labs/combo-labs/README.md) |
+| `protocol-labs/*` | `ProtocolLabAView`, `ProtocolLabBView`, `ProtocolLabCView` | `/prototype/protocol-a`, `-b` y `-c` — tres versiones de la página Protocol completa. Las siete secciones son las MISMAS en las tres; lo único que cambia es el hero (`heroes/`). Tiene su propio [README](./protocol-labs/README.md) |
+| `quantum-security-heroes/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` (+ `-h3`) — **laboratorio**: dos heroes para `/quantum-security`, cada uno con el acomodo de un hero de `protocol-labs/` (h2/h3, ya borrados) y su propio fondo ASCII. El resto de cada página reusa `quantum-security-copy/*` sin modificar. Tiene su propio [README](./quantum-security-heroes/README.md) |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
@@ -76,21 +73,17 @@ son laboratorios y no se tocan a la ligera.
 
 ## Laboratorios
 
-Hay tres vivos, todos bajo `protocol-labs/`: `hero-labs/` (la primera pantalla,
-decidida — queda H2 como alternativa), `opening-labs/` (tres aperturas completas
-con superficie, sin decidir) y `combo-labs/` (qué va debajo de cada hero: cinco
-propuestas para las secciones 2 y 3, sin decidir — es el que está en curso). La regla que gobierna a
-cualquiera: **un laboratorio alimenta una ruta de comparación, ninguna página real
-lo importa, y si una versión gana se COPIA** a la carpeta de la página que la
-reciba — no se importa desde ahí. Y cuando se copia, la del lab se borra: dos
-archivos que dicen ser el mismo componente divergen sin que nadie se entere.
+No queda ninguno vivo. La regla, para cuando vuelva a hacer falta: **un
+laboratorio alimenta una ruta de comparación, ninguna página real lo importa, y
+si una versión gana se COPIA** a la carpeta de la página que la reciba. Y cuando
+se copia, la del lab se borra: dos archivos que dicen ser el mismo componente
+divergen sin que nadie se entere.
 
-`protocol-labs/a/` ya NO es un laboratorio: es la estructura elegida, esperando
-que se decida su apertura.
-
-`transition-labs/` —doce transiciones hero → contenido— se borró entero el
-2026-08-22 junto con seis heroes y cuatro aperturas: se descartaron por diseño,
-no por deuda. Está en el historial de git; el detalle de qué era cada pieza, en
+Los tres de Protocol —`hero-labs/`, `opening-labs/` y `combo-labs/`— se borraron
+el 2026-08-23, con sus rutas. Lo que sobrevivió de cada uno está montado en
+`/prototype/protocol-a`, `-b` y `-c`, que es donde se juzga de verdad; un
+laboratorio existe para elegir, y una vez elegido mantenerlo es mantener dos
+versiones de lo mismo. El detalle de qué se descartó está en
 [`protocol-labs/README.md`](./protocol-labs/README.md).
 
 Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
