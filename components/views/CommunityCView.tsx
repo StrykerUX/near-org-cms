@@ -7,6 +7,7 @@ import RallyInvolvement from "@/components/sections/community/c/RallyInvolvement
 import RallyFaq from "@/components/sections/community/c/RallyFaq";
 import RallyClose from "@/components/sections/community/c/RallyClose";
 import { SAMPLE_EVENTS } from "@/components/sections/community/communityContent";
+import { citiesFromEvents } from "@/components/sections/community/cityField";
 
 // Composition of /prototype/community-c — "Rally", the people-first reading.
 //
@@ -27,14 +28,14 @@ import { SAMPLE_EVENTS } from "@/components/sections/community/communityContent"
 // The white is the channels, which is where this variant spends its one lift,
 // because unlike `a/` it has no dark Legion to spend it on.
 //
-// The cities are derived here and not in the section: the strip and the events
-// table then cannot disagree about which cities the calendar has. `Set` keeps
-// the feed's order (insertion order) while dropping repeats, so a month with
-// three Lisbon events shows Lisbon once and in the right place.
+// The cities are derived here and not in the section: the field, the strip and
+// the events table then cannot disagree about which cities the calendar has.
+// The dedupe lives in `citiesFromEvents` so all three layouts mean the same
+// thing by "the cities on the calendar".
 //
 // The header and footer are NOT here: `app/prototype/layout.tsx` mounts both.
 export default function CommunityCView() {
-  const cities = Array.from(new Set(SAMPLE_EVENTS.map((e) => e.city)));
+  const cities = citiesFromEvents(SAMPLE_EVENTS);
 
   return (
     <main className="flex flex-col bg-cream">

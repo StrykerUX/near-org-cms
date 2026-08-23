@@ -7,6 +7,7 @@ import HubInvolvement from "@/components/sections/community/a/HubInvolvement";
 import HubFaq from "@/components/sections/community/a/HubFaq";
 import HubClose from "@/components/sections/community/a/HubClose";
 import { SAMPLE_EVENTS } from "@/components/sections/community/communityContent";
+import { citiesFromEvents } from "@/components/sections/community/cityField";
 
 // Composition of /prototype/community-a — "Hub", the canonical directory.
 //
@@ -27,12 +28,19 @@ import { SAMPLE_EVENTS } from "@/components/sections/community/communityContent"
 // `readonly CommunityEvent[]`, so wiring the Luma calendar means changing this
 // line and `page.tsx`, and nothing inside `a/`.
 //
+// The cities are derived here and passed down, rather than each section
+// deriving its own: the city field under the stats and the events list below it
+// are then reading the same calendar by construction, and cannot disagree about
+// which places it names.
+//
 // The header and footer are NOT here: `app/prototype/layout.tsx` mounts both.
 export default function CommunityAView() {
+  const cities = citiesFromEvents(SAMPLE_EVENTS);
+
   return (
     <main className="flex flex-col bg-cream">
       <HubHero />
-      <HubStats />
+      <HubStats cities={cities} />
       <HubEvents events={SAMPLE_EVENTS} />
       <LegionBand />
       <HubChannels />
