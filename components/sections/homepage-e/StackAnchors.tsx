@@ -8,6 +8,7 @@ import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { DUR, STAGGER, enterTimeline } from "@/components/sections/homepage-e/motion";
 import StackAssembly, { type StackStop } from "@/components/sections/homepage-e/stackAssembly";
+import StackFlow from "@/components/sections/homepage-e/StackFlow";
 import StackCursorTag from "@/components/sections/homepage-e/StackCursorTag";
 import { useStackScene } from "@/components/sections/homepage-e/useStackScene";
 import {
@@ -108,6 +109,15 @@ export type StackAnchorsProps = {
    */
   frame?: boolean;
   /**
+   * El fondo deja de ser negro plano y pasa a ser el shader del hero,
+   * recalibrado: la luz nace abajo al centro y sube. Ver `StackFlow`.
+   *
+   * Reemplaza al halo —un radial verde muy contenido detrás del ensamble, que
+   * estaba ahí para que el arte no flotara en el vacío—. El flujo hace ese
+   * trabajo mejor y además dice algo: el stack se apoya en algo que asciende.
+   */
+  flow?: boolean;
+  /**
    * Solo se ve la ficha de la capa ACTIVA; las otras tres no están.
    *
    * Es la respuesta al audit de carga cognitiva, aplicada sin mover un solo
@@ -133,6 +143,7 @@ export default function StackAnchors({
   headEntrance = true,
   frame = false,
   soloActive = false,
+  flow = false,
 }: StackAnchorsProps = {}) {
   const { rootRef, stageRef, stage, stop, hover, enhanced, goTo, stageProps, tagRef } =
     useStackScene();
@@ -176,12 +187,20 @@ export default function StackAnchors({
             frame ? "bg-ink" : ""
           }`}
         >
-          {/* El halo. `inset` negativo y el degradado apagándose antes del borde:
-              si el radial termina dentro de su propia caja, se ve el rectángulo. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-[30svh] bg-[radial-gradient(circle_at_50%_50%,rgba(0,220,141,0.13)_0%,rgba(0,220,141,0.05)_22%,rgba(0,220,141,0.015)_34%,rgba(16,16,16,0)_46%)]"
-          />
+          {flow ? (
+            /* El flujo. Va `inset-0` y no sobredimensionado como el halo: el
+               shader llena su caja y su parada más oscura ya es prácticamente
+               el fondo de la sección, así que no hay borde que disimular. */
+            <StackFlow className="pointer-events-none absolute inset-0" />
+          ) : (
+            /* El halo. `inset` negativo y el degradado apagándose antes del
+               borde: si el radial termina dentro de su propia caja, se ve el
+               rectángulo. */
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-[30svh] bg-[radial-gradient(circle_at_50%_50%,rgba(0,220,141,0.13)_0%,rgba(0,220,141,0.05)_22%,rgba(0,220,141,0.015)_34%,rgba(16,16,16,0)_46%)]"
+            />
+          )}
 
           <Container className="pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)]">
             {/* El titular del stack, DENTRO de la escena pegada.

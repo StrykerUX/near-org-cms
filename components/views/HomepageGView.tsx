@@ -68,6 +68,17 @@ export default function HomepageGView() {
           panel fijo— vive en `homepage-fold/StackAtlas.tsx`. Quedó fuera del
           árbol de rutas, no borrada: montarla es cambiar este import. */}
       <StackOverture mode="bleed" />
+      {/* ⏸ PENDIENTE: el fondo del stack.
+      
+          Falta la prop `flow`, que cambia el halo por el shader del hero
+          recalibrado (`StackFlow`). El componente está hecho y funciona, pero
+          ninguna calibración convenció todavía: se probaron abanico desde
+          abajo, vórtice con el foco al centro y líneas duras por escalón de
+          paleta, y el resultado va de «demasiado brillante» a «se ve plano».
+      
+          `StackFlow.tsx` conserva todo lo aprendido en cada intento —qué
+          parámetro hace qué y cuál rompe a cuál— para retomarlo sin repetir el
+          camino. Encenderlo es agregar `flow` acá. */}
       <StackAnchors headEntrance={false} soloActive />
       <InkCurtain direction="up" span={45} />
       <ProofDatum />

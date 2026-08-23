@@ -25,11 +25,20 @@ import { FOLIAGE_VERT, FOLIAGE_FRAG } from "@/components/sections/homepage-e/gl/
 //   · `gradGamma > 1` aprieta la zona clara contra la esquina iluminada y deja
 //     el resto en los verdes medios. Sin esa curva solo se puede elegir entre
 //     "todo medio" y "dos bloques con una costura diagonal".
+/**
+ * La calibración del shader, con cada valor como `number` y no como el literal
+ * que `as const` deja en `P`. Sin este remapeo, `focusX` tendría el tipo `1.28`
+ * y ninguna recalibración compilaría — que es lo contrario de para qué existe.
+ */
+export type FoliageParams = { [K in keyof typeof P]: number };
+
 const P = {
   focusX: 1.28,
   focusY: 0.58,
   scale: 3.4,
   curl: 1.35,
+  // 0 = flujo radial, el del hero. Ver `u_swirl` en el shader.
+  swirl: 0,
   curlScale: 1.1,
   blur: 3.4,
   detail: 0.72,
@@ -68,8 +77,34 @@ function hexToRgb(hex: string): [number, number, number] {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
-export default function HeroFoliage({ className }: { className?: string }) {
+export type HeroFoliageProps = {
+  className?: string;
+  /**
+   * Recalibración del shader. Se mezcla sobre los valores del hero, así que un
+   * consumidor solo declara lo que cambia.
+   *
+   * Existe porque el mismo campo sirve para dos cosas distintas: el paisaje del
+   * hero —luz diagonal, verdes medios, el foco fuera a la derecha— y el flujo
+   * del stack, que es el mismo shader con la luz naciendo abajo al centro y
+   * casi todo el cuadro en negro. Duplicar el componente para eso serían 130
+   * líneas idénticas y un segundo sitio donde arreglar el mismo bug.
+   */
+  params?: Partial<FoliageParams>;
+  /** Las cinco paradas del degradé, de la luz a la sombra. */
+  palette?: readonly string[];
+};
+
+export default function HeroFoliage({
+  className,
+  params,
+  palette,
+}: HeroFoliageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Los dos entran como dependencias del efecto para que un cambio de
+  // calibración recree el programa. En la práctica son constantes de módulo en
+  // los dos consumidores, así que el efecto corre una vez.
+  const key = JSON.stringify([params, palette]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -77,6 +112,9 @@ export default function HeroFoliage({ className }: { className?: string }) {
 
     const gl = getGl2(canvas);
     if (!gl) return; // sin WebGL2 utilizable queda el color de fondo del canvas
+
+    const cfg = { ...P, ...params };
+    const ramp = palette ?? PALETTE;
 
     const program = buildProgram(gl, FOLIAGE_VERT, FOLIAGE_FRAG, "hero-foliage");
     if (!program) return;
@@ -104,22 +142,23 @@ export default function HeroFoliage({ className }: { className?: string }) {
     // momento; acá son constantes, y mandar veinte uniformes a 60fps es
     // tráfico gratuito hacia el driver. Por frame quedan solo `u_res` y
     // `u_time`.
-    gl.uniform2f(u("u_focus"), P.focusX, P.focusY);
-    gl.uniform1f(u("u_scale"), P.scale);
-    gl.uniform1f(u("u_curl"), P.curl);
-    gl.uniform1f(u("u_curlScale"), P.curlScale);
-    gl.uniform1f(u("u_blur"), P.blur);
-    gl.uniform1f(u("u_detail"), P.detail);
-    gl.uniform1f(u("u_detailFall"), P.detailFall);
-    gl.uniform1f(u("u_contrast"), P.contrast);
-    gl.uniform1f(u("u_lift"), P.lift);
-    gl.uniform1f(u("u_gradAngle"), P.gradAngle);
-    gl.uniform1f(u("u_gradSpread"), P.gradSpread);
-    gl.uniform1f(u("u_gradGamma"), P.gradGamma);
-    gl.uniform1f(u("u_gradMix"), P.gradMix);
-    gl.uniform1f(u("u_grain"), P.grain);
-    gl.uniform1f(u("u_drift"), reduced ? 0 : P.drift);
-    PALETTE.forEach((hex, i) => gl.uniform3fv(u(`u_c${i}`), hexToRgb(hex)));
+    gl.uniform2f(u("u_focus"), cfg.focusX, cfg.focusY);
+    gl.uniform1f(u("u_scale"), cfg.scale);
+    gl.uniform1f(u("u_curl"), cfg.curl);
+    gl.uniform1f(u("u_swirl"), cfg.swirl);
+    gl.uniform1f(u("u_curlScale"), cfg.curlScale);
+    gl.uniform1f(u("u_blur"), cfg.blur);
+    gl.uniform1f(u("u_detail"), cfg.detail);
+    gl.uniform1f(u("u_detailFall"), cfg.detailFall);
+    gl.uniform1f(u("u_contrast"), cfg.contrast);
+    gl.uniform1f(u("u_lift"), cfg.lift);
+    gl.uniform1f(u("u_gradAngle"), cfg.gradAngle);
+    gl.uniform1f(u("u_gradSpread"), cfg.gradSpread);
+    gl.uniform1f(u("u_gradGamma"), cfg.gradGamma);
+    gl.uniform1f(u("u_gradMix"), cfg.gradMix);
+    gl.uniform1f(u("u_grain"), cfg.grain);
+    gl.uniform1f(u("u_drift"), reduced ? 0 : cfg.drift);
+    ramp.forEach((hex, i) => gl.uniform3fv(u(`u_c${i}`), hexToRgb(hex)));
 
     const uRes = u("u_res");
     const uTime = u("u_time");
@@ -197,7 +236,7 @@ export default function HeroFoliage({ className }: { className?: string }) {
       // StrictMode React reusa el mismo <canvas>, y perder el contexto acá deja
       // al segundo montaje con un contexto muerto y errores sin mensaje.
     };
-  }, []);
+  }, [key]);
 
   return (
     <canvas

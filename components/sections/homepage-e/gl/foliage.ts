@@ -37,6 +37,7 @@ uniform vec2  u_focus;
 
 uniform float u_scale;      // frecuencia base del campo
 uniform float u_curl;       // cuánto se doblan las estrías respecto del radial puro
+uniform float u_swirl;      // rotación CONSTANTE del flujo: 0 radial, ~1.2 espiral
 uniform float u_curlScale;  // tamaño de esa curvatura
 uniform float u_blur;       // longitud del blur (estirado en A, recorrido en B y C)
 uniform float u_detail;     // segunda capa de alta frecuencia: las "hojas"
@@ -116,7 +117,23 @@ vec2 flowDir(vec2 p) {
   vec2 d = p - focusField();
   float r = max(length(d), 1e-4);
   vec2 radial = d / r;
-  float sw = (fbm2(p * u_curlScale + vec2(0.0, u_time * 0.02 * u_drift)) - 0.375) * u_curl;
+  // u_swirl es un sesgo CONSTANTE sobre esa rotación, y es lo que separa un
+  // abanico de un vórtice.
+  //
+  // El término de u_curl multiplica un fbm centrado en cero: oscila hacia los
+  // dos lados, así que dobla las estrías pero no las enrolla — por mucho que se
+  // suba, el flujo sigue siendo radial con ondas. Sumando un ángulo fijo, la
+  // dirección deja de apuntar hacia afuera y pasa a cortar en diagonal: las
+  // trayectorias se vuelven espirales y el campo entero gira alrededor del
+  // foco.
+  //
+  // A 0 el comportamiento es exactamente el de antes, que es lo que el hero
+  // necesita. Cerca de PI/2 el flujo sería puramente tangencial —anillos
+  // concéntricos, sin avance— así que los valores útiles quedan por debajo.
+  //
+  // (Sin comillas invertidas en este comentario: todo el GLSL vive dentro de un
+  // template literal de TypeScript y un backtick suelto lo cierra.)
+  float sw = u_swirl + (fbm2(p * u_curlScale + vec2(0.0, u_time * 0.02 * u_drift)) - 0.375) * u_curl;
   float c = cos(sw);
   float s = sin(sw);
   return mat2(c, -s, s, c) * radial;
