@@ -265,6 +265,16 @@ Lo archivado está completo en el tag `v-pre-limpieza` y en la rama `Respaldo`;
 vuelta. Antes de dar por perdido un efecto (transiciones, murales, shaders de
 hero, las catorce bandas de newsletter), mirá ahí.
 
+**Cuatro páginas nuevas, con tres layouts cada una.** `/about`, `/economics`,
+`/community` y `/near-foundation` dejaron de ser `StubView` el 2026-08-23:
+montan su variante A y se mudaron de `(site)` a `(motion)` porque usan
+ScrollTrigger (el porqué está en `app/(motion)/layout.tsx`). Las tres propuestas
+de cada una viven en `/prototype/<page>-a|b|c` y **comparten un único módulo de
+copy** (`components/sections/<page>/<page>Content.ts`), que es lo que hace que
+toda diferencia entre A, B y C sea de layout y nunca de redacción. Elegir otra
+propuesta es cambiar el import de una línea en el `page.tsx` real. El detalle
+del patrón está en `components/sections/README.md`.
+
 **Página nueva:** la skill `/new-page <slug> "<Título>"` (o
 `node scripts/new-page.mjs <slug> "<Título>"` a mano) es un atajo — genera
 `page.tsx`/`page.meta.ts`/View coherentes y regenera el manifiesto en un paso.
@@ -286,4 +296,4 @@ Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`
 
 ---
 
-*Last updated: 2026-08-23 — poda de las exploraciones del homepage: de seis rutas (`e`–`k`) quedan dos, renombradas junto con la línea viva a `a`, `b` y `c`. `homepage-e/` pasó a llamarse `homepage-shared/`, que es lo que es.*
+*Last updated: 2026-08-23 — cuatro páginas nuevas (`/about`, `/economics`, `/community`, `/near-foundation`) con tres layouts cada una y una copy compartida por página; las cuatro dejan de ser stubs y pasan a `(motion)`.*
