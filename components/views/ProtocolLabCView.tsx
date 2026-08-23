@@ -1,5 +1,5 @@
 import Appendix from "@/components/sections/protocol-labs/Appendix";
-import Assembly from "@/components/sections/protocol-labs/Assembly";
+import AssemblyBand from "@/components/sections/protocol-labs/AssemblyBand";
 import Deployment from "@/components/sections/protocol-labs/Deployment";
 import DevRuntime from "@/components/sections/protocol-labs/DevRuntime";
 import MachineClose from "@/components/sections/protocol-labs/MachineClose";
@@ -46,7 +46,7 @@ export default function ProtocolLabCView() {
         <HeroField />
         <ProofRow />
         <ScaleClaim />
-        <Assembly />
+        <AssemblyBand />
         <DevRuntime />
         <Deployment />
         <Appendix />
