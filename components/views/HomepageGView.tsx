@@ -1,7 +1,7 @@
 import HeroFold from "@/components/sections/homepage-fold/HeroFold";
 import StatementPlain from "@/components/sections/homepage-fold/StatementPlain";
 import OwnYourOwn from "@/components/sections/homepage-e/OwnYourOwn";
-import InkCurtain from "@/components/sections/homepage-e/InkCurtain";
+import SectionReveal from "@/components/sections/homepage-fold/SectionReveal";
 import StackOverture from "@/components/sections/homepage-fold/StackOverture";
 import StackAnchors from "@/components/sections/homepage-e/StackAnchors";
 import ProofDatum from "@/components/sections/homepage-e/ProofDatum";
@@ -80,8 +80,22 @@ export default function HomepageGView() {
           parámetro hace qué y cuál rompe a cuál— para retomarlo sin repetir el
           camino. Encenderlo es agregar `flow` acá. */}
       <StackAnchors headEntrance={false} soloActive />
-      <InkCurtain direction="up" span={45} />
-      <ProofDatum />
+      {/* La salida del negro, con la gramática nueva.
+      
+          Acá estaba `InkCurtain direction="up"`, que hace el gesto contrario al
+          que esta transición necesita: pinta crema encima en vez de retirar el
+          negro. El resultado eran dos fallos que resultaron ser el mismo — el
+          recorte no revelaba nada porque el panel estaba vacío, y `ProofDatum`
+          corría su entrada entera detrás de él y aparecía hecha.
+      
+          Con `SectionReveal` el velo es el negro del que se sale y se abre
+          desde abajo, así que lo que el recorte descubre es la sección de
+          verdad; y la sección espera a que la descubran antes de animar. Las
+          otras cuatro vistas siguen con la cortina: ver el docblock de
+          `SectionReveal.tsx`. */}
+      <SectionReveal>
+        <ProofDatum />
+      </SectionReveal>
       <CustomerStories />
       <PressCarousel />
       <BelongsNewsletter />

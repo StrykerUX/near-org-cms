@@ -5,6 +5,7 @@ import { gsap } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import { EASE } from "@/components/sections/homepage-e/motion";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
+import { useRevealGate } from "@/components/sections/homepage-fold/SectionReveal";
 import { PROOF_STATS } from "@/components/sections/homepage-e/homepageUpdateContent";
 
 // Un eje y seis marcas. Las pruebas cuelgan de una línea que cruza el ancho
@@ -106,6 +107,14 @@ const STEM = [
 ] as const;
 
 export default function ProofDatum() {
+  // El gate de la transición que revela esta sección, si es que hay una.
+  //
+  // `null` es el caso normal —cinco de las seis vistas la montan suelta— y ahí
+  // todo sigue exactamente igual que antes. Cuando existe, la escena deja de
+  // decidir sola cuándo entrar: el velo que la tapa es quien le da paso, porque
+  // es el único que sabe si se la está viendo.
+  const gate = useRevealGate();
+
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk }) => {
     if (!motionOk) return;
 
@@ -114,9 +123,15 @@ export default function ProofDatum() {
     const cards = q("[data-card]");
     if (cards.length === 0) return;
 
+    // Con gate, el timeline nace en pausa y sin trigger propio: un `top 75%`
+    // dispararía mientras el velo todavía cubre la pantalla, que es justo el
+    // fallo que la transición viene a cerrar. Sin gate, el trigger de siempre.
     const tl = gsap.timeline({
       defaults: { ease: EASE_OUT },
-      scrollTrigger: { trigger: scope, start: "top 75%", once: true, markers: DEBUG_MARKERS },
+      paused: !!gate,
+      scrollTrigger: gate
+        ? undefined
+        : { trigger: scope, start: "top 75%", once: true, markers: DEBUG_MARKERS },
     });
 
     // El eje se traza de un extremo al otro antes que nada: es la estructura, y
@@ -215,7 +230,23 @@ export default function ProofDatum() {
 
     tl.from(stems, { scaleY: 0, duration: 0.45, stagger: 0.08 }, 0.2);
 
+    // Reversible, como el velo: si el lector sube y el negro vuelve a tapar, la
+    // escena se rebobina a cubierto y se la ve entrar otra vez al bajar. Un
+    // `once` acá dejaría el segundo pase con la cortina abriéndose sobre algo ya
+    // montado — que es el pop original, solo que a partir de la segunda vuelta.
+    const unsubscribe = gate?.subscribe(
+      (instant) => {
+        if (tl.progress() !== 0 || tl.isActive()) return;
+        if (instant) tl.progress(1).pause();
+        else tl.play();
+      },
+      () => {
+        if (tl.progress() !== 0 || tl.isActive()) tl.pause(0);
+      }
+    );
+
     return () => {
+      unsubscribe?.();
       tl.scrollTrigger?.kill();
       tl.kill();
       // `lines` y no `cards`: desde que la entrada mueve los renglones, la que
@@ -231,7 +262,7 @@ export default function ProofDatum() {
         el.textContent = text;
       });
     };
-  });
+  }, [gate]);
 
   // Sin `min-h-svh`: la sección mide lo que mide su contenido. Forzarla a una
   // pantalla dejaría medio viewport en blanco alrededor de un eje de 350px.
