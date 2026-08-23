@@ -2,9 +2,10 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import MediaFrame from "@/components/primitives/MediaFrame";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import { LEGION } from "@/components/sections/community/communityContent";
+import { LEGION, MEDIA } from "@/components/sections/community/communityContent";
 
 // §4 of the Board — the one block that is not a row.
 //
@@ -31,6 +32,23 @@ import { LEGION } from "@/components/sections/community/communityContent";
 // Centred, and the only centred type on the page — for the same reason as
 // everything else here. The board is left-aligned because a scan needs a common
 // left edge; this block is not being scanned.
+//
+// ── The page's only photograph, and there is exactly one on purpose ────────
+// `a/` reserves six picture slots and `c/` reserves eleven. This variant
+// reserves one, and the restraint is the variant: a departures board that
+// suddenly grows thumbnails in its rows stops being a board, and four pictures
+// over the four ways in would be a second layout idea on a page whose entire
+// value is having only one.
+//
+// So the single image goes where the single exception already is. This block is
+// already the one thing here that is not a row; the photograph is the widest
+// object on the page, at `21/9`, spanning the full container instead of the
+// `46rem` the type is held to. Wider than the sentence above it, on the page's
+// only white ground, after twelve screens of hairlines — it is the stop.
+//
+// The commission is the same `MEDIA.legion` all three variants use. One
+// photograph, three crops; not three requests to a team that has to go and take
+// it.
 export default function BoardLegion() {
   const rootRef = useScrollReveal<HTMLElement>({ y: 36, stagger: 0.12 });
 
@@ -59,6 +77,10 @@ export default function BoardLegion() {
           <p data-reveal className="mt-8 text-caption-mono uppercase text-gray-intermediate">
             {LEGION.statLine}
           </p>
+        </div>
+
+        <div data-reveal className="mt-24">
+          <MediaFrame label={MEDIA.legion.label} spec={MEDIA.legion.spec} ratio="21/9" />
         </div>
       </Container>
     </section>

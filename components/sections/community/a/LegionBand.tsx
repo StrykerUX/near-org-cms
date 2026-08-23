@@ -2,9 +2,10 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import MediaFrame from "@/components/primitives/MediaFrame";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import { LEGION } from "@/components/sections/community/communityContent";
+import { LEGION, MEDIA } from "@/components/sections/community/communityContent";
 
 // §4 of the Hub — the Legion, and the page's only dark cut.
 //
@@ -23,6 +24,21 @@ import { LEGION } from "@/components/sections/community/communityContent";
 // looking for it. It works precisely BECAUSE it is the only one; a second dark
 // section on this page would cost this one its entire effect, which is the thing
 // to remember if anyone ever adds one.
+//
+// ── And the picture, which is the ask ──────────────────────────────────────
+// The block asks the reader to join a group of people it never shows them. That
+// is the single biggest hole on the page: everything else here is a destination
+// you can check for yourself — a calendar, eight channels, a repo — and this is
+// the one that runs on believing there is somebody on the other side.
+//
+// So the band ends in a wide photograph of the Legion as an actual room, at
+// `5/2` across all twelve columns: the largest reserved slot anywhere in this
+// variant, and deliberately below the CTA rather than beside it. Beside it, the
+// picture competes with the button for the same glance; underneath, it is what
+// the reader is looking at while deciding.
+//
+// `tone="dark"` is not cosmetic — the frame's light registration marks are tuned
+// for cream and vanish on ink.
 //
 // `data-nav-dark` inverts the fixed site header while this band is under it —
 // it is not decorative, the header would otherwise be black-on-black here.
@@ -68,6 +84,15 @@ export default function LegionBand() {
               {LEGION.statLine}
             </p>
           </div>
+        </div>
+
+        <div data-reveal className="mt-20">
+          <MediaFrame
+            label={MEDIA.legion.label}
+            spec={MEDIA.legion.spec}
+            ratio="5/2"
+            tone="dark"
+          />
         </div>
       </Container>
     </section>

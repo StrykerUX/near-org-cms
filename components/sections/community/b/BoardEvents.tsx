@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import Container from "@/components/primitives/Container";
+import RouteField from "@/components/sections/community/b/RouteField";
+import { citiesFromEvents } from "@/components/sections/community/cityField";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
@@ -28,6 +30,23 @@ export type BoardEventsProps = {
 // per-character 3D rig, and it degrades into nonsense the moment the reader has
 // reduced motion on. A character settling into place says the same thing about
 // live data, in the vocabulary the rest of the site already uses.
+//
+// ── The one drawing on this variant, and where it goes ────────────────────
+// The board gets its city field in the HEADER of this block rather than in a
+// space of its own, and it is doing a specific job there: it is the legend for
+// the table underneath. The reader meets the shape of the calendar — how far
+// apart these five things are — and then reads the five rows that say what and
+// when. A timetable in a station has the route diagram over it for the same
+// reason, and in the same order.
+//
+// It names nothing. `RouteField` explains why at length: the city column of
+// this very table is two inches below it.
+//
+// The cities are derived HERE from the section's own prop, unlike `a/` and
+// `c/`, which take them from the view. Those two render the field and the feed
+// in different sections and have to be kept in agreement from above; here the
+// drawing and the table are the same component reading the same array, so
+// passing the list in from outside would only add a prop that cannot disagree.
 //
 // ── Why `.from` and not `staggerChars()` ───────────────────────────────────
 // `staggerChars` emits `.to` tweens, which means the characters have to already
@@ -102,12 +121,18 @@ export default function BoardEvents({ events }: BoardEventsProps) {
       className="scroll-mt-[var(--site-header-block)] bg-cream pb-[10svh] pt-[6svh]"
     >
       <Container>
-        <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
-          <div>
+        <div className="grid-ds items-end gap-y-10">
+          <div className="col-span-12 lg:col-span-5">
             <p className="text-eyebrow-mono uppercase text-gray-intermediate">{EVENTS.eyebrow}</p>
             <h2 className="mt-4 max-w-[18ch] text-h2 text-pretty">{EVENTS.headline}</h2>
+            <p className="mt-6 max-w-[38ch] text-body-sm text-ink-soft text-pretty">
+              {EVENTS.sub}
+            </p>
           </div>
-          <p className="max-w-[38ch] text-body-sm text-ink-soft text-pretty">{EVENTS.sub}</p>
+
+          <div className="col-span-12 lg:col-span-6 lg:col-start-7">
+            <RouteField cities={citiesFromEvents(events)} />
+          </div>
         </div>
 
         <div data-board className="mt-12">

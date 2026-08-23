@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
+import ChannelMark from "@/components/sections/community/c/ChannelMarks";
 import {
   CHANNEL_GROUPS,
   SOCIALS,
@@ -33,7 +34,16 @@ import {
 // channel without grouping it makes it disappear from THIS layout only, loudly,
 // rather than showing up half-described in all three.
 //
-// No logos, for the reason spelled out in `a/HubChannels`.
+// ── No logos, and yet three marks ─────────────────────────────────────────
+// The eight channels still get no logos, for the arithmetic reason set out at
+// length in `a/HubChannels`: two of these eight have a real mark in the icon
+// set, one has a stale one, and five would have to be invented.
+//
+// The three GROUPS are a different case, and only this variant has them. Nobody
+// owns a mark for "talk to someone", so there is nothing to counterfeit and no
+// row of half-real trademarks to line up — the mark can just be the behaviour,
+// drawn. `ChannelMarks` carries the three and the caption each one had to
+// survive being given.
 //
 // The white ground is the page's one lift and it is spent here rather than on
 // the Legion, which is `c/`'s whole inversion: the Legion is separated by
@@ -58,7 +68,10 @@ export default function RallyChannels() {
           {CHANNEL_GROUPS.map((group) => (
             <div key={group.id} className="col-span-12 lg:col-span-4">
               <div className="border-t border-rule pt-6">
-                <h3 className="text-h3 text-pretty">{group.label}</h3>
+                <div className="mt-2 text-ink">
+                  <ChannelMark family={group.id} />
+                </div>
+                <h3 className="mt-8 text-h3 text-pretty">{group.label}</h3>
                 <p className="mt-3 max-w-[30ch] text-body-sm text-gray-intermediate text-pretty">
                   {group.note}
                 </p>

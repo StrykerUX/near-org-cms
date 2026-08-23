@@ -2,9 +2,10 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import MediaFrame from "@/components/primitives/MediaFrame";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import { LEGION } from "@/components/sections/community/communityContent";
+import { LEGION, MEDIA } from "@/components/sections/community/communityContent";
 
 // §2 of the Rally — the Legion, moved to the top, and the reason this variant
 // exists.
@@ -29,6 +30,24 @@ import { LEGION } from "@/components/sections/community/communityContent";
 // to reach it. That is the trade this variant is proposing, and the comparison
 // against `a/` is what it is for.
 //
+// ── The photograph, and why it is the largest thing on any of the three ───
+// This variant separates the Legion by POSITION and by nothing else — no band,
+// no rule, no change of ground. That works as an argument and it leaves the
+// block with no visual weight of its own, which is the honest objection to the
+// whole inversion: the most important thing on the page is set in the same
+// cream, at one step down from the heading above it.
+//
+// The picture is what settles that. `16/9` across columns 2–12 is the biggest
+// reserved slot in the set, and it lands between the heading and the ask, so a
+// reader coming out of the hero passes through a room full of people on the way
+// to "Join the Legion". That is the argument this variant is making, made in
+// the one medium that can make it in a single glance.
+//
+// The indent (starting at column 2 rather than 1) is the same continuity device
+// as everything else here: the block is the second sentence of the opening, and
+// an indented picture reads as a continuation where a full-bleed one reads as a
+// new chapter.
+//
 // One step down from the `h1` in the scale and nothing else. Matching the h1's
 // `text-display` was tried and it reads as two competing openings rather than
 // one continuous one — the heading has to be clearly the SECOND voice for the
@@ -47,7 +66,13 @@ export default function RallyLegion() {
           Join the <Accent display>Legion</Accent>
         </h2>
 
-        <div className="mt-12 grid-ds items-end gap-y-10">
+        <div data-reveal className="mt-14 grid-ds">
+          <div className="col-span-12 lg:col-span-11 lg:col-start-2">
+            <MediaFrame label={MEDIA.legion.label} spec={MEDIA.legion.spec} ratio="16/9" />
+          </div>
+        </div>
+
+        <div className="mt-16 grid-ds items-end gap-y-10">
           <div className="col-span-12 lg:col-span-7">
             <p data-reveal className="max-w-[54ch] text-body-lg text-ink-soft text-pretty">
               {LEGION.body}

@@ -3,7 +3,12 @@ import { ArrowUpRight } from "lucide-react";
 
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import { EVENTS, type CommunityEvent } from "@/components/sections/community/communityContent";
+import MediaFrame from "@/components/primitives/MediaFrame";
+import {
+  EVENTS,
+  MEDIA,
+  type CommunityEvent,
+} from "@/components/sections/community/communityContent";
 
 export type HubEventsProps = {
   /** The feed. Sample data today, a Luma calendar the day `page.tsx` fetches it. */
@@ -25,9 +30,31 @@ export type HubEventsProps = {
 // is scannable in one vertical pass and the hairline between rows does the
 // grouping that a border would have done around each one.
 //
+// ── One photograph, and it is of the next event ───────────────────────────
+// The rows stay text, because the scan is the whole reason they are rows. But a
+// list of five events on a page about people is still a page with nobody in it,
+// so the block opens with one wide picture: not a decorative header image, the
+// LEAD event's own room.
+//
+// Its commission is built from the feed — the event's title and city plus the
+// suffix in `MEDIA.eventsLead` — which means it can never ask for a photograph
+// of something the page does not list, and it re-points itself the day the Luma
+// calendar replaces the sample. Same discipline as `c/RallyCities` deriving its
+// strip from the feed instead of a hand-written list of impressive places.
+//
+// It spans columns 4–12 rather than the full width, and that offset is the
+// point: the list underneath starts at the left edge, so the picture breaking
+// away from it is what keeps this block from being one more full-width stack on
+// a page of full-width stacks.
+//
 // A server component: it is a list of links with a CSS hover, and nothing here
 // needs to run on the client.
 export default function HubEvents({ events }: HubEventsProps) {
+  // Guarded rather than assumed: an empty calendar is a real state for a feed,
+  // and it should render an empty list, not a commission for a photograph of
+  // nothing.
+  const lead = events[0];
+
   return (
     <section
       id="events"
@@ -43,6 +70,19 @@ export default function HubEvents({ events }: HubEventsProps) {
             <p className="max-w-[38ch] text-body text-ink-soft text-pretty">{EVENTS.sub}</p>
           </div>
         </div>
+
+        {lead && (
+          <div className="mt-14 grid-ds">
+            <div className="col-span-12 lg:col-span-9 lg:col-start-4">
+              <MediaFrame
+                label={`${lead.title}, ${lead.city} ${MEDIA.eventsLead.suffix}`}
+                spec={MEDIA.eventsLead.spec}
+                ratio="5/2"
+                src={lead.image}
+              />
+            </div>
+          </div>
+        )}
 
         <ul className="mt-14 border-t border-rule">
           {events.map((e) => (

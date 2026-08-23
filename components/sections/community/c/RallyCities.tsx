@@ -1,6 +1,7 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
+import PlacesField from "@/components/sections/community/c/PlacesField";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { CITIES } from "@/components/sections/community/communityContent";
@@ -28,6 +29,23 @@ export type RallyCitiesProps = {
 // that in about a fifth of a screen, and it earns the cut by being the hinge of
 // the page's argument: those are the figures' countries turning into actual
 // places, and the calendar of what happens in them starts immediately below.
+//
+// ── The drawing above the strip, and why they are one band and not two ────
+// The strip alone says the names. It cannot say that they are far apart, which
+// is the actual claim under "70+ countries" — a marquee of five words reads as
+// a list no matter how long it runs. So the band opens with the city field: the
+// same five places, plotted, and then the same five places running. One
+// movement, in one ground: here is where they are, and here they come.
+//
+// Split into two sections it would have been a diagram followed by a marquee of
+// the identical data, which is the same thing twice. Stacked inside one band it
+// is a statement and its own restatement in motion, which is what a hinge in a
+// page is supposed to do.
+//
+// `CITIES.note` moves out of the header and down beside the foot of the
+// drawing, where it belongs: it is the sentence that says the list is the
+// calendar and not a claim about the whole community, and it now sits against
+// the thing it qualifies rather than above it.
 //
 // `data-nav-dark` inverts the fixed site header over it — the band is tall
 // enough that the header is fully inside it for a while, so without the flag the
@@ -62,15 +80,22 @@ export default function RallyCities({ cities }: RallyCitiesProps) {
   );
 
   return (
-    <section data-nav-dark className="bg-ink py-[8svh] text-cream">
+    <section data-nav-dark className="bg-ink py-[12svh] text-cream">
       <Container>
-        <div className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3">
-          <p className="text-eyebrow-mono uppercase text-near-green-accent">{CITIES.eyebrow}</p>
-          <p className="max-w-[44ch] text-caption text-cream/60 text-pretty">{CITIES.note}</p>
+        <p className="text-eyebrow-mono uppercase text-near-green-accent">{CITIES.eyebrow}</p>
+
+        <div className="mt-12 grid-ds items-end gap-y-10">
+          <div className="col-span-12 lg:col-span-7">
+            <PlacesField cities={cities} />
+          </div>
+
+          <p className="col-span-12 max-w-[40ch] text-caption text-cream/60 text-pretty lg:col-span-4 lg:col-start-9">
+            {CITIES.note}
+          </p>
         </div>
       </Container>
 
-      <div ref={rootRef} className="mt-10 overflow-hidden">
+      <div ref={rootRef} className="mt-20 overflow-hidden">
         <div data-marquee className="flex w-max">
           <div className="flex gap-8 pr-8">{set}</div>
           <div className="flex gap-8 pr-8" aria-hidden="true">

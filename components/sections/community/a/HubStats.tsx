@@ -1,10 +1,16 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
+import CityField from "@/components/sections/community/a/CityField";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
 import { STATS, STATS_NOTE } from "@/components/sections/community/communityContent";
+
+export type HubStatsProps = {
+  /** The calendar's cities, deduplicated in feed order. Derived by the view. */
+  cities: readonly string[];
+};
 
 // §2 of the Hub — four figures on four rules, immediately under the hero.
 //
@@ -29,11 +35,25 @@ import { STATS, STATS_NOTE } from "@/components/sections/community/communityCont
 // is wider than that. Stepping the figure down instead would break the row's
 // uniformity, which is the one thing this treatment cannot trade.
 //
+// ── The figure under the row, and why the provenance line moved ───────────
+// "70+ / Countries" is the one figure of the four that can be shown rather than
+// asserted, because the events calendar names actual cities. `CityField` plots
+// them, directly under the row, in the same block — a figure does not get its
+// own section here, it lives inside the one making the claim.
+//
+// Putting it in columns 1–7 pushed `STATS_NOTE` out of the full-width line it
+// used to run on and into columns 9–12, at the foot of the drawing, and that is
+// an improvement rather than a side effect: the note is about how all of this
+// was counted, and it now sits beside the thing being counted instead of
+// underneath everything as a footer. It also breaks the block's symmetry, which
+// on a page of eight full-width stacks is the first place the eye gets a reason
+// to stop.
+//
 // The rule wipes first and the figure follows it out by a fifth of a second, so
 // the row reads as four rules drawing with four numbers coming up behind them
 // rather than as two separate waves. Same rhythm as `ProofBand`, on purpose:
 // this is one site, and a figure arriving should look the same everywhere.
-export default function HubStats() {
+export default function HubStats({ cities }: HubStatsProps) {
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk }) => {
     if (!motionOk) return;
 
@@ -44,7 +64,11 @@ export default function HubStats() {
 
     tl.from(q("[data-stat-rule]"), { scaleX: 0, duration: 0.8, stagger: 0.11 }, 0)
       .from(q("[data-stat-rise]"), { yPercent: 115, duration: 0.9, stagger: 0.11 }, 0.2)
-      .from(q("[data-stat-label]"), { autoAlpha: 0, y: 8, duration: 0.5, stagger: 0.11 }, 0.5);
+      .from(q("[data-stat-label]"), { autoAlpha: 0, y: 8, duration: 0.5, stagger: 0.11 }, 0.5)
+      // The figure joins the timeline the section already has rather than
+      // bringing a ScrollTrigger of its own. It is one fade: the drawing is not
+      // an event, it is where the row's second figure lands.
+      .from(q("[data-stat-figure]"), { autoAlpha: 0, y: 14, duration: 0.8 }, 0.7);
 
     return () => {
       tl.scrollTrigger?.kill();
@@ -78,9 +102,15 @@ export default function HubStats() {
           ))}
         </div>
 
-        <p className="mt-12 max-w-[62ch] text-caption text-gray-intermediate text-pretty">
-          {STATS_NOTE}
-        </p>
+        <div className="mt-16 grid-ds items-end gap-y-10">
+          <div data-stat-figure className="col-span-12 lg:col-span-7">
+            <CityField cities={cities} />
+          </div>
+
+          <p className="col-span-12 max-w-[46ch] text-caption text-gray-intermediate text-pretty lg:col-span-4 lg:col-start-9">
+            {STATS_NOTE}
+          </p>
+        </div>
       </Container>
     </section>
   );

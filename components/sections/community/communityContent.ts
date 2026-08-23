@@ -87,6 +87,20 @@ export type CommunityEvent = {
   city: string;
   kind: string;
   href: string;
+  /**
+   * The event's photograph, when there is one.
+   *
+   * Optional, and it stays optional forever: a Luma event has a cover image and
+   * a meetup announced yesterday often does not. The layouts that render a
+   * picture per event pass this straight to `MediaFrame`'s `src`, so an event
+   * without one shows the reserved frame with its own commission written in it
+   * — the same cell, the same height, nothing to lay out twice.
+   *
+   * ⚠ The day the Luma calendar is wired, THIS is the field its cover image
+   * lands in. Nothing else about the sections has to change: the photo arrives
+   * with the event, and the frames stop being frames one row at a time.
+   */
+  image?: string;
 };
 
 /**
@@ -151,6 +165,27 @@ export const SAMPLE_EVENTS = [
 export const CITIES = {
   eyebrow: "On the ground",
   note: "Every city on the calendar for the next few weeks.",
+} as const;
+
+/**
+ * §3c — the page's one drawn figure, in all three layouts.
+ *
+ * The geometry, the projection and the coordinate table live in `cityField.ts`;
+ * only the words are here. The caption is shared across the three variants on
+ * purpose, like every other string in this module: the three treatments differ
+ * in size, ground and density, and if they also differed in what they CLAIMED
+ * the comparison would stop being about layout.
+ *
+ * The caption's second sentence is the figure's whole licence. A field of dots
+ * behind a handful of cities looks like a map, and a map implies land, borders
+ * and coverage this page is not claiming. Saying "graticule, not a coastline"
+ * costs one line and makes the drawing honest.
+ */
+export const CITY_FIELD = {
+  caption:
+    "The calendar's cities, at their real coordinates. The field behind them is the graticule — a grid of latitude and longitude, not a coastline.",
+  /** Prefix for the cities the coordinate table cannot place. "Online" is one. */
+  unplaced: "Not a place",
 } as const;
 
 /**
@@ -382,5 +417,95 @@ export const CLOSING = {
     // both live here rather than as literals inside three closing sections.
     placeholder: "email address",
     fieldLabel: "Email address",
+  },
+} as const;
+/**
+ * The photography this page reserves space for — every commission in one place.
+ *
+ * ── These labels are rendered, so they are in English ──────────────────────
+ *
+ * A `MediaFrame` prints its label inside the reserved area, in mono, under the
+ * registration marks. It is scaffolding — it disappears the instant a `src`
+ * arrives — but it is scaffolding the reader can see, on an English page, so it
+ * is written in English like everything else that reaches the screen. The
+ * comments in these folders are the only thing here written for the editor
+ * rather than the browser.
+ *
+ * ── Why they are here and not written into the components ──────────────────
+ *
+ * The community team needs one list to go shooting with. Spread across nine
+ * components in three variant folders, "what photos do we need" is a grep; here
+ * it is a block you read top to bottom, and the README's asset table is
+ * transcribed from it. It is also how the same commission stays the same
+ * commission across A, B and C — the Legion group shot is ONE photograph the
+ * three layouts crop differently, not three requests.
+ *
+ * ── How to write one ───────────────────────────────────────────────────────
+ *
+ * A label has to be enough for somebody to go and take the picture: what is in
+ * frame, how wide, and what it has to show. "Event photo" is not a commission.
+ * Nothing here is decorative and nothing is stock — this is the one page on the
+ * site whose subject can genuinely be photographed.
+ */
+export const MEDIA = {
+  /**
+   * The page's most important asset by a distance. The Legion is the primary
+   * conversion and it is currently a paragraph asking people to join something
+   * they have never seen; a wide shot of an actual room of actual people is
+   * what makes the ask credible. All three layouts give it their biggest slot,
+   * at three different crops of the same photograph.
+   */
+  legion: {
+    label:
+      "The Legion together — wide group shot at a regional event, 40+ people, faces to camera and recognisable",
+    spec: "2800×1200 · JPG",
+  },
+
+  /**
+   * The lead photograph of an events block. Its label is BUILT FROM THE FEED
+   * (`title` + `city` + this suffix), so the commission can never ask for a
+   * photograph of an event the page does not list, and it re-points itself the
+   * day the Luma calendar replaces the sample. Same discipline as
+   * `RallyCities` deriving its strip from the feed instead of a hand-written
+   * list of impressive places.
+   */
+  eventsLead: {
+    suffix: "— wide shot of the full room, lead image for the section",
+    spec: "2000×800 · JPG",
+  },
+
+  /** The per-event picture, for the layout that gives every row one. */
+  eventRow: {
+    suffix: "— event photo, room or stage",
+    spec: "1200×675 · JPG",
+  },
+
+  /**
+   * The four doors. Four small pictures, one per way in, and the point of them
+   * is DIFFERENTIATION: four paragraphs under four headings read as one thing
+   * said four times, and four pictures of four visibly different activities do
+   * not. Keys match `INVOLVEMENT.ways[].id`.
+   */
+  ways: {
+    host: {
+      label:
+        "Host an event — someone presenting on their feet to about 30 people, borrowed room, late-afternoon light",
+      spec: "1200×900 · JPG",
+    },
+    campus: {
+      label:
+        "NEAR on Campus — long table of students with laptops in a lecture room or library, shot on the diagonal",
+      spec: "1200×900 · JPG",
+    },
+    code: {
+      label:
+        "Contribute code — close shot of a screen with an open pull request on a NEAR repo, hands in frame",
+      spec: "1200×900 · JPG",
+    },
+    content: {
+      label:
+        "Create content — someone recording a stream or a workshop, with the camera or the mic inside the frame",
+      spec: "1200×900 · JPG",
+    },
   },
 } as const;
