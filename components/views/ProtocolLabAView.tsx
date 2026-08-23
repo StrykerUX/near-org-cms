@@ -2,6 +2,7 @@ import { GridOverlay } from "@/components/primitives/Grid";
 import Hero from "@/components/sections/protocol-labs/a/Hero";
 import ProofRow from "@/components/sections/protocol-labs/a/ProofRow";
 import ScaleClaim from "@/components/sections/protocol-labs/a/ScaleClaim";
+import ScaleClaimRow from "@/components/sections/protocol-labs/a/ScaleClaimRow";
 import ScaleClaimSplit from "@/components/sections/protocol-labs/a/ScaleClaimSplit";
 import Assembly from "@/components/sections/protocol-labs/a/Assembly";
 import DevRuntime from "@/components/sections/protocol-labs/a/DevRuntime";
@@ -88,9 +89,17 @@ export default function ProtocolLabAView() {
         <Hero />
         <ProofRow />
         <ScaleClaim proof={false} />
-        {/* La misma sección con otro reparto horizontal, montada a continuación
-            para compararlas seguidas. Comparten copy, card y arte: lo único
-            distinto es el layout. Sale una de las dos al elegir. */}
+        {/* Dos variantes de la misma sección, montadas a continuación para
+            compararlas seguidas. Las tres comparten copy, card y arte vía
+            `ScaleCard`, así que lo único que las distingue es el layout:
+            
+              · `ScaleClaimRow`   — mismo reparto, cajas ACOSTADAS (panel a la
+                                    izquierda) para que no crezcan de alto.
+              · `ScaleClaimSplit` — texto en una cuarta columna y cards más
+                                    estrechas.
+            
+            Queda una de las tres al elegir. */}
+        <ScaleClaimRow />
         <ScaleClaimSplit />
         <Assembly />
         <DevRuntime />
