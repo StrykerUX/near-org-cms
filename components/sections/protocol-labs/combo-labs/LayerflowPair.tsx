@@ -1,20 +1,18 @@
-import { hexToRgb } from "@/components/sections/protocol-labs/opening-labs/gl/color";
-import { HAZE_FRAG } from "@/components/sections/protocol-labs/opening-labs/gl/haze";
+import { hexToRgb } from "@/components/sections/protocol-labs/gl/color";
 import { LAYERFLOW_FRAG } from "@/components/sections/protocol-labs/opening-labs/gl/layerflow";
 import HeroGl from "@/components/sections/protocol-labs/combo-labs/HeroGl";
 import ProofPeek, { PROOF_PEEK } from "@/components/sections/protocol-labs/combo-labs/ProofPeek";
 import StairScale from "@/components/sections/protocol-labs/combo-labs/StairScale";
 
-// Los dos heroes claros de C, y la escalera que comparten.
+// El hero claro de C — /prototype/protocol-combo/layerflow.
 //
-// ── Qué pregunta esta familia ─────────────────────────────────────────────
+// ── Qué pregunta esta ruta ────────────────────────────────────────────────
 //
-// Si la página necesita abrir en oscuro, y con qué superficie. Las dos rutas
-// montan la MISMA composición —el layout de Spectrum, la misma escalera clara
-// debajo, la misma página entera detrás— y cambian una sola variable: el fondo.
-// Es la única manera de que la comparación mida la superficie y no otra cosa.
+// Si la página necesita abrir en oscuro. Monta la misma composición que
+// `/prototype/protocol-combo/stair` —el layout de Spectrum, la misma página entera
+// detrás— y cambia el fondo y el tono.
 //
-// ── Por qué ninguna de las dos es el espectro ─────────────────────────────
+// ── Por qué no es el espectro en claro ────────────────────────────────────
 //
 // El espectro de doce columnas se probó en claro y no funciona. El problema no
 // era el color ni la velocidad: era que la superficie TIENE ESTRUCTURA, y la
@@ -22,41 +20,14 @@ import StairScale from "@/components/sections/protocol-labs/combo-labs/StairScal
 // pantalla ya carga un titular, un cuerpo, una salida y seis cifras asomando —
 // no le sobra atención para doce elementos más.
 //
-// Las dos alternativas de acá quitan la estructura por caminos distintos: una
-// la disuelve del todo, la otra la reduce a seis planos que casi no se mueven.
-// Las dos toman el método del hero de la homepage —degradé maestro, campo de
-// ruido que lo abolla, grano de película— para que el fondo de Protocol y el de
-// la home pertenezcan a la misma familia.
-
-// ── HAZE ───────────────────────────────────────────────────────────────────
+// Hubo una segunda alternativa clara, `Haze`: la misma composición con una
+// superficie sin ninguna estructura, sólo luz difusa. Se descartó junto con los
+// otros tres combos; está en el historial de git, y su shader era
+// `opening-labs/gl/haze.ts`.
 //
-// La rampa arranca en un crema apenas más claro que el papel y cierra en un
-// verde profundo pero desaturado. La distancia entre los cuatro tonos es corta a
-// propósito: lo que tiene que percibirse es que hay volumen, no que hay colores.
-//
-// `u_gradAngle` a 2.1 radianes (~120°) manda la luz desde arriba a la izquierda
-// y deja la esquina inferior derecha como la zona más densa — justo debajo del
-// bloque de cuerpo y CTA, que es donde el texto agradece un fondo con algo de
-// peso.
-const HAZE_UNIFORMS = {
-  u_c0: hexToRgb("#f7f6f3"),
-  u_c1: hexToRgb("#eceee7"),
-  u_c2: hexToRgb("#d7e3d8"),
-  u_c3: hexToRgb("#b9d2c4"),
-  u_scale: 1.15,
-  u_gradAngle: 2.1,
-  u_gradSpread: 1.05,
-  // Menor que 1: estira la zona clara. Sin esto la mitad de la pantalla queda en
-  // el tono más denso y el hero deja de leerse como claro.
-  u_gradGamma: 0.85,
-  u_mix: 0.55,
-  u_lift: 0.02,
-  // Doce milésimas por segundo. El campo tarda más de un minuto en cambiar de
-  // forma de manera perceptible, que es el registro que se busca: nada que se
-  // pueda seguir con la vista.
-  u_drift: 0.012,
-  u_grain: 0.016,
-};
+// Layerflow toma el método del hero de la homepage —punto de fuga, campo
+// estirado, rampa de cinco tonos, grano— para que el fondo de Protocol y el de
+// la home pertenezcan a la misma familia, y le agrega las capas.
 
 // ── LAYERFLOW ──────────────────────────────────────────────────────────────
 //
@@ -119,19 +90,6 @@ const LAYERFLOW_UNIFORMS = {
   u_c4: hexToRgb("#4a7a63"),
 };
 
-export function HazeHero() {
-  return (
-    <HeroGl
-      fragment={HAZE_FRAG}
-      uniforms={HAZE_UNIFORMS}
-      tag="combo-haze"
-      fallback="#f2f2ef"
-      tone="light"
-      peek={PROOF_PEEK}
-      footer={<ProofPeek tone="light" />}
-    />
-  );
-}
 
 export function LayersHero() {
   return (
@@ -183,7 +141,7 @@ export function LayersHero() {
 // página sigue, y desarrollar las mismas seis cifras dos veces le quitaba a la
 // primera aparición justamente lo que la hace funcionar.
 //
-// La versión oscura (`/prototype/protocol-combo/c`) conserva la escalera: su
+// La versión oscura (`/prototype/protocol-combo/stair`) conserva la escalera: su
 // hero no trae cifras, y ahí es la única aparición de la evidencia antes del
 // acto.
 export default function SpectrumLightPair() {

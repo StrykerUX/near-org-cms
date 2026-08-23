@@ -11,7 +11,7 @@ import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 // ── Por qué existe además de `HeroSpectrum` ───────────────────────────────
 //
 // `HeroSpectrum` trae su shader soldado: es el hero DE Spectrum, y las rutas de
-// `/prototype/protocol-opening/c` y `/prototype/protocol-combo/c` dependen de
+// `/prototype/protocol-opening/c` y `/prototype/protocol-combo/stair` dependen de
 // que siga siendo exactamente eso. Este toma la misma composición —titular
 // abajo a la izquierda, cuerpo y salida a la derecha, la superficie corriendo
 // entera detrás— y deja el shader como parámetro.

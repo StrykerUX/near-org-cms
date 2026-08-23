@@ -5,6 +5,6 @@ import meta from "./page.meta";
 
 export const metadata: Metadata = toMetadata(meta);
 
-export default function ProtocolComboH4Page() {
-  return <ProtocolComboLabView id="h4" />;
+export default function ProtocolComboLayerflowPage() {
+  return <ProtocolComboLabView id="layerflow" />;
 }

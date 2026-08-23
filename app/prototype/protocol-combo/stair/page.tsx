@@ -5,6 +5,6 @@ import meta from "./page.meta";
 
 export const metadata: Metadata = toMetadata(meta);
 
-export default function ProtocolComboCPage() {
-  return <ProtocolComboLabView id="c" />;
+export default function ProtocolComboStairPage() {
+  return <ProtocolComboLabView id="stair" />;
 }

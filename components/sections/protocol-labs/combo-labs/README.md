@@ -1,32 +1,52 @@
 # `combo-labs/` — qué va DEBAJO de cada hero
 
 Índice en `/prototype/protocol-combo`; cada combo en
-`/prototype/protocol-combo/h4`, `/h2`, `/c`, `/e` y `/g`.
+`/prototype/protocol-combo/stair`, `/layerflow` y `/mural`.
+
+Las rutas se llaman por la **propuesta** y no por el hero: `c`, `c-layers` y `e`
+venían de la apertura que había traído cada hero y dejaron de significar nada en
+cuanto los combos empezaron a proponer estructuras propias.
 
 ## El hueco que llena
 
-Cinco heroes sobrevivieron a los laboratorios: **H4 · Cut** (el de la página),
-**H2 · Count** y los tres de las aperturas —**C · Spectrum**, **E · Field** y
-**G · Field claro**—. Ninguno eligió lo que va debajo. Las secciones 2 y 3 —las
-seis cifras y «Built for AI scale»— venían heredadas de la variante que trajo el
-hero, no decididas:
+Los heroes que sobrevivieron a los laboratorios llegaron con sus secciones 2 y 3
+—las seis cifras y «Built for AI scale»— **heredadas** de la variante que trajo
+el hero, no decididas: C traía seis columnas con barra y tres columnas
+numeradas; E y G compartían `opening-labs/ScaleSection`, idéntica en las dos;
+H4 y H2 arrastraban `a/ScaleClaim`.
 
-- H4 y H2 arrastran `a/ScaleClaim` (franja de seis columnas + tres bullets).
-- C trae seis columnas con barra y tres columnas numeradas.
-- E y G comparten `opening-labs/ScaleSection`, idéntica en las dos.
+Dos estructuras para cinco heroes, y una de ellas repetida. Este laboratorio
+propone una por hero, y ninguna repite la estructura de otra.
 
-O sea: dos estructuras para cinco heroes, y una de ellas repetida. Este
-laboratorio propone **una por hero**, y ninguna repite la estructura de otra.
-
-## Las cinco
+## Las tres
 
 | | Hero | Estructura | Tesis | Riesgo |
 |---|---|---|---|---|
-| **h4** | H4 · Cut | Nueve filas de un registro, 01 a 09 | Las cifras y las propiedades son el MISMO documento: una sola columna de índices que no se interrumpe. Cada cifra tiene el ancho entero y le entran label, unidad y nota | Nueve filas ocupan casi dos pantallas |
-| **h2** | H2 · Count | **Fondo de rotación de claves** + columna pegada | La única que no repite las cifras: el hero ya las dio contando, acá se DESARROLLAN. El título queda pegado mientras las respuestas pasan | Funde las secciones 2 y 3 en un bloque; si el sticky se siente largo, no hay dónde cortarlo |
-| **c** | C · Spectrum | Seis escalones en diagonal | El trío de C es vertical tres pantallas seguidas. La escalera cruza la dirección del campo: la superficie es el fondo, no el molde | Impone un orden de lectura, y obliga a decidir qué cifra va primera |
-| **e** | E · Field | Seis franjas a escala de cartel | E resolvía «el momento en que el texto del fondo se vuelve texto de verdad» a cuerpo de nota — el tamaño del ruido. Acá cada cifra ocupa una franja y las propiedades bajan a mono | Invierte la jerarquía; si las tres propiedades se sienten abandonadas, falló |
-| **g** | G · Field claro | Un tablero de celdas asimétricas | La única sin secciones 2 y 3 separadas. Va con G porque su riesgo es que el crema se vea plano, y una rejilla de filetes es lo contrario de plano sin usar textura | Ver todo junto también es no jerarquizar nada |
+| **stair** | C · Spectrum | Seis escalones en diagonal | El trío de C es vertical tres pantallas seguidas. La escalera cruza la dirección del campo: la superficie es el fondo, no el molde | Impone un orden de lectura, y obliga a decidir qué cifra va primera |
+| **layerflow** | C · layout claro | Cifras asomando en el hero · «Built for AI scale» debajo | ¿Necesita la página abrir en oscuro? Misma composición que `stair` con una sola variable distinta — el fondo. Las cifras no van en una sección propia: asoman cortadas por el borde de la primera pantalla | Es la única que apuesta todo a la superficie |
+| **mural** | E · Field | Seis franjas a escala de cartel | E resolvía «el momento en que el texto del fondo se vuelve texto de verdad» a cuerpo de nota — el tamaño del ruido. Acá cada cifra ocupa una franja y las propiedades bajan a mono | Invierte la jerarquía; si las tres propiedades se sienten abandonadas, falló |
+
+## Lo que se descartó
+
+Eran siete. Se fueron cuatro, y con ellas dos superficies:
+
+- **Ledger** (h4 · Cut) — las seis cifras y las tres propiedades como **nueve
+  filas de un solo registro**, numeradas 01 a 09 sin interrupción. Era la única
+  que cosía la evidencia y la explicación con un mismo índice.
+- **Sustained** (h2 · Count) — una columna pegada con el título mientras la otra
+  desfilaba, y la única que **no repetía** las cifras: las desarrollaba. Iba con
+  el fondo `KeyRotationField`, un campo de caracteres donde un frente reescribía
+  todo el alfabeto en una sola pasada menos las cuentas, que quedaban idénticas
+  — la sección 8 dibujada. Respondía al puntero: mover revolvía el ruido, hacer
+  clic disparaba la rotación desde ese punto.
+- **Haze** (hero claro) — luz difusa sin ninguna estructura, con el método del
+  hero de la homepage. Su shader era `opening-labs/gl/haze.ts`.
+- **Board** (g · Field claro) — título, cifras y propiedades como piezas de un
+  **tablero de celdas asimétricas**, leídas todas a la vez. Dibujaba sus filetes
+  con el `gap` sobre un fondo de color, no con bordes.
+
+Todo está en el historial de git, en el commit anterior a esta limpieza:
+`git log --diff-filter=D -- components/sections/protocol-labs/combo-labs`.
 
 ## Cada ruta trae la página ENTERA
 
@@ -56,115 +76,38 @@ Lo que existe sólo acá son las cinco propuestas de secciones 2 y 3.
 ahí — o sea que las rutas de `/prototype/protocol-opening` y las de acá muestran
 literalmente el mismo hero.
 
-## `KeyRotationField` — el primer fondo con un mecanismo adentro
+## Una técnica que conviene mirar antes de copiarla
 
-Va en **h2** y sólo en h2. Una retícula densa de caracteres, muy tenue. Cada
-tantos segundos un frente cruza el plano **en una sola pasada** y todos los
-glifos cambian de alfabeto a su paso. Ni una celda se mueve: cambia lo que dice,
-no dónde está.
+**El buffer de `Layerflow` no usa los valores por defecto de `GlSurface`.**
+Renderiza a resolución plena (`renderScale={1}`) y con `maxDpr={2}`, contra el
+0.6 y el 1.75 que trae el componente. Aquellos números están calibrados para
+superficies **sin bordes** —el follaje de la home es blur puro y lo que se pierde
+al escalar no se ve—; una superficie con estructura escalada así muestra
+escalones en cada borde diagonal, y el 1.75 además obliga a un reescalado
+fraccionario en cualquier pantalla a dpr 2.
 
-Entre el ruido hay dos clases de palabras, y la diferencia entre ellas es el
-argumento entero:
-
-- **Los esquemas de firma** —ED25519, SECP256K1, ML-DSA, FIPS-204— rotan con el
-  campo.
-- **Las cuentas** —`alice.near`, `agent.near`, `vault.near`— **no cambian
-  nunca**. El frente les pasa por encima y quedan idénticas.
-
-Sale de la sección 8, textual: *«NEAR accounts are decoupled from cryptography,
-so upgrading to quantum-safe keys takes a single key rotation. NEAR supports
-FIPS-204 (ML-DSA), a NIST-approved post-quantum signing scheme.»* Las tres cosas
-que dice esa frase están en el dibujo: la criptografía cambia, la cuenta no, y
-pasa en una sola pasada.
-
-**Sin licencias.** Rotar es una operación repetible, así que cada pasada estrena
-un alfabeto nuevo en vez de alternar entre dos estados. El fondo no tiene que
-des-hacer lo que acaba de hacer para volver a mostrarlo.
-
-### El puntero
-
-Dos gestos, y los dos dicen lo mismo que el párrafo:
-
-- **Mover** revuelve el ruido bajo el cursor y lo enciende en verde. Las cuentas
-  que caen dentro del halo **no se inmutan** — el argumento otra vez, ahora
-  provocado por el lector en vez de mostrado.
-- **Hacer clic** dispara la rotación **desde ese punto**, en frente radial. La
-  pasada automática es diagonal; la que dispara el lector sale de su mano.
-
-Se revuelve sólo el ruido: romper un esquema o una cuenta destruiría lo único
-estable que tiene el campo.
-
-Los eventos se escuchan en la **sección**, no en el canvas: el canvas vive en
-`z-0` con `pointer-events-none` bajo el titular y el marcador, así que
-escuchando en él el puntero sólo respondería en los huecos entre bloques. Un clic
-sobre un enlace o un botón no dispara nada.
-
-### Los dos verdes
-
-`--near-green-accent` (#00dc8d) no llega a 3:1 sobre crema; `--green-ink`
-(#00a86b) sí. La división no es estética: **el filo del frente va en el verde de
-marca** —un destello de un cuarto de segundo, no texto que haya que leer— y todo
-lo que tiene que leerse (las cuentas, la cola del frente, el halo) va en
-`--green-ink`.
-
-Es canvas 2D. Comparte técnica con `opening-labs/GlyphField` —celda estable,
-alfa bajo, texto en canvas y no en el DOM— pero no lo reusa: aquél tiene una onda
-que enciende glifos fijos, éste tiene un evento que los reescribe, y metérselo a
-`GlyphField` se lo metería también a las aperturas E y G, que no lo piden.
-
-### Lo que se descartó antes en este mismo hero
-
-`ShardSurface`: un plano que se partía solo en diez shards más el privado,
-latiendo al block time (600 ms) y a la finalidad (1.2 s). El concepto estaba bien
-anclado —sección 5 y dos de las seis cifras— y **se veía mal**: sobre crema, las
-regiones con relleno y el tramado del shard privado quedaban sucios detrás de un
-titular y de un marcador de cifras.
-
-La lección, que vale para el próximo fondo de este hero: **acá el fondo tiene que
-ser tipografía, no formas.** La pantalla ya tiene dos elementos fuertes
-peleándose el espacio.
-
-Está en el historial de git.
-
-## Dos técnicas que conviene mirar antes de copiarlas
-
-**El tablero de `BoardScale` dibuja sus filetes con el `gap`,** no con bordes:
-`gap-px` sobre un fondo del color de filete, y cada celda pinta su crema encima.
-Las líneas son el fondo asomando por las juntas. Se hace así porque en una
-retícula irregular los bordes se duplican donde dos celdas se tocan y faltan
-donde una linda con el borde del tablero.
-
-La condición que impone: **cada fila tiene que sumar doce columnas exactas**, o
-el hueco se ve como un bloque del color del filete. Las cuatro filas están
-verificadas en el archivo: (5+7) · (5+3+4) · (3+4+5) · (3+4+5).
-
-**El sticky de `SustainedScale` es CSS,** nunca `pin: true`. El pin de
-ScrollTrigger mueve el elemento a un contenedor propio, recalcula alturas y pelea
-con Lenis; sticky no toca el layout y funciona con el JS apagado. Su `top` sale
-de `--site-header-block` más aire, porque el header es fijo.
+Va con dither ordenado de Bayer sobre el índice de la rampa, dimensionado sobre
+el tramo y no sobre 1/256: el índice recorre 0..1 en cuatro tramos y cada tramo
+cubre la distancia de color entre dos paradas, así que un nivel son ~0.006 de
+índice.
 
 ## Las clases de retícula son mapas literales
 
-`STEP`, `SIDE`, `STAT_CELL`, `POINT_CELL`, `PLACE`: todas arrays de strings
-completos. **Nunca un template string.** Tailwind v4 no detecta clases
+`STEP` y `SIDE`: arrays de strings completos. **Nunca un template string.** Tailwind v4 no detecta clases
 construidas en tiempo de ejecución y las purga del CSS — el layout se rompe sólo
 en producción, donde el purge corre de verdad.
 
 ## Estado
 
-Sin ver en navegador, sin decidir. Lo primero a mirar:
+Sin ver del todo en navegador, sin decidir. Lo primero a mirar:
 
-- **El paso al acto en las cinco.** Es el motivo de que la página vaya entera.
-- **h4** — si dos pantallas de registro cansan antes de llegar al acto.
-- **h2, el fondo** — tres cosas: si la pasada se lee como un **evento** o como
-  un parpadeo; si las cuentas se distinguen del ruido (si no, el argumento se
-  pierde y queda textura); y si el halo del puntero distrae mientras se lee el
-  titular. El halo hierve mientras el cursor esté dentro, aunque esté quieto — si
-  molesta, la salida es decaerlo cuando no hay movimiento, no bajarle el alfa.
-- **h2** — el largo del sticky, y si las seis lecturas + tres propiedades en una
-  sola columna se leen como un bloque o como una lista interminable.
-- **e** — si las tres propiedades en mono se leen como condiciones técnicas o
+- **El paso al acto en las tres.** Es el motivo de que la página vaya entera.
+- **layerflow** — si las nueve capas se leen como capas apiladas. Si no, es
+  follaje con rayas, y los números para empujar son `u_layers`, `u_seam`,
+  `u_seamLift` y `u_blur` a la baja.
+- **mural** — si las tres propiedades en mono se leen como condiciones técnicas o
   como un pie de página. Es la apuesta entera de esa variante.
-- **g** — el tablero a 1024px, donde las columnas se aprietan pero todavía no
-  colapsa a la pila de móvil.
+- **El asomo de layerflow** — si la pasada de opacidad se lee como un revelado o
+  como un parpadeo, y si `PEEK` deja asomando la mitad de la cifra en pantallas
+  de distinta altura. Es un porcentaje calibrado contra este contenido.
 - Todas — a 390, 1024 y 1920, y con `prefers-reduced-motion`.

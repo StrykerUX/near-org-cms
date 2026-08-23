@@ -1,6 +1,8 @@
 import { GridOverlay } from "@/components/primitives/Grid";
 import Hero from "@/components/sections/protocol-labs/a/Hero";
+import ProofRow from "@/components/sections/protocol-labs/a/ProofRow";
 import ScaleClaim from "@/components/sections/protocol-labs/a/ScaleClaim";
+import ScaleClaimSplit from "@/components/sections/protocol-labs/a/ScaleClaimSplit";
 import Assembly from "@/components/sections/protocol-labs/a/Assembly";
 import DevRuntime from "@/components/sections/protocol-labs/a/DevRuntime";
 import Deployment from "@/components/sections/protocol-labs/a/Deployment";
@@ -84,7 +86,12 @@ export default function ProtocolLabAView() {
     <>
       <main>
         <Hero />
-        <ScaleClaim proof="top" />
+        <ProofRow />
+        <ScaleClaim proof={false} />
+        {/* La misma sección con otro reparto horizontal, montada a continuación
+            para compararlas seguidas. Comparten copy, card y arte: lo único
+            distinto es el layout. Sale una de las dos al elegir. */}
+        <ScaleClaimSplit />
         <Assembly />
         <DevRuntime />
         <Deployment />

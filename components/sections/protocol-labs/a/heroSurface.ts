@@ -1,16 +1,21 @@
 import { NOISE_GLSL } from "@/components/sections/protocol-labs/gl/noise";
 
-// Layerflow — capas paralelas que fluyen, cada una por su cuenta.
+// La superficie del hero de la página — capas paralelas que fluyen, cada una por
+// su cuenta.
 //
-// ── Qué reemplaza ──────────────────────────────────────────────────────────
+// ── Es una COPIA, y por qué ────────────────────────────────────────────────
 //
-// A `strata`, que apilaba seis bandas horizontales muy tenues. Fallaba por dos
-// cosas a la vez: casi no se veía —todo su rango de contraste cabía entre dos
-// tonos de crema— y no se parecía en nada al hero de la homepage, que era la
-// referencia. Una superficie tan sutil que hay que buscarla no está sirviendo de
-// fondo, está pidiendo disculpas.
+// Salió de `opening-labs/gl/layerflow.ts`, el shader de
+// `/prototype/protocol-combo/layerflow`, cuando esa variante ganó. Se copió y no
+// se importa por la regla del laboratorio: `a/` es la estructura elegida y un
+// lab puede cambiar o borrarse sin aviso, así que la página no puede depender de
+// él. Desde acá los dos evolucionan por separado — calibrar esta superficie ya
+// no toca la ruta de comparación, que es lo que permite seguir usándola como
+// referencia de dónde estaba el diseño.
 //
-// ── De dónde sale ahora ───────────────────────────────────────────────────
+// El mismo criterio que siguió `homepage-update/gl/foliage.ts` con su lab.
+//
+// ── De dónde sale ─────────────────────────────────────────────────────────
 //
 // Del motor del hero de la home (`homepage-update/gl/foliage.ts`), entero:
 //
@@ -55,7 +60,7 @@ import { NOISE_GLSL } from "@/components/sections/protocol-labs/gl/noise";
 //
 // GLSL ES 3.00 — ver la nota de GlSurface.
 
-export const LAYERFLOW_FRAG = `#version 300 es
+export const HERO_SURFACE_FRAG = `#version 300 es
 precision highp float;
 
 out vec4 fragColor;
