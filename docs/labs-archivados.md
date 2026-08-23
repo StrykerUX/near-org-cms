@@ -137,6 +137,72 @@ git checkout v-pre-limpieza -- components/views/PrototypeLandingView.tsx \
 
 El índice real del repo sigue siendo `app/(site)/page.tsx`, en la ruta `/`.
 
+## Propuestas de chain abstraction (2026-08-23)
+
+Cuatro copias en paralelo de una propuesta para `/chain-abstraction`, hechas
+sobre el sistema visual de `homepage-update`. Se eligieron dos —
+`chain-ab-propuesta-a` (era la copia 3) y `chain-ab-propuesta-b` (era la 4),
+las dos vivas en el árbol— y se descartaron las otras dos.
+
+**Estas NO están en `v-pre-limpieza`**, que es anterior. El ancla es el commit
+`761cd3f`, que las dejó asentadas justo antes de este borrado.
+
+| Copia | Qué la distinguía | Rescatar con |
+|---|---|---|
+| 1 | Contadores en grid de 4 columnas separadas por un hairline que se dibujaba solo (`scaleX` desde 0), y gráfica de barras CON ondulación — un `Math.sin` de dos frecuencias sumado a la altura, dentro de una card con la marca de agua «GROWTH» de fondo | `git checkout 761cd3f -- components/sections/chain-ab-homepage-refined components/views/ChainAbHomepageRefinedView.tsx app/prototype/chain-ab-homepage-refined` |
+| 2 | Contadores en 4 fichas con marco (`rounded-2xl border`) centradas, y la gráfica más simple de todas las que pasaron por la sección: una línea recta entre los 3 milestones, con dots y `strokeDashoffset` para dibujarla | `git checkout 761cd3f -- components/sections/chain-ab-homepage-refined-2 components/views/ChainAbHomepageRefined2View.tsx app/prototype/chain-ab-homepage-refined-2` |
+
+Las dos gráficas descartadas siguen siendo las únicas versiones con
+ondulación (la 1) y con trazo de línea (la 2): las dos que quedan vivas usan
+barras estrictamente crecientes.
+
+## Las tres opciones del giro (2026-08-23)
+
+Tres rutas idénticas a la propuesta C salvo por una sección — "Built for what
+transacts next", §5b, el giro de la página. Existieron para comparar tres
+tratamientos del mismo copy y se borraron apenas se eligió uno.
+
+**El ancla es el commit `f0f7661`**, que las dejó asentadas justo antes de este
+borrado. No están en `v-pre-limpieza`, que es muy anterior.
+
+| Opción | Qué era | Rescatar con |
+|---|---|---|
+| 1 | **El relevo.** Díptico de dos actores pares —una persona hoy, un agente después— que bajan por dos líneas a un ÚNICO nodo de cuenta, dibujado una sola vez. **Esta ganó**: no hace falta rescatarla, vive en `components/sections/chain-abstraction-proposals/ForwardTurn.tsx` | — |
+| 2 | **La línea que no se corta.** Una hairline full-bleed con tres paradas, que entra y sale de cuadro por los dos lados: sin principio ni final visible. En mobile el eje pasa a vertical | `git checkout f0f7661 -- components/sections/chain-ab-opcion-2 components/views/ChainAbOpcion2View.tsx app/prototype/chain-ab-opcion-2` |
+| 3 | **El mismo sujeto, otro operador.** Una marca de cuenta que no se mueve nunca y una línea debajo que releva «a person» por «an agent» en loop. La quietud como argumento | `git checkout f0f7661 -- components/sections/chain-ab-opcion-3 components/views/ChainAbOpcion3View.tsx app/prototype/chain-ab-opcion-3` |
+
+Las tres iban en crema y sin gradiente, y las tres respetaban la regla que la
+sección trae del original: movimiento auto-pautado (`once: true`, nunca
+`scrub`), porque es el único lugar de la página donde el lector suelta el
+volante. La 3 es la única de la familia con algo en loop, con `pauseOffscreen`
+y sin rotar bajo `prefers-reduced-motion`.
+
+## La propuesta A de chain abstraction (2026-08-23)
+
+Se descarta la tercera de las tres propuestas que quedaban, y las otras dos
+corren de letra: la **B pasa a ser A** y la **C pasa a ser B**. Ojo con eso al
+leer el historial — `chain-ab-propuesta-a` nombra dos páginas distintas antes y
+después del commit `1a4832c`.
+
+Lo que se va con ella:
+
+- **El hero en ink.** Era la única de las tres con el hero sobre fondo oscuro;
+  las otras dos lo tienen en crema.
+- **El bento asimétrico de "Why it matters"**, reusando `BentoGrid`/`BentoCard`.
+  Las que quedan usan otra composición para esa sección, así que este es el
+  último lugar del árbol donde ese primitivo se usaba.
+- **El pie de ecosystem en pills de texto** — las dos que quedan lo tienen con
+  logos, en carrusel.
+
+Su cuerpo de Proof NO se pierde: el titular acentuado con los contadores en
+lista y la gráfica al lado se había pasado a la propuesta C (hoy B) en
+`1a4832c`, que es donde sigue vivo.
+
+```bash
+git checkout 1a4832c -- components/sections/chain-ab-propuesta-a \
+  components/views/ChainAbPropuestaAView.tsx app/prototype/chain-ab-propuesta-a
+```
+
 ## Lo que NO se archivó
 
 Sigue vivo en el árbol, sin necesidad de rescate:
