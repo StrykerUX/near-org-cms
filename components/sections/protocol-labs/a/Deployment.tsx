@@ -25,7 +25,7 @@ export default function Deployment() {
   const ref = useScrollReveal<HTMLDivElement>({ y: 22, stagger: 0.1 });
 
   return (
-    <section className="bg-background text-foreground">
+    <section className="bg-cream text-foreground">
       <Container className="py-28 lg:py-36">
         <div ref={ref} className="grid-ds gap-y-14">
           <article data-reveal className="col-span-full flex flex-col gap-4 lg:col-span-4">

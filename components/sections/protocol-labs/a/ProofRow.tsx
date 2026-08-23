@@ -35,6 +35,12 @@ import { PROOF } from "@/components/sections/protocol-labs/protocolContent";
 //
 // El corte que sí importa es el de arriba, contra el hero: ahí el cambio de la
 // superficie al papel limpio lo marca solo.
+//
+// Y ese papel es CREMA y no blanco, como el resto de las secciones claras de la
+// página. El blanco puro se usaba acá y en dos secciones más, y era el único
+// valor que no salía del sistema: `--cream` es el papel de este sitio y
+// `--background` existe para el admin y para los pocos sitios que necesitan un
+// blanco de verdad.
 export default function ProofRow() {
   const countRef = useCountUp<HTMLDListElement>({ start: "top 82%" });
 
@@ -42,7 +48,7 @@ export default function ProofRow() {
     // Sólo padding vertical, que es lo que impide que la fila choque con el hero
     // arriba y con la sección siguiente abajo. Sin `min-h`: la sección mide lo
     // que mide su contenido.
-    <section className="bg-background text-foreground">
+    <section className="bg-cream text-foreground">
       <Container className="py-20 lg:py-24">
         <dl
           ref={countRef}
