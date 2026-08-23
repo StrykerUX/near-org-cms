@@ -6,6 +6,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
 import Container from "@/components/primitives/Container";
+import Marquee from "@/components/primitives/Marquee";
 import {
   PROOF_HEADLINE,
   PROOF_STATS,
@@ -25,6 +26,11 @@ import {
 // verdad; Abound, Brave, Zodl y Venice están haciendo de HOT Wallet,
 // Infinex, SWEAT y Rhea Finance. Hay que cambiarlos cuando lleguen los
 // buenos — si no, en dos semanas parece que Brave es Infinex.
+//
+// ⚠️ HAY UNA COPIA GEMELA de este array en la propuesta C, con el mismo
+// carrusel. Se decidió duplicar en vez de compartir, así que cambiar los
+// logos acá NO arregla la otra: hay que tocar los dos archivos o una de
+// las dos propuestas se queda con Brave haciendo de Infinex.
 //
 // `logo: null` en la última no es un pendiente: "Every major NEAR wallet"
 // no es una empresa y no hay logotipo posible. Mismo caso que Gov. of
@@ -350,16 +356,27 @@ export default function Proof() {
           </div>
         </div>
 
-        {/* `items-end` en la fila: los cinco PNG tienen alturas ópticas
-            distintas, así que alineando por abajo los nombres quedan en
-            una sola línea aunque los logos no. */}
-        <div className="flex flex-col gap-6">
-          <span data-eco className="text-caption-mono uppercase text-gray-intermediate">
+        {/* El strip corre en loop en vez de quedarse quieto en una fila:
+            es el mismo carrusel que monta la propuesta C, por pedido. `Marquee` ya hace
+            el ciclo sin salto (doble set + `xPercent: -50`) y se pausa
+            fuera del viewport y con `prefers-reduced-motion`, donde cae a
+            un scroll horizontal a mano.
+
+            `data-eco` va en el label y en el bloque del carrusel, NO en
+            cada celda: adentro del marquee las celdas están duplicadas y
+            en movimiento, así que un stagger de entrada por celda pelearía
+            con el loop. El tween de entrada mueve `y` sobre este wrapper y
+            el marquee mueve `xPercent` sobre un div interno, así que no se
+            pisan. */}
+        <div data-eco className="flex flex-col gap-6">
+          <span className="text-caption-mono uppercase text-gray-intermediate">
             Built into:
           </span>
-          <div className="flex flex-wrap items-end gap-x-12 gap-y-8">
-            {ECOSYSTEM_LOGOS.map((item) => (
-              <div key={item.name} data-eco className="flex flex-col items-center gap-3">
+          <Marquee
+            speedSeconds={40}
+            itemClassName="mr-16 shrink-0"
+            items={ECOSYSTEM_LOGOS.map((item) => (
+              <span key={item.name} className="flex flex-col items-center gap-3">
                 {item.logo ? (
                   <Image
                     src={item.logo.src}
@@ -394,9 +411,9 @@ export default function Proof() {
                 <span className="text-caption-mono uppercase text-gray-intermediate">
                   {item.name}
                 </span>
-              </div>
+              </span>
             ))}
-          </div>
+          />
         </div>
       </Container>
     </section>
