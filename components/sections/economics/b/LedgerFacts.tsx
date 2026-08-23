@@ -4,6 +4,7 @@ import Container from "@/components/primitives/Container";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import FactGlyph from "@/components/sections/economics/factGlyphs";
 import { MATURITY } from "@/components/sections/economics/economicsContent";
 
 // §2 of variant B — the four structural facts as four ROWS.
@@ -26,6 +27,23 @@ import { MATURITY } from "@/components/sections/economics/economicsContent";
 // number is the default ornament of every tokenomics page ever published, which
 // is precisely what a layout that presents itself as a book of record cannot
 // afford to borrow. The figures arrive by having their rule drawn under them.
+//
+// ── The glyph is a column of the table, not an illustration beside it ──────
+// The drawings come from `../factGlyphs`, shared with the other two variants,
+// and here they go INSIDE the figure cell — under the figure and its label, in
+// the same column for all four rows. That is the whole reason a table earns its
+// keep: four things answering the same question in the same position can be
+// compared straight down the column, and the four glyphs compared that way are
+// a span, a span cut in half, a threshold and a run. Set off to one side as
+// decoration they would be four unrelated marks.
+//
+// They also happen to be the only kind of drawing this variant can accept. B
+// refuses the ring of variant A because a ring is a metaphor; these are
+// measures — bars, a cut, a gate, a line across five divisions — which is the
+// register a book of record is already written in.
+//
+// No tween of their own: they sit inside `data-row-body` and arrive with the
+// row.
 
 export default function LedgerFacts() {
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk }) => {
@@ -85,6 +103,9 @@ export default function LedgerFacts() {
                   <p className="mt-2 max-w-[22ch] text-caption-mono text-gray-intermediate">
                     {f.figureLabel}
                   </p>
+                  <div className="mt-8 text-ink">
+                    <FactGlyph id={f.id} />
+                  </div>
                 </div>
 
                 <h3 className="col-span-12 max-w-[20ch] text-h4 text-pretty lg:col-span-3">

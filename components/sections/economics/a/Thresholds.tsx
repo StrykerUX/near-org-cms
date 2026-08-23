@@ -5,6 +5,7 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
+import FactGlyph from "@/components/sections/economics/factGlyphs";
 import { MATURITY } from "@/components/sections/economics/economicsContent";
 
 // §2 of variant A — the four thresholds already crossed.
@@ -31,6 +32,20 @@ import { MATURITY } from "@/components/sections/economics/economicsContent";
 // the evenness that lets the row be read in one sweep. And on a tokenomics page
 // specifically, a rising number is the genre default this whole page was built
 // to avoid.
+//
+// ── The glyph sits between the figure and the claim ────────────────────────
+// Each column now carries the drawing of its own fact (`../factGlyphs`), and it
+// goes in the one position where it is doing work: the figure states the
+// quantity, the glyph shows its SHAPE, and only then does the sentence arrive to
+// name it. Above the figure it would be an ornament introducing a number;
+// under the body it would be an afterthought nobody reaches. In between, a
+// reader who scans the row gets `100% · a full span · Supply is fully unlocked`
+// in one downward sweep per column.
+//
+// It enters on this section's existing timeline — the four glyphs are the third
+// wave, after the rules and the figures and before the claims — because four
+// hairline drawings the size of a line of type do not need four ScrollTriggers
+// of their own.
 
 export default function Thresholds() {
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk }) => {
@@ -51,6 +66,7 @@ export default function Thresholds() {
       // reads as four rules drawing with four figures coming up behind them and
       // not as two separate waves crossing the section.
       .from(q("[data-figure]"), { autoAlpha: 0, y: 22, duration: 0.85, stagger: 0.12 }, 0.2)
+      .from(q("[data-glyph]"), { autoAlpha: 0, duration: 0.55, stagger: 0.12 }, 0.34)
       .from(q("[data-claim]"), { autoAlpha: 0, y: 14, duration: 0.6, stagger: 0.12 }, 0.42);
 
     return () => {
@@ -85,6 +101,10 @@ export default function Thresholds() {
                 <p className="mt-3 max-w-[20ch] text-caption-mono text-gray-intermediate">
                   {f.figureLabel}
                 </p>
+              </div>
+
+              <div data-glyph className="mt-9 text-ink">
+                <FactGlyph id={f.id} />
               </div>
 
               <div data-claim>

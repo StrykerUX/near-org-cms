@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
+import MediaFrame from "@/components/primitives/MediaFrame";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { PRODUCTS } from "@/components/sections/economics/economicsContent";
 
@@ -29,10 +30,47 @@ import { PRODUCTS } from "@/components/sections/economics/economicsContent";
 //
 // Below `lg` the halves stack, which turns the seam into a horizontal one —
 // still two grounds meeting, and still no border.
+//
+// ── The captures, and why they go in the middle of each half ──────────────
+// This page spends four full screens drawing a mechanism and never shows one
+// thing that exists. These two do exist, they have interfaces, and the half
+// that names them is the only place on the page where evidence beats drawing.
+// Each `MediaFrame` sits between the name block and the body — the halves are
+// `justify-between`, so the middle is the one position that does not fight the
+// two blocks already anchored to the top and the bottom edge, and it is also
+// what stops a very tall column from being a name at the top and a paragraph at
+// the bottom with a screen of nothing in between.
+//
+// The frames take their tone from the ground they are on, so the registration
+// marks stay at the same weight on both sides of the seam — a light frame on
+// ink would be the one hard-edged rectangle on a page that has none.
+//
+// The two proportions are different because the two products are: Intents is a
+// route across chains, which is a wide, horizontal thing, so it gets the 5/2
+// strip; NEAR AI is a console, which is not. Matching them would have made the
+// split symmetrical, and the split is the one place the page abandons its grid
+// precisely to stop being symmetrical.
+
+// Keyed by product id and not by index: the halves alternate ground by
+// position, but the brief for a capture belongs to the product.
+const SHOTS = {
+  intents: {
+    label:
+      "NEAR Intents — wide strip of a cross-chain swap: the stated intent, the route between chains, and settlement",
+    spec: "2500×1000 · PNG @2x",
+    ratio: "5/2",
+  },
+  ai: {
+    label:
+      "NEAR AI — agent console: one agent running in a confidential environment, with its execution proof",
+    spec: "1600×1200 · PNG @2x",
+    ratio: "4/3",
+  },
+} as const;
 
 const HALVES = [
-  { ground: "bg-ink text-cream", body: "text-white/70", rule: "bg-white/20", link: "border-white/30 hover:border-white text-cream", claim: "text-near-green-accent" },
-  { ground: "bg-cream text-ink", body: "text-ink-soft", rule: "bg-rule", link: "border-foreground/30 hover:border-foreground text-ink", claim: "text-green-ink" },
+  { ground: "bg-ink text-cream", body: "text-white/70", rule: "bg-white/20", link: "border-white/30 hover:border-white text-cream", claim: "text-near-green-accent", frame: "dark" },
+  { ground: "bg-cream text-ink", body: "text-ink-soft", rule: "bg-rule", link: "border-foreground/30 hover:border-foreground text-ink", claim: "text-green-ink", frame: "light" },
 ] as const;
 
 export default function SplitProducts() {
@@ -66,6 +104,15 @@ export default function SplitProducts() {
                 <p className={`mt-6 max-w-[22ch] text-h3-serif italic text-pretty ${t.claim}`}>
                   {p.claim}
                 </p>
+              </div>
+
+              <div data-reveal>
+                <MediaFrame
+                  label={SHOTS[p.id].label}
+                  spec={SHOTS[p.id].spec}
+                  ratio={SHOTS[p.id].ratio}
+                  tone={t.frame}
+                />
               </div>
 
               <div data-reveal>

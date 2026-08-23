@@ -2,6 +2,7 @@
 
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
+import FactGlyph from "@/components/sections/economics/factGlyphs";
 import { MATURITY } from "@/components/sections/economics/economicsContent";
 
 // §2 of variant C — the four thresholds, compressed into one band.
@@ -20,6 +21,15 @@ import { MATURITY } from "@/components/sections/economics/economicsContent";
 // The rest of the page is full-bleed panels, so the band being contained,
 // ruled and short is also what makes it read as an interruption rather than as
 // the first panel.
+//
+// ── The glyphs matter more here than in the other two variants ────────────
+// This band is the only thing standing between a very large hero and four
+// screens of metaphor, and a reader moving at that speed reads figures, not
+// paragraphs. The drawing from `../factGlyphs` doubles what that reader takes
+// away per cell — the figure gives the quantity, the glyph gives its shape —
+// without adding a line of copy to the shortest section on the page. It sits
+// tight under the figure label, on the same rhythm as everything else in the
+// cell, and enters with the cell's reveal.
 
 export default function FactRow() {
   const rootRef = useScrollReveal<HTMLElement>({ start: "top 85%" });
@@ -48,6 +58,9 @@ export default function FactRow() {
               <p className="mt-2 max-w-[20ch] text-caption-mono text-gray-intermediate">
                 {f.figureLabel}
               </p>
+              <div className="mt-7 text-ink">
+                <FactGlyph id={f.id} />
+              </div>
               <h3 className="mt-7 max-w-[18ch] text-h4 text-pretty">{f.title}</h3>
               <p className="mt-3 max-w-[32ch] text-body-sm text-ink-soft text-pretty">{f.body}</p>
             </div>

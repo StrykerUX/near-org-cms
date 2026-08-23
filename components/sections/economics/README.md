@@ -175,6 +175,145 @@ módulo de copy y no en el componente. Esa es la parte importante: son las
 condiciones bajo las cuales la figura tiene permiso de existir, así que tienen
 que ser tan difíciles de borrar como los datos.
 
+## El aparato gráfico (segunda pasada)
+
+La página arrancó con tres figuras —el anillo de `a/LoopScene`, la curva de
+emisión de `b/EmissionChart` y el riel de `b/LedgerFlow`— y con los dos tramos
+de alrededor resueltos solo con tipografía. Esta pasada llenó esos dos huecos, y
+**no tocó ninguna de las tres figuras que ya estaban**.
+
+Todo lo que entró pasa la regla de las tres: es **evidencia** (el lugar de un
+recurso real, con `MediaFrame`), **argumento** (un dibujo que carga una
+afirmación, con SVG propio) o **estructura**. Nada entró para llenar.
+
+### 1. Cuatro micro-glifos para los hechos estructurales — `factGlyphs.tsx`
+
+`MATURITY.facts` era el bloque más dibujable de la página y eran cuatro párrafos
+con una cifra grande. Ahora cada hecho lleva su propio dibujo de 1px, y cada
+dibujo **ejecuta su afirmación** en vez de ilustrarla (mismo criterio que
+`chain/WhyItMatters`; ningún glifo es un pictograma):
+
+| | Hecho | Qué dibuja |
+|---|---|---|
+| 01 | Supply totalmente desbloqueado | Una barra cerrada de ocho compartimentos, **todos ocupados**. En otra red los últimos estarían vacíos y ese tramo vacío serían los tokens por liberar. El lector busca el hueco y no está |
+| 02 | Emisión partida a la mitad | Dos barras y un corte. La vertical es a la vez el corte, el extremo derecho de la barra de abajo, y se pasa de las dos para leerse como evento y no como borde |
+| 03 | Gobernanza onchain y en vivo | Cuatro propuestas de largo desigual llegando a un umbral; pasado el umbral son una sola línea con cuatro puntos **rellenos** — la marca de la casa para algo ya asentado. Ni urna ni martillo |
+| 04 | Cinco años sin caídas | Cinco marcas de año, y un trazo que las cruza **sin cortarse**. Las marcas existen para que el trazo tenga dónde romperse, y no rompe en ninguna |
+
+**Se dibujan una vez y las tres variantes los consumen.** Los hechos son los
+mismos en `a/`, `b/` y `c/` — lo que se compara entre variantes es el LAYOUT, y
+un glifo no es layout. Tres versiones a mano del mismo dibujo se despegan la
+primera vez que alguien toca una.
+
+Lo único que cambia por variante es **dónde se acomodan**:
+
+- `a/Thresholds` — columna bajo filete, entre la cifra y la afirmación. Entra en
+  la timeline que la sección ya tenía, como tercera ola (filetes → cifras →
+  glifos → afirmaciones).
+- `b/LedgerFacts` — dentro de la celda de la cifra, en la misma columna para las
+  cuatro filas. Es lo que hace que la tabla se gane su forma: cuatro glifos
+  comparables hacia abajo son una barra, una barra cortada, un umbral y una
+  corrida. Es además el único tipo de dibujo que B admite — son medidas, no
+  metáforas.
+- `c/FactRow` — fila apretada, bajo la etiqueta de la cifra. Es donde más
+  rinden: la banda es lo único que hay entre un hero enorme y cuatro pantallas
+  de metáfora, y duplican lo que se lleva un lector que va rápido sin agregar
+  una línea de copy.
+
+Ninguno se anima solo. Entran con el reveal que su sección ya tiene: cuatro
+dibujos del tamaño de una línea de texto no justifican doce ScrollTriggers.
+
+### 2. Evidencia — los dos productos, y el panel de ingresos
+
+Intents y NEAR AI son productos reales con interfaz, y la página no mostraba
+ninguno. Un diagrama de Intents sería el diagrama de algo que no lo necesita, así
+que acá va evidencia y no dibujo. Cada `MediaFrame` lleva su encargo escrito
+abajo, y **las proporciones y los lados varían a propósito** — ocho slots 16/9
+idénticos son una plantilla, no una composición.
+
+Además entra **una sola vez** en toda la página una captura de
+`revenue.near.org`, y entra en `b/EmissionChart`, que es donde más pesa: la
+sección termina en un link a ese panel para responder la única objeción justa que
+el gráfico invita («¿y los números?»), y un link es una respuesta débil porque
+obliga a irse a comprobar. Ahora las dos cosas están enfrentadas y dicen cosas
+distintas a propósito: forma dibujada a la derecha, que no afirma ninguna
+magnitud, y registro fotografiado a la izquierda, que no tiene que hacerlo.
+**Es una captura y no un embed**, y esa distinción es la honestidad del slot.
+
+### 3. Argumento — un activo, tres trabajos (`c/DescentClose`)
+
+`CENTER` afirma que los tres roles **se refuerzan entre sí**, y tres columnas de
+texto pueden enunciarlo pero no mostrarlo: tres columnas son tres cosas
+paralelas y la afirmación es sobre un retorno. La figura dibuja el retorno y nada
+más — un activo, tres lóbulos, y cada lóbulo sale del activo y **vuelve a entrar
+en él por otro punto**. La primera versión era un diagrama de rayos (un centro
+con tres líneas hacia afuera) y ese es el dibujo de un token con tres usos, que
+es justo lo que la copy dice que tienen los demás.
+
+Va en `c/` y en ninguna otra:
+
+- En `a/` sería el segundo anillo de la página después de `LoopScene`, y dos
+  figuras circulares en una página hacen que el lector busque una relación entre
+  ellas que no existe.
+- En `b/` sería una metáfora en la única variante que las rechaza.
+- `c/` era la única variante sin un solo dibujo propio, y es la que hace la
+  afirmación más difícil de sostener con puro tamaño tipográfico.
+
+Se apoya a la **izquierda** de `CENTER.body`, que invierte el hábito de la página
+(titular a la izquierda, prosa a la derecha). Si cayera del mismo lado y al mismo
+ancho que todo lo de arriba, no cambiaría el ritmo en nada, que es la única
+razón para meter una figura en un cierre.
+
+### Los assets que hay que producir
+
+Todos los `label` son la orden de trabajo. En inglés, porque se imprimen en la
+página; los comentarios del código siguen en inglés y este README en español.
+
+| Variante · sección | Asset | Proporción · spec |
+|---|---|---|
+| `a/RevenueEngines` | NEAR Intents — cross-chain swap in progress: the stated intent, the route it takes, and settlement on both chains | 16/9 · 2400×1350 · PNG @2x |
+| `a/RevenueEngines` | NEAR AI — agent infrastructure console: one agent running in a confidential environment, execution proof in view | 4/3 · 1600×1200 · PNG @2x |
+| `b/EmissionChart` | revenue.near.org — screenshot of the public dashboard: cumulative revenue and buybacks, with the date of the snapshot visible | 4/3 · 1600×1200 · PNG @2x, recorte del panel, sin cromo del navegador |
+| `b/LedgerEntries` | NEAR Intents inside a wallet — portrait capture of a cross-chain swap: the stated intent, the route, and the settled balance | 3/4 · 1200×1600 · PNG @2x, solo el device |
+| `b/LedgerEntries` | NEAR AI — wide crop of the agent console: active agents, their confidential environment, and the execution log | 21/9 · 2520×1080 · PNG @2x |
+| `c/SplitProducts` | NEAR Intents — wide strip of a cross-chain swap: the stated intent, the route between chains, and settlement | 5/2 · 2500×1000 · PNG @2x |
+| `c/SplitProducts` | NEAR AI — agent console: one agent running in a confidential environment, with its execution proof | 4/3 · 1600×1200 · PNG @2x |
+
+Son siete capturas de tres productos: Intents (tres encuadres distintos, porque
+las tres variantes lo piden distinto), NEAR AI (tres) y el panel de ingresos
+(una). Mientras no existan, el hueco se ve como un área reservada con su encargo
+escrito, no como una imagen rota. Cuando lleguen, se les pasa `src` y el layout
+no se mueve.
+
+## La honestidad no se relajó al agregar dibujos
+
+Un dibujo afirma más rápido que un párrafo, también cuando afirma de más. Lo que
+esta pasada NO hizo, y no puede hacerse después:
+
+- **Ningún glifo dibuja la deflación como hecho consumado.** El glifo 02 dibuja
+  el recorte de emisión, que ya ocurrió y es verificable. La convergencia
+  emisión/recompra sigue viviendo solo en `EmissionChart`, con sus tres
+  retenciones intactas (ejes sin valores, marca de encuentro hueca, `Projection`
+  dentro del área de trazado).
+- **Ninguna figura sugiere telemetría en vivo.** El panel de ingresos entra como
+  captura fechada dentro de marcas de registro, con su encargo en mono debajo. Un
+  embed, o peor un widget que parezca en vivo, sería actualidad fabricada.
+- **Sigue sin haber contadores animados**, por las cuatro razones de más abajo.
+- **Los glifos no llevan color propio.** Heredan `currentColor` del bloque que
+  los monta, igual que todo trazo de la casa. El verde sigue reservado a las
+  frases `reinforces` y a los `claim` de producto.
+
+## Los heroes se quedaron sin ancla visual, a propósito
+
+Se evaluó y se descartó en las tres. En `a/` y `c/` el hero es tipografía a
+tamaño deliberadamente grande y su trabajo es establecer la escala antes de que
+llegue la primera sección; cualquier figura al lado llega primero y se gasta la
+atención en el lugar equivocado — que es exactamente el argumento que ya está
+escrito en `a/Hero`. En `b/` el ancla ya existe y es el ÍNDICE: un libro de
+registro abre diciendo qué contiene, y eso es un dispositivo visual, no un
+adorno. Las tres variantes ganaron entre cinco y siete momentos gráficos sin
+tocarlos.
+
 ## Lo que se descartó
 
 | Se probó / se consideró | Por qué no |
@@ -186,6 +325,14 @@ que ser tan difíciles de borrar como los datos.
 | Un quinto paso escrito en el copy para «cerrar el bucle» | El cierre ya existe (`FLYWHEEL.closing`). Agregar copy nueva para lo que el layout tiene que demostrar es la salida fácil, y es la que rompe la comparación entre variantes |
 | Fondo verde saturado para una mitad del split de C | Fuera de la paleta de suelos del DS (`cream`, `ink`, `ink-slate`, `background`). La costura tinta/crema ya es el corte más duro de la página |
 | `pin: true` de GSAP para la escena de A | Nunca, en ninguna sección de este repo. El razonamiento largo está en el README padre |
+| Un diagrama de rayos para `CENTER` (un centro y tres líneas hacia afuera) | Es el dibujo de «un token con tres usos», que es justo lo que la copy dice que tienen los DEMÁS tokens. Sin el trazo de vuelta la figura no dice nada que las tres columnas no digan |
+| La figura de `CENTER` también en `a/` y en `b/` | En `a/` sería el segundo anillo de la página; en `b/`, una metáfora en la variante que las rechaza. Ver arriba |
+| Un pictograma por hecho estructural (urna para gobernanza, reloj para uptime) | Un pictograma nombra el tema y le deja la afirmación al párrafo, que es exactamente el trabajo que el dibujo venía a ahorrar |
+| Animar cada glifo con su propio ScrollTrigger | Doce triggers más para animar cuatro objetos del tamaño de una línea de texto, en una página que ya tiene una escena pegada y un gráfico dibujado. Entran con el reveal de su sección |
+| Una figura en los tres heroes | Ver la sección de arriba: en `a/` y `c/` compite con la escala tipográfica, en `b/` el índice ya es el ancla |
+| Un embed o un widget «en vivo» de revenue.near.org | Telemetría que este sitio no tiene. La captura fechada dentro de marcas de registro no se puede confundir con un feed |
+| Repetir la captura del panel de ingresos en las tres variantes | La sección tiene dos CTAs al panel, pero el respaldo se gasta una vez y donde más pesa: enfrentado al gráfico que se niega a poner valores en los ejes |
+| Slots `MediaFrame` idénticos 16/9 apilados | Es una plantilla, no una composición: repetiría la simetría que el layout ya tiene y no cambiaría el ritmo de la página en nada |
 
 ## Detalles que es fácil deshacer sin querer
 

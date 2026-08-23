@@ -1,6 +1,7 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
+import MediaFrame from "@/components/primitives/MediaFrame";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
@@ -29,6 +30,28 @@ import { PROJECTION } from "@/components/sections/economics/economicsContent";
 // The wording of all three lives in `PROJECTION` in the content module, with a
 // note there saying why it is data and not decoration.
 //
+// ── Why the public dashboard is reserved HERE and nowhere else on the page ──
+// The section already ends on `PROJECTION.source` — a link to revenue.near.org,
+// which is a public panel of what the network has actually earned. That link is
+// the answer to the only fair objection this figure invites ("then where are
+// the numbers?"), and a link is a weak way to answer it, because the reader has
+// to leave to find out whether there is anything behind it.
+//
+// So the left column reserves a capture of that panel. It is the strongest slot
+// on the whole page: the two things now sit opposite each other and say
+// different things on purpose — drawn shape on the right, which claims nothing
+// about magnitude, and photographed record on the left, which does not have to,
+// because it is a picture of a page anyone can open.
+//
+// It is a CAPTURE and not an embed, and that distinction is the honesty of this
+// slot. An embed, or worse a live-looking widget, would be telemetry this site
+// does not have. A dated screenshot inside registration marks, with its brief
+// written under it in mono, cannot be mistaken for a feed.
+//
+// It goes on the left, under the legend, and not beneath the plot: under the
+// plot it would read as the chart's source data, which is precisely what it is
+// not. Across the gutter it reads as the other kind of evidence.
+//
 // ── Mechanism ──────────────────────────────────────────────────────────────
 // `pathLength={PATH_LEN}` + `strokeDashoffset`, the same plugin-free draw as
 // every other stroke on this site. 100 and not 1 because GSAP's CSSPlugin
@@ -37,6 +60,15 @@ import { PROJECTION } from "@/components/sections/economics/economicsContent";
 // between, and nothing errors. Long version in `chain/CapabilityStack`.
 
 const PATH_LEN = 100;
+
+// The panel this section reserves a picture of. `spec` asks for the crop and
+// not the whole browser window: a screenshot with a URL bar in it is a
+// screenshot of a browser, and the subject here is the panel.
+const DASHBOARD = {
+  label:
+    "revenue.near.org — screenshot of the public dashboard: cumulative revenue and buybacks, with the date of the snapshot visible",
+  spec: "1600×1200 · PNG @2x, panel crop, no browser chrome",
+} as const;
 
 // ── Chart box ──────────────────────────────────────────────────────────────
 const W = 640;
@@ -117,6 +149,15 @@ export default function EmissionChart() {
                 </div>
               ))}
             </dl>
+
+            {/* No `data-chart-label`: that selector belongs to the plot's own
+                timeline, and the left column of this section does not animate
+                at all. A large block fading in a second and a half after the
+                reader arrives, on the side that was legible from the start,
+                reads as a page still loading. */}
+            <div className="mt-12">
+              <MediaFrame label={DASHBOARD.label} spec={DASHBOARD.spec} ratio="4/3" />
+            </div>
           </div>
 
           <div className="col-span-12 lg:col-span-7 lg:col-start-6">

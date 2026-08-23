@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
+import MediaFrame from "@/components/primitives/MediaFrame";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { PRODUCTS } from "@/components/sections/economics/economicsContent";
 
@@ -21,6 +22,40 @@ import { PRODUCTS } from "@/components/sections/economics/economicsContent";
 // alternatives, they are two engines feeding one loop. Stacked full width, each
 // gets its own rule and its own line of sight, and the reader meets them in the
 // deck's order rather than choosing between them.
+//
+// ── Why this is the one section on the page with real assets in it ─────────
+// Everything above this is a claim about a mechanism, and mechanisms are drawn.
+// These two are shipped products with interfaces, and the honest way to show a
+// product that exists is to show it — a diagram of Intents would be a diagram of
+// something that does not need one. So each entry reserves a capture
+// (`MediaFrame`), and the label is the brief for whoever shoots it, not a
+// caption.
+//
+// The two slots are deliberately unequal. Same size and same side, one under
+// the other, is a template: it would restate the symmetry the stacked layout
+// already has and change the page's rhythm not at all. So Intents takes a wide
+// 16/9 under the right-hand column and NEAR AI a 4/3 under the left, which
+// leaves an empty half-row after each — the same open space the rest of the
+// page uses to separate things without drawing a box around them.
+
+// Keyed by product id and not by index: a reordered deck must not be able to
+// hand NEAR AI the brief written for Intents.
+const SHOTS = {
+  intents: {
+    label:
+      "NEAR Intents — cross-chain swap in progress: the stated intent, the route it takes, and settlement on both chains",
+    spec: "2400×1350 · PNG @2x",
+    ratio: "16/9",
+    span: "col-span-12 lg:col-span-6 lg:col-start-7",
+  },
+  ai: {
+    label:
+      "NEAR AI — agent infrastructure console: one agent running in a confidential environment, execution proof in view",
+    spec: "1600×1200 · PNG @2x",
+    ratio: "4/3",
+    span: "col-span-12 lg:col-span-5",
+  },
+} as const;
 
 export default function RevenueEngines() {
   const rootRef = useScrollReveal<HTMLElement>();
@@ -34,7 +69,9 @@ export default function RevenueEngines() {
         </div>
 
         <div className="mt-20 flex flex-col gap-20">
-          {PRODUCTS.items.map((p) => (
+          {PRODUCTS.items.map((p) => {
+            const shot = SHOTS[p.id];
+            return (
             <article key={p.id} data-reveal>
               <div className="h-px w-full bg-rule" aria-hidden="true" />
 
@@ -60,9 +97,14 @@ export default function RevenueEngines() {
                     <ArrowUpRight className="size-4" aria-hidden="true" />
                   </Link>
                 </div>
+
+                <div className={`mt-6 ${shot.span}`}>
+                  <MediaFrame label={shot.label} spec={shot.spec} ratio={shot.ratio} />
+                </div>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
 
         {/* The tie-back is the sentence that puts both products back inside the
