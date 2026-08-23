@@ -14,9 +14,9 @@ import BuildersCta from "@/components/sections/chain/BuildersCta";
 //    faltaban.
 //
 // De esas tres, `ForwardTurn` YA NO sale de la página real: se probaron tres
-// tratamientos propios en `/prototype/chain-ab-opcion-1`, `-2` y `-3`, y el
-// elegido vive ahora en `chain-abstraction-proposals/`, la carpeta común de
-// las tres propuestas. A y B montan el mismo.
+// tratamientos propios, y el elegido vive ahora en
+// `chain-abstraction-proposals/`, la carpeta común de las tres propuestas. A y
+// B montan el mismo. Los dos descartados están en `docs/labs-archivados.md`.
 //
 // `CompletePicture` y `BuildersCta` sí siguen viniendo tal cual de
 // `components/sections/chain/`, que es lo que se pidió: verlas exactamente

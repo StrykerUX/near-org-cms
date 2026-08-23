@@ -156,6 +156,27 @@ Las dos gráficas descartadas siguen siendo las únicas versiones con
 ondulación (la 1) y con trazo de línea (la 2): las dos que quedan vivas usan
 barras estrictamente crecientes.
 
+## Las tres opciones del giro (2026-08-23)
+
+Tres rutas idénticas a la propuesta C salvo por una sección — "Built for what
+transacts next", §5b, el giro de la página. Existieron para comparar tres
+tratamientos del mismo copy y se borraron apenas se eligió uno.
+
+**El ancla es el commit `f0f7661`**, que las dejó asentadas justo antes de este
+borrado. No están en `v-pre-limpieza`, que es muy anterior.
+
+| Opción | Qué era | Rescatar con |
+|---|---|---|
+| 1 | **El relevo.** Díptico de dos actores pares —una persona hoy, un agente después— que bajan por dos líneas a un ÚNICO nodo de cuenta, dibujado una sola vez. **Esta ganó**: no hace falta rescatarla, vive en `components/sections/chain-abstraction-proposals/ForwardTurn.tsx` | — |
+| 2 | **La línea que no se corta.** Una hairline full-bleed con tres paradas, que entra y sale de cuadro por los dos lados: sin principio ni final visible. En mobile el eje pasa a vertical | `git checkout f0f7661 -- components/sections/chain-ab-opcion-2 components/views/ChainAbOpcion2View.tsx app/prototype/chain-ab-opcion-2` |
+| 3 | **El mismo sujeto, otro operador.** Una marca de cuenta que no se mueve nunca y una línea debajo que releva «a person» por «an agent» en loop. La quietud como argumento | `git checkout f0f7661 -- components/sections/chain-ab-opcion-3 components/views/ChainAbOpcion3View.tsx app/prototype/chain-ab-opcion-3` |
+
+Las tres iban en crema y sin gradiente, y las tres respetaban la regla que la
+sección trae del original: movimiento auto-pautado (`once: true`, nunca
+`scrub`), porque es el único lugar de la página donde el lector suelta el
+volante. La 3 es la única de la familia con algo en loop, con `pauseOffscreen`
+y sin rotar bajo `prefers-reduced-motion`.
+
 ## Lo que NO se archivó
 
 Sigue vivo en el árbol, sin necesidad de rescate:

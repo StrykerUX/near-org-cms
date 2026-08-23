@@ -10,9 +10,9 @@ import { FORWARD_BODY, FORWARD_CODA } from "@/components/sections/chain/chainCon
 
 // §5b — "el relevo". La versión elegida de esta sección.
 //
-// Se probaron tres tratamientos del mismo copy (`/prototype/chain-ab-opcion-1`,
-// `-2` y `-3`), cada uno ilustrando una frase distinta. Ganó este, que toma la
-// del tercer párrafo:
+// Se probaron tres tratamientos del mismo copy, cada uno ilustrando una frase
+// distinta; los otros dos se archivaron (ver `docs/labs-archivados.md`). Ganó
+// este, que toma la del tercer párrafo:
 //
 //   "The account that simplifies crypto for a person today is the account
 //    an agent operates through tomorrow."

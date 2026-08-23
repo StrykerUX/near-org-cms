@@ -19,8 +19,8 @@ import BuildersCta from "@/components/sections/chain/BuildersCta";
 // comparación.
 //
 // `ForwardTurn` sale de `chain-abstraction-proposals/`, la carpeta común de la
-// familia: es el tratamiento que ganó entre los tres que se probaron en
-// `/prototype/chain-ab-opcion-1`, `-2` y `-3`.
+// familia: es el tratamiento que ganó entre los tres que se probaron. Los dos
+// descartados están en `docs/labs-archivados.md`.
 //
 // `CompletePicture` y `BuildersCta` vienen tal cual de `components/sections/
 // chain/`, la página real. Es la excepción y no la regla — la consigna era
