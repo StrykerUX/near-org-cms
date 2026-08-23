@@ -60,11 +60,13 @@ import m53 from "@/app/prototype/quantum-axis/page.meta";
 import m54 from "@/app/prototype/quantum-ledger/page.meta";
 import m55 from "@/app/prototype/quantum-manifesto/page.meta";
 import m56 from "@/app/prototype/quantum-security-copy/page.meta";
-import m57 from "@/app/prototype/scroll-sections/page.meta";
-import m58 from "@/app/(motion)/quantum-security/page.meta";
-import m59 from "@/app/(site)/research/page.meta";
-import m60 from "@/app/(site)/solutions/page.meta";
-import m61 from "@/app/(site)/terms-of-use/page.meta";
+import m57 from "@/app/prototype/quantum-security-h2/page.meta";
+import m58 from "@/app/prototype/quantum-security-h3/page.meta";
+import m59 from "@/app/prototype/scroll-sections/page.meta";
+import m60 from "@/app/(motion)/quantum-security/page.meta";
+import m61 from "@/app/(site)/research/page.meta";
+import m62 from "@/app/(site)/solutions/page.meta";
+import m63 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -124,9 +126,11 @@ export const ROUTES: RouteEntry[] = [
   { ...m54, route: "/prototype/quantum-ledger", stub: false, file: "app/prototype/quantum-ledger/page.meta.ts" },
   { ...m55, route: "/prototype/quantum-manifesto", stub: false, file: "app/prototype/quantum-manifesto/page.meta.ts" },
   { ...m56, route: "/prototype/quantum-security-copy", stub: false, file: "app/prototype/quantum-security-copy/page.meta.ts" },
-  { ...m57, route: "/prototype/scroll-sections", stub: false, file: "app/prototype/scroll-sections/page.meta.ts" },
-  { ...m58, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m59, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m60, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m61, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m57, route: "/prototype/quantum-security-h2", stub: false, file: "app/prototype/quantum-security-h2/page.meta.ts" },
+  { ...m58, route: "/prototype/quantum-security-h3", stub: false, file: "app/prototype/quantum-security-h3/page.meta.ts" },
+  { ...m59, route: "/prototype/scroll-sections", stub: false, file: "app/prototype/scroll-sections/page.meta.ts" },
+  { ...m60, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m61, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m62, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m63, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
