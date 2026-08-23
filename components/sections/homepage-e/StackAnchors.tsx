@@ -3,10 +3,10 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import { gsap } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { DUR, STAGGER, enterTimeline } from "@/components/sections/homepage-e/motion";
+import { DUR, EASE, STAGGER } from "@/components/sections/homepage-e/motion";
 import StackAssembly, { type StackStop } from "@/components/sections/homepage-e/stackAssembly";
 import StackFlow from "@/components/sections/homepage-e/StackFlow";
 import StackCursorTag from "@/components/sections/homepage-e/StackCursorTag";
@@ -147,13 +147,19 @@ export default function StackAnchors({
 }: StackAnchorsProps = {}) {
   const { rootRef, stageRef, stage, stop, hover, enhanced, goTo, stageProps, tagRef } =
     useStackScene();
-  // `frame || soloActive`: los dos modos gobiernan la visibilidad de las
-  // fichas por su cuenta, y una entrada que también les escriba `opacity` y
-  // `visibility` inline se pelea con ellos — el inline gana sobre la clase, así
-  // que o las tres inactivas reaparecen al terminar la entrada, o quedan las
-  // cuatro ocultas si la entrada no llegó a dispararse. Un solo dueño por
-  // propiedad.
-  const headRef = useSceneEntrance(headEntrance, frame || soloActive);
+  // Solo `frame` salta la entrada del contenido, y `soloActive` NO.
+  //
+  // Estuvieron los dos, y era un error con síntoma claro: en `soloActive` la
+  // escena entera aparecía de golpe al plantarse, sin ninguna entrada.
+  //
+  // El motivo por el que `soloActive` estaba en la lista era real pero dejó de
+  // aplicar: al principio la clase de presencia vivía en el CONTENEDOR de la
+  // ficha, el mismo elemento que la entrada anima, y el `opacity` inline de
+  // GSAP le ganaba a la clase. Cuando el encabezado se separó del cuerpo, esa
+  // clase se mudó al div del cuerpo — un elemento distinto—, así que animar el
+  // contenedor ya no pisa nada: las dos opacidades se multiplican, que es
+  // justo lo que se quiere.
+  const headRef = useSceneEntrance(headEntrance, frame);
   const frameRef = useFrameReveal(frame);
 
   // La ficha se enciende cuando su capa es la parada activa, cuando el puntero
@@ -187,20 +193,22 @@ export default function StackAnchors({
             frame ? "bg-ink" : ""
           }`}
         >
+          {/* Sin `flow`, el fondo de la escena es el negro de la sección y
+              nada más.
+
+              Acá vivía un halo radial verde —un `radial-gradient` centrado,
+              a media opacidad, sobredimensionado con `inset` negativo para que
+              su borde cayera fuera de cuadro. Se cayó por dos motivos que
+              apuntaban al mismo lado: aparecía de golpe con el destape (no
+              tiene por qué animar, es fondo, no contenido) y no aportaba
+              encuadre — el arte ya trae toda la luz verde que la escena
+              necesita, y el halo solo la repetía más floja. */}
           {flow ? (
-            /* El flujo. Va `inset-0` y no sobredimensionado como el halo: el
-               shader llena su caja y su parada más oscura ya es prácticamente
-               el fondo de la sección, así que no hay borde que disimular. */
+            /* El flujo. Va `inset-0`: el shader llena su caja y su parada más
+               oscura ya es prácticamente el fondo de la sección, así que no hay
+               borde que disimular. */
             <StackFlow className="pointer-events-none absolute inset-0" />
-          ) : (
-            /* El halo. `inset` negativo y el degradado apagándose antes del
-               borde: si el radial termina dentro de su propia caja, se ve el
-               rectángulo. */
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-[30svh] bg-[radial-gradient(circle_at_50%_50%,rgba(0,220,141,0.13)_0%,rgba(0,220,141,0.05)_22%,rgba(0,220,141,0.015)_34%,rgba(16,16,16,0)_46%)]"
-            />
-          )}
+          ) : null}
 
           <Container className="pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)]">
             {/* El titular del stack, DENTRO de la escena pegada.
@@ -227,6 +235,7 @@ export default function StackAnchors({
                   distintos, cuando son una sola entrada. */}
               <p
                 data-stack-line
+                data-stack-sub
                 className="mx-auto max-w-[42ch] text-body text-cream/70 text-balance"
               >
                 {INTRO.sub}
@@ -387,10 +396,10 @@ export default function StackAnchors({
  * columna ya venía haciendo por su lado (ver el build-in de `useStackScene`,
  * que corre en el mismo punto). Las dos cosas dejan de ir cada una por su lado.
  *
- * `enabled` gobierna SOLO el encabezado: cuando algo anterior ya lo trajo en
+ * `enabled` gobierna SOLO el TITULAR: cuando algo anterior ya lo trajo en
  * pantalla —la obertura lo hace, y termina dejándolo exactamente en esta
- * posición— repetir su entrada acá lo haría parpadear. Las fichas entran
- * siempre; nadie las trae de antes.
+ * posición— repetir su entrada acá lo haría parpadear. El subtítulo y las
+ * fichas entran siempre; nadie las trae de antes.
  */
 function useSceneEntrance(enabled: boolean, frame: boolean) {
   return useGsapContext<HTMLDivElement>((_self, scope) => {
@@ -399,14 +408,16 @@ function useSceneEntrance(enabled: boolean, frame: boolean) {
 
     const mm = gsap.matchMedia();
     mm.add(MQ.motion, () => {
-      const lines = enabled
-        ? Array.from(scope.querySelectorAll<HTMLElement>("[data-stack-line]"))
-        : [];
-      // Con caja o con «solo la activa», las fichas y el arte NO entran acá.
-      //
-      // En modo caja los maneja el scrub de la apertura (`useFrameReveal`),
-      // atados al mismo recorrido que el encuadre. En modo solo, la visibilidad
-      // es la clase del propio `Anchor`, que sigue a la parada.
+      // Sin `enabled`, el TITULAR llega relevado de la obertura y no debe
+      // animar: repetir su entrada acá lo haría parpadear justo en el punto en
+      // que la obertura lo deja quieto. Pero el subtítulo no viaja en ese
+      // relevo —la obertura solo lleva el `h2`—, así que estaba quedando fuera
+      // de todo y apareciendo de golpe con el destape. Entra él solo.
+      const lines = Array.from(
+        scope.querySelectorAll<HTMLElement>(enabled ? "[data-stack-line]" : "[data-stack-sub]")
+      );
+      // Con caja, las fichas y el arte NO entran acá: los maneja el scrub de la
+      // apertura (`useFrameReveal`), atados al mismo recorrido que el encuadre.
       //
       // Repartirlos entre dos triggers parecía equivalente y no lo es: este es
       // un `once` sobre una posición, y el de la caja es un scrub sobre un
@@ -424,8 +435,34 @@ function useSceneEntrance(enabled: boolean, frame: boolean) {
       const art = frame ? null : section.querySelector<HTMLElement>("[data-stack-art]");
       if (lines.length === 0 && cards.length === 0) return;
 
-      const tl = enterTimeline(section, { start: "top top", duration: DUR.base });
-      if (lines.length) tl.from(lines, { autoAlpha: 0, y: 18, stagger: STAGGER }, 0);
+      // `set` + `to`, nunca `from` con stagger: un `.from()` escalonado deja
+      // aplicado el estado inicial SOLO del primer elemento y el resto arranca
+      // visible. Documentado con su síntoma en `useFrameReveal`.
+      //
+      // La curva es `EASE.out` — la del sistema de motion de esta página, la
+      // misma que usan todas las demás entradas.
+      //
+      // El timeline arranca en pausa y lo gobierna un trigger propio, y no el
+      // `once` de `enterTimeline`: acá la entrada tiene que poder REARMARSE al
+      // subir, y un `once` solo sabe ocurrir una vez. Ver el gate más abajo.
+
+      // El aire antes de la entrada, en TIEMPO y no en recorrido de scroll.
+      //
+      // Fue un `start` corrido 140px y no podía quedarse así: el punto donde la
+      // escena se destapa y el punto donde la entrada arranca tienen que ser el
+      // mismo, o el tramo intermedio queda con la escena a la vista y todavía
+      // invisible. El aire sigue estando —el título aterriza limpio sobre el
+      // negro antes de que entre nada— pero ahora lo pone el timeline.
+      const ENTER_DELAY = 0.26;
+
+      const tl = gsap.timeline({
+        paused: true,
+        defaults: { ease: EASE.out, duration: DUR.base },
+      });
+      if (lines.length) {
+        gsap.set(lines, { autoAlpha: 0, y: 18 });
+        tl.to(lines, { autoAlpha: 1, y: 0, stagger: STAGGER, duration: DUR.slow }, ENTER_DELAY);
+      }
       // Las fichas arrancan con el encabezado ya en camino, no después de que
       // termine: esperarlo deja un hueco muerto de medio segundo con la
       // pantalla casi vacía. El escalonado entre ellas es más largo que el de
@@ -433,17 +470,87 @@ function useSceneEntrance(enabled: boolean, frame: boolean) {
       // ritmo de un renglón se leerían como una sola cosa apareciendo de a
       // partes.
       if (cards.length) {
-        tl.from(cards, { autoAlpha: 0, y: 24, stagger: STAGGER * 1.6 }, 0.18);
+        gsap.set(cards, { autoAlpha: 0, y: 24 });
+        tl.to(
+          cards,
+          { autoAlpha: 1, y: 0, stagger: STAGGER * 1.6, duration: DUR.slow },
+          ENTER_DELAY + 0.18
+        );
       }
       // El arte, primero de todo lo que no es texto: es el centro de la escena
       // y lo que el encabezado acaba de anunciar. Su propio build-in —los seis
       // cubos subiendo— arranca en este mismo punto y se monta encima de este
       // fade, así que lo que se ve es la columna construyéndose mientras
       // aparece, no dos cosas seguidas.
-      if (art) tl.from(art, { autoAlpha: 0 }, 0.06);
+      if (art) {
+        gsap.set(art, { autoAlpha: 0 });
+        tl.to(art, { autoAlpha: 1, duration: DUR.slow }, ENTER_DELAY + 0.06);
+      }
+
+      // El tramo que este trigger vigila NO es la escena: es lo que pasa
+      // JUSTO ANTES de que se vea.
+      //
+      //   start "top bottom" — la sección asoma por el borde inferior
+      //   end   "top top"    — la sección se pega arriba: el destape
+      //
+      // Así los dos bordes caen donde hacen falta. `onLeave` (cruzar el end
+      // bajando) es exactamente el instante del destape, y `onLeaveBack`
+      // (cruzar el start subiendo) es un punto en el que la sección está
+      // ENTERA fuera de cuadro — el único lugar seguro para rebobinar sin que
+      // se vea desaparecer nada.
+      //
+      // El rango es de un viewport, y la obertura ocupa la pantalla durante
+      // todo ese tramo, así que el rebobinado siempre ocurre a cubierto.
+      const play = () => {
+        if (tl.progress() === 0 && !tl.isActive()) tl.play();
+      };
+      const reset = () => {
+        if (tl.progress() !== 0 || tl.isActive()) tl.pause(0);
+      };
+
+      // Rebobinar es reversible SOLO cuando el encabezado viene de afuera.
+      //
+      // `enabled === false` significa literalmente que algo delante ya trajo el
+      // título a esta posición: la obertura. Y eso es justo lo que hace seguro
+      // rearmar la entrada al subir — mientras el lector está por encima del
+      // destape, la obertura le está tapando la escena, así que el rebobinado
+      // es invisible y al volver a bajar la entrada se ve de nuevo.
+      //
+      // Sin obertura delante (`enabled === true`, el resto de las rutas) no hay
+      // nada que garantice esa cobertura: la sección se despega y sigue a la
+      // vista mientras sube. Ahí la entrada se queda como estaba, una sola vez,
+      // porque rebobinarla haría desaparecer lo que el lector está mirando.
+      const rewinds = !enabled;
+
+      // El refresh INICIAL es el único que puede saltar al final: si la página
+      // nace con la sección ya pasada —recarga a media página, llegada por
+      // ancla— nadie debe ver una entrada que ya debería haber ocurrido. Los
+      // refreshes posteriores no deciden nada.
+      let armed = false;
+
+      const gate = ScrollTrigger.create({
+        trigger: section,
+        start: "top bottom",
+        end: "top top",
+        markers: DEBUG_MARKERS,
+        onLeave: play,
+        // Volver a entrar al rango por arriba = el lector subió por encima del
+        // destape. Con la obertura cubriendo, se rearma para la próxima bajada.
+        onEnterBack: () => {
+          if (rewinds) reset();
+        },
+        onLeaveBack: () => {
+          if (rewinds) reset();
+        },
+        onRefresh: (self) => {
+          if (armed) return;
+          armed = true;
+          if (self.progress >= 1) tl.progress(1).pause();
+        },
+      });
 
       return () => {
-        tl.scrollTrigger?.kill();
+        gate.kill();
         tl.kill();
         gsap.set([...lines, ...cards, ...(art ? [art] : [])], { clearProps: "all" });
       };
