@@ -1,26 +1,39 @@
 # `protocol-labs/` — la página Protocol en curso
 
-Dos cosas:
+Tres cosas:
 
 - **`a/`** — la estructura elegida para `near.org/protocol`, en
   `/prototype/protocol-a`. Su razonamiento completo está en
   `components/views/ProtocolLabAView.tsx`.
-- **`hero-labs/`** — las ocho variantes de la primera pantalla contra las que se
-  decidió, en `/prototype/protocol-heroes`. Ganó **H4 · Cut**, ya copiada en
-  `a/Hero.tsx`. Tiene su propio [README](./hero-labs/README.md).
-- **`opening-labs/`** — seis aperturas completas (hero + las seis cifras +
+- **`hero-labs/`** — la alternativa viva para la primera pantalla, en
+  `/prototype/protocol-heroes/h2`. Eran ocho: ganó **H4 · Cut** —ya copiada en
+  `a/Hero.tsx`, y su copia del lab se borró— y se conservó **H2 · Count**. Tiene
+  su propio [README](./hero-labs/README.md).
+- **`opening-labs/`** — tres aperturas completas (hero + las seis cifras +
   «Built for AI scale»), en `/prototype/protocol-opening`. Cada una con su propia
-  superficie: cuatro shaders WebGL, un SVG con paralaje y un campo de caracteres
-  en canvas. Sin decidir. Tiene su propio [README](./opening-labs/README.md).
-- **`transition-labs/`** — doce secciones de transición para la juntura entre el
-  hero y el contenido, en `/prototype/protocol-transitions` (+ una ruta por
-  variante, en contexto). Agrupadas por altura: 25–30svh, ~50svh y 85–100svh. Sin
-  decidir. Tiene su propio [README](./transition-labs/README.md).
+  superficie: un shader WebGL y dos campos de caracteres en canvas. Sin decidir.
+  Tiene su propio [README](./opening-labs/README.md).
 
-  Reemplazan a `proof-labs/`, ocho dividers que trataban la franja de cifras como
-  un separador. Están en el commit anterior; se descartaron porque un separador no
-  hace lo que esta juntura necesita —introducir el contenido— y porque el rol se
-  estaba definiendo por lo que la franja NO debía ser.
+## Lo que se borró en la limpieza
+
+De lo que este README describía antes queda menos de la mitad, y no por
+descarte técnico sino porque no gustó. Todo está en el historial de git, en el
+commit anterior a la limpieza — `git log --diff-filter=D -- components/sections/protocol-labs`:
+
+- **`transition-labs/`, entera** — doce secciones de transición para la juntura
+  entre el hero y el contenido, agrupadas por altura (25–30svh, ~50svh y
+  85–100svh), con su copy propuesta en `transitionContent.ts`. Reemplazaban a
+  `proof-labs/`, ocho dividers que trataban la franja de cifras como un
+  separador; el problema de fondo nunca se resolvió y las doce se descartaron
+  también. Antes de rehacer esta juntura conviene leer por qué fallaron las
+  veinte: se estaban diseñando **sin una sola referencia visual**, que es
+  exactamente el error que `docs/protocol-page-brief.md` documenta.
+- **Seis heroes** — H1 · Ledger, H3 · Threshold, H5 · Index, H6 · Field,
+  H7 · Mural y H8 · Terminal, más la `ProofBand`. Detalle de qué proponía cada
+  uno en [`hero-labs/README.md`](./hero-labs/README.md).
+- **Cuatro aperturas** — A · Lattice, B · Shards, D · Stack y F · Horizon, con
+  sus shaders `gl/lattice.ts`, `gl/voronoi.ts` y `gl/horizon.ts`. Detalle en
+  [`opening-labs/README.md`](./opening-labs/README.md).
 
 ## De dónde viene `a/`
 
@@ -50,7 +63,8 @@ Rige el contrato general de [`../README.md`](../README.md).
 
 Los quince bloques del doc de sitemap están en
 [`protocolContent.ts`](./protocolContent.ts), y todo lo demás lo consume desde
-ahí — la página y las ocho variantes de hero. Nada transcribe copy por su cuenta:
+ahí — la página, el hero que queda y las tres aperturas. Nada transcribe copy
+por su cuenta:
 así, cualquier diferencia entre dos versiones es una diferencia de diseño y no de
 redacción, y una corrección de dato entra en un solo lugar.
 
@@ -66,9 +80,10 @@ sigue abierto.
 | `CodeSample.tsx` | El bloque de código de la sección 10 | El código y su tokenización no cambian; lo que cambia es el marco, y eso es un prop |
 | `ArtPlaceholder.tsx` | Hueco declarado para un asset | Distingue "sección sin diseñar" de "sección diseñada esperando un render" |
 
-La regla del README padre sigue en pie para lo que viene: si una variante de hero
-gana, **se copia** a `a/` y reemplaza a `DatasheetHero` — no se importa desde
-`hero-labs/`.
+La regla del README padre sigue en pie para lo que viene: si una variante gana,
+**se copia** a `a/` — no se importa desde su laboratorio. Ya pasó con H4 · Cut, y
+la vuelta completa incluye borrar la copia del lab: dos archivos que dicen ser el
+mismo hero es la forma más barata de que uno quede desactualizado en silencio.
 
 ## Estado
 
@@ -78,9 +93,8 @@ propios sobre el eje isométrico del sitio.
 
 Lo que falta antes de que esto pueda pasar a página real:
 
-- **Verificar el asomo del hero.** Mide 78svh para que la franja de cifras
-  asome cortada por el borde inferior; a distintas alturas de pantalla no asoma
-  lo mismo. Es un porcentaje, no una medida contra la franja.
+- **Decidir la apertura.** El hero de `a/` está a pantalla completa y sin
+  superficie; las tres candidatas para ponerle una están en `opening-labs/`.
 - **Mirarla en el navegador a 390, 1024 y 1920.** Todas las mediciones de acá
   salieron de la escala del DS, no de una pantalla — que es exactamente cómo el
   primer hero de la página viva terminó métricamente correcto y visualmente

@@ -1,8 +1,8 @@
-# `opening-labs/` — siete maneras de abrir la página
+# `opening-labs/` — tres maneras de abrir la página
 
 Hero + las seis cifras + «Built for AI scale», rediseñados **como una sola
 pieza**. Índice en `/prototype/protocol-opening`; cada trío en
-`/prototype/protocol-opening/a` … `f`.
+`/prototype/protocol-opening/c`, `/e` y `/g`.
 
 ## Por qué un trío y no un hero
 
@@ -12,17 +12,37 @@ problema vuelve dos pantallas más abajo. Cada alternativa decide **una
 superficie y cómo se consume a lo largo de las tres secciones** — eso es lo que
 se compara.
 
-## Las seis
+## Las tres
 
 | | Superficie | Tesis | Riesgo |
 |---|---|---|---|
-| **A · Lattice** | Shader — retícula isométrica en perspectiva | Las tres son un descenso: el hero flota sobre la red, las cifras se apoyan al ras, la superficie se agota antes del texto | Vive cerca del cliché de la grilla en fuga; la salva o la hunde la inclinación |
-| **B · Shards** | Shader — Voronoi que deriva | La única que **explica**: un espacio partido en regiones que se redistribuyen es el tema de la página. Las cifras van dentro de regiones dibujadas | Si se lee como «efecto de shader» y no como la red, pierde lo que la distingue |
 | **C · Spectrum** | Shader — bandas verticales en interferencia | Una idea formal atraviesa las tres: la columna. La superficie no se retira, **se convierte en el layout** (doce columnas = las de la página) | Es la más cercana a lo que ya hace Sui |
-| **D · Stack** | **SVG puro** — cuatro planos isométricos con paralaje | ¿Hacía falta inventar una superficie, o alcanzaba con dejar de usar el lenguaje propio en miniatura? El mismo cubo, a 900px en vez de 20 | Sin la densidad de un shader puede leerse simple al lado de las otras |
 | **E · Field** | Canvas — retícula de caracteres | La superficie es texto: SHARD, FINALITY, WITNESS, SIGNATURE escondidas entre ruido, encendidas por una onda diagonal | El campo de caracteres es un recurso muy usado en cripto; lo distingue que las palabras sean las de esta página — y sólo si se alcanzan a leer |
-| **F · Horizon** | Shader — degradé con banda de luz y grano | La única cálida. El trío progresa de noche a día | La más bonita y la menos argumentada: no dice nada del protocolo |
 | **G · Field claro** | Canvas — el campo de E, sobre crema | La única que abre en el color de la marca. Pregunta si la página **necesita** abrir en oscuro | Vuelve al fondo que se veía plano; la diferencia tiene que venir entera del campo |
+
+## Eran siete
+
+Se borraron cuatro, con sus shaders:
+
+- **A · Lattice** — shader de retícula isométrica en perspectiva (`gl/lattice.ts`).
+  Las tres secciones eran un descenso: el hero flotaba sobre la red, las cifras se
+  apoyaban al ras, la superficie se agotaba antes del texto.
+- **B · Shards** — Voronoi que deriva (`gl/voronoi.ts`). La única que
+  **explicaba**: un espacio partido en regiones que se redistribuyen es el tema
+  de la página, y las cifras iban dentro de regiones dibujadas.
+- **D · Stack** — **SVG puro**, cuatro planos isométricos con paralaje. Sin
+  WebGL: el mismo cubo de la marca a 900px en vez de 20.
+- **F · Horizon** — degradé profundo con banda de luz y grano (`gl/horizon.ts`).
+  La única cálida; el trío progresaba de noche a día.
+
+Están enteras en el historial de git, en el commit anterior a esta limpieza:
+`git log --diff-filter=D -- components/sections/protocol-labs/opening-labs`.
+
+**`ScaleSection` salió de `OpeningA` al borrarla.** Vivía exportada desde ahí
+porque A fue la primera y las siete la compartían; ahora tiene archivo propio
+(`ScaleSection.tsx`), que es donde debió estar siempre — una pieza compartida
+dentro de una de sus consumidoras queda a un borrado de romper a las demás, y eso
+fue exactamente lo que pasó.
 
 ## Ninguna funde una sección con la siguiente
 
@@ -31,9 +51,8 @@ plana sobre la superficie, para que el texto se lea— y no degradés que termin
 en el color del bloque de abajo. Un degradé así disuelve el borde entre dos
 secciones; acá el corte se ve.
 
-Consecuencia: donde dos secciones comparten color (A, C, D, E, F y G tienen el
-hero y las cifras del mismo tono) la frontera la marca un **filete**, no un
-fundido.
+Consecuencia: donde dos secciones comparten color (las tres tienen el hero y las
+cifras del mismo tono) la frontera la marca un **filete**, no un fundido.
 
 ## `GlyphField` sirve a E y a G, y no comparten calibración
 
@@ -48,10 +67,11 @@ dos tokens.
 
 ## Infraestructura
 
-**`GlSurface.tsx`** — el andamiaje WebGL de las cuatro aperturas con shader.
-`HeroFoliage` ya había resuelto este problema completo para la homepage, pero con
-~90 líneas de infraestructura por 20 de calibración; repetirlas cuatro veces
-repetiría también los cuatro modos de fallo que costó encontrar una vez.
+**`GlSurface.tsx`** — el andamiaje WebGL. Hoy lo usa una sola apertura (C), pero
+se queda: `HeroFoliage` ya había resuelto este problema completo para la
+homepage, con ~90 líneas de infraestructura por 20 de calibración, y volver a
+inline-arlas dentro de `OpeningC` es lo que hace que la próxima superficie repita
+también los cuatro modos de fallo que costó encontrar una vez.
 
 Lo que hereda y no se toca:
 
@@ -71,38 +91,41 @@ literal nuevo en cada render del padre reconstruiría el programa entero. Es
 correcto porque son tablas de una docena de números; si el JSON cambia, alguien
 editó el archivo.
 
-`renderScale` por defecto 0.6 — el costo cae con el **cuadrado** del factor. B lo
-sube a 0.85 porque su Voronoi tiene bordes finos que a baja resolución aliasean
-y titilan al derivar.
+`renderScale` por defecto 0.6 — el costo cae con el **cuadrado** del factor.
 
-## Los shaders
+## El shader
 
-`gl/lattice.ts`, `gl/voronoi.ts`, `gl/spectrum.ts`, `gl/horizon.ts`. GLSL 1.0 sin
-`#version` sobre contexto WebGL2, igual que el resto del toolkit.
+Queda `gl/spectrum.ts`, el de C. **GLSL ES 3.00** (`#version 300 es`, `in`/`out`),
+no GLSL 1.0: en 1.0 las derivadas (`fwidth`) vienen de `OES_standard_derivatives`,
+una extensión que WebGL2 **no expone** —`getExtension` devuelve `null`— porque en
+ES 3.00 son parte del núcleo. El síntoma era
+`ERROR: 0:39: 'fwidth' : no matching overloaded function found`.
 
-**Ojo al editar: no puede haber backticks dentro del GLSL.** Cierran el template
-literal de TypeScript y el error que da no señala el shader.
+Dos trampas al editar:
+
+- **`#version` tiene que ser la primerísima línea**, sin un salto antes. Por eso
+  las fuentes van `.trimStart()`eadas antes de compilar.
+- **No puede haber backticks dentro del GLSL.** Cierran el template literal de
+  TypeScript y el error que da no señala el shader.
 
 ## Cada ruta monta el acto debajo
 
-No es decorado. Cinco de las seis aperturas abren en oscuro, y el acto ya era el
-único bloque oscuro largo de la página: si la apertura le come el rango, se ve
-ahí y en ningún otro lado. Montar la apertura sola contestaría «¿se ve bien?»,
-que no es la pregunta.
+No es decorado. C y E abren en oscuro, y el acto ya era el único bloque oscuro
+largo de la página: si la apertura le come el rango, se ve ahí y en ningún otro
+lado. Montar la apertura sola contestaría «¿se ve bien?», que no es la pregunta.
+
+Para G —la clara— el acto contesta lo contrario y es igual de útil: si abrir en
+crema hace que el acto recupere el peso que tenía, es un argumento a su favor que
+ninguna captura del hero puede dar.
 
 ## Estado
 
-Sin ver en navegador — **y esta vez importa más que nunca**, porque todo lo que
-distingue a estas seis es lo que hace la superficie en movimiento, que es
-exactamente lo que no se puede juzgar desde el código.
+Sin decidir. Lo primero a mirar:
 
-Lo primero a mirar:
-
-- **A** — la inclinación del plano. Es un parámetro (`u_tilt`) y decide si la
-  retícula se lee como un plano o como una carretera.
-- **B** — si el Voronoi se lee como la red o como un efecto.
-- **E** — si las palabras se alcanzan a leer. Si no, el campo es ruido bonito.
-- **Todas** — el paso al acto oscuro, y `prefers-reduced-motion` (la superficie
+- **E y G** — si las palabras se alcanzan a leer. Si no, el campo es ruido bonito,
+  y es lo único que lo distingue del recurso genérico.
+- **G** — si a este tono el campo pesa lo suficiente. Si no, es el hero plano de
+  antes con textura encima.
+- **Las tres** — el paso al acto oscuro, y `prefers-reduced-motion` (la superficie
   queda en un cuadro fijo, no desaparece).
-- Rendimiento en un portátil sin GPU dedicada: cuatro rutas traen un canvas WebGL
-  a pantalla completa.
+- Rendimiento en un portátil sin GPU dedicada.

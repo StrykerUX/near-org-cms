@@ -65,9 +65,8 @@ dar por terminado un cambio.
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
 | `protocol-labs/a/*` | `ProtocolLabAView` | `/prototype/protocol-a` — la estructura elegida para la página de Protocol, salida de comparar cuatro. Tiene su propio [README](./protocol-labs/README.md) |
-| `protocol-labs/hero-labs/*` | `ProtocolHeroLabView` | `/prototype/protocol-heroes/h1…h8` — **laboratorio**: ocho variantes de la primera pantalla. Tiene su propio [README](./protocol-labs/hero-labs/README.md). Importa `shardField` de `protocol/`; **ninguna página real lo importa** |
-| `protocol-labs/opening-labs/*` | `ProtocolOpeningsIndexView`, `ProtocolOpeningLabView` | `/prototype/protocol-opening` (+ `/a…f`) — **laboratorio**: seis aperturas completas con superficie propia (4 shaders WebGL, 1 SVG, 1 canvas). Tiene su propio [README](./protocol-labs/opening-labs/README.md) |
-| `protocol-labs/transition-labs/*` | `ProtocolTransitionsIndexView`, `ProtocolTransitionLabView` | `/prototype/protocol-transitions` (+ `/t1…t12` en contexto) — **laboratorio**: doce secciones de transición para la juntura hero → contenido, agrupadas por altura. Tiene su propio [README](./protocol-labs/transition-labs/README.md); su copy propuesta vive aparte de la transcripción del doc |
+| `protocol-labs/hero-labs/*` | `ProtocolHeroesIndexView`, `ProtocolHeroLabView` | `/prototype/protocol-heroes` (+ `/h2`) — **laboratorio**: la alternativa viva para la primera pantalla. Eran ocho; ganó H4 · Cut, ya copiada en `protocol-labs/a/Hero.tsx`. Tiene su propio [README](./protocol-labs/hero-labs/README.md); **ninguna página real lo importa** |
+| `protocol-labs/opening-labs/*` | `ProtocolOpeningsIndexView`, `ProtocolOpeningLabView` | `/prototype/protocol-opening` (+ `/c`, `/e`, `/g`) — **laboratorio**: tres aperturas completas (hero + cifras + «Built for AI scale») con superficie propia — un shader WebGL y dos campos de caracteres en canvas. Tiene su propio [README](./protocol-labs/opening-labs/README.md) |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
@@ -75,16 +74,21 @@ son laboratorios y no se tocan a la ligera.
 
 ## Laboratorios
 
-Hay tres vivos, todos bajo `protocol-labs/`: `hero-labs/` (ocho primeras
-pantallas, decidida), `transition-labs/` (doce transiciones hero → contenido, sin
-decidir) y `opening-labs/` (seis aperturas completas con superficie, sin
-decidir — es el que está en curso). La regla que gobierna a cualquiera: **un laboratorio
-alimenta una ruta de comparación, ninguna página real lo importa, y si una
-versión gana se COPIA** a la carpeta de la página que la reciba — no se importa
-desde ahí.
+Hay dos vivos, los dos bajo `protocol-labs/`: `hero-labs/` (la primera pantalla,
+decidida — queda H2 como alternativa) y `opening-labs/` (tres aperturas completas
+con superficie, sin decidir — es el que está en curso). La regla que gobierna a
+cualquiera: **un laboratorio alimenta una ruta de comparación, ninguna página real
+lo importa, y si una versión gana se COPIA** a la carpeta de la página que la
+reciba — no se importa desde ahí. Y cuando se copia, la del lab se borra: dos
+archivos que dicen ser el mismo componente divergen sin que nadie se entere.
 
 `protocol-labs/a/` ya NO es un laboratorio: es la estructura elegida, esperando
-que se decida su hero.
+que se decida su apertura.
+
+`transition-labs/` —doce transiciones hero → contenido— se borró entero el
+2026-08-22 junto con seis heroes y cuatro aperturas: se descartaron por diseño,
+no por deuda. Está en el historial de git; el detalle de qué era cada pieza, en
+[`protocol-labs/README.md`](./protocol-labs/README.md).
 
 Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
 `transition-labs`, `newsletter-labs`, `mural-labs`, `footer-labs`) y ocho

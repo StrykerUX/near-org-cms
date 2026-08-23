@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useCountUp } from "@/components/sections/protocol-labs/countUp";
 import GlyphField from "@/components/sections/protocol-labs/opening-labs/GlyphField";
-import { ScaleSection } from "@/components/sections/protocol-labs/opening-labs/OpeningA";
+import { ScaleSection } from "@/components/sections/protocol-labs/opening-labs/ScaleSection";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { HERO, PROOF } from "@/components/sections/protocol-labs/protocolContent";
 
