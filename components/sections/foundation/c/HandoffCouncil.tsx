@@ -3,7 +3,11 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import { COUNCIL } from "@/components/sections/foundation/foundationContent";
+import MediaFrame from "@/components/primitives/MediaFrame";
+import {
+  COUNCIL,
+  COUNCIL_PORTRAITS,
+} from "@/components/sections/foundation/foundationContent";
 
 // §5 — the governing body, as two named blocks and nothing else.
 //
@@ -12,6 +16,18 @@ import { COUNCIL } from "@/components/sections/foundation/foundationContent";
 // three-screen figure on black, and a second diagram in the run-up to it would
 // spend the reader's attention on the wrong one. The last thing before the
 // scene has to be quiet.
+//
+// The portraits do not break that rule, and it is worth saying why they are the
+// one thing allowed in: a reserved frame is evidence, not a gesture. It makes
+// no claim, it holds still, and it does the job the section could not do
+// otherwise — put the faces of the body being described on the page before the
+// page hands everything over. Four of them, in a row, under the two remits and
+// against the right of the grid so the block below them keeps its run-up.
+//
+// They carry no `data-reveal`, unlike everything else in this section: the
+// reveal pre-hides its targets at mount, and a frame that exists to declare a
+// missing asset must not be missing while it waits its turn in a stagger. The
+// rule holds for every `MediaFrame` in this folder — see `EcosystemMark`.
 export default function HandoffCouncil() {
   const rootRef = useScrollReveal<HTMLElement>({ start: "top 80%" });
 
@@ -50,6 +66,19 @@ export default function HandoffCouncil() {
             </div>
           ))}
         </div>
+
+        <ul className="mt-[12svh] grid-ds gap-y-8">
+          {COUNCIL_PORTRAITS.map((seat, i) => (
+            <li
+              key={seat.id}
+              className={`col-span-6 sm:col-span-3 lg:col-span-2 ${
+                i === 0 ? "lg:col-start-5" : ""
+              }`}
+            >
+              <MediaFrame label={seat.label} spec={seat.spec} ratio="3/4" />
+            </li>
+          ))}
+        </ul>
       </Container>
     </section>
   );

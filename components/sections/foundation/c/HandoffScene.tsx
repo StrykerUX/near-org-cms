@@ -28,9 +28,9 @@ import { OPERATIONS } from "@/components/sections/foundation/foundationContent";
 // devolution, and it is the reason the marks travel rather than fade in.
 //
 // ── Why the twelve destinations ────────────────────────────────────────────
-// Twelve because `ECOSYSTEM_NAMES` has twelve entries and the section directly
-// below this one names them. Nothing labels the clusters here — labelled, this
-// becomes an org chart — but the reader who scrolls on meets twelve names
+// Twelve because `ECOSYSTEM_MARKS` has twelve entries and the section directly
+// below this one shows them. Nothing labels the clusters here — labelled, this
+// becomes an org chart — but the reader who scrolls on meets twelve builders
 // immediately after watching the mass settle into twelve places. If that list
 // ever changes length, `CLUSTERS` should follow it.
 //

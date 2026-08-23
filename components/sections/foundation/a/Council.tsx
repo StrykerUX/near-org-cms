@@ -5,7 +5,11 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
-import { COUNCIL } from "@/components/sections/foundation/foundationContent";
+import MediaFrame from "@/components/primitives/MediaFrame";
+import {
+  COUNCIL,
+  COUNCIL_PORTRAITS,
+} from "@/components/sections/foundation/foundationContent";
 
 // §5 — the separation of powers, drawn with one stroke.
 //
@@ -139,6 +143,39 @@ export default function Council() {
           <div className="col-span-12 lg:col-span-4 lg:col-start-9">
             <Body body={COUNCIL.bodies[1]} />
           </div>
+        </div>
+
+        {/* The faces, reserved.
+            A foundation that argues transparency is structural and shows
+            nobody who governs it is the contradiction this section names, so
+            the portraits get their place before the people exist.
+
+            They hang off the RIGHT half of the grid and start at column five.
+            Two reasons, and neither is taste: the loop above is a small
+            drawing that lives on air, and a full-width row of four frames
+            directly under it would close that air; and everything else on this
+            page is a measure that runs from the left margin, so a block that
+            starts inboard reads as attached to the section rather than as
+            another course of the page.
+
+            They are NOT on `[data-council-item]`, which is what would have
+            hooked them into the section's existing stagger without touching the
+            drawing's choreography. That tween pre-hides its targets at mount,
+            and a frame whose whole job is to declare a missing asset cannot be
+            missing itself — it would leave a hole the exact size of what is not
+            there yet. So they are painted at rest, and the loop's timeline is
+            untouched for the simpler reason that nothing was added to it. */}
+        <div className="mt-[12svh] grid-ds gap-y-8">
+          {COUNCIL_PORTRAITS.map((seat, i) => (
+            <div
+              key={seat.id}
+              className={`col-span-6 sm:col-span-3 lg:col-span-2 ${
+                i === 0 ? "lg:col-start-5" : ""
+              }`}
+            >
+              <MediaFrame label={seat.label} spec={seat.spec} ratio="3/4" />
+            </div>
+          ))}
         </div>
       </Container>
     </section>

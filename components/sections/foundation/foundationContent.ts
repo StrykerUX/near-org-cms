@@ -185,29 +185,69 @@ export const ECOSYSTEM = {
 } as const;
 
 /**
- * The names, set in type rather than in artwork.
+ * The ecosystem, as twelve marks — five that exist and seven that do not.
  *
- * The deck asks to retain the dApps logo grid from the current site. This repo
- * has exactly five logo assets (`public/logos`), so a grid here would be five
- * real marks next to a dozen placeholders — the same problem `chain/ProofBand`
- * hit, and it is solved the same way: names in the page's own face are honest,
- * and at this size more legible than a wall of foreign logos at a dozen optical
- * weights. Swap in the real grid when the assets land; the section's shape does
- * not change.
+ * The deck asks to retain the dApps logo grid from the current site. The first
+ * answer here was names set in type, on the grounds that this repo holds
+ * exactly five logo assets and a grid would have been five real marks beside
+ * seven blanks. `MediaFrame` is what changed the answer: a blank is no longer a
+ * blank, it is a reserved cell carrying its own work order. So the grid can be
+ * built today, at its real state — half served, half commissioned — which is
+ * both more honest and more useful than twelve names in a typeface. The reader
+ * sees the ecosystem; whoever produces the assets sees exactly what is missing.
+ *
+ * The five with `src` are NEAR case studies whose wordmarks are already in
+ * `public/logos`. They are WORDMARKS and not symbols, which is why nothing
+ * outside the frame repeats the name: the mark says it, and a name set beside
+ * a mark that already reads as the name is the caption of a caption. Five of
+ * the twelve names the deck listed came out to make room for them rather than
+ * mapping a real file onto a project it does not depict.
+ *
+ * Still twelve, and that is load-bearing: `c/HandoffScene` sends the
+ * Foundation's mass to twelve clusters and this section names twelve builders.
+ * If this list ever changes length, `CLUSTERS` there has to follow it.
  */
-export const ECOSYSTEM_NAMES = [
-  "Ref Finance",
-  "Meteor Wallet",
-  "Aurora",
-  "Rainbow Bridge",
-  "Bitte",
-  "Mintbase",
-  "Sweat Economy",
-  "HERE Wallet",
-  "Burrow",
-  "Pikespeak",
-  "Keypom",
-  "Nearblocks",
+export const ECOSYSTEM_MARKS = [
+  { id: "ref-finance", name: "Ref Finance" },
+  { id: "ledger", name: "Ledger", src: "/logos/ledger.png" },
+  { id: "meteor-wallet", name: "Meteor Wallet" },
+  { id: "aurora", name: "Aurora" },
+  { id: "venice", name: "Venice", src: "/logos/venice.png" },
+  { id: "rainbow-bridge", name: "Rainbow Bridge" },
+  { id: "abound", name: "Abound", src: "/logos/abound.png" },
+  { id: "mintbase", name: "Mintbase" },
+  { id: "sweat-economy", name: "Sweat Economy" },
+  { id: "brave", name: "Brave", src: "/logos/brave.png" },
+  { id: "burrow", name: "Burrow" },
+  { id: "zodl", name: "ZODL", src: "/logos/zodl.png" },
+] as const;
+
+/**
+ * Four reserved portraits, and deliberately not the Council.
+ *
+ * The section above declares a governing body and an executive team and shows
+ * no one, which on the one page arguing that transparency is structural rather
+ * than chosen is the contradiction the section itself names. So the portraits
+ * get a place. What they do NOT get is invented people: the deck does not say
+ * how many members the Council has, and making up a roster on this page would
+ * be fabricating the record it claims to keep.
+ *
+ * Four slots, therefore — a count chosen because it composes at every
+ * breakpoint (4 · 2 · 1) and for no other reason. When the real roster lands,
+ * this array becomes the people, each entry gains a `src` and a name, and no
+ * layout changes.
+ *
+ * `label` and `spec` are a work order and not page copy — they are what
+ * `MediaFrame` prints inside the reserved cell for whoever produces the asset,
+ * and they disappear the moment `src` arrives. They are still written in
+ * ENGLISH, like everything else that reaches the screen: a placeholder is
+ * temporary, but it is on the page today and the page has one language.
+ */
+export const COUNCIL_PORTRAITS = [
+  { id: "seat-01", label: "Council member 01 — portrait", spec: "1200×1600 · JPG" },
+  { id: "seat-02", label: "Council member 02 — portrait", spec: "1200×1600 · JPG" },
+  { id: "seat-03", label: "Council member 03 — portrait", spec: "1200×1600 · JPG" },
+  { id: "seat-04", label: "Executive team — portrait", spec: "1200×1600 · JPG" },
 ] as const;
 
 /** §8 — the close. */
