@@ -41,18 +41,32 @@ const RATIO = {
 } as const;
 
 // Dos juegos de color, porque estas páginas alternan fondo y el hueco tiene que
-// leerse igual de deliberado sobre los dos. No son opacidades del mismo valor:
-// sobre tinta, un filete al 12% de blanco pesa lo mismo que `--rule` sobre crema.
+// leerse igual de deliberado sobre los dos.
+//
+// ── Las marcas son más oscuras que un filete, y eso no es un capricho ──────
+//
+// La primera versión las pintaba con `--rule`, el mismo valor que los filetes de
+// la casa. En pantalla el resultado fue exactamente lo que este componente
+// existe para evitar: sobre una caja de 550×730 cuatro escuadras de 16px al
+// color de un filete no se ven, y lo que queda es un rectángulo gris — el
+// placeholder averiado, otra vez.
+//
+// Un filete de 1px cruza cientos de píxeles y por eso se lee con poquísimo
+// contraste. Una marca de esquina son 32px de trazo en las cuatro puntas de un
+// área grande: para pesar lo mismo necesita bastante más valor. De ahí que el
+// trazo salga de `--ink` con alfa y no de `--rule`, y que midan 24 y no 16.
 const TONE = {
   light: {
-    mark: "text-rule",
+    mark: "text-ink/35",
+    rule: "bg-rule",
     label: "text-gray-intermediate",
-    field: "bg-card-tint/40",
+    field: "bg-ink/[0.03]",
   },
   dark: {
-    mark: "text-white/25",
-    label: "text-white/45",
-    field: "bg-white/[0.03]",
+    mark: "text-white/40",
+    rule: "bg-white/15",
+    label: "text-white/50",
+    field: "bg-white/[0.04]",
   },
 } as const;
 
@@ -78,14 +92,14 @@ export type MediaFrameProps = {
 function Corner({ className }: { className: string }) {
   return (
     <svg
-      viewBox="0 0 16 16"
-      className={`absolute size-4 ${className}`}
+      viewBox="0 0 24 24"
+      className={`absolute size-6 ${className}`}
       fill="none"
       stroke="currentColor"
       strokeWidth="1"
       aria-hidden="true"
     >
-      <path d="M0 0 H16 M0 0 V16" />
+      <path d="M0 0 H24 M0 0 V24" />
     </svg>
   );
 }
@@ -134,14 +148,24 @@ export default function MediaFrame({
       </div>
 
       {/* El encargo, abajo y en mono: se lee como el pie de un plano, no como el
-          contenido de la caja. Va con `gap` y `flex-wrap` porque en una celda
-          angosta la especificación tiene que caer a su propio renglón antes que
-          recortarse. */}
-      <div
-        className={`absolute inset-x-0 bottom-0 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 p-3 text-micro-mono uppercase ${t.label}`}
-      >
-        <span>{label}</span>
-        <span>{spec ?? ratio}</span>
+          contenido de la caja.
+
+          El filete que lo separa hace dos cosas: le da estructura al borde
+          inferior —sin él la caja no tiene ningún trazo que la cruce y flota— y
+          pone al encargo del lado de afuera del área de imagen, que es donde
+          va. El día que llegue el asset, el filete se va con el resto.
+
+          `flex-wrap` porque en una celda angosta la especificación tiene que
+          caer a su propio renglón antes que recortarse: un encargo cortado a la
+          mitad no es un encargo. */}
+      <div className="absolute inset-x-0 bottom-0">
+        <div className={`h-px w-full ${t.rule}`} aria-hidden="true" />
+        <div
+          className={`flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 p-3 text-micro-mono uppercase ${t.label}`}
+        >
+          <span>{label}</span>
+          <span>{spec ?? ratio}</span>
+        </div>
       </div>
     </div>
   );
