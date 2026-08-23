@@ -117,6 +117,6 @@ Lo que falta antes de que esto pueda pasar a página real:
   *igualar medidas no es igualar diseño*.
 - `components/sections/quantum/README.md` — el ritmo (claro/oscuro,
   fuerte/suave) que las tres respetan.
-- `components/sections/homepage-update/` — la línea de diseño viva de la
+- `components/sections/homepage-a/` — la línea de diseño viva de la
   homepage: crema, Kepler en los acentos, cubos isométricos, `CtaPill` y
   `ArrowCircle`.

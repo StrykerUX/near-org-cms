@@ -13,11 +13,11 @@ import { NOISE_GLSL } from "@/components/sections/protocol-labs/gl/noise";
 // no toca la ruta de comparación, que es lo que permite seguir usándola como
 // referencia de dónde estaba el diseño.
 //
-// El mismo criterio que siguió `homepage-update/gl/foliage.ts` con su lab.
+// El mismo criterio que siguió `homepage-a/gl/foliage.ts` con su lab.
 //
 // ── De dónde sale ─────────────────────────────────────────────────────────
 //
-// Del motor del hero de la home (`homepage-update/gl/foliage.ts`), entero:
+// Del motor del hero de la home (`homepage-a/gl/foliage.ts`), entero:
 //
 //   · un **punto de fuga** fuera del canvas al que apuntan las estrías;
 //   · el campo **estirado** a lo largo de esa dirección, con la compresión

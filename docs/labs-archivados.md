@@ -141,7 +141,7 @@ El índice real del repo sigue siendo `app/(site)/page.tsx`, en la ruta `/`.
 
 Sigue vivo en el árbol, sin necesidad de rescate:
 
-- **`homepage-update`** — la línea elegida (`app/prototype/homepage-update`).
+- **`homepage-update`** — la línea elegida (`app/prototype/homepage-a`).
 - **`/blog`**, **`/design-system`** y los 18 stubs de `app/(site)/`.
 - **`/blockchain`**, **`/chain-abstraction`**, **`/quantum-security`** — páginas
   reales, con sus secciones `protocol/`, `chain/`, `quantum/`.
@@ -226,7 +226,7 @@ contra el doc maestro de copy, que todavía no llegó).
 
 **Retirada el 2026-08-23.** Vivió en
 `components/sections/homepage-fold/SectionReveal.tsx` y solo la montó
-`/prototype/homepage-g`. Está entera en el commit `148cac6`; recuperarla es
+`/prototype/homepage-b`. Está entera en el commit `148cac6`; recuperarla es
 `git show 148cac6:components/sections/homepage-fold/SectionReveal.tsx`.
 
 Resolvía el problema de que `InkCurtain direction="up"` no puede revelar nada:

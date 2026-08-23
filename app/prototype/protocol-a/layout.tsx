@@ -1,6 +1,6 @@
 import PrototypeMotionProvider from "@/components/site/providers/PrototypeMotionProvider";
 
-// Mismo criterio que app/prototype/homepage-update/layout.tsx: el provider vive
+// Mismo criterio que app/prototype/homepage-a/layout.tsx: el provider vive
 // en la ruta y no en app/prototype/, para que las rutas hermanas que no usan
 // ScrollTrigger sigan sin Lenis.
 //

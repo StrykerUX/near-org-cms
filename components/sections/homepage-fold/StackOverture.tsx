@@ -7,7 +7,7 @@ import Container from "@/components/primitives/Container";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { STACK_INTRO as INTRO } from "@/components/sections/homepage-e/nearStackContent";
+import { STACK_INTRO as INTRO } from "@/components/sections/homepage-shared/nearStackContent";
 
 // La obertura del stack: el título llega antes que la sección, sobre crema, y
 // el negro lo alcanza ahí.

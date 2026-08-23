@@ -8,7 +8,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { getLenis } from "@/components/site/providers/lenisInstance";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
-import HeroFoliage from "@/components/sections/homepage-e/HeroFoliage";
+import HeroFoliage from "@/components/sections/homepage-shared/HeroFoliage";
 
 // El hero que se pliega: el paisaje entero se comprime hasta caber en el mark
 // de NEAR, y el mark ocupa el lugar de la palabra «your».
@@ -41,7 +41,8 @@ import HeroFoliage from "@/components/sections/homepage-e/HeroFoliage";
 //             se cierra a un cuadrado de esquinas blandas y el mark aparece
 //             dentro, en crema sólido sobre el follaje.
 //
-// Es la única diferencia entre `/prototype/homepage-f` y `/prototype/homepage-g`.
+// Era la única diferencia entre `/prototype/homepage-f` y `/prototype/homepage-b`;
+// desde que `f` se borró (2026-08-23) `mask` no lo monta nadie.
 //
 // ── Dos decisiones estructurales que sostienen todo ─────────────────────────
 //

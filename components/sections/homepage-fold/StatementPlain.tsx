@@ -5,11 +5,11 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
-import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-e/homepageUpdateContent";
+import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-shared/homepageUpdateContent";
 
 // El statement, como sección PROPIA y siempre re-legible.
 //
-// En `homepage-e` (y en la línea viva) esta frase vive dentro de la secuencia
+// En `homepage-shared` (y en la línea viva) esta frase vive dentro de la secuencia
 // congelada del hero (`AgentEconomy`): el hero dispara, el scroll se traba ~2.2s
 // y el icono viaja hasta el texto. Acá esa secuencia no existe — el hero tiene
 // su propio gesto (`HeroFold`) y no le entrega nada a nadie— así que el

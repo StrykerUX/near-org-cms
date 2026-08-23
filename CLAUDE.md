@@ -254,8 +254,10 @@ nunca el `ScrollTrigger.refresh()` global (congela Lenis).
 
 **Una sola línea de diseño viva.** Hasta el 2026-08-21 el repo tenía nueve
 homepages en paralelo y siete laboratorios de secciones. Se archivaron todos:
-queda `components/sections/homepage-update/` (montada en
-`/prototype/homepage-update`), más las tres páginas reales — `protocol/`,
+queda `components/sections/homepage-a/` (montada en
+`/prototype/homepage-a` y en la home real), más las dos exploraciones vivas
+—`/prototype/homepage-b` y `-c`, que comparten `homepage-shared/`,
+`homepage-fold/` y `homepage-tuck/`— y las tres páginas reales — `protocol/`,
 `chain/` y `quantum/`, que se importan entre sí y no son laboratorios.
 
 Lo archivado está completo en el tag `v-pre-limpieza` y en la rama `Respaldo`;
@@ -284,4 +286,4 @@ Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`
 
 ---
 
-*Last updated: 2026-08-21 — limpieza del árbol; `homepage-update` queda como única línea de diseño viva (ver docs/labs-archivados.md)*
+*Last updated: 2026-08-23 — poda de las exploraciones del homepage: de seis rutas (`e`–`k`) quedan dos, renombradas junto con la línea viva a `a`, `b` y `c`. `homepage-e/` pasó a llamarse `homepage-shared/`, que es lo que es.*

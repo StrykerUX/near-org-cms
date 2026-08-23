@@ -59,8 +59,11 @@ dar por terminado un cambio.
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` — la landing de marketing, no un índice |
-| `LatestUpdates`, `UpdatesList` | `HomepageUpdateView` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado. Sobrevivieron a la limpieza porque la homepage viva las sigue montando. |
-| `homepage-update/*` | `HomepageUpdateView` | `/prototype/homepage-update` — **la línea de diseño viva**. Única superviviente de nueve homepages; ver `docs/labs-archivados.md` para las ocho archivadas. Tiene su propio [README](./homepage-update/README.md). |
+| `LatestUpdates`, `UpdatesList` | `HomepageAView` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado. Sobrevivieron a la limpieza porque la homepage viva las sigue montando. |
+| `homepage-a/*` | `HomepageAView` | `/prototype/homepage-a` — **la línea de diseño viva**, y lo que monta la home real. Tiene su propio [README](./homepage-a/README.md). |
+| `homepage-shared/*` | `HomepageBView`, `HomepageCView` | La base que comparten las dos exploraciones vivas. Nació como duplicado de `homepage-a` con ruta propia; la ruta se borró y la carpeta quedó. Ver su [README](./homepage-shared/README.md). |
+| `homepage-fold/*` | `HomepageBView`, `HomepageCView` | El hero que se pliega —«Own your world.» → «Own ⬡ world.»— y la obertura del stack. [README](./homepage-fold/README.md). |
+| `homepage-tuck/*` | `HomepageCView` | El hero que se recoge en una caja. |
 | `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
@@ -95,7 +98,9 @@ no por deuda. Está en el historial de git; el detalle de qué era cada pieza, e
 Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
 `transition-labs`, `newsletter-labs`, `mural-labs`, `footer-labs`) y ocho
 homepages en paralelo. Se archivaron todos el 2026-08-21 al quedar
-`homepage-update` como la única línea viva.
+`homepage-a` como la única línea viva. Las exploraciones que siguieron —seis
+rutas de la `e` a la `k`— se podaron el 2026-08-23 hasta las dos que quedan,
+renombradas `b` y `c`.
 
 Están completos en el tag `v-pre-limpieza` y en la rama `Respaldo`, y
 **`docs/labs-archivados.md`** dice qué era cada uno y cómo traerlo de vuelta.
