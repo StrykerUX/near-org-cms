@@ -1,11 +1,9 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
-import { gsap } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, EASE_OUT } from "@/components/primitives/motion/motionTokens";
-import { EASE } from "@/components/sections/homepage-e/motion";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
-import { useRevealGate } from "@/components/sections/homepage-fold/SectionReveal";
 import { PROOF_STATS } from "@/components/sections/homepage-e/homepageUpdateContent";
 
 // Un eje y seis marcas. Las pruebas cuelgan de una línea que cruza el ancho
@@ -106,15 +104,31 @@ const STEM = [
   "lg:order-first",
 ] as const;
 
-export default function ProofDatum() {
-  // El gate de la transición que revela esta sección, si es que hay una.
-  //
-  // `null` es el caso normal —cinco de las seis vistas la montan suelta— y ahí
-  // todo sigue exactamente igual que antes. Cuando existe, la escena deja de
-  // decidir sola cuándo entrar: el velo que la tapa es quien le da paso, porque
-  // es el único que sabe si se la está viendo.
-  const gate = useRevealGate();
+/* ── El ritmo de la entrada ───────────────────────────────────────────────── */
 
+/**
+ * El respiro entre "la sección ya se ve" y "la sección empieza a llegar".
+ *
+ * Sin él, el contenido arranca en el mismo frame en que la cortina lo
+ * descubre, y las dos cosas se pisan: no se llega a leer que primero apareció
+ * el sitio y después lo que va dentro. Con el respiro son dos tiempos, y el
+ * segundo se deja mirar.
+ */
+const LEAD = 0.34;
+
+/** La distancia entre una marca y la siguiente. */
+const CARD_STAGGER = 0.2;
+
+/**
+ * Entre letra y letra.
+ *
+ * Chico a propósito: por encima de ~0.03 el ojo deja de leer "una palabra
+ * escribiéndose" y empieza a contar letras, que es un efecto distinto y peor.
+ * La cifra usa un poco más porque son menos caracteres y más grandes.
+ */
+const CHAR = 0.018;
+
+export default function ProofDatum() {
   const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk }) => {
     if (!motionOk) return;
 
@@ -123,146 +137,118 @@ export default function ProofDatum() {
     const cards = q("[data-card]");
     if (cards.length === 0) return;
 
-    // Con gate, el timeline nace en pausa y sin trigger propio: un `top 75%`
-    // dispararía mientras el velo todavía cubre la pantalla, que es justo el
-    // fallo que la transición viene a cerrar. Sin gate, el trigger de siempre.
-    const tl = gsap.timeline({
-      defaults: { ease: EASE_OUT },
-      paused: !!gate,
-      scrollTrigger: gate
-        ? undefined
-        : { trigger: scope, start: "top 75%", once: true, markers: DEBUG_MARKERS },
-    });
+    let tl: gsap.core.Timeline | null = null;
+    let splits: SplitText[] = [];
+    let cancelled = false;
 
-    // El eje se traza de un extremo al otro antes que nada: es la estructura, y
-    // las fichas llegan a algo que ya está.
-    if (axis) tl.from(axis, { scaleX: 0, duration: 1.05 }, 0);
+    // El split espera a que las fuentes midan. Partir por LÍNEAS es geometría
+    // de fuente —dónde cae cada quiebre depende de la métrica real—, y partir
+    // por CARACTERES hereda el mismo problema: con la fuente de respaldo, cada
+    // letra queda envuelta en un span del ancho equivocado y el reflow al
+    // cambiar la fuente deja la línea rota. Es el mismo patrón del statement.
+    const build = () => {
+      if (cancelled || splits.length) return;
 
-    // Cada ficha entra HACIA el eje: las de arriba bajan, las de abajo suben.
-    // Signo por índice y no un valor único — con el mismo `y` para las seis,
-    // tres de ellas se alejarían del eje al entrar.
-    //
-    // Lo que se mueve son los RENGLONES, no la ficha. Animar el `<article>`
-    // entero desplaza también su tallo —el `data-stem`, que ya tiene su propio
-    // tween— y sobre todo mueve una caja: se lee como un panel entrando. Por
-    // renglón se lee como un dato que se escribe, que es lo que estas fichas
-    // son. El escalonado interno es corto (0.07) porque las tres piezas son UNA
-    // ficha; el que separa fichas entre sí es el de abajo, y tiene que ser
-    // claramente mayor o las seis se funden en una cortina.
-    //
-    // `expo.out` y no el `EASE_OUT` del timeline (`power3.out`): el renglón sale
-    // disparado y frena largo, casi deteniéndose antes de llegar. `power3`
-    // reparte el frenado de forma más pareja y la entrada se lee como un
-    // desplazamiento; `expo` gasta más de la mitad del recorrido en el primer
-    // 20% del tiempo, y lo que queda es la cola. Va con `duration` alta a
-    // propósito: el tramo lento ES el gesto, y en 0.7s no se llega a ver.
-    //
-    // 0.18 entre fichas —más del doble que antes— para que se lean como seis
-    // llegadas y no como una sola cosa que aparece de a partes.
-    const lines: HTMLElement[] = [];
-    cards.forEach((card, i) => {
-      const rows = Array.from(card.querySelectorAll<HTMLElement>("[data-line]"));
-      if (rows.length === 0) return;
-      lines.push(...rows);
+      // Local y no `tl` a secas dentro del armado: `tl` es un `let` del scope
+      // de arriba y TypeScript no lo estrecha dentro del `forEach`.
+      const timeline = gsap.timeline({
+        defaults: { ease: EASE_OUT },
+        scrollTrigger: { trigger: scope, start: "top 75%", once: true, markers: DEBUG_MARKERS },
+      });
+      tl = timeline;
 
-      tl.from(
-        rows,
-        {
-          autoAlpha: 0,
-          y: i % 2 === 0 ? -20 : 20,
-          duration: 1.2,
-          ease: "expo.out",
-          stagger: 0.07,
-        },
-        0.25 + i * 0.18
-      );
-    });
+      // El eje se traza de un extremo al otro antes que nada: es la estructura,
+      // y las marcas llegan a algo que ya está. Va ANTES del respiro, no
+      // dentro: lo que el respiro separa es la llegada del contenido, y el eje
+      // no es contenido.
+      if (axis) timeline.from(axis, { scaleX: 0, duration: 1.05 }, 0);
 
-    // ── Las cifras se CUENTAN ────────────────────────────────────────────
-    //
-    // Son datos, y un dato que sube hasta su valor dice algo que el mismo
-    // número quieto no dice: que hay una magnitud detrás. La cuenta arranca
-    // junto con el renglón de su ficha y termina antes que él —el número ya
-    // está cuando el movimiento de entrada todavía frena—, así que se lee como
-    // una cifra que aterriza, no como un contador de aeropuerto.
-    //
-    // Solo cuentan las que tienen número: "Quantum-" y "Confi" no son cifras y
-    // se quedan como están. El prefijo y el sufijo se conservan literales
-    // (`$`, `%`, " Million", los espacios) porque son parte del diseño de la
-    // cifra — ver el docblock de `value`/`accent` en el contenido.
-    //
-    // `snap: 1` para que ningún frame muestre "0.37 Million": el valor
-    // intermedio de un contador tiene que ser un valor posible.
-    const counted: [HTMLElement, string][] = [];
+      cards.forEach((card, i) => {
+        // El turno de esta ficha. `LEAD` es el respiro después de que la
+        // sección ya se ve; `CARD_STAGGER`, la distancia entre una marca y la
+        // siguiente.
+        const at = LEAD + i * CARD_STAGGER;
 
-    cards.forEach((card, i) => {
-      const el = card.querySelector<HTMLElement>("[data-count]");
-      const parts = el?.textContent?.match(/^(\D*)(\d[\d.,]*)(.*)$/s);
-      if (!el || !parts) return;
-      counted.push([el, el.textContent ?? ""]);
+        const stem = stems[i];
+        if (stem) timeline.from(stem, { scaleY: 0, duration: 0.45 }, at);
 
-      const [, prefix, digits, suffix] = parts;
-      const target = Number(digits.replace(/,/g, ""));
-      if (!Number.isFinite(target)) return;
+        // ── El rótulo, letra por letra ──────────────────────────────────
+        //
+        // `chars` y no `words`: son tres palabras cortas y en `text-h4`, y a
+        // ese tamaño el escalonado por palabra son tres saltos que se leen
+        // como tres cosas. Por letra se lee como una sola escribiéndose.
+        const eyebrow = card.querySelector<HTMLElement>("[data-eyebrow]");
+        if (eyebrow) {
+          const s = SplitText.create(eyebrow, { type: "chars" });
+          splits.push(s);
+          gsap.set(s.chars, { autoAlpha: 0, y: 8 });
+          timeline.to(s.chars, { autoAlpha: 1, y: 0, duration: 0.4, stagger: CHAR }, at);
+        }
 
-      const box = { n: 0 };
-      tl.to(
-        box,
-        {
-          n: target,
-          duration: 1.1,
-          ease: EASE.out,
-          snap: { n: 1 },
-          onUpdate: () => {
-            el.textContent = `${prefix}${Math.round(box.n).toLocaleString("en-US")}${suffix}`;
-          },
-          // El valor final se escribe LITERAL y no formateado: `toLocaleString`
-          // de 100 da "100", pero de 1000 daría "1,000" y la copy podría no
-          // llevar la coma. Al terminar, lo que se ve es exactamente lo que
-          // dice el contenido.
-          onComplete: () => {
-            el.textContent = `${prefix}${digits}${suffix}`;
-          },
-        },
-        0.25 + i * 0.18
-      );
-    });
+        // ── La cifra, letra por letra ───────────────────────────────────
+        //
+        // Acá vivía un CONTADOR: la cifra subía desde cero hasta su valor con
+        // `snap: 1`. Se fue porque las dos cosas no pueden convivir sobre el
+        // mismo texto — el contador reescribe el `textContent` en cada frame y
+        // eso borra los spans que el split acaba de crear, así que la primera
+        // actualización deja la cifra plana y la animación de letras muerta.
+        //
+        // Lo que se pierde es poco: el contador decía "hay una magnitud
+        // detrás", y una cifra que se escribe dice lo mismo por otra vía. El
+        // split abarca el `<p>` entero, así que el número y el acento verde
+        // caen en la misma tirada de letras en vez de ser dos gestos pegados.
+        const figure = card.querySelector<HTMLElement>("[data-figure]");
+        if (figure) {
+          const s = SplitText.create(figure, { type: "chars" });
+          splits.push(s);
+          gsap.set(s.chars, { autoAlpha: 0, y: 14 });
+          timeline.to(
+            s.chars,
+            { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out", stagger: CHAR * 1.4 },
+            at + 0.12
+          );
+        }
 
-    tl.from(stems, { scaleY: 0, duration: 0.45, stagger: 0.08 }, 0.2);
+        // ── El cuerpo, línea por línea ──────────────────────────────────
+        //
+        // `mask: "lines"` envuelve cada línea en un contenedor con
+        // `overflow: hidden`, así que el renglón sube DESDE DEBAJO de su
+        // propio hueco en vez de aparecer flotando. Sin la máscara, un
+        // `yPercent` de entrada se ve pasar por encima de la línea de arriba.
+        const body = card.querySelector<HTMLElement>("[data-body]");
+        if (body) {
+          const s = SplitText.create(body, { type: "lines", mask: "lines" });
+          splits.push(s);
+          gsap.set(s.lines, { autoAlpha: 0, yPercent: 100 });
+          timeline.to(
+            s.lines,
+            { autoAlpha: 1, yPercent: 0, duration: 0.65, stagger: 0.08 },
+            at + 0.26
+          );
+        }
+      });
 
-    // Reversible, como el velo: si el lector sube y el negro vuelve a tapar, la
-    // escena se rebobina a cubierto y se la ve entrar otra vez al bajar. Un
-    // `once` acá dejaría el segundo pase con la cortina abriéndose sobre algo ya
-    // montado — que es el pop original, solo que a partir de la segunda vuelta.
-    const unsubscribe = gate?.subscribe(
-      (instant) => {
-        if (tl.progress() !== 0 || tl.isActive()) return;
-        if (instant) tl.progress(1).pause();
-        else tl.play();
-      },
-      () => {
-        if (tl.progress() !== 0 || tl.isActive()) tl.pause(0);
-      }
-    );
+      // Si la sección YA está en cuadro cuando el split termina —una recarga a
+      // media página—, el trigger nuevo tiene que evaluarse contra el layout
+      // vigente o el texto queda apagado hasta el próximo scroll.
+      ScrollTrigger.refresh();
+    };
+
+    if (document.fonts?.ready) document.fonts.ready.then(build).catch(build);
+    else build();
 
     return () => {
-      unsubscribe?.();
-      tl.scrollTrigger?.kill();
-      tl.kill();
-      // `lines` y no `cards`: desde que la entrada mueve los renglones, la que
-      // queda con estilos inline es cada `<p>`. Limpiar los `<article>` dejaría
-      // seis fichas en `opacity: 0` para siempre — y en dev pasa en cada mount
-      // por StrictMode, no solo al navegar.
-      gsap.set([...lines, ...stems, ...(axis ? [axis] : [])], { clearProps: "all" });
-      // Las cifras no son un estilo: `clearProps` no las devuelve. Si el
-      // desmontaje cae a mitad de la cuenta —en dev pasa en cada mount por
-      // StrictMode— el `<span>` se queda con el número intermedio, y React no
-      // lo reescribe porque su árbol no cambió.
-      counted.forEach(([el, text]) => {
-        el.textContent = text;
-      });
+      cancelled = true;
+      tl?.scrollTrigger?.kill();
+      tl?.kill();
+      // `revert()` y no `kill()`: SplitText no es un tween, es cirugía de DOM.
+      // Sin revertir, un segundo mount —StrictMode lo hace en cada uno de dev—
+      // splitea sobre spans ya splitteados y multiplica el árbol.
+      splits.forEach((s) => s.revert());
+      splits = [];
+      gsap.set([...stems, ...(axis ? [axis] : [])], { clearProps: "all" });
     };
-  }, [gate]);
+  }, []);
 
   // Sin `min-h-svh`: la sección mide lo que mide su contenido. Forzarla a una
   // pantalla dejaría medio viewport en blanco alrededor de un eje de 350px.
@@ -278,6 +264,11 @@ export default function ProofDatum() {
       // El aire crece porque esta sección es lo primero que se ve al salir del
       // negro: llegar con las fichas pegadas al borde de arriba las convierte
       // en la continuación de la transición en vez de en un respiro.
+      //
+      // ⚠️ El de ARRIBA está acoplado al de abajo de `StackNotesSection`, que
+      // es la sección negra que precede a esta en `homepage-g`. Los dos tienen
+      // que medir lo mismo para que el corte entre los dos fondos se lea
+      // centrado. Cambiar uno sin el otro desbalancea la costura en silencio.
       className="flex flex-col justify-center bg-cream py-32 text-ink lg:py-44"
     >
       {/* Sin `flex flex-col gap-10`: el `Container` tuvo dos hijos mientras el
@@ -305,25 +296,28 @@ export default function ProofDatum() {
                 aria-hidden="true"
                 className={`hidden h-5 w-px origin-center bg-rule lg:block ${STEM[i]}`}
               />
-              {/* `data-line` en las tres: la entrada ya no mueve la ficha como
-                  un bloque, mueve sus renglones uno detrás de otro. Van marcados
-                  desde el JSX y no buscados con un selector estructural
-                  (`article > p`) porque ese selector se rompe solo el día que
-                  alguien agregue un cuarto párrafo o envuelva alguno en un div,
-                  y lo hace en silencio: la animación sigue corriendo, con una
-                  pieza de menos. */}
-              <p data-line className="text-h4 text-gray-intermediate">
+              {/* Un marcador por pieza —`eyebrow`, `figure`, `body`— y no un
+                  `data-line` para las tres: cada una entra de una manera
+                  distinta, así que el JS necesita distinguirlas.
+                  
+                  Marcados desde el JSX y no buscados con un selector
+                  estructural (`article > p:first-child`) porque ese selector se
+                  rompe solo el día que alguien reordene o envuelva alguno, y lo
+                  hace en silencio: la animación sigue corriendo, con una pieza
+                  de menos. */}
+              <p data-eyebrow className="text-h4 text-gray-intermediate">
                 {stat.eyebrow}
               </p>
-              <p data-line className="text-h2-serif italic text-balance">
-                {/* El tramo en tinta va en su propio `<span>` para que la cuenta
-                    pueda escribirle el texto sin tocar el acento verde, que es
-                    un hermano y no lleva número. Sin el span habría que
-                    manipular nodos de texto sueltos del `<p>`. */}
-                <span data-count>{stat.value}</span>
+              <p data-figure className="text-h2-serif italic text-balance">
+                {/* Los dos `<span>` siguen separados aunque la cuenta se haya
+                    ido: el acento va en verde y el resto en tinta, y el split
+                    de caracteres respeta esa frontera — cada letra hereda el
+                    color de su span. Fundidos en un solo nodo habría que
+                    repintar letra por letra desde el JS. */}
+                <span>{stat.value}</span>
                 <span className="text-green-ink">{stat.accent}</span>
               </p>
-              <p data-line className="text-body-sm text-gray-intermediate text-pretty">
+              <p data-body className="text-body-sm text-gray-intermediate text-pretty">
                 {stat.body}
               </p>
             </article>

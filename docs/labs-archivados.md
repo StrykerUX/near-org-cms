@@ -219,3 +219,43 @@ hero («Own your world.»), `OwnYourOwn`, `CustomerStories` y `PressCarousel`.
 Y una corrección de copy detectada de paso: **"Built for privacy"**, que en
 `homepageUpdateContent.ts` está como "Built to privacy" (pendiente de confirmar
 contra el doc maestro de copy, que todavía no llegó).
+
+---
+
+## La transición de salida del stack (`SectionReveal`)
+
+**Retirada el 2026-08-23.** Vivió en
+`components/sections/homepage-fold/SectionReveal.tsx` y solo la montó
+`/prototype/homepage-g`. Está entera en el commit `148cac6`; recuperarla es
+`git show 148cac6:components/sections/homepage-fold/SectionReveal.tsx`.
+
+Resolvía el problema de que `InkCurtain direction="up"` no puede revelar nada:
+es un panel del color de LLEGADA, liso, sin contenido dentro. El velo de
+`SectionReveal` era el negro del que se SALE y se abría desde abajo, con la
+sección siguiente detrás.
+
+Lo que dejó aprendido, por si el gesto vuelve:
+
+- **Un velo que nace cerrado obliga a un tramo de un viewport entero.** Necesita
+  un frame con la pantalla ocupada solo por el tramo —lo de arriba ya salió, lo
+  de abajo todavía no asoma—, y eso se paga con un viewport de scroll en negro.
+  La alternativa es nacer CALZADO, con el recorte ya puesto donde está el borde
+  de la sección de abajo (`1 - alto del tramo / viewport`).
+- **La curva tiene que ir RETRASADA.** Mientras el velo se abre, la sección de
+  abajo sube linealmente con el scroll. Con una curva adelantada —`EASE.curtain`
+  lo es mucho— el recorte nunca llega a tapar nada y no hay gesto que ver.
+- **Cuánto retiene es cosa de la curva, no del tramo.** El velo solo puede
+  ocultar lo que todavía no se descubrió.
+- **El paso al contenido no puede colgar del velo.** La sección de abajo asoma
+  medio viewport antes de que el velo pueda encenderse, y durante ese tramo se
+  la ve vacía. Necesita trigger propio, atado a cuándo ASOMA.
+- **Un velo de pantalla completa se come lo que quede arriba.** Se arregla
+  levantando ese contenido por encima (`z-[3]` contra el `z-[2]` del velo), y
+  hay que levantarlo TODO: con solo las notas del stack levantadas, la escena
+  del stack desaparecía y las notas quedaban flotando en negro.
+
+Nada de eso resultó ser el problema de fondo. Después de siete pasadas de
+calibración el gesto seguía pidiendo elegir entre dos cosas incompatibles —que
+la cortina cerrara pronto, y que se notara— así que se quitó junto con la idea
+de tener una transición de salida. El stack termina y empieza la sección
+siguiente, con el corte que da el borde entre los dos fondos.

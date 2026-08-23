@@ -183,15 +183,7 @@ export default function StackAnchors({
         // que se recorta. Pintado acá se vería alrededor de la caja y no
         // habría caja que ver. El crema de la sección es el que asoma por los
         // márgenes mientras la escena entra y sale.
-        // `z-[3]`, igual que las notas de abajo: por ENCIMA del velo de la
-        // transición, que es `z-[2]`.
-        //
-        // Las dos son el mismo mundo —el negro del que la página sale— y las
-        // dos tienen que viajar sobre la cortina en vez de debajo. Con solo las
-        // notas levantadas, un velo de pantalla completa se comía esta escena
-        // entera —el arte, las cuatro fichas— y dejaba las notas flotando en
-        // negro, que es un estado que no significa nada.
-        className={`group/anchors relative z-[3] text-cream data-[mode=track]:h-[calc(var(--travel)+100svh)] ${
+        className={`group/anchors relative text-cream data-[mode=track]:h-[calc(var(--travel)+100svh)] ${
           frame ? "bg-cream" : "bg-ink"
         }`}
       >
@@ -812,24 +804,18 @@ function StackNotesSection() {
     //
     // No baja a cero porque sin motion no hay tramo, y esto es todo lo que
     // separa el último renglón de la sección siguiente.
-    // `z-[3]`: por ENCIMA del velo de la transición, que es `z-[2]`.
+    // El aire de abajo es el mismo que el de arriba de `ProofDatum`, la sección
+    // que sigue: `py-32 lg:py-44`. Sin transición de salida, el corte entre los
+    // dos fondos es un borde recto y a la vista, y lo que lo hace leerse como
+    // una costura y no como un tropiezo es que el negro y el crema dejen el
+    // mismo respiro a cada lado de la línea.
     //
-    // Es lo que deja que la cortina cubra el viewport entero sin borrar estas
-    // dos notas. El velo se abre por debajo revelando la sección siguiente
-    // mientras este bloque —opaco, del mismo negro— sigue subiendo con el
-    // scroll y se va por arriba. Un solo gesto en vez de dos tiempos.
-    //
-    // El fondo tiene que quedarse: es lo que impide que la sección revelada se
-    // vea a través del texto mientras las dos coinciden en pantalla.
-    <section className="relative z-[3] bg-ink pb-10 pt-24 text-cream lg:pb-12 lg:pt-32">
+    // ⚠️ Los dos números están acoplados a mano. Si el aire de `ProofDatum`
+    // cambia, este tiene que cambiar con él o la costura se desbalancea sin que
+    // nada avise.
+    <section className="bg-ink pb-32 pt-24 text-cream lg:pb-44 lg:pt-32">
       <Container>
-        {/* El ancla del gesto. La cortina termina de abrirse cuando el borde
-            inferior de ESTE bloque llega al 20% del viewport — no cuando lo
-            hace la sección, que lleva pegado su propio padding y desincroniza
-            el punto en cuanto alguien lo toca. */}
-        <div data-stack-notes>
-          <StackNotes className="grid" />
-        </div>
+        <StackNotes className="grid" />
       </Container>
     </section>
   );
