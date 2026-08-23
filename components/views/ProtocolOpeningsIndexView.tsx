@@ -5,29 +5,20 @@ import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
 
 // Índice del laboratorio de aperturas — /prototype/protocol-opening
 //
-// Seis maneras de abrir la página. Cada una es un TRÍO —hero, cifras y "Built
+// Tres maneras de abrir la página. Cada una es un TRÍO —hero, cifras y "Built
 // for AI scale"— y no un hero suelto: la queja que las originó fue que el hero
 // se veía plano, y un hero no se arregla solo si las dos secciones que le siguen
 // lo dejan caer en el vacío.
 //
 // Lo que cambia entre ellas es la superficie y cómo se consume a lo largo de las
-// tres secciones. Cuatro traen shader, una es SVG puro y una es texto en canvas.
+// tres secciones. Una trae shader y dos son texto en canvas.
+//
+// Eran siete. A · Lattice (retícula isométrica en fuga), B · Shards (Voronoi),
+// D · Stack (planos SVG con paralaje) y F · Horizon (degradé cálido con grano)
+// se borraron junto con sus shaders. Las tres que quedan son las que siguen en
+// carrera; el resto está en el historial de git, antes de esta limpieza.
 
 const OPENINGS = [
-  {
-    id: "a",
-    name: "Lattice",
-    surface: "Shader · retícula isométrica en perspectiva",
-    idea: "Las tres secciones son un descenso: el hero flota sobre una retícula que se pierde en la profundidad, las cifras bajan a apoyarse casi al ras, y para «Built for AI scale» la superficie se agotó y queda el papel limpio.",
-    risk: "Es el eje de 30° de la marca llevado a superficie, pero una retícula en perspectiva vive muy cerca del cliché de la grilla en fuga. Lo que la salva o la hunde es la inclinación.",
-  },
-  {
-    id: "b",
-    name: "Shards",
-    surface: "Shader · campo de Voronoi que deriva",
-    idea: "La única superficie que explica en vez de acompañar: un espacio partido en regiones que se redistribuyen es, literalmente, el tema de la página. Las cifras se meten cada una dentro de una región dibujada.",
-    risk: "Un Voronoi es un recurso reconocible. Si se lee como «efecto de shader» y no como la red, pierde justo lo que la hace distinta de las otras cinco.",
-  },
   {
     id: "c",
     name: "Spectrum",
@@ -36,25 +27,11 @@ const OPENINGS = [
     risk: "Es la más cercana a lo que ya hace Sui. Gana en energía y se juega el parecido.",
   },
   {
-    id: "d",
-    name: "Stack",
-    surface: "SVG · cuatro planos isométricos con paralaje",
-    idea: "Sin WebGL. Usa el material que la marca ya tiene —planos y cubos— a un tamaño que nunca se le dio: 900px en vez de 20. Pregunta si hacía falta inventar una superficie o alcanzaba con dejar de usar el lenguaje propio en miniatura.",
-    risk: "Sin la densidad de un shader puede leerse simple al lado de las otras. Si aun así se sostiene, gana por peso, por edición y por funcionar sin GPU.",
-  },
-  {
     id: "e",
     name: "Field",
     surface: "Canvas · retícula de caracteres con palabras escondidas",
     idea: "La superficie es texto: miles de celdas monoespaciadas donde están escritas SHARD, FINALITY, WITNESS, SIGNATURE entre ruido, encendidas por una onda diagonal lenta. Sale de la misma mono con la que está rotulada toda la página.",
     risk: "El campo de caracteres es un recurso muy usado en cripto. Lo que lo distingue acá es que las palabras son las de esta página y no ruido — y eso sólo funciona si se alcanzan a leer.",
-  },
-  {
-    id: "f",
-    name: "Horizon",
-    surface: "Shader · degradé profundo con banda de luz y grano",
-    idea: "La única cálida. Las otras cinco son geométricas o tipográficas; ésta aporta lo que la foto de amanecer aporta a la portada de Ondo. El trío progresa de noche a día: hero oscuro, cifras sobre la línea de luz, «Built for AI scale» en pleno día.",
-    risk: "La más bonita y la menos argumentada: no dice nada del protocolo. Si la primera pantalla tiene que trabajar, no es ésta.",
   },
   {
     id: "g",
@@ -74,7 +51,7 @@ export default function ProtocolOpeningsIndexView() {
             Protocol · apertura
           </p>
           <h1 className="text-h1 text-balance">
-            Siete maneras de <Accent display>abrir la página</Accent>
+            Tres maneras de <Accent display>abrir la página</Accent>
           </h1>
           <p className="text-body-lg text-ink-soft text-pretty">
             Cada una es un trío completo — hero, las seis cifras y «Built for AI scale» — y no un
@@ -83,13 +60,13 @@ export default function ProtocolOpeningsIndexView() {
             consume a lo largo de las tres.
           </p>
           <p className="text-body text-gray-intermediate text-pretty">
-            Sin logos ni assets: cuatro traen shader WebGL, una es SVG puro y dos son texto en
-            canvas. Todas degradan a un cuadro fijo con{" "}
+            Sin logos ni assets: una trae shader WebGL y dos son texto en canvas. Todas degradan
+            a un cuadro fijo con{" "}
             <code className="text-caption-mono">prefers-reduced-motion</code> y a un color sólido si
             no hay WebGL2. Ninguna funde una sección con la siguiente: donde dos secciones comparten
             color, el corte lo marca un filete y no un degradé. Cada ruta monta además el acto
-            oscuro debajo — cinco de las siete abren en oscuro, y si le comen el rango se ve ahí y
-            en ningún otro lado.
+            oscuro debajo — dos de las tres abren en oscuro, y si le comen el rango se ve ahí y en
+            ningún otro lado.
           </p>
         </div>
 

@@ -6,5 +6,5 @@ import meta from "./page.meta";
 export const metadata: Metadata = toMetadata(meta);
 
 export default function ProtocolHeroH2Page() {
-  return <ProtocolHeroLabView id="h2" />;
+  return <ProtocolHeroLabView />;
 }

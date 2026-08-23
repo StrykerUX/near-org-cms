@@ -52,6 +52,12 @@ export type GlSurfaceProps = {
    * shader tiene bordes duros que aliasean.
    */
   renderScale?: number;
+  /**
+   * Tope de `devicePixelRatio` para el buffer. Por defecto 1.75, que en una
+   * pantalla a dpr 2 obliga a un reescalado fraccionario. Una superficie con
+   * bordes visibles debería pasar 2 para quedar 1:1 con la pantalla.
+   */
+  maxDpr?: number;
   className?: string;
 };
 
@@ -83,6 +89,18 @@ const VERT = `#version 300 es
 in vec2 a;
 void main(){ gl_Position = vec4(a, 0., 1.); }`;
 
+// Tope de densidad por defecto.
+//
+// 1.75 y no 2 es una economía heredada de superficies sin bordes, y tiene un
+// efecto secundario que en aquéllas no importa y en una superficie con
+// estructura sí: en una pantalla a dpr 2, un buffer a 1.75 se muestra con un
+// factor de 1.143 — un reescalado FRACCIONARIO. Es peor que uno entero: la
+// interpolación reparte cada píxel del buffer entre uno y dos de pantalla según
+// dónde caiga, así que el suavizado no es uniforme y aparecen escalones
+// irregulares en los bordes diagonales.
+//
+// Una superficie con bordes debería pasar `maxDpr={2}` para que el buffer
+// coincida 1:1 con la pantalla y no haya resampling en absoluto.
 const MAX_DPR = 1.75;
 
 export default function GlSurface({
@@ -91,6 +109,7 @@ export default function GlSurface({
   tag,
   fallback,
   renderScale = 0.6,
+  maxDpr = MAX_DPR,
   className,
 }: GlSurfaceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -149,7 +168,7 @@ export default function GlSurface({
     let height = 0;
 
     const resize = () => {
-      const dpr = deviceRatio(MAX_DPR) * renderScale;
+      const dpr = deviceRatio(maxDpr) * renderScale;
       const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
       const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
       if (w === width && h === height) return;
@@ -211,7 +230,7 @@ export default function GlSurface({
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
     };
-  }, [fragment, tag, renderScale, uniformsKey]);
+  }, [fragment, tag, renderScale, maxDpr, uniformsKey]);
 
   return (
     <canvas
@@ -224,7 +243,7 @@ export default function GlSurface({
 }
 
 /** `#00dc8d` → `[0, 0.862, 0.553]`. Los shaders reciben color en 0..1. */
-export function hexToRgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.slice(1), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-}
+// Re-export por compatibilidad: la función se mudó a `gl/color.ts` porque este
+// módulo es de cliente y ella se llama al armar la tabla de uniformes, que a
+// veces ocurre en un server component. Ver la nota de aquel archivo.
+export { hexToRgb } from "@/components/sections/protocol-labs/gl/color";

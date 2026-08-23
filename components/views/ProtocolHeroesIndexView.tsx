@@ -5,77 +5,40 @@ import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
 
 // Índice del laboratorio de heroes — /prototype/protocol-heroes
 //
-// Ocho variantes para la primera pantalla de la página Protocol. Lo que se
-// compara no es "cuál se ve mejor" sino tres decisiones que cada una toma
-// distinto: dónde vive la evidencia, qué se agranda, y si el hero se mueve.
+// Empezó con ocho variantes para la primera pantalla de Protocol, comparando
+// tres decisiones que cada una tomaba distinto: dónde vive la evidencia, qué se
+// agranda, y si el hero se mueve. Quedaron dos, y no como empate:
 //
-// La tabla de abajo es el resumen; el razonamiento completo de cada una está en
-// su archivo, en `components/sections/protocol-labs/hero-labs/`.
+//   · **H4 · Cut** ganó y se copió a `protocol-labs/a/Hero.tsx`. Vive en la
+//     página, no acá — por eso su fila apunta a `/prototype/protocol-a` y no a
+//     una ruta de este lab, que ya no existe.
+//   · **H2 · Count** se conservó como la alternativa viva.
+//
+// Las otras seis (Ledger, Threshold, Index, Field, Mural, Terminal) y la
+// `ProofBand` que tres de ellas usaban se borraron; están completas en el
+// historial de git, antes de esta limpieza.
+//
+// La tabla es el resumen; el razonamiento de H2 está en su archivo, en
+// `components/sections/protocol-labs/hero-labs/`.
 
 const VARIANTS = [
   {
-    id: "h1",
-    name: "Ledger",
-    proof: "dentro",
+    id: "h4",
+    name: "Cut",
+    href: "/prototype/protocol-a",
+    proof: "fuera · banda asomando",
     motion: "ninguno",
-    thesis: "Las seis cifras en columna, como asientos de un registro.",
-    note: "El único hero del sitio sin una sola animación. La quietud es el argumento: lo que lleva cinco años corriendo no necesita presentarse moviéndose.",
+    thesis: "El hero mide el alto completo y la banda de cifras abre la sección siguiente.",
+    note: "ELEGIDA — es el hero de /prototype/protocol-a, y se ve ahí. Nació a 78svh, con la banda asomando cortada por el borde del viewport en vez de una flecha que rebota; al pasar a pantalla completa se perdió ese asomo y el archivo lo deja anotado.",
   },
   {
     id: "h2",
     name: "Count",
+    href: "/prototype/protocol-heroes/h2",
     proof: "dentro",
     motion: "los números cuentan al entrar",
     thesis: "Marcador a sangre en el borde inferior; el titular ya está, los números llegan.",
     note: "Pone el movimiento sobre el argumento y no sobre la decoración. Con reduced-motion las cifras salen en su valor final.",
-  },
-  {
-    id: "h3",
-    name: "Threshold",
-    proof: "fuera · barra pegada",
-    motion: "el hero se despide con el scroll",
-    thesis: "El hero declara y no argumenta: frase, línea y salida.",
-    note: "La evidencia llega en el primer movimiento y se queda pegada bajo el nav un tramo. Riesgo: quien no scrollea no ve una cifra.",
-  },
-  {
-    id: "h4",
-    name: "Cut",
-    proof: "fuera · banda asomando",
-    motion: "ninguno",
-    thesis: "El hero mide 78svh y la banda de cifras asoma cortada por el borde.",
-    note: "ELEGIDA — es el hero de /prototype/protocol-a. El corte reemplaza a la flecha que rebota: no agrega un elemento para anunciar el contenido, deja que el contenido se anuncie.",
-  },
-  {
-    id: "h5",
-    name: "Index",
-    proof: "fuera · banda",
-    motion: "el cubo se enciende al recorrer",
-    thesis: "En el lugar de las cifras, el índice de la página: las seis capacidades, enlazadas.",
-    note: "La única que admite que la página es larga. Ayuda al lector que viene por una de las seis; riesgo de leerse como documentación.",
-  },
-  {
-    id: "h6",
-    name: "Field",
-    proof: "dentro",
-    motion: "el campo de shards, continuo",
-    thesis: "Continuidad con lo publicado: el mismo campo generativo de /blockchain.",
-    note: "Las cifras cuelgan a los costados del titular. A juzgar: si el fondo con textura se come seis datos chicos.",
-  },
-  {
-    id: "h7",
-    name: "Mural",
-    proof: "fuera · banda",
-    motion: "ninguno",
-    thesis: "Se agranda la CATEGORÍA, no la afirmación: «agent economy» cruzando la página.",
-    note: "Apuesta sobre qué pelea pelea la página. Depende de la banda de abajo: sola es un cartel sin argumento.",
-  },
-  {
-    id: "h8",
-    name: "Terminal",
-    proof: "dentro · status line",
-    motion: "el sheen recorriendo el titular",
-    thesis: "El único hero oscuro; las cifras como lecturas de un sistema encendido.",
-    note: "Cambia el ritmo de la página entera: con el hero en negro, el acto deja de ser una irrupción y hay que rehacer la alternancia detrás.",
   },
 ] as const;
 
@@ -88,17 +51,16 @@ export default function ProtocolHeroesIndexView() {
             Protocol · hero variants
           </p>
           <h1 className="text-h1 text-balance">
-            Ocho primeras <Accent display>pantallas</Accent>
+            Dos primeras <Accent display>pantallas</Accent>
           </h1>
           <p className="text-body-lg text-ink-soft text-pretty">
-            Todas dicen lo mismo con las mismas palabras. Lo que cambia son tres decisiones: dónde
-            vive la evidencia (dentro del hero o después), qué elemento se agranda, y si la pantalla
-            se mueve. Cuatro llevan las seis cifras dentro y cuatro las sacan; cinco tienen
-            movimiento propio y tres no.
+            Las dos dicen lo mismo con las mismas palabras. Lo que cambia son dos decisiones: dónde
+            vive la evidencia —dentro del hero o después— y si la pantalla se mueve. Eran ocho; seis
+            se descartaron.
           </p>
           <p className="text-body text-gray-intermediate text-pretty">
-            Cada variante se ve sola y seguida de lo que va abajo en la página real — un hero se
-            juzga por su juntura, no por su captura.
+            Cada variante se ve seguida de lo que va abajo en la página real — un hero se juzga por
+            su juntura, no por su captura.
           </p>
         </div>
 
@@ -106,7 +68,7 @@ export default function ProtocolHeroesIndexView() {
           {VARIANTS.map((v) => (
             <Link
               key={v.id}
-              href={`/prototype/protocol-heroes/${v.id}`}
+              href={v.href}
               data-q-arrow-host
               className="grid-ds gap-y-5 border-t border-ink py-9 transition-colors duration-500 hover:bg-background"
             >
@@ -148,8 +110,12 @@ export default function ProtocolHeroesIndexView() {
             /prototype/protocol-a
           </Link>
           , y su hero es <strong>H4 · Cut</strong>, copiado de acá al elegirse — desde ese momento
-          deja de moverse con este laboratorio. La página publicada hoy es{" "}
-          <code className="text-caption-mono">/blockchain</code>.
+          dejó de moverse con este laboratorio, y su copia del lab se borró. Las superficies que se
+          le pueden poner encima están en{" "}
+          <Link href="/prototype/protocol-opening" className="underline underline-offset-4">
+            /prototype/protocol-opening
+          </Link>
+          . La página publicada hoy es <code className="text-caption-mono">/blockchain</code>.
         </p>
       </Container>
     </main>

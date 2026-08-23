@@ -23,50 +23,34 @@ import m16 from "@/app/(site)/near-foundation/page.meta";
 import m17 from "@/app/(site)/nearcom/page.meta";
 import m18 from "@/app/(site)/official-rules/page.meta";
 import m19 from "@/app/(site)/privacy/page.meta";
-import m20 from "@/app/prototype/components/page.meta";
-import m21 from "@/app/prototype/homepage-update/page.meta";
-import m22 from "@/app/prototype/protocol-a/page.meta";
-import m23 from "@/app/prototype/protocol-heroes/page.meta";
-import m24 from "@/app/prototype/protocol-heroes/h1/page.meta";
-import m25 from "@/app/prototype/protocol-heroes/h2/page.meta";
-import m26 from "@/app/prototype/protocol-heroes/h3/page.meta";
-import m27 from "@/app/prototype/protocol-heroes/h4/page.meta";
-import m28 from "@/app/prototype/protocol-heroes/h5/page.meta";
-import m29 from "@/app/prototype/protocol-heroes/h6/page.meta";
-import m30 from "@/app/prototype/protocol-heroes/h7/page.meta";
-import m31 from "@/app/prototype/protocol-heroes/h8/page.meta";
-import m32 from "@/app/prototype/protocol-opening/page.meta";
-import m33 from "@/app/prototype/protocol-opening/a/page.meta";
-import m34 from "@/app/prototype/protocol-opening/b/page.meta";
-import m35 from "@/app/prototype/protocol-opening/c/page.meta";
-import m36 from "@/app/prototype/protocol-opening/d/page.meta";
-import m37 from "@/app/prototype/protocol-opening/e/page.meta";
-import m38 from "@/app/prototype/protocol-opening/f/page.meta";
-import m39 from "@/app/prototype/protocol-opening/g/page.meta";
-import m40 from "@/app/prototype/protocol-transitions/page.meta";
-import m41 from "@/app/prototype/protocol-transitions/t1/page.meta";
-import m42 from "@/app/prototype/protocol-transitions/t10/page.meta";
-import m43 from "@/app/prototype/protocol-transitions/t11/page.meta";
-import m44 from "@/app/prototype/protocol-transitions/t12/page.meta";
-import m45 from "@/app/prototype/protocol-transitions/t2/page.meta";
-import m46 from "@/app/prototype/protocol-transitions/t3/page.meta";
-import m47 from "@/app/prototype/protocol-transitions/t4/page.meta";
-import m48 from "@/app/prototype/protocol-transitions/t5/page.meta";
-import m49 from "@/app/prototype/protocol-transitions/t6/page.meta";
-import m50 from "@/app/prototype/protocol-transitions/t7/page.meta";
-import m51 from "@/app/prototype/protocol-transitions/t8/page.meta";
-import m52 from "@/app/prototype/protocol-transitions/t9/page.meta";
-import m53 from "@/app/prototype/quantum-axis/page.meta";
-import m54 from "@/app/prototype/quantum-ledger/page.meta";
-import m55 from "@/app/prototype/quantum-manifesto/page.meta";
-import m56 from "@/app/prototype/quantum-security-copy/page.meta";
-import m57 from "@/app/prototype/quantum-security-h2/page.meta";
-import m58 from "@/app/prototype/quantum-security-h3/page.meta";
-import m59 from "@/app/prototype/scroll-sections/page.meta";
-import m60 from "@/app/(motion)/quantum-security/page.meta";
-import m61 from "@/app/(site)/research/page.meta";
-import m62 from "@/app/(site)/solutions/page.meta";
-import m63 from "@/app/(site)/terms-of-use/page.meta";
+import m20 from "@/app/prototype/chain-ab-propuesta-a/page.meta";
+import m21 from "@/app/prototype/chain-ab-propuesta-b/page.meta";
+import m22 from "@/app/prototype/components/page.meta";
+import m23 from "@/app/prototype/homepage-e/page.meta";
+import m24 from "@/app/prototype/homepage-f/page.meta";
+import m25 from "@/app/prototype/homepage-g/page.meta";
+import m26 from "@/app/prototype/homepage-h/page.meta";
+import m27 from "@/app/prototype/homepage-i/page.meta";
+import m28 from "@/app/prototype/homepage-k/page.meta";
+import m29 from "@/app/prototype/homepage-update/page.meta";
+import m30 from "@/app/prototype/protocol-a/page.meta";
+import m31 from "@/app/prototype/protocol-combo/page.meta";
+import m32 from "@/app/prototype/protocol-combo/layerflow/page.meta";
+import m33 from "@/app/prototype/protocol-combo/mural/page.meta";
+import m34 from "@/app/prototype/protocol-combo/stair/page.meta";
+import m35 from "@/app/prototype/protocol-heroes/page.meta";
+import m36 from "@/app/prototype/protocol-heroes/h2/page.meta";
+import m37 from "@/app/prototype/protocol-opening/page.meta";
+import m38 from "@/app/prototype/protocol-opening/c/page.meta";
+import m39 from "@/app/prototype/protocol-opening/e/page.meta";
+import m40 from "@/app/prototype/protocol-opening/g/page.meta";
+import m41 from "@/app/prototype/quantum-security-copy/page.meta";
+import m42 from "@/app/prototype/quantum-security-h2/page.meta";
+import m43 from "@/app/prototype/quantum-security-h3/page.meta";
+import m44 from "@/app/(motion)/quantum-security/page.meta";
+import m45 from "@/app/(site)/research/page.meta";
+import m46 from "@/app/(site)/solutions/page.meta";
+import m47 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -89,48 +73,32 @@ export const ROUTES: RouteEntry[] = [
   { ...m17, route: "/nearcom", stub: true, file: "app/(site)/nearcom/page.meta.ts" },
   { ...m18, route: "/official-rules", stub: true, file: "app/(site)/official-rules/page.meta.ts" },
   { ...m19, route: "/privacy", stub: true, file: "app/(site)/privacy/page.meta.ts" },
-  { ...m20, route: "/prototype/components", stub: false, file: "app/prototype/components/page.meta.ts" },
-  { ...m21, route: "/prototype/homepage-update", stub: false, file: "app/prototype/homepage-update/page.meta.ts" },
-  { ...m22, route: "/prototype/protocol-a", stub: false, file: "app/prototype/protocol-a/page.meta.ts" },
-  { ...m23, route: "/prototype/protocol-heroes", stub: false, file: "app/prototype/protocol-heroes/page.meta.ts" },
-  { ...m24, route: "/prototype/protocol-heroes/h1", stub: false, file: "app/prototype/protocol-heroes/h1/page.meta.ts" },
-  { ...m25, route: "/prototype/protocol-heroes/h2", stub: false, file: "app/prototype/protocol-heroes/h2/page.meta.ts" },
-  { ...m26, route: "/prototype/protocol-heroes/h3", stub: false, file: "app/prototype/protocol-heroes/h3/page.meta.ts" },
-  { ...m27, route: "/prototype/protocol-heroes/h4", stub: false, file: "app/prototype/protocol-heroes/h4/page.meta.ts" },
-  { ...m28, route: "/prototype/protocol-heroes/h5", stub: false, file: "app/prototype/protocol-heroes/h5/page.meta.ts" },
-  { ...m29, route: "/prototype/protocol-heroes/h6", stub: false, file: "app/prototype/protocol-heroes/h6/page.meta.ts" },
-  { ...m30, route: "/prototype/protocol-heroes/h7", stub: false, file: "app/prototype/protocol-heroes/h7/page.meta.ts" },
-  { ...m31, route: "/prototype/protocol-heroes/h8", stub: false, file: "app/prototype/protocol-heroes/h8/page.meta.ts" },
-  { ...m32, route: "/prototype/protocol-opening", stub: false, file: "app/prototype/protocol-opening/page.meta.ts" },
-  { ...m33, route: "/prototype/protocol-opening/a", stub: false, file: "app/prototype/protocol-opening/a/page.meta.ts" },
-  { ...m34, route: "/prototype/protocol-opening/b", stub: false, file: "app/prototype/protocol-opening/b/page.meta.ts" },
-  { ...m35, route: "/prototype/protocol-opening/c", stub: false, file: "app/prototype/protocol-opening/c/page.meta.ts" },
-  { ...m36, route: "/prototype/protocol-opening/d", stub: false, file: "app/prototype/protocol-opening/d/page.meta.ts" },
-  { ...m37, route: "/prototype/protocol-opening/e", stub: false, file: "app/prototype/protocol-opening/e/page.meta.ts" },
-  { ...m38, route: "/prototype/protocol-opening/f", stub: false, file: "app/prototype/protocol-opening/f/page.meta.ts" },
-  { ...m39, route: "/prototype/protocol-opening/g", stub: false, file: "app/prototype/protocol-opening/g/page.meta.ts" },
-  { ...m40, route: "/prototype/protocol-transitions", stub: false, file: "app/prototype/protocol-transitions/page.meta.ts" },
-  { ...m41, route: "/prototype/protocol-transitions/t1", stub: false, file: "app/prototype/protocol-transitions/t1/page.meta.ts" },
-  { ...m42, route: "/prototype/protocol-transitions/t10", stub: false, file: "app/prototype/protocol-transitions/t10/page.meta.ts" },
-  { ...m43, route: "/prototype/protocol-transitions/t11", stub: false, file: "app/prototype/protocol-transitions/t11/page.meta.ts" },
-  { ...m44, route: "/prototype/protocol-transitions/t12", stub: false, file: "app/prototype/protocol-transitions/t12/page.meta.ts" },
-  { ...m45, route: "/prototype/protocol-transitions/t2", stub: false, file: "app/prototype/protocol-transitions/t2/page.meta.ts" },
-  { ...m46, route: "/prototype/protocol-transitions/t3", stub: false, file: "app/prototype/protocol-transitions/t3/page.meta.ts" },
-  { ...m47, route: "/prototype/protocol-transitions/t4", stub: false, file: "app/prototype/protocol-transitions/t4/page.meta.ts" },
-  { ...m48, route: "/prototype/protocol-transitions/t5", stub: false, file: "app/prototype/protocol-transitions/t5/page.meta.ts" },
-  { ...m49, route: "/prototype/protocol-transitions/t6", stub: false, file: "app/prototype/protocol-transitions/t6/page.meta.ts" },
-  { ...m50, route: "/prototype/protocol-transitions/t7", stub: false, file: "app/prototype/protocol-transitions/t7/page.meta.ts" },
-  { ...m51, route: "/prototype/protocol-transitions/t8", stub: false, file: "app/prototype/protocol-transitions/t8/page.meta.ts" },
-  { ...m52, route: "/prototype/protocol-transitions/t9", stub: false, file: "app/prototype/protocol-transitions/t9/page.meta.ts" },
-  { ...m53, route: "/prototype/quantum-axis", stub: false, file: "app/prototype/quantum-axis/page.meta.ts" },
-  { ...m54, route: "/prototype/quantum-ledger", stub: false, file: "app/prototype/quantum-ledger/page.meta.ts" },
-  { ...m55, route: "/prototype/quantum-manifesto", stub: false, file: "app/prototype/quantum-manifesto/page.meta.ts" },
-  { ...m56, route: "/prototype/quantum-security-copy", stub: false, file: "app/prototype/quantum-security-copy/page.meta.ts" },
-  { ...m57, route: "/prototype/quantum-security-h2", stub: false, file: "app/prototype/quantum-security-h2/page.meta.ts" },
-  { ...m58, route: "/prototype/quantum-security-h3", stub: false, file: "app/prototype/quantum-security-h3/page.meta.ts" },
-  { ...m59, route: "/prototype/scroll-sections", stub: false, file: "app/prototype/scroll-sections/page.meta.ts" },
-  { ...m60, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m61, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m62, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m63, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m20, route: "/prototype/chain-ab-propuesta-a", stub: false, file: "app/prototype/chain-ab-propuesta-a/page.meta.ts" },
+  { ...m21, route: "/prototype/chain-ab-propuesta-b", stub: false, file: "app/prototype/chain-ab-propuesta-b/page.meta.ts" },
+  { ...m22, route: "/prototype/components", stub: false, file: "app/prototype/components/page.meta.ts" },
+  { ...m23, route: "/prototype/homepage-e", stub: false, file: "app/prototype/homepage-e/page.meta.ts" },
+  { ...m24, route: "/prototype/homepage-f", stub: false, file: "app/prototype/homepage-f/page.meta.ts" },
+  { ...m25, route: "/prototype/homepage-g", stub: false, file: "app/prototype/homepage-g/page.meta.ts" },
+  { ...m26, route: "/prototype/homepage-h", stub: false, file: "app/prototype/homepage-h/page.meta.ts" },
+  { ...m27, route: "/prototype/homepage-i", stub: false, file: "app/prototype/homepage-i/page.meta.ts" },
+  { ...m28, route: "/prototype/homepage-k", stub: false, file: "app/prototype/homepage-k/page.meta.ts" },
+  { ...m29, route: "/prototype/homepage-update", stub: false, file: "app/prototype/homepage-update/page.meta.ts" },
+  { ...m30, route: "/prototype/protocol-a", stub: false, file: "app/prototype/protocol-a/page.meta.ts" },
+  { ...m31, route: "/prototype/protocol-combo", stub: false, file: "app/prototype/protocol-combo/page.meta.ts" },
+  { ...m32, route: "/prototype/protocol-combo/layerflow", stub: false, file: "app/prototype/protocol-combo/layerflow/page.meta.ts" },
+  { ...m33, route: "/prototype/protocol-combo/mural", stub: false, file: "app/prototype/protocol-combo/mural/page.meta.ts" },
+  { ...m34, route: "/prototype/protocol-combo/stair", stub: false, file: "app/prototype/protocol-combo/stair/page.meta.ts" },
+  { ...m35, route: "/prototype/protocol-heroes", stub: false, file: "app/prototype/protocol-heroes/page.meta.ts" },
+  { ...m36, route: "/prototype/protocol-heroes/h2", stub: false, file: "app/prototype/protocol-heroes/h2/page.meta.ts" },
+  { ...m37, route: "/prototype/protocol-opening", stub: false, file: "app/prototype/protocol-opening/page.meta.ts" },
+  { ...m38, route: "/prototype/protocol-opening/c", stub: false, file: "app/prototype/protocol-opening/c/page.meta.ts" },
+  { ...m39, route: "/prototype/protocol-opening/e", stub: false, file: "app/prototype/protocol-opening/e/page.meta.ts" },
+  { ...m40, route: "/prototype/protocol-opening/g", stub: false, file: "app/prototype/protocol-opening/g/page.meta.ts" },
+  { ...m41, route: "/prototype/quantum-security-copy", stub: false, file: "app/prototype/quantum-security-copy/page.meta.ts" },
+  { ...m42, route: "/prototype/quantum-security-h2", stub: false, file: "app/prototype/quantum-security-h2/page.meta.ts" },
+  { ...m43, route: "/prototype/quantum-security-h3", stub: false, file: "app/prototype/quantum-security-h3/page.meta.ts" },
+  { ...m44, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m45, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m46, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m47, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];

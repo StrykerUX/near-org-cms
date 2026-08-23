@@ -1,6 +1,9 @@
 import { GridOverlay } from "@/components/primitives/Grid";
 import Hero from "@/components/sections/protocol-labs/a/Hero";
+import ProofRow from "@/components/sections/protocol-labs/a/ProofRow";
 import ScaleClaim from "@/components/sections/protocol-labs/a/ScaleClaim";
+import ScaleClaimRow from "@/components/sections/protocol-labs/a/ScaleClaimRow";
+import ScaleClaimSplit from "@/components/sections/protocol-labs/a/ScaleClaimSplit";
 import Assembly from "@/components/sections/protocol-labs/a/Assembly";
 import DevRuntime from "@/components/sections/protocol-labs/a/DevRuntime";
 import Deployment from "@/components/sections/protocol-labs/a/Deployment";
@@ -32,7 +35,12 @@ import MachineClose from "@/components/sections/protocol-labs/a/MachineClose";
 // El hero salió de comparar ocho variantes en `/prototype/protocol-heroes` — era
 // la H4, "Cut", después llevada a altura completa (ver la nota en `a/Hero.tsx`
 // sobre qué se ganó y qué se dejó ir con ese cambio). Está copiado y no
-// importado desde el lab: desde que se eligió, deja de moverse con él.
+// importado desde el lab: desde que se eligió, deja de moverse con él — y por
+// eso su copia del lab se borró. De las ocho sobrevive H2 · Count como
+// alternativa; el resto está en el historial de git.
+//
+// Lo que le falta a esta página es la SUPERFICIE del hero, que hoy no tiene:
+// las tres candidatas viven en `/prototype/protocol-opening`.
 //
 // ── El ritmo ────────────────────────────────────────────────────────────────
 //
@@ -63,7 +71,9 @@ import MachineClose from "@/components/sections/protocol-labs/a/MachineClose";
 // 1. **La primera pantalla ya no anuncia lo que sigue.** Era lo que hacía el
 //    hero recortado de H4, y se cambió por presencia y por consistencia con los
 //    heroes de altura completa del resto del sitio. Si el arranque se siente
-//    cerrado, es esto — y `hero-labs/H4Cut` conserva la versión con el corte.
+//    cerrado, es esto. La versión con el corte a 78svh ya no vive en ningún
+//    archivo: se borró con el resto del laboratorio de heroes y está en el
+//    historial de git.
 // 2. **Dos ejes de composición conviven.** El hero, el ecosistema y el apéndice
 //    alinean a la izquierda; developers y el cierre centran, y el cambio de eje
 //    cae justo después del acto. Puede leerse como el corte que el acto pedía o
@@ -77,7 +87,20 @@ export default function ProtocolLabAView() {
     <>
       <main>
         <Hero />
-        <ScaleClaim proof="top" />
+        <ProofRow />
+        <ScaleClaim proof={false} />
+        {/* Dos variantes de la misma sección, montadas a continuación para
+            compararlas seguidas. Las tres comparten copy, card y arte vía
+            `ScaleCard`, así que lo único que las distingue es el layout:
+            
+              · `ScaleClaimRow`   — mismo reparto, cajas ACOSTADAS (panel a la
+                                    izquierda) para que no crezcan de alto.
+              · `ScaleClaimSplit` — texto en una cuarta columna y cards más
+                                    estrechas.
+            
+            Queda una de las tres al elegir. */}
+        <ScaleClaimRow />
+        <ScaleClaimSplit />
         <Assembly />
         <DevRuntime />
         <Deployment />
