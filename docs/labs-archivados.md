@@ -137,6 +137,25 @@ git checkout v-pre-limpieza -- components/views/PrototypeLandingView.tsx \
 
 El índice real del repo sigue siendo `app/(site)/page.tsx`, en la ruta `/`.
 
+## Propuestas de chain abstraction (2026-08-23)
+
+Cuatro copias en paralelo de una propuesta para `/chain-abstraction`, hechas
+sobre el sistema visual de `homepage-update`. Se eligieron dos —
+`chain-ab-propuesta-a` (era la copia 3) y `chain-ab-propuesta-b` (era la 4),
+las dos vivas en el árbol— y se descartaron las otras dos.
+
+**Estas NO están en `v-pre-limpieza`**, que es anterior. El ancla es el commit
+`761cd3f`, que las dejó asentadas justo antes de este borrado.
+
+| Copia | Qué la distinguía | Rescatar con |
+|---|---|---|
+| 1 | Contadores en grid de 4 columnas separadas por un hairline que se dibujaba solo (`scaleX` desde 0), y gráfica de barras CON ondulación — un `Math.sin` de dos frecuencias sumado a la altura, dentro de una card con la marca de agua «GROWTH» de fondo | `git checkout 761cd3f -- components/sections/chain-ab-homepage-refined components/views/ChainAbHomepageRefinedView.tsx app/prototype/chain-ab-homepage-refined` |
+| 2 | Contadores en 4 fichas con marco (`rounded-2xl border`) centradas, y la gráfica más simple de todas las que pasaron por la sección: una línea recta entre los 3 milestones, con dots y `strokeDashoffset` para dibujarla | `git checkout 761cd3f -- components/sections/chain-ab-homepage-refined-2 components/views/ChainAbHomepageRefined2View.tsx app/prototype/chain-ab-homepage-refined-2` |
+
+Las dos gráficas descartadas siguen siendo las únicas versiones con
+ondulación (la 1) y con trazo de línea (la 2): las dos que quedan vivas usan
+barras estrictamente crecientes.
+
 ## Lo que NO se archivó
 
 Sigue vivo en el árbol, sin necesidad de rescate:
