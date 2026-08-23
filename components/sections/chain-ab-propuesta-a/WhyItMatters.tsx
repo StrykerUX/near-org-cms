@@ -1,78 +1,32 @@
 "use client";
 
-import Image from "next/image";
 import Container from "@/components/primitives/Container";
-import BentoGrid, { BentoCard } from "@/components/primitives/BentoGrid";
+import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { WHY_IT_MATTERS } from "@/components/sections/chain-abstraction-proposals/content";
 
-// Tercer estilo para esta sección — los otros dos (filas en escalera y 3
-// columnas) eran de las propuestas que se archivaron, ver
-// `docs/labs-archivados.md`: bento asimétrico, reusando
-// `BentoGrid`/`BentoCard` — el primitivo ya existente para justo este
-// patrón ("una card ancha + una cuadrada + una barra de ancho completo",
-// documentado en su propio archivo). Mismo copy e íconos de siempre
-// (`WHY_IT_MATTERS`, `icon-*.webp`), ningún dato nuevo — solo la
-// composición cambia.
-const ICONS = [
-  "/prototype/homepage-update/icon-data.webp",
-  "/prototype/homepage-update/icon-assets.webp",
-  "/prototype/homepage-update/icon-intelligence.webp",
-] as const;
-
-// "wide" (2 columnas) + "tall" (1 columna, incógnita: comparte el mismo
-// `row-span-2` que "wide", así que las dos quedan a la MISMA altura) llenan
-// las 3 columnas de la primera fila sin hueco ni descalce — "square" habría
-// dejado a la wide más alta que su vecina (2 filas contra 1), con un bloque
-// de aire de más debajo de la chica. "full" es la barra de abajo.
-const SPANS = ["wide", "tall", "full"] as const;
+// Misma estructura de 3 columnas (regla fina arriba, título, cuerpo,
+// escalera vertical por columna) — sin ícono esta vez, pedido explícito.
+// Mismo copy de siempre (`WHY_IT_MATTERS`), ningún dato nuevo.
+const STEP = ["lg:mt-0", "lg:mt-14", "lg:mt-28"] as const;
 
 export default function WhyItMatters() {
-  const rootRef = useScrollReveal<HTMLElement>();
+  const rootRef = useScrollReveal<HTMLElement>({ start: "top 90%" });
 
   return (
     <section ref={rootRef} className="bg-cream py-20 lg:py-28">
-      <Container>
-        <BentoGrid>
+      <Container className="flex flex-col gap-14">
+        <Eyebrow>Why it matters</Eyebrow>
+
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
           {WHY_IT_MATTERS.map((item, i) => (
-            <BentoCard key={item.title} span={SPANS[i]} tone="tint" data-reveal>
-              {SPANS[i] === "full" ? (
-                // La barra de abajo es ancha y baja — icono a la izquierda,
-                // texto a la derecha aprovecha esa forma en vez de apilar
-                // como las dos de arriba (altas, angostas).
-                <div className="flex items-center gap-6">
-                  <Image
-                    src={ICONS[i]}
-                    alt=""
-                    width={56}
-                    height={59}
-                    sizes="56px"
-                    className="h-14 w-14 flex-none object-contain"
-                  />
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-h3-serif italic text-pretty">{item.title}</h3>
-                    <p className="text-body text-foreground/75 text-pretty">{item.body}</p>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <Image
-                    src={ICONS[i]}
-                    alt=""
-                    width={56}
-                    height={59}
-                    sizes="56px"
-                    className="h-14 w-14 object-contain"
-                  />
-                  <div className="flex flex-col gap-3">
-                    <h3 className="text-h3-serif italic text-pretty">{item.title}</h3>
-                    <p className="text-body text-foreground/75 text-pretty">{item.body}</p>
-                  </div>
-                </>
-              )}
-            </BentoCard>
+            <div key={item.title} data-reveal className={`flex flex-col gap-5 ${STEP[i]}`}>
+              <div className="h-px w-full bg-rule" aria-hidden="true" />
+              <h3 className="text-h3 text-pretty">{item.title}</h3>
+              <p className="text-body text-foreground/75 text-pretty">{item.body}</p>
+            </div>
           ))}
-        </BentoGrid>
+        </div>
       </Container>
     </section>
   );

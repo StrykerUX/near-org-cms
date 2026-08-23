@@ -12,11 +12,15 @@ import BuildersCta from "@/components/sections/chain/BuildersCta";
 // chains (`chain/chainContent.ts`) y la geometría del diagrama radial
 // (`chain/chainDiagram.ts`, puro cálculo, sin GSAP).
 //
+// Esta propuesta se llamaba B hasta que se archivó la A original y las dos
+// restantes corrieron de letra (ver `docs/labs-archivados.md`). Vale saberlo al
+// leer el historial: `chain-ab-propuesta-a` nombra dos páginas distintas antes
+// y después de ese corrimiento.
+//
 // ── El cierre de la página ──────────────────────────────────────────────
-// Las últimas tres secciones se agregaron después, en base a la propuesta C, y
-// son las MISMAS en las tres propuestas: lo que se está comparando es la mitad
-// de arriba, así que darle a cada una un cierre distinto metería ruido en esa
-// comparación.
+// Las últimas tres secciones son las MISMAS en las dos propuestas: lo que se
+// está comparando es la mitad de arriba, así que darle a cada una un cierre
+// distinto metería ruido en esa comparación.
 //
 // `ForwardTurn` sale de `chain-abstraction-proposals/`, la carpeta común de la
 // familia: es el tratamiento que ganó entre los tres que se probaron. Los dos
@@ -25,7 +29,7 @@ import BuildersCta from "@/components/sections/chain/BuildersCta";
 // `CompletePicture` y `BuildersCta` vienen tal cual de `components/sections/
 // chain/`, la página real. Es la excepción y no la regla — la consigna era
 // composición propia—, y la contrapartida es que quedan atadas: si alguien
-// edita esas dos, las tres propuestas cambian solas.
+// edita esas dos, las dos propuestas cambian solas.
 export default function ChainAbPropuestaAView() {
   return (
     <main className="flex flex-col bg-cream">

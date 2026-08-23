@@ -6,26 +6,22 @@ import CompletePicture from "@/components/sections/chain/CompletePicture";
 import ForwardTurn from "@/components/sections/chain-abstraction-proposals/ForwardTurn";
 import BuildersCta from "@/components/sections/chain/BuildersCta";
 
-// Regla de oro de esta familia: sistema visual estrictamente del homepage real
-// (`/prototype/homepage-update`) y composición PROPIA para las cuatro primeras
-// secciones. Los datos que sí vienen de la fuente real: la lista completa de 35
-// chains (`chain/chainContent.ts`) y la geometría del diagrama radial
-// (`chain/chainDiagram.ts`, puro cálculo, sin GSAP).
+// La otra propuesta viva. Se llamaba C hasta que se archivó la A original y las
+// dos restantes corrieron de letra (ver `docs/labs-archivados.md`).
 //
-// ── El cierre de la página ──────────────────────────────────────────────
-// Las últimas tres secciones se agregaron después, en base a la propuesta C, y
-// son las MISMAS en las tres propuestas: lo que se está comparando es la mitad
-// de arriba, así que darle a cada una un cierre distinto metería ruido en esa
-// comparación.
+// Dos cosas la separan de la A:
 //
-// `ForwardTurn` sale de `chain-abstraction-proposals/`, la carpeta común de la
-// familia: es el tratamiento que ganó entre los tres que se probaron. Los dos
-// descartados están en `docs/labs-archivados.md`.
+// 1. El `Proof`: titular con `<Accent>`, contadores en lista sin reglas y
+//    gráfica al lado, en dos columnas. La A usa fila compacta y gráfica a ancho
+//    completo. Ese cuerpo venía de la propuesta que se archivó; acá sobrevive.
+// 2. El strip de ecosystem corre en carrusel — aunque eso ya no distingue: la
+//    A lo montó también, y por eso `ECOSYSTEM_LOGOS` está duplicado en las dos
+//    (decisión explícita, con su advertencia en ambos archivos).
 //
-// `CompletePicture` y `BuildersCta` vienen tal cual de `components/sections/
-// chain/`, la página real. Es la excepción y no la regla — la consigna era
-// composición propia—, y la contrapartida es que quedan atadas: si alguien
-// edita esas dos, las tres propuestas cambian solas.
+// El cierre es idéntico al de la A, a propósito: lo que se compara es la mitad
+// de arriba. `ForwardTurn` sale de la carpeta común de la familia;
+// `CompletePicture` y `BuildersCta` vienen tal cual de la página real, con la
+// contrapartida de que quedan atadas a ella.
 export default function ChainAbPropuestaBView() {
   return (
     <main className="flex flex-col bg-cream">

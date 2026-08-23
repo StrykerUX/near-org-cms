@@ -2,7 +2,6 @@
 
 import Container from "@/components/primitives/Container";
 import Accent from "@/components/primitives/Accent";
-import GradientMesh from "@/components/primitives/GradientMesh";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
@@ -13,22 +12,56 @@ import { HERO_B } from "@/components/sections/chain-abstraction-proposals/conten
 import { CHAINS } from "@/components/sections/chain/chainContent";
 
 // ── El campo de chains — grid denso con las cajas de texto recortadas ──────
-// Mismo acomodo de texto y mismo campo que la propuesta B (título arriba a la
-// izquierda, texto abajo a la derecha, grid denso con las dos cajas de
-// texto recortadas por descarte) — pedido explícito de traer ese mismo
-// efecto acá, la única diferencia real es que esta variante mantiene el
-// fondo oscuro (`bg-ink-slate`) en vez de pasar a claro.
+// Cuarta variante: título arriba a la izquierda, texto abajo a la derecha.
+// Dos intentos anteriores (dos rectángulos sueltos en las esquinas libres;
+// después una franja diagonal ascendente conectándolas) dejaban partes
+// grandes del lienzo vacías porque ninguno de los dos cubría TODO el
+// espacio libre, solo una porción angosta de él. Pedido explícito: que no
+// quede vacío en ningún lado, y está bien repetir chains si hacen falta
+// más de las 35 reales para llenar el espacio.
+//
+// Esta versión vuelve a un grid que cubre el lienzo COMPLETO (con margen
+// de borde) y recorta las dos cajas de texto por DESCARTE: si el centro de
+// una celda cae en la caja del título o del párrafo, esa celda simplemente
+// no se usa. Nunca por EMPUJE (la alternativa que se probó primero, antes
+// de esta sesión, para el problema original de "las chains encima del
+// texto") — empujar cada celda hacia el borde más cercano las amontona ahí
+// mismo; descartar dejar el resto del grid, sin tocar, ya cubre parejo
+// todo lo que no es texto.
 const JITTER = 0.32;
 
 const MARGIN = { x0: 6, y0: 8, x1: 94, y1: 92 }; // mismo margen de borde de siempre
-const COLS = 16;
-const ROWS = 11; // grid denso — de sobra para que no se note ningún hueco
+// El grid manda cuántas chains hay: `CELLS` lo recorre entero y descarta
+// las celdas cuyo centro cae en `TITLE_BOX`/`TEXT_BOX`, así que el total
+// visible es COLS×ROWS menos lo descartado. Con 16×11 quedaban 95
+// etiquetas y el campo se leía como una pared de texto; con 12×8 quedan
+// 52, y las cajas de descarte de más abajo bajan eso a 42 — pedido
+// explícito de buscar el punto donde no se sienta ni tan vacío ni tan
+// lleno. Cubre el mismo lienzo (mismo margen), solo que más aireado; para
+// volver a densificar, subir estos dos números y nada más.
+const COLS = 12;
+const ROWS = 8;
 
-// Cajas a evitar. Aproximan dónde caen el título y el párrafo — se
-// reajustan a ojo si hace falta, mismo criterio que la propuesta B.
+// Cajas a evitar. Aproximan dónde caen el título, la barra de nav y el
+// párrafo — se reajustan a ojo si hace falta, mismo criterio que toda
+// esta sección. Segunda pasada sobre ellas: bajar la densidad del grid no
+// alcanzó, porque las etiquetas que molestaban no eran las del medio del
+// lienzo sino las que rozaban el texto por afuera del borde de estas
+// cajas. Las tres se agrandaron hasta que dejan de aparecer:
+//
+//  · `TITLE_BOX` de x1 69 a 73 — las dos que caían pegadas al borde
+//    derecho del titular (a la altura de "Disappears.").
+//  · `HEADER_BOX`, nueva — la esquina de arriba a la derecha, donde tres
+//    etiquetas quedaban a la misma altura que la píldora de nav.
+//  · `TEXT_BOX` de x0 55 a 40 y de y0 74 a 70 — el párrafo de abajo a la
+//    derecha se comía tres etiquetas por su flanco izquierdo.
+//
+// Entre las tres sacan 10 (52 → 42): las 8 marcadas más `ATOM` y `DOT`,
+// que caen dentro del mismo ensanche del párrafo.
 type Rect = { x0: number; y0: number; x1: number; y1: number };
-const TITLE_BOX: Rect = { x0: 0, y0: 0, x1: 69, y1: 50 };
-const TEXT_BOX: Rect = { x0: 55, y0: 74, x1: 100, y1: 100 };
+const TITLE_BOX: Rect = { x0: 0, y0: 0, x1: 73, y1: 50 };
+const HEADER_BOX: Rect = { x0: 60, y0: 0, x1: 100, y1: 17 };
+const TEXT_BOX: Rect = { x0: 40, y0: 70, x1: 100, y1: 100 };
 
 const inside = (x: number, y: number, r: Rect) => x > r.x0 && x < r.x1 && y > r.y0 && y < r.y1;
 
@@ -44,7 +77,7 @@ for (let row = 0; row < ROWS; row++) {
     const ty = (row + 0.5 + jy * 2 * JITTER) / ROWS;
     const x = round(MARGIN.x0 + tx * (MARGIN.x1 - MARGIN.x0));
     const y = round(MARGIN.y0 + ty * (MARGIN.y1 - MARGIN.y0));
-    if (inside(x, y, TITLE_BOX) || inside(x, y, TEXT_BOX)) continue;
+    if (inside(x, y, TITLE_BOX) || inside(x, y, HEADER_BOX) || inside(x, y, TEXT_BOX)) continue;
     CELLS.push({ x, y });
   }
 }
@@ -68,32 +101,26 @@ const FIELD = CELLS.map((p, i) => ({
 const PULL_TAU = 0.2;
 const MAX_FRAME_S = 0.05;
 
-// ── El encendido de izquierda a derecha ─────────────────────────────────────
-// Al cargar: una sola pasada, las de la izquierda ya visibles, la ola
-// avanza hacia la derecha. Termina en el `onComplete` de este tween —no
-// suelto en el tiempo— para encadenar justo ahí el arranque de la
-// luciérnaga (ver más abajo): que no empiecen a parpadear chains que
-// todavía no terminaron de aparecer.
+// ── El encendido de izquierda a derecha, en loop ────────────────────────────
+// Tercera vuelta sobre este efecto: la luciérnaga (lotes al azar
+// apagándose/prendiendo sueltos por todo el campo) se pidió sacar del
+// todo — pedido explícito: "se ve como árbol de navidad, no luciérnaga".
+// Se queda SOLO el barrido ascendente, pero ahora en loop: al llegar al
+// máximo (todas prendidas) empiezan a apagarse, y vuelven a aparecer en
+// el mismo orden ascendente — un solo tween con `yoyo:true` en vez de dos
+// sistemas separados (barrido + luciérnaga). `yoyo` reproduce el MISMO
+// tween al revés en cada repetición: como tiene `stagger` ascendente, la
+// pasada inversa apaga en orden DESCENDENTE (derecha→izquierda) — se lee
+// como que la ola se repliega por donde vino, no como parpadeo al azar.
+// `repeatDelay` dos veces por ciclo (yoyo hace ida y vuelta): una pausa
+// con todo prendido y otra con todo apagado antes de invertir.
 const REVEAL_STEP = 0.028; // delay entre una chain y la siguiente en el barrido
 const REVEAL_DURATION = 0.7;
-
-// ── La luciérnaga — solo opacidad, sin intercambio de posición ─────────────
-// Sin efecto hover (nunca lo tuvo esta sección, a diferencia de la vieja
-// versión de la propuesta B): cada chain parpadea independiente, en su propio
-// lugar, opacidad de reposo → 0 → opacidad de reposo. Lote grande y con
-// tiempo real apagada (`FIREFLY_HOLD`) para que se note — mismos valores ya
-// afinados en la propuesta B.
-const FIREFLY_MIN = 16;
-const FIREFLY_RANGE = 16;
-const FIREFLY_FADE_OUT = 0.5;
-const FIREFLY_HOLD = 0.9;
-const FIREFLY_FADE_IN = 0.5;
-const FIREFLY_GAP_MIN = 0.4;
-const FIREFLY_GAP_RANGE = 0.6;
+const REVEAL_HOLD = 1.6; // pausa en cada extremo (todo prendido / todo apagado)
 
 export default function Hero() {
   // Scope 1: el campo de tickers — encendido de izquierda a derecha al
-  // cargar + wander idle, en un loop de `gsap.ticker`.
+  // cargar + wander idle + gravedad de puntero, en un loop de `gsap.ticker`.
   const fieldRef = useGsapContext<HTMLDivElement>((_self, scope) => {
     const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
     const mm = gsap.matchMedia();
@@ -130,81 +157,43 @@ export default function Hero() {
 
       gsap.ticker.add(update);
 
-      // Luciérnaga: arranca recién cuando termina el barrido de encendido
-      // (se engancha a su `onComplete`, no corre en paralelo) — `revealDone`
-      // frena a `scheduleFirefly` hasta ese momento aunque `onViewportToggle`
-      // dispare antes (dispara al montar, con la sección ya visible, mucho
-      // antes de que el barrido termine). Gateada además por `inView` — se
-      // pausa fuera de pantalla y retoma al volver, siempre que ya haya
-      // terminado el barrido.
-      const busy = new Set<number>();
-      let fireflyTimer: gsap.core.Tween | null = null;
-      let revealDone = false;
-      let inView = true;
+      // Aparece y desaparece con la MISMA trayectoria diagonal (mismo
+      // orden `appearOrder`, por `x`) — no un orden distinto para cada
+      // sentido. Una versión con un orden propio para desaparecer (por
+      // `y`) se probó antes, pero eso es un barrido vertical de verdad,
+      // sin relación con la diagonal de la aparición; lo pedido es
+      // reusar ESA misma diagonal para las dos direcciones.
+      const appearOrder = drifts.map((_, i) => i).sort((a, b) => FIELD[a].x - FIELD[b].x);
+      const appearDrifts = appearOrder.map((i) => drifts[i]);
+      const appearOpacity = appearOrder.map((i) => FIELD[i].opacity);
 
-      const blinkOne = () => {
-        const idle = drifts.map((_, i) => i).filter((i) => !busy.has(i));
-        if (!idle.length) return;
-        const i = idle[Math.floor(Math.random() * idle.length)];
-        busy.add(i);
-        gsap
-          .timeline({ onComplete: () => busy.delete(i) })
-          .to(drifts[i], { opacity: 0, duration: FIREFLY_FADE_OUT, ease: "power1.in" })
-          .to(
-            drifts[i],
-            { opacity: FIELD[i].opacity, duration: FIREFLY_FADE_IN, ease: "power1.out" },
-            `+=${FIREFLY_HOLD}`,
-          );
-      };
-
-      const blink = () => {
-        const wanted = FIREFLY_MIN + Math.floor(Math.random() * FIREFLY_RANGE);
-        for (let n = 0; n < wanted; n++) blinkOne();
-      };
-
-      const scheduleFirefly = () => {
-        fireflyTimer?.kill();
-        if (!revealDone || !inView) return;
-        fireflyTimer = gsap.delayedCall(FIREFLY_GAP_MIN + Math.random() * FIREFLY_GAP_RANGE, () => {
-          if (!inView) return;
-          blink();
-          scheduleFirefly();
-        });
-      };
-
-      // Encendido de izquierda a derecha, una sola vez: se ordenan los
-      // índices por `x` (no por orden del DOM, que es orden de grid — fila
-      // por fila, no columna por columna) y se anima cada `drift` de
-      // opacity 0 a su opacity de reposo (`FIELD[i].opacity`, la misma que
-      // ya trae el `style` inline de React) con un delay creciente en ESE
-      // orden. `gsap.set` a 0 primero para no depender de que el inline
-      // style de React "gane" la carrera contra el primer paint.
-      const order = drifts.map((_, i) => i).sort((a, b) => FIELD[a].x - FIELD[b].x);
-      const orderedDrifts = order.map((i) => drifts[i]);
-      const orderedOpacity = order.map((i) => FIELD[i].opacity);
-      gsap.set(orderedDrifts, { opacity: 0 });
-      gsap.to(orderedDrifts, {
-        opacity: (i) => orderedOpacity[i],
-        duration: REVEAL_DURATION,
-        ease: EASE_OUT,
-        stagger: REVEAL_STEP,
-        onComplete: () => {
-          revealDone = true;
-          scheduleFirefly();
-        },
-      });
+      // `gsap.set` a 0 primero para no depender de que el inline style de
+      // React "gane" la carrera contra el primer paint.
+      gsap.set(drifts, { opacity: 0 });
+      const wave = gsap.timeline({ repeat: -1, repeatDelay: REVEAL_HOLD });
+      wave
+        .to(appearDrifts, {
+          opacity: (i) => appearOpacity[i],
+          duration: REVEAL_DURATION,
+          ease: EASE_OUT,
+          stagger: REVEAL_STEP,
+        })
+        .to(
+          appearDrifts,
+          { opacity: 0, duration: REVEAL_DURATION, ease: EASE_OUT, stagger: REVEAL_STEP },
+          `+=${REVEAL_HOLD}`,
+        );
 
       const track = scope.closest("section") ?? scope;
       onViewportToggle(track, (v) => {
         visible = v;
-        inView = v;
-        if (v) scheduleFirefly();
-        else fireflyTimer?.kill();
+        if (v) wave.play();
+        else wave.pause();
       });
 
       return () => {
         gsap.ticker.remove(update);
-        fireflyTimer?.kill();
+        wave.kill();
         gsap.killTweensOf(drifts);
       };
     });
@@ -212,7 +201,9 @@ export default function Hero() {
     return () => mm.revert();
   }, []);
 
-  // Scope 2: título y subtítulo entran juntos al cargar, sin scroll.
+  // Scope 2: título y subtítulo entran juntos al cargar, sin scroll. Acá no
+  // hay reemplazo por scroll: los dos textos conviven siempre, uno abajo a
+  // la izquierda y el otro abajo a la derecha.
   const introRef = useMotionScope<HTMLElement>(({ q, motionOk }) => {
     const heading = q("[data-hero-heading]")[0];
     const items = q("[data-hero-item]");
@@ -246,10 +237,25 @@ export default function Hero() {
   return (
     <section
       ref={introRef}
-      data-nav-dark
-      className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-ink-slate text-white"
+      className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-cream"
     >
-      <GradientMesh tone="dark" />
+      {/* `GradientMesh tone="light"` no sirve tal cual acá: su segundo blob
+          (gris, `var(--stone)`) está anclado a propósito en 90%/85% para
+          otras heroes de esta familia — pero en esta variante el párrafo
+          vive justo ahí (abajo a la derecha), así que ese blob se veía
+          como un fondo gris sucio detrás del texto. Se deja solo el
+          primer blob (el verde de arriba a la izquierda, lejos del texto)
+          en vez de tocar el primitivo compartido — `GradientMesh` lo usan
+          otras heroes con el párrafo en otra posición, donde ese segundo
+          blob sí calza. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 60% 50% at 15% 10%, color-mix(in srgb, var(--near-green) 14%, transparent) 0%, transparent 65%)",
+        }}
+      />
       <div ref={fieldRef} aria-hidden="true" className="pointer-events-none absolute inset-0">
         {FIELD.map((t, i) => (
           <span
@@ -260,7 +266,7 @@ export default function Hero() {
           >
             <span
               data-ticker-drift
-              className="block whitespace-nowrap text-caption-mono uppercase text-white/70"
+              className="block whitespace-nowrap text-caption-mono uppercase text-foreground"
               style={{ opacity: t.opacity }}
             >
               {t.label}
@@ -274,12 +280,12 @@ export default function Hero() {
           los separa a los extremos), no uno solo con `items-end`. */}
       <Container className="relative pt-44">
         {/* Sin `max-w` en el `<h1>` a propósito: "The Chain Disappears."
-            entera en un renglón necesita el ancho que necesite a este
-            tamaño de fuente (`text-display`, hasta 8rem) — con un `max-w`
-            puesto se corta antes de tiempo y vuelve a partir en dos líneas
-            ("The Chain" / "Disappears."), que es justo lo que no se quiere.
-            El `<Container>` de afuera sigue poniendo el techo real
-            (`max-w-[1780px]`). */}
+            entera en un renglón (pedido explícito) necesita el ancho que
+            necesite a este tamaño de fuente (`text-display`, hasta 8rem) —
+            con un `max-w` puesto se corta antes de tiempo y vuelve a partir
+            en dos líneas ("The Chain" / "Disappears."), que es justo lo que
+            no se quiere. El `<Container>` de afuera sigue poniendo el techo
+            real (`max-w-[1780px]`). */}
         <h1 data-hero-heading className="text-display text-pretty">
           <div className="lg:whitespace-nowrap">The Chain Disappears.</div>
           <div className="mt-4 lg:mt-6">
@@ -288,13 +294,24 @@ export default function Hero() {
         </h1>
       </Container>
       <Container className="relative flex justify-end pb-20">
-        {/* `text-justify` estira cada línea salvo la última ("...never
-            does.") para que ambos bordes, izquierdo y derecho, queden
-            parejos. Sin `hyphens-auto`: sin partir palabras. El bloque
-            entero sigue clavado abajo a la derecha (lo pone el
-            `justify-end` del `Container`). */}
+        {/* `max-w-md` (28rem) dejaba a "never does." solo en su propio
+            renglón. `text-justify` estira cada línea salvo la última
+            ("...never does.") para que ambos bordes, izquierdo y derecho,
+            queden parejos. Antes había un `<br/>` a mano después de "...one
+            system." para que esa oración quedara sola en su renglón — pero
+            un salto forzado cuenta como "última línea" para `justify`
+            también, así que esa línea 1 quedaba sin estirar igual que la
+            verdadera última, y las líneas del medio (2-3) sí se estiraban:
+            el resultado se veía desparejo (líneas del medio sobresaliendo
+            más que la primera y la última). Sacar el `<br/>` deja que
+            `text-justify` estire TODAS las líneas salvo la última, que es
+            el pedido. Sin `hyphens-auto`: sin partir palabras, el espaciado
+            entre palabras se estira un poco más de lo que haría con
+            guiones, trade-off ya aceptado. El bloque entero sigue clavado
+            abajo a la derecha (lo pone el `justify-end` del `Container`),
+            esto solo cambia cómo se alinea el TEXTO adentro de esa caja. */}
         <div data-hero-item className="max-w-2xl">
-          <p className="text-body-lg text-justify text-white/70">{HERO_B.sub}</p>
+          <p className="text-body-lg text-justify text-foreground/70">{HERO_B.sub}</p>
         </div>
       </Container>
     </section>

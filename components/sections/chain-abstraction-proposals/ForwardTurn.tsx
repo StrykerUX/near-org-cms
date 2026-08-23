@@ -22,8 +22,8 @@ import { FORWARD_BODY, FORWARD_CODA } from "@/components/sections/chain/chainCon
 // gets rebuilt" sin tener que decirlo debajo.
 //
 // ── Por qué vive acá y no adentro de una propuesta ──────────────────────
-// Las tres propuestas (A, B y C) montan ESTA sección, así que meterla en la
-// carpeta de cualquiera de ellas obligaría a las otras dos a importar de la
+// Las dos propuestas (A y B) montan ESTA sección, así que meterla en la
+// carpeta de cualquiera de ellas obligaría a la otra a importar de la
 // vecina. `chain-abstraction-proposals/` ya es la carpeta común de la
 // familia — es donde vive `content.ts`, el copy que las tres comparten.
 //

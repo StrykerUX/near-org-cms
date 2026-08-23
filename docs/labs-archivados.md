@@ -177,6 +177,32 @@ sección trae del original: movimiento auto-pautado (`once: true`, nunca
 volante. La 3 es la única de la familia con algo en loop, con `pauseOffscreen`
 y sin rotar bajo `prefers-reduced-motion`.
 
+## La propuesta A de chain abstraction (2026-08-23)
+
+Se descarta la tercera de las tres propuestas que quedaban, y las otras dos
+corren de letra: la **B pasa a ser A** y la **C pasa a ser B**. Ojo con eso al
+leer el historial — `chain-ab-propuesta-a` nombra dos páginas distintas antes y
+después del commit `1a4832c`.
+
+Lo que se va con ella:
+
+- **El hero en ink.** Era la única de las tres con el hero sobre fondo oscuro;
+  las otras dos lo tienen en crema.
+- **El bento asimétrico de "Why it matters"**, reusando `BentoGrid`/`BentoCard`.
+  Las que quedan usan otra composición para esa sección, así que este es el
+  último lugar del árbol donde ese primitivo se usaba.
+- **El pie de ecosystem en pills de texto** — las dos que quedan lo tienen con
+  logos, en carrusel.
+
+Su cuerpo de Proof NO se pierde: el titular acentuado con los contadores en
+lista y la gráfica al lado se había pasado a la propuesta C (hoy B) en
+`1a4832c`, que es donde sigue vivo.
+
+```bash
+git checkout 1a4832c -- components/sections/chain-ab-propuesta-a \
+  components/views/ChainAbPropuestaAView.tsx app/prototype/chain-ab-propuesta-a
+```
+
 ## Lo que NO se archivó
 
 Sigue vivo en el árbol, sin necesidad de rescate:

@@ -239,23 +239,12 @@ export default function Hero() {
       ref={introRef}
       className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-cream"
     >
-      {/* `GradientMesh tone="light"` no sirve tal cual acá: su segundo blob
-          (gris, `var(--stone)`) está anclado a propósito en 90%/85% para
-          otras heroes de esta familia — pero en esta variante el párrafo
-          vive justo ahí (abajo a la derecha), así que ese blob se veía
-          como un fondo gris sucio detrás del texto. Se deja solo el
-          primer blob (el verde de arriba a la izquierda, lejos del texto)
-          en vez de tocar el primitivo compartido — `GradientMesh` lo usan
-          otras heroes con el párrafo en otra posición, donde ese segundo
-          blob sí calza. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "radial-gradient(ellipse 60% 50% at 15% 10%, color-mix(in srgb, var(--near-green) 14%, transparent) 0%, transparent 65%)",
-        }}
-      />
+      {/* Sin gradiente de fondo, y ahí está la diferencia con la propuesta
+          B: esa hereda un blob verde radial anclado arriba a la izquierda
+          (lo que quedó de `GradientMesh tone="light"` después de descartar
+          su segundo blob gris, que caía justo detrás del párrafo). Acá el
+          cream va plano de punta a punta — pedido explícito — así que el
+          único elemento sobre el fondo es el campo de chains. */}
       <div ref={fieldRef} aria-hidden="true" className="pointer-events-none absolute inset-0">
         {FIELD.map((t, i) => (
           <span
