@@ -44,6 +44,14 @@ porque A fue la primera y las siete la compartían; ahora tiene archivo propio
 dentro de una de sus consumidoras queda a un borrado de romper a las demás, y eso
 fue exactamente lo que pasó.
 
+## Los tres heroes viven en archivos propios
+
+`HeroSpectrum.tsx`, `HeroField.tsx` y `HeroFieldLight.tsx`. Estaban embebidos
+dentro de sus tríos hasta que `combo-labs/` necesitó montarlos con otras
+secciones 2 y 3; `OpeningC`, `OpeningE` y `OpeningG` los importan desde ahí, así
+que las rutas de este laboratorio y las de `/prototype/protocol-combo` muestran
+literalmente el mismo hero y no pueden divergir mientras se compara.
+
 ## Ninguna funde una sección con la siguiente
 
 Regla del laboratorio. Los velos que hay son de **legibilidad** —tinta o crema

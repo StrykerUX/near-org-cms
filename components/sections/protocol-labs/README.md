@@ -1,6 +1,6 @@
 # `protocol-labs/` — la página Protocol en curso
 
-Tres cosas:
+Cuatro cosas:
 
 - **`a/`** — la estructura elegida para `near.org/protocol`, en
   `/prototype/protocol-a`. Su razonamiento completo está en
@@ -13,6 +13,12 @@ Tres cosas:
   «Built for AI scale»), en `/prototype/protocol-opening`. Cada una con su propia
   superficie: un shader WebGL y dos campos de caracteres en canvas. Sin decidir.
   Tiene su propio [README](./opening-labs/README.md).
+- **`combo-labs/`** — qué va DEBAJO de cada hero, en `/prototype/protocol-combo`.
+  Los cinco heroes que sobrevivieron llegaron con sus secciones 2 y 3 heredadas
+  de la variante que los trajo —dos estructuras para cinco heroes, una de ellas
+  repetida—; acá hay una propuesta por hero, y ninguna repite a otra. Cada ruta
+  monta la página entera. Sin decidir. Tiene su propio
+  [README](./combo-labs/README.md).
 
 ## Lo que se borró en la limpieza
 

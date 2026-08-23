@@ -224,7 +224,7 @@ export default function GlSurface({
 }
 
 /** `#00dc8d` → `[0, 0.862, 0.553]`. Los shaders reciben color en 0..1. */
-export function hexToRgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.slice(1), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-}
+// Re-export por compatibilidad: la función se mudó a `gl/color.ts` porque este
+// módulo es de cliente y ella se llama al armar la tabla de uniformes, que a
+// veces ocurre en un server component. Ver la nota de aquel archivo.
+export { hexToRgb } from "@/components/sections/protocol-labs/opening-labs/gl/color";

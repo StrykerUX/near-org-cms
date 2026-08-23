@@ -3,10 +3,8 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useCountUp } from "@/components/sections/protocol-labs/countUp";
-import GlSurface, { hexToRgb } from "@/components/sections/protocol-labs/opening-labs/GlSurface";
-import { SPECTRUM_FRAG } from "@/components/sections/protocol-labs/opening-labs/gl/spectrum";
-import CtaPill from "@/components/sections/quantum/CtaPill";
-import { AI_SCALE, HERO, PROOF } from "@/components/sections/protocol-labs/protocolContent";
+import { AI_SCALE, PROOF } from "@/components/sections/protocol-labs/protocolContent";
+import HeroSpectrum from "@/components/sections/protocol-labs/opening-labs/HeroSpectrum";
 
 // C · Spectrum — la columna como unidad de toda la apertura.
 //
@@ -22,12 +20,9 @@ import { AI_SCALE, HERO, PROOF } from "@/components/sections/protocol-labs/proto
 // la página son la MISMA cosa, así que no hay que negociar entre un fondo
 // bonito y doce columnas que gobiernan todo lo demás.
 //
-// ── El layout del hero cambia, y por eso ──────────────────────────────────
-//
-// El titular baja al tercio inferior y se alinea a la izquierda, contra el borde
-// del contenedor. La mitad superior queda para el espectro. Un titular centrado
-// en medio de bandas verticales las corta por la mitad; abajo, las deja correr
-// enteras y el texto se apoya sobre ellas como sobre un pie.
+// El hero vive aparte, en `HeroSpectrum.tsx`, desde que `combo-labs/` necesitó
+// montarlo con otras secciones 2 y 3. Se importa y no se copia: las dos rutas
+// que lo muestran tienen que ser el mismo hero.
 //
 // ── Las barras de los números NO son comparativas ─────────────────────────
 //
@@ -36,65 +31,12 @@ import { AI_SCALE, HERO, PROOF } from "@/components/sections/protocol-labs/proto
 // acá salen del mismo campo del shader, o sea que son ritmo, no medición. Están
 // atenuadas y sin eje justamente para que nadie las lea como datos.
 
-const INK = "#070b09";
-
-const SPECTRUM_UNIFORMS = {
-  u_bg: hexToRgb(INK),
-  u_low: hexToRgb("#123626"),
-  u_high: hexToRgb("#8bf29c"),
-  // Doce: las mismas columnas que gobiernan la página. Es el número que hace
-  // que la superficie y la retícula sean lo mismo.
-  u_columns: 12,
-  u_speed: 0.35,
-  u_soft: 0.55,
-};
-
 export default function OpeningC() {
   const numbers = useCountUp<HTMLDListElement>({ stagger: 0.07 });
 
   return (
     <>
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section
-        data-nav-dark
-        className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden pt-[var(--site-header-block)] text-cream"
-      >
-        <GlSurface
-          fragment={SPECTRUM_FRAG}
-          uniforms={SPECTRUM_UNIFORMS}
-          tag="opening-spectrum"
-          fallback={INK}
-          className="absolute inset-0 z-0 h-full w-full"
-        />
-        {/* El pie de tinta que sostiene la copy. Sube desde abajo y deja las
-            bandas enteras en los dos tercios superiores, que es donde tienen que
-            verse correr. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-10"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(7,11,9,0.25) 0%, rgba(7,11,9,0.1) 34%, rgba(7,11,9,0.82) 62%, rgba(7,11,9,0.97) 100%)",
-          }}
-        />
-
-        <Container className="relative z-20 grid-ds items-end gap-y-8 pb-16">
-          <div className="col-span-full flex flex-col gap-6 lg:col-span-7">
-            <p className="uppercase text-eyebrow-mono text-cream/50">{HERO.eyebrow}</p>
-            <h1 className="text-h1 text-balance">
-              {HERO.lead}
-              <br />
-              <Accent display>{HERO.accent}</Accent>
-            </h1>
-          </div>
-          <div className="col-span-full flex flex-col gap-6 lg:col-start-9 lg:col-span-4">
-            <p className="max-w-[36ch] text-body-lg text-cream/70 text-pretty">{HERO.body}</p>
-            <CtaPill href={HERO.cta.href} tone="solid" external>
-              {HERO.cta.label}
-            </CtaPill>
-          </div>
-        </Container>
-      </section>
+      <HeroSpectrum />
 
       {/* ── Números como columnas ─────────────────────────────────────────── */}
       <section data-nav-dark className="border-t border-cream/20 bg-[#070b09] text-cream">

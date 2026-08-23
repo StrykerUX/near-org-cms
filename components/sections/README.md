@@ -67,6 +67,7 @@ dar por terminado un cambio.
 | `protocol-labs/a/*` | `ProtocolLabAView` | `/prototype/protocol-a` — la estructura elegida para la página de Protocol, salida de comparar cuatro. Tiene su propio [README](./protocol-labs/README.md) |
 | `protocol-labs/hero-labs/*` | `ProtocolHeroesIndexView`, `ProtocolHeroLabView` | `/prototype/protocol-heroes` (+ `/h2`) — **laboratorio**: la alternativa viva para la primera pantalla. Eran ocho; ganó H4 · Cut, ya copiada en `protocol-labs/a/Hero.tsx`. Tiene su propio [README](./protocol-labs/hero-labs/README.md); **ninguna página real lo importa** |
 | `protocol-labs/opening-labs/*` | `ProtocolOpeningsIndexView`, `ProtocolOpeningLabView` | `/prototype/protocol-opening` (+ `/c`, `/e`, `/g`) — **laboratorio**: tres aperturas completas (hero + cifras + «Built for AI scale») con superficie propia — un shader WebGL y dos campos de caracteres en canvas. Tiene su propio [README](./protocol-labs/opening-labs/README.md) |
+| `protocol-labs/combo-labs/*` | `ProtocolCombosIndexView`, `ProtocolComboLabView` | `/prototype/protocol-combo` (+ `/h4`, `/h2`, `/c`, `/e`, `/g`) — **laboratorio**: qué va debajo de cada hero superviviente. Cinco propuestas para las secciones 2 y 3, una por hero; cada ruta monta la página entera. Tiene su propio [README](./protocol-labs/combo-labs/README.md) |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
@@ -74,9 +75,10 @@ son laboratorios y no se tocan a la ligera.
 
 ## Laboratorios
 
-Hay dos vivos, los dos bajo `protocol-labs/`: `hero-labs/` (la primera pantalla,
-decidida — queda H2 como alternativa) y `opening-labs/` (tres aperturas completas
-con superficie, sin decidir — es el que está en curso). La regla que gobierna a
+Hay tres vivos, todos bajo `protocol-labs/`: `hero-labs/` (la primera pantalla,
+decidida — queda H2 como alternativa), `opening-labs/` (tres aperturas completas
+con superficie, sin decidir) y `combo-labs/` (qué va debajo de cada hero: cinco
+propuestas para las secciones 2 y 3, sin decidir — es el que está en curso). La regla que gobierna a
 cualquiera: **un laboratorio alimenta una ruta de comparación, ninguna página real
 lo importa, y si una versión gana se COPIA** a la carpeta de la página que la
 reciba — no se importa desde ahí. Y cuando se copia, la del lab se borra: dos
