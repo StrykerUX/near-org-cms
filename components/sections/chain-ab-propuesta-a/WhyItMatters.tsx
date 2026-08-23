@@ -6,8 +6,9 @@ import BentoGrid, { BentoCard } from "@/components/primitives/BentoGrid";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { WHY_IT_MATTERS } from "@/components/sections/chain-abstraction-proposals/content";
 
-// Tercer estilo para esta sección (ni las filas en escalera de la primera
-// copia, ni las 3 columnas de la segunda): bento asimétrico, reusando
+// Tercer estilo para esta sección — los otros dos (filas en escalera y 3
+// columnas) eran de las propuestas que se archivaron, ver
+// `docs/labs-archivados.md`: bento asimétrico, reusando
 // `BentoGrid`/`BentoCard` — el primitivo ya existente para justo este
 // patrón ("una card ancha + una cuadrada + una barra de ancho completo",
 // documentado en su propio archivo). Mismo copy e íconos de siempre

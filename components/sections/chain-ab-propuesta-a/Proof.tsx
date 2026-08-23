@@ -54,7 +54,7 @@ const STAT_META = PROOF_STATS.map((s) => ({
 }));
 
 // ── El gráfico de growth trajectory ──────────────────────────────────────
-// Traído de la copia 4 (pedido explícito): barras verticales de punta
+// Traído de la propuesta B (pedido explícito): barras verticales de punta
 // redondeada, con el mismo espíritu "waveform ascendente" que un gráfico
 // de audio. Reemplaza al stepper de 3 hitos con flechas que vivía acá —
 // las etiquetas del gráfico ya marcan esos mismos tres milestones, así
@@ -62,7 +62,7 @@ const STAT_META = PROOF_STATS.map((s) => ({
 // milestone, la misma que usan las barras.
 const W = 520;
 const H = 160;
-// Más ancho que el 24 de la copia 4 a propósito: las etiquetas de hito se
+// Más ancho que el 24 de la propuesta B a propósito: las etiquetas de hito se
 // centran sobre su punto (`-translate-x-1/2`), y el primero y el último
 // caen justo en `PAD_X` y `W - PAD_X`. Con 24 eso es 4.6% y 95.4%, así que
 // media etiqueta quedaba afuera del área dibujada — medido en vivo, el
@@ -229,7 +229,7 @@ export default function Proof() {
   return (
     <section ref={rootRef} className="bg-cream py-20 lg:py-28">
       <Container className="flex flex-col gap-16">
-        {/* Mismo tratamiento que la copia 2. El salto después de "for" es
+        {/* El salto después de "for" es
             a mano: la partición natural caía por el guión de "cross-chain"
             ("Already the rails for cross-" / "chain value"), que parte la
             palabra al medio y se lee mal. El `<br />` va oculto abajo de
@@ -239,7 +239,7 @@ export default function Proof() {
             oculto. El texto vive acá y no en `content.ts` por lo que
             explica `components/sections/README.md`: un titular con
             `<br />` y `<Accent>` no entra en un string plano, y
-            `PROOF_HEADLINE` lo comparten las cuatro copias.
+            `PROOF_HEADLINE` lo comparten las dos propuestas.
 
             `<Accent>` es el tratamiento del sitio para acentuar un tramo
             de un heading sans — Kepler itálica, con la corrección óptica
@@ -266,7 +266,7 @@ export default function Proof() {
             `overflow-visible` puede empujar la pista más allá de su
             fracción si no se le fija piso en 0. */}
         <div className="grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center">
-          {/* Variante propia de esta copia: en vez de un grid de bloques,
+          {/* Variante propia de esta propuesta: en vez de un grid de bloques,
               una LISTA — cada stat es un renglón donde el número y el
               label comparten línea de base ("$20B+ — All-time cross-chain
               volume"), apilados los 4 — más editorial/documento que panel
@@ -274,7 +274,7 @@ export default function Proof() {
               llevaba `divide-y` entre renglones y `border-y` arriba y
               abajo; ahora la separación la da sola el `gap`, y por eso
               cada renglón tampoco necesita ya su `py-5`. `text-h3` (techa
-              en 2.5rem, la más chica de las 4 propuestas): en un renglón
+              en 2.5rem, la escala más chica que se probó): en un renglón
               de lectura como este, un número grande no calza — tiene que
               pesar como una palabra más de la frase, no como un
               titular. */}
@@ -291,7 +291,7 @@ export default function Proof() {
             ))}
           </div>
 
-          {/* El gráfico de barras traído de la copia 4, sin card ni marca
+          {/* El gráfico de barras traído de la propuesta B, sin card ni marca
               de agua — solo el label y las barras. `data-growth-intro` va
               ARRIBA del gráfico como bloque normal, no absoluto adentro:
               las etiquetas de milestone ya ocupan el tope del wrapper y

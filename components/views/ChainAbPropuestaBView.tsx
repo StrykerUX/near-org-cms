@@ -1,7 +1,7 @@
-import Hero from "@/components/sections/chain-ab-homepage-refined-4/Hero";
-import WhyItMatters from "@/components/sections/chain-ab-homepage-refined-4/WhyItMatters";
-import StickyScrollCapabilities from "@/components/sections/chain-ab-homepage-refined-4/StickyScrollCapabilities";
-import Proof from "@/components/sections/chain-ab-homepage-refined-4/Proof";
+import Hero from "@/components/sections/chain-ab-propuesta-b/Hero";
+import WhyItMatters from "@/components/sections/chain-ab-propuesta-b/WhyItMatters";
+import StickyScrollCapabilities from "@/components/sections/chain-ab-propuesta-b/StickyScrollCapabilities";
+import Proof from "@/components/sections/chain-ab-propuesta-b/Proof";
 
 // Vuelta a la regla de oro: sistema visual estrictamente del homepage real
 // (`/prototype/homepage-update`) — sin referencias externas, y composición
@@ -15,7 +15,7 @@ import Proof from "@/components/sections/chain-ab-homepage-refined-4/Proof";
 // (Hero, Why it matters, Capabilities sticky-scroll, Proof); el resto de la
 // página (Complete Picture, Forward Turn, Builders CTA) todavía no se
 // construye.
-export default function ChainAbHomepageRefined4View() {
+export default function ChainAbPropuestaBView() {
   return (
     <main className="flex flex-col bg-cream">
       <Hero />

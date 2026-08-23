@@ -201,9 +201,9 @@ export default function Hero() {
     return () => mm.revert();
   }, []);
 
-  // Scope 2: título y subtítulo entran juntos al cargar, sin scroll — mismo
-  // criterio que la copia 2: acá no hay reemplazo por scroll, los dos textos
-  // conviven siempre, uno abajo a la izquierda y el otro abajo a la derecha.
+  // Scope 2: título y subtítulo entran juntos al cargar, sin scroll. Acá no
+  // hay reemplazo por scroll: los dos textos conviven siempre, uno abajo a
+  // la izquierda y el otro abajo a la derecha.
   const introRef = useMotionScope<HTMLElement>(({ q, motionOk }) => {
     const heading = q("[data-hero-heading]")[0];
     const items = q("[data-hero-item]");

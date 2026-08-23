@@ -248,12 +248,12 @@ export default function Proof() {
         {/* Vuelta atrás sobre la ronda pasada: esto no es un "divisor"
             aparte (se saca la regla+kicker "At a glance" y la línea de
             copy que la acompañaba), es parte de la misma sección de
-            Proof. Variante propia de esta copia (ya la más despojada de
-            las 4): en vez de un grid de 4 bloques grandes, una fila
-            compacta tipo ficha — valor y label en línea, separados por
-            `divide-x` — más angosta y acorde al minimalismo ya
-            establecido acá. `text-h3` (techa en 2.5rem, la más chica de
-            las 4 propuestas) en vez de `text-display`/`text-statement`:
+            Proof. Variante propia de esta propuesta, la más despojada de
+            las que se probaron: en vez de un grid de 4 bloques grandes,
+            una fila compacta tipo ficha — valor y label en línea,
+            separados por `divide-x` — más angosta y acorde al minimalismo
+            ya establecido acá. `text-h3` (techa en 2.5rem, la escala más
+            chica que se probó) en vez de `text-display`/`text-statement`:
             ninguna de las dos bajaba lo suficiente, y en un renglón
             compacto como este un número grande desentona más todavía. */}
         <div

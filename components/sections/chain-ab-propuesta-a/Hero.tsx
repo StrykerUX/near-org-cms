@@ -13,7 +13,7 @@ import { HERO_B } from "@/components/sections/chain-abstraction-proposals/conten
 import { CHAINS } from "@/components/sections/chain/chainContent";
 
 // ── El campo de chains — grid denso con las cajas de texto recortadas ──────
-// Mismo acomodo de texto y mismo campo que la copia 4 (título arriba a la
+// Mismo acomodo de texto y mismo campo que la propuesta B (título arriba a la
 // izquierda, texto abajo a la derecha, grid denso con las dos cajas de
 // texto recortadas por descarte) — pedido explícito de traer ese mismo
 // efecto acá, la única diferencia real es que esta variante mantiene el
@@ -25,7 +25,7 @@ const COLS = 16;
 const ROWS = 11; // grid denso — de sobra para que no se note ningún hueco
 
 // Cajas a evitar. Aproximan dónde caen el título y el párrafo — se
-// reajustan a ojo si hace falta, mismo criterio que la copia 4.
+// reajustan a ojo si hace falta, mismo criterio que la propuesta B.
 type Rect = { x0: number; y0: number; x1: number; y1: number };
 const TITLE_BOX: Rect = { x0: 0, y0: 0, x1: 69, y1: 50 };
 const TEXT_BOX: Rect = { x0: 55, y0: 74, x1: 100, y1: 100 };
@@ -79,10 +79,10 @@ const REVEAL_DURATION = 0.7;
 
 // ── La luciérnaga — solo opacidad, sin intercambio de posición ─────────────
 // Sin efecto hover (nunca lo tuvo esta sección, a diferencia de la vieja
-// versión de la copia 4): cada chain parpadea independiente, en su propio
+// versión de la propuesta B): cada chain parpadea independiente, en su propio
 // lugar, opacidad de reposo → 0 → opacidad de reposo. Lote grande y con
 // tiempo real apagada (`FIREFLY_HOLD`) para que se note — mismos valores ya
-// afinados en la copia 4.
+// afinados en la propuesta B.
 const FIREFLY_MIN = 16;
 const FIREFLY_RANGE = 16;
 const FIREFLY_FADE_OUT = 0.5;

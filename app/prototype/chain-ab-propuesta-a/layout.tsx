@@ -14,7 +14,7 @@ import PrototypeMotionProvider from "@/components/site/providers/PrototypeMotion
 // progreso ya viene adelantado — el diagrama y el texto llegan medio
 // dibujados/a mitad de camino ANTES de que la sección visualmente toque el
 // borde superior del viewport, en vez de arrancar en cero justo ahí.
-export default function ChainAbHomepageRefined4Layout({
+export default function ChainAbPropuestaALayout({
   children,
 }: {
   children: React.ReactNode;
