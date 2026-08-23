@@ -18,6 +18,16 @@ import { CHAPTERS } from "@/components/sections/about/aboutContent";
 // history, and lifting it off the cream is what separates the two registers
 // without drawing a box around it.
 //
+// ── Why there are no thumbnails in the rows ────────────────────────────────
+// A contact sheet down the index is the obvious move, and it was tried. Two
+// things break it. A `MediaFrame` prints its own brief — that is the whole
+// reason it is not a grey box — and at two columns wide on a 1024px screen the
+// brief is five lines of mono inside a 117px box, so the index stops being
+// scannable exactly where it was supposed to be fastest. And this section is
+// apparatus: eight thumbnails would make it a second, worse version of the
+// ledger below, which files all eight frames properly and at usable widths.
+// The index stays type, which is what an index is.
+//
 // ── Plain `<a>`, and no smooth scroll ──────────────────────────────────────
 // These are fragment links inside the current document, not navigations, so
 // `next/link` has nothing to do here — the repo's rule about `<Link>` is about

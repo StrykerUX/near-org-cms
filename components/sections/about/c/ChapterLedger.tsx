@@ -2,7 +2,9 @@
 
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import { CHAPTERS, type AboutChapter } from "@/components/sections/about/aboutContent";
+import ArchiveSlot from "@/components/sections/about/ArchiveSlot";
+import ChapterFigure from "@/components/sections/about/ChapterFigure";
+import { CHAPTERS, FIGURES, type AboutChapter } from "@/components/sections/about/aboutContent";
 
 // §3 of variant C — the ledger.
 //
@@ -25,8 +27,41 @@ import { CHAPTERS, type AboutChapter } from "@/components/sections/about/aboutCo
 // prose lasts and releases at the next chapter — the header of a ledger row,
 // behaving like one. It is `position: sticky` in CSS with no ScrollTrigger
 // anywhere near it; nothing here is pinned.
+//
+// ── The archive: five in the ledger column, three across the record ────────
+// This is the dense variant, so most of the archive is filed rather than
+// exhibited: the frame sits under the marker, in the sticky left column, and
+// the eight rows read down the page as a contact sheet beside the history.
+// That is the right register for a register — but eight of them is a strip, and
+// a strip down one edge is wallpaper.
+//
+// So three of them break the other way and take the full record column, at the
+// width of the prose they belong to: the whiteboard, the slide, and the last
+// panorama. They are the three chapters where the asset is evidence a reader is
+// meant to look AT rather than note the existence of, and they are spaced far
+// enough apart (rows 3, 5 and 8) that the break never becomes the pattern.
+//
+// The two drawn figures always take the record column. A diagram whose whole
+// job is to be read faster than the paragraph beside it cannot be filed at a
+// quarter width.
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * Which column each chapter's archive frame is filed in. See the note above —
+ * this is a sequence decision, which is why it is a table and not a rule about
+ * the asset's proportion.
+ */
+const FILED = [
+  "left", // 2017 · the paper
+  "left", // 2018 · the founders
+  "record", // 2018-2020 · the whiteboard
+  "left", // 2021 · Rainbow Bridge
+  "record", // 2023 · the slide
+  "left", // 2024 · the card
+  "left", // 2025 · the phones
+  "record", // 2026 · now
+] as const;
 
 /**
  * One chapter. A component rather than a `map` in the parent because each row
@@ -35,6 +70,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
  */
 function LedgerRow({ chapter, index }: { chapter: AboutChapter; index: number }) {
   const ref = useScrollReveal<HTMLElement>({ start: "top 82%" });
+  const filed = FILED[index];
+  const hasFigure = chapter.id in FIGURES;
 
   return (
     <article
@@ -52,6 +89,12 @@ function LedgerRow({ chapter, index }: { chapter: AboutChapter; index: number })
         <p data-reveal className="mt-6 max-w-[30ch] text-body-sm-mono text-ink-soft text-pretty">
           {chapter.marker}
         </p>
+
+        {filed === "left" && (
+          <div data-reveal className="mt-10">
+            <ArchiveSlot id={chapter.id} />
+          </div>
+        )}
       </div>
 
       <div className="col-span-12 mt-10 lg:col-span-8 lg:col-start-5 lg:mt-0">
@@ -70,6 +113,21 @@ function LedgerRow({ chapter, index }: { chapter: AboutChapter; index: number })
             </p>
           ))}
         </div>
+
+        {/* Evidence before explanation. The sharding chapter carries both, and
+            the order matters there: the photograph of the whiteboard, then the
+            drawing that is what the whiteboard was trying to say. */}
+        {filed === "record" && (
+          <div data-reveal className="mt-14">
+            <ArchiveSlot id={chapter.id} />
+          </div>
+        )}
+
+        {hasFigure && (
+          <div data-reveal>
+            <ChapterFigure id={chapter.id} className="mt-14" />
+          </div>
+        )}
 
         {chapter.note && (
           <aside data-reveal className="mt-10 border-t border-rule pt-6">

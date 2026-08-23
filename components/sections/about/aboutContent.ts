@@ -192,3 +192,111 @@ export type AboutChapter = {
   readonly body: readonly string[];
   readonly note: { readonly label: string; readonly body: string } | null;
 };
+
+/**
+ * The archive: one asset per chapter, and what has to be produced for it.
+ *
+ * ── Why the work order is the label ───────────────────────────────────────
+ *
+ * This is the one page of the set whose material certainly exists somewhere —
+ * the paper, the two founders, the whiteboard, the Rainbow Bridge screen, the
+ * slide where Chain Abstraction got its name. None of it is in the repo, so
+ * every layout renders a `MediaFrame`, and a `MediaFrame` prints its own label
+ * under the reserved box. That label is read by two people who are not the same
+ * person: the reader, who learns what will be there, and whoever has to go find
+ * it. Written as "Photo" it fails both. Written as a brief it works for both,
+ * which is why these are sentences and not titles.
+ *
+ * ── Why `shape` is here and placement is not ───────────────────────────────
+ *
+ * `shape` is a fact about the asset: a page of a paper is portrait, a whiteboard
+ * is a panorama, an announcement card is a square. Deciding it once here is what
+ * keeps the same photograph from being a portrait in one layout and a letterbox
+ * in another — and it is also what stops the eight frames from becoming eight
+ * identical 16/9 slots stacked down the page, which is a template rather than a
+ * composition.
+ *
+ * WHERE each frame lands — margin, prose column, full plate, page bleed — is
+ * composition, so it lives with each layout, in the same way `TONES` lives in
+ * `AboutBView` and not here.
+ */
+export const ARCHIVE = {
+  paper: {
+    label:
+      "Attention Is All You Need, page one — screenshot of the arXiv PDF, full page with the author list visible, uncropped",
+    spec: "1200×1600 · PNG",
+    shape: "3/4",
+  },
+  problem: {
+    label:
+      "Illia Polosukhin and Alexander Skidanov, 2018 — the two founders together, any NEAR AI archive frame from before the pivot",
+    spec: "1600×1200 · JPG",
+    shape: "4/3",
+  },
+  sharding: {
+    label:
+      "The sharding whiteboard — photograph of an architecture diagram of the period, or a scan of the design notebook, drawing legible edge to edge",
+    spec: "2400×1030 · JPG",
+    shape: "21/9",
+  },
+  unifying: {
+    label:
+      "Rainbow Bridge, 2021 — full browser capture of the transfer interface as it shipped, browser chrome included",
+    spec: "2560×1440 · PNG",
+    shape: "16/9",
+  },
+  "chain-abstraction": {
+    label:
+      "The slide where Chain Abstraction was named, 2023 — keynote frame, or the diagram from the original announcement post",
+    spec: "2400×1350 · PNG",
+    shape: "16/9",
+  },
+  ai: {
+    label:
+      "Chain Signatures on mainnet, 2024 — the announcement card, or an explorer capture of the first cross-chain signature",
+    spec: "1400×1400 · PNG",
+    shape: "1/1",
+  },
+  intents: {
+    label:
+      "Wallets shipping Intents, 2025 — three phone captures of the same cross-chain flow, mounted as one image",
+    spec: "1080×1440 · PNG",
+    shape: "3/4",
+  },
+  now: {
+    label:
+      "Confidential Intents and the agent runtime, 2026 — current NEAR AI / IronClaw product capture, or the TEE render",
+    spec: "2400×960 · PNG",
+    shape: "5/2",
+  },
+} as const;
+
+/**
+ * The two drawn figures, keyed by the chapter they belong to.
+ *
+ * Two, and not eight. A figure per chapter turns a history into a manual, and
+ * six of these chapters make claims a drawing cannot say faster than the
+ * sentence already does. These two can:
+ *
+ *   `sharding` — the paragraph spends four lines explaining that work is
+ *     partitioned across parallel subsets instead of every node doing all of
+ *     it. The drawing says it at a glance.
+ *   `ai` — the page's whole shape, which is a circle: they built a network
+ *     because the models were not ready, and the models arrived needing the
+ *     network. Prose has to say that in two sentences and a reader has to hold
+ *     both. Two lines converging holds it for them.
+ *
+ * The caption is not a title. `Figure` prints it under the drawing and it is
+ * the thing that had to be writable for the figure to be worth drawing: if the
+ * only sentence available is "diagram of sharding", the drawing shows nothing.
+ */
+export const FIGURES = {
+  sharding: {
+    caption:
+      "One boundary around all twelve, or four boundaries around three each. The work does not change; how much of it can run at once does.",
+  },
+  ai: {
+    caption:
+      "The upper line is the models, and it stops in 2018. The detour it forced is the lower one. When the models come back, the two arrive at the same point — and keep going.",
+  },
+} as const;
