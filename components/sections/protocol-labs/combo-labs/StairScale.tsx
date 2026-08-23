@@ -104,13 +104,33 @@ const TONES: Record<"dark" | "light", StairTone> = {
   },
 };
 
-export default function StairScale({ tone = "dark" }: { tone?: "dark" | "light" } = {}) {
+// ── La prop `proof`: si la escalera se monta o no ─────────────────────────
+//
+// Las variantes claras la apagan. No es una preferencia visual: sus heroes
+// llevan las seis cifras asomando por el borde inferior de la pantalla
+// (`ProofPeek`), así que la escalera las mostraba por segunda vez a dos
+// pantallas de distancia. Era la tensión que este archivo tenía anotada sin
+// resolver, y se resolvió por el lado del asomo — que llega antes y es el que
+// hace el trabajo de anunciar que la página sigue.
+//
+// La versión oscura la conserva, porque su hero no trae cifras: ahí la escalera
+// es la única aparición de la evidencia y quitarla dejaría la página sin ella
+// hasta el acto.
+//
+// Con `proof` en false lo que queda es «Built for AI scale» sola, y entonces
+// este componente ya no aporta un tono: la sección 3 es blanca en los dos casos.
+export default function StairScale({
+  tone = "dark",
+  proof = true,
+}: { tone?: "dark" | "light"; proof?: boolean } = {}) {
   const t = TONES[tone];
   const numbers = useCountUp<HTMLDListElement>({ stagger: 0.1, start: "top 85%" });
   const points = useScrollReveal<HTMLDivElement>({ y: 24, stagger: 0.12 });
 
   return (
     <>
+      {proof && (
+      <>
       {/* ── La escalera ────────────────────────────────────────────────────── */}
       {/* Sigue en el color del hero: el corte con la sección 3 lo marca el cambio
           de valor, y el corte con el hero, el filete superior. Ningún degradé
@@ -141,6 +161,8 @@ export default function StairScale({ tone = "dark" }: { tone?: "dark" | "light" 
           </dl>
         </Container>
       </section>
+      </>
+      )}
 
       {/* ── Built for AI scale, tres bloques que alternan ───────────────────── */}
       <section className="bg-background text-foreground">

@@ -86,6 +86,7 @@ uniform float u_drift;      // deriva temporal
 uniform float u_layers;     // cuántas capas cruzan el campo
 uniform float u_seam;       // ancho de la juntura entre capas
 uniform float u_seamLift;   // cuánto aclara esa juntura
+uniform float u_dither;     // amplitud del dither sobre el índice de la rampa
 
 uniform vec3  u_c0;         // luz
 uniform vec3  u_c1;
@@ -118,6 +119,22 @@ vec2 flowDir(vec2 p) {
   float c = cos(sw);
   float s = sin(sw);
   return mat2(c, -s, s, c) * radial;
+}
+
+// Dither ordenado de Bayer 4x4, calculado con aritmética en vez de una tabla.
+//
+// Se usa ORDENADO y no ruido blanco: a la misma amplitud, el patrón ordenado
+// rompe el banding con bastante menos energía, porque distribuye los errores de
+// cuantización de forma regular en vez de dejar que se agrupen por azar. Ruido
+// blanco al nivel necesario para matar una banda ancha ya se ve como suciedad;
+// esto no se ve en absoluto.
+float bayer2(vec2 a) {
+  a = floor(a);
+  return fract(a.x / 2.0 + a.y * a.y * 0.75);
+}
+
+float bayer4(vec2 a) {
+  return bayer2(0.5 * a) * 0.25 + bayer2(a);
 }
 
 vec3 ramp(float t) {
@@ -167,7 +184,10 @@ void main() {
   // La capa fina no se suma cruda: se centra en cero y se pondera. Sumada cruda
   // subiría el nivel medio del campo y aclararía la zona que tiene que cerrar en
   // verde profundo.
-  float fine = (fbm(q * u_scale * 3.4 + 11.3, 3) - 0.5) * u_detail * det;
+  // Dos octavas y no tres: con el buffer a resolución plena esta capa cuesta el
+  // triple que antes, y la tercera octava cae por debajo del píxel en casi toda
+  // la pantalla — se estaba pagando detalle que no llega a verse.
+  float fine = (fbm(q * u_scale * 3.4 + 11.3, 2) - 0.5) * u_detail * det;
   float f = base + fine;
 
   // La juntura entre capas: el campo pierde densidad y aparece un filo CLARO.
@@ -190,7 +210,23 @@ void main() {
   // marca más las estrías sin desplazar el nivel general de luz.
   float dev = (f - 0.5) * u_contrast;
 
-  vec3 col = ramp(clamp(grad + dev * u_gradMix + u_lift, 0.0, 1.0));
+  float coord = clamp(grad + dev * u_gradMix + u_lift, 0.0, 1.0);
+
+  // Dither sobre el ÍNDICE de la rampa, antes de mapear a color.
+  //
+  // Un degradé que cruza la pantalla entera reparte 256 niveles de 8 bits sobre
+  // miles de píxeles, así que cada nivel ocupa una franja ancha y las fronteras
+  // entre franjas se ven como bandas. Es banding de cuantización y no tiene nada
+  // que ver con la resolución del buffer — a resolución plena se ve igual.
+  //
+  // La amplitud NO es 1/256. El índice recorre 0..1 en cuatro tramos, y cada
+  // tramo cubre la distancia de color entre dos paradas de la rampa: con paradas
+  // separadas por ~40 niveles, un nivel son ~0.006 de índice, no 0.004. Un
+  // dither calculado sobre 1/256 se queda corto por casi la mitad, que es
+  // exactamente por qué el banding sobrevivió al primer intento.
+  coord += (bayer4(gl_FragCoord.xy) - 0.5) * u_dither;
+
+  vec3 col = ramp(clamp(coord, 0.0, 1.0));
 
   // Grano cuantizado en el tiempo: un grano que corre más rápido que la imagen
   // se lee como ruido de compresión y no como emulsión.

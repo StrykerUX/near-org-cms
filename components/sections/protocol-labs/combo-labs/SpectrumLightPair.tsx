@@ -95,7 +95,7 @@ const LAYERFLOW_UNIFORMS = {
   // cuadro en los tonos claros.
   u_gradGamma: 1.55,
   u_gradMix: 0.36,
-  u_grain: 0.028,
+  u_grain: 0.032,
   // Lento. Es todo el movimiento que tiene la pantalla.
   u_drift: 0.035,
 
@@ -105,6 +105,10 @@ const LAYERFLOW_UNIFORMS = {
   u_layers: 9.0,
   u_seam: 0.16,
   u_seamLift: 0.2,
+
+  // Un nivel de 8 bits medido sobre el índice, no sobre el color: ver la nota
+  // del shader sobre por qué no es 1/256.
+  u_dither: 0.007,
 
   // De la luz a la sombra. Mismo recorrido que la home, con el rango recortado
   // para que el texto en tinta se sostenga encima.
@@ -137,6 +141,22 @@ export function LayersHero() {
       tag="combo-layerflow"
       fallback="#eef0e4"
       tone="light"
+      // Buffer a resolución plena, contra el 0.6 que trae `GlSurface`. Aquel
+      // valor está calibrado para superficies sin bordes —el follaje de la home
+      // es blur puro y lo que se pierde al escalar no se ve—, y ésta tiene
+      // estructura: nueve capas con su juntura y estrías finas. A 0.6 cada borde
+      // diagonal muestra escalones, y el grano se cuantiza en bloques de dos
+      // píxeles, con lo que deja de hacer de dither y el degradé bandea.
+      //
+      // Cuesta 2.8x en píxeles. Se compensa en parte bajando una octava del
+      // detalle fino, que a resolución plena caía por debajo del píxel.
+      renderScale={1}
+      // 1:1 con la pantalla. El 1.75 que trae `GlSurface` obliga a un reescalado
+      // fraccionario en cualquier display a dpr 2 — la interpolación reparte
+      // cada píxel del buffer entre uno y dos de pantalla según dónde caiga, así
+      // que el suavizado no es uniforme y los bordes diagonales quedan
+      // escalonados de forma irregular. Con 2 no hay resampling en absoluto.
+      maxDpr={2}
       // Velo de legibilidad, plano y sólo al pie: esta superficie tiene mucho
       // más recorrido tonal que Haze, y el bloque de cuerpo y salida cae sobre
       // la zona donde las estrías todavía tienen contraste. No llega al borde
@@ -149,26 +169,23 @@ export function LayersHero() {
   );
 }
 
-// La sección 2 y 3, iguales para las dos. La escalera en claro: mismo layout que
-// la versión oscura, con el filete de cada escalón en `--green-ink` porque el
-// menta no llega a 3:1 sobre crema y un filete de 1px en ese verde desaparece —
-// que es justo la pieza que cuelga los escalones entre sí.
+// Lo que va debajo del hero en las dos claras: «Built for AI scale», y nada más.
 //
-// ── El asomo repite las cifras, y hay que decidirlo ───────────────────────
+// ── Por qué NO va la escalera de cifras ───────────────────────────────────
 //
-// Los dos heroes llevan `ProofPeek` al pie: las seis cifras cortadas por el
-// borde de la pantalla. Eso las deja DOS veces en las tres primeras pantallas —
-// asomando arriba y otra vez, grandes, en la escalera.
+// Porque las cifras ya aparecieron. Los dos heroes llevan `ProofPeek` al pie —
+// las seis cortadas por el borde de la pantalla, subiendo de a una al
+// scrollear—, así que la escalera las mostraba por segunda vez a dos pantallas
+// de distancia.
 //
-// Queda a la vista a propósito en vez de taparlo, porque hay dos salidas y la
-// elección no es obvia:
+// De las dos salidas posibles se tomó ésta: el asomo se queda con la evidencia y
+// la escalera se va. El asomo llega antes, hace el trabajo de anunciar que la
+// página sigue, y desarrollar las mismas seis cifras dos veces le quitaba a la
+// primera aparición justamente lo que la hace funcionar.
 //
-//   · que la escalera baje el peso de la cifra y suba el de la nota, o sea que
-//     pase de mostrar los datos a DESARROLLARLOS —lo que hace `SustainedScale`
-//     con h2—, o
-//   · que el asomo muestre otra cosa que las seis cifras.
-//
-// Sin decidir. Mirarla scrolleando es lo que dice cuál de las dos.
+// La versión oscura (`/prototype/protocol-combo/c`) conserva la escalera: su
+// hero no trae cifras, y ahí es la única aparición de la evidencia antes del
+// acto.
 export default function SpectrumLightPair() {
-  return <StairScale tone="light" />;
+  return <StairScale tone="light" proof={false} />;
 }

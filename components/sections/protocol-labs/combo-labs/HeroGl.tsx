@@ -48,6 +48,17 @@ export type HeroGlProps = {
   veil?: string;
   footer?: React.ReactNode;
   peek?: string;
+  /**
+   * Resolución del buffer como fracción del canvas. `GlSurface` usa 0.6 por
+   * defecto y esa cifra NO es universal: vale para superficies sin bordes, donde
+   * lo que se pierde al escalar no se ve. Una superficie con estructura —capas,
+   * junturas, estrías finas— escalada desde 0.6 muestra escalones en cada borde
+   * diagonal, y además arruina el grano: cuantizado a bloques de dos píxeles
+   * deja de hacer de dither y el degradé vuelve a bandear.
+   */
+  renderScale?: number;
+  /** Tope de densidad del buffer. 2 deja la superficie 1:1 con la pantalla. */
+  maxDpr?: number;
 };
 
 const TONES = {
@@ -76,6 +87,8 @@ export default function HeroGl({
   veil,
   footer,
   peek,
+  renderScale,
+  maxDpr,
 }: HeroGlProps) {
   const cfg = TONES[tone];
 
@@ -90,6 +103,8 @@ export default function HeroGl({
         uniforms={uniforms}
         tag={tag}
         fallback={fallback}
+        renderScale={renderScale}
+        maxDpr={maxDpr}
         className="absolute inset-0 z-0 h-full w-full"
       />
 
@@ -106,8 +121,22 @@ export default function HeroGl({
         />
       )}
 
+      {/* El bloque de texto sube ~10svh cuando hay footer.
+          
+          Es padding INFERIOR y no un margen superior ni un `justify` distinto, y
+          eso importa por dónde queda el asomo: la sección alinea sus hijos al
+          final, así que el padding empuja al texto hacia arriba y deja la fila de
+          cifras exactamente donde estaba — pegada al borde de la pantalla, que es
+          la única posición en la que el asomo funciona. Con un margen superior o
+          centrando el bloque, el texto se movería y el asomo también.
+          
+          Los 2.5rem de base se conservan sumados: son la separación mínima entre
+          la salida y las cifras, y sin ellos el CTA quedaría pegado al asomo a
+          cualquier altura de pantalla en que el 10svh se quede corto. */}
       <Container
-        className={`relative z-20 grid-ds items-end gap-y-8 ${footer ? "pb-10" : "pb-16"}`}
+        className={`relative z-20 grid-ds items-end gap-y-8 ${
+          footer ? "pb-[calc(2.5rem+10svh)]" : "pb-16"
+        }`}
       >
         <div className="col-span-full flex flex-col gap-6 lg:col-span-7">
           <p className={`uppercase text-eyebrow-mono ${cfg.eyebrow}`}>{HERO.eyebrow}</p>
