@@ -59,8 +59,15 @@ dar por terminado un cambio.
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` — la landing de marketing, no un índice |
-| `LatestUpdates`, `UpdatesList` | `HomepageUpdateView` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado. Sobrevivieron a la limpieza porque la homepage viva las sigue montando. |
-| `homepage-update/*` | `HomepageUpdateView` | `/prototype/homepage-update` — **la línea de diseño viva**. Única superviviente de nueve homepages; ver `docs/labs-archivados.md` para las ocho archivadas. Tiene su propio [README](./homepage-update/README.md). |
+| `LatestUpdates`, `UpdatesList` | `HomepageAView` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado. Sobrevivieron a la limpieza porque la homepage viva las sigue montando. |
+| `homepage-a/*` | `HomepageAView` | `/prototype/homepage-a` — **la línea de diseño viva**, y lo que monta la home real. Tiene su propio [README](./homepage-a/README.md). |
+| `homepage-shared/*` | `HomepageBView`, `HomepageCView` | La base que comparten las dos exploraciones vivas. Nació como duplicado de `homepage-a` con ruta propia; la ruta se borró y la carpeta quedó. Ver su [README](./homepage-shared/README.md). |
+| `homepage-fold/*` | `HomepageBView`, `HomepageCView` | El hero que se pliega —«Own your world.» → «Own ⬡ world.»— y la obertura del stack. [README](./homepage-fold/README.md). |
+| `homepage-tuck/*` | `HomepageCView` | El hero que se recoge en una caja. |
+| `foundation/*` | `FoundationAView`, `FoundationBView`, `FoundationCView` | `/prototype/foundation-a\|b\|c` — **tres layouts de la misma página**, no tres páginas. Copy compartida en `foundationContent.ts`. [README](./foundation/README.md). |
+| `economics/*` | `EconomicsAView`, `EconomicsBView`, `EconomicsCView` | `/prototype/economics-a\|b\|c` — idem, copy en `economicsContent.ts`. [README](./economics/README.md). |
+| `about/*` | `AboutAView`, `AboutBView`, `AboutCView` | `/prototype/about-a\|b\|c` — idem, copy en `aboutContent.ts`. [README](./about/README.md). |
+| `community/*` | `CommunityAView`, `CommunityBView`, `CommunityCView` | `/prototype/community-a\|b\|c` — idem, copy en `communityContent.ts`. [README](./community/README.md). |
 | `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
@@ -70,6 +77,31 @@ dar por terminado un cambio.
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
 son laboratorios y no se tocan a la ligera.
+
+## El patrón A/B/C: una copy, tres layouts
+
+`foundation/`, `economics/`, `about/` y `community/` comparten una forma que las
+distingue tanto de las páginas reales como de los laboratorios de antes:
+
+```
+components/sections/<page>/
+  <page>Content.ts   ← TODA la copy. La leen las tres variantes.
+  a/  b/  c/         ← tres layouts de la MISMA página
+  README.md
+```
+
+Que la copy viva en un solo módulo no es prolijidad: es lo que hace honesta la
+comparación. Con tres carpetas de secciones y tres copias del texto, la primera
+corrección de estilo entra en una sola y las tres dejan de ser comparables —
+cualquier diferencia que se vea podría ser de layout o de redacción, y no hay
+forma de saber cuál. Con un módulo, **toda** diferencia entre A, B y C es de
+layout, por construcción.
+
+No son laboratorios en el sentido de `protocol-labs/`: no hay una ruta índice
+que las compare, cada variante es una página completa que se abre y se enseña.
+Cuando el equipo elija una, se promueve a la ruta real de `(site)` —
+`/near-foundation`, `/economics`, `/about`, `/community`, hoy `StubView`— y las
+otras dos se borran junto con su carpeta.
 
 ## Laboratorios
 
@@ -89,7 +121,9 @@ versiones de lo mismo. El detalle de qué se descartó está en
 Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
 `transition-labs`, `newsletter-labs`, `mural-labs`, `footer-labs`) y ocho
 homepages en paralelo. Se archivaron todos el 2026-08-21 al quedar
-`homepage-update` como la única línea viva.
+`homepage-a` como la única línea viva. Las exploraciones que siguieron —seis
+rutas de la `e` a la `k`— se podaron el 2026-08-23 hasta las dos que quedan,
+renombradas `b` y `c`.
 
 Están completos en el tag `v-pre-limpieza` y en la rama `Respaldo`, y
 **`docs/labs-archivados.md`** dice qué era cada uno y cómo traerlo de vuelta.

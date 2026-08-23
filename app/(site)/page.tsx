@@ -104,7 +104,7 @@ const UNLINKED: string[] = [
 // y cada una es el rollback de una mitad de ab7. Cuando ab7 se confirme, las
 // dos bajan con v4.
 // Vacío tras la limpieza: las seis rutas que destacaba (hero-alt y las cinco
-// homepages viejas) se archivaron. `homepage-update` no va acá — con una sola
+// homepages viejas) se archivaron. `homepage-a` no va acá — con una sola
 // línea de diseño viva, "destacada" no distingue nada.
 const FEATURED: string[] = [];
 

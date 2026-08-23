@@ -7,7 +7,7 @@ import Container from "@/components/primitives/Container";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { STACK_INTRO as INTRO } from "@/components/sections/homepage-e/nearStackContent";
+import { STACK_INTRO as INTRO } from "@/components/sections/homepage-shared/nearStackContent";
 
 // La obertura del stack: el título llega antes que la sección, sobre crema, y
 // el negro lo alcanza ahí.
@@ -283,7 +283,18 @@ export default function StackOverture({ mode, travel = TRAVEL }: StackOverturePr
       // con `z-10` encima, lo que tapaba era la escena entera. Se veía el
       // encabezado del stack desaparecer y volver una pantalla después, sin
       // ninguna causa visible.
-      className="relative z-10 -mb-[100svh] h-[calc(var(--ov-travel)+100svh)]"
+      // `pointer-events-none`, y es la TERCERA pieza del solape.
+      //
+      // El mismo `-mb-[100svh]` + `z-10` que deja a esta sección tapando el
+      // primer viewport del stack la deja también capturándole el puntero, y
+      // eso no se ve: la escena de abajo se pinta bien —el hijo pegado ya se
+      // apagó— pero no responde. El arte no toma hover y las fichas de NEAR
+      // Protocol y NEAR Intents no se pueden clicar, sin nada en pantalla que
+      // explique por qué.
+      //
+      // Se puede apagar entera porque acá no hay nada con lo que interactuar:
+      // dos copias de un título y dos paneles de color. Es una transición.
+      className="pointer-events-none relative z-10 -mb-[100svh] h-[calc(var(--ov-travel)+100svh)]"
     >
       {/* `overflow-hidden` sobre el hijo pegado y nunca sobre la sección: un
           ancestro con overflow distinto de `visible` se vuelve el contenedor de

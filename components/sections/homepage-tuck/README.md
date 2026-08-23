@@ -1,6 +1,6 @@
 # `homepage-tuck` — el hero que se recoge
 
-Montado en `/prototype/homepage-k`. Rige el contrato general de
+Montado en `/prototype/homepage-c`. Rige el contrato general de
 [`../README.md`](../README.md).
 
 ## Qué es

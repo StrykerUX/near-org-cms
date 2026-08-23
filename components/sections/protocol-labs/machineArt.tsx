@@ -20,7 +20,7 @@
 // se estaba mirando, que es exactamente al revés de para qué sirve un diagrama.
 //
 // El criterio nuevo, tomado del ensamble del stack de la homepage
-// (`homepage-update/stackAssembly.tsx`): **verde es lo activo, el wireframe es
+// (`homepage-a/stackAssembly.tsx`): **verde es lo activo, el wireframe es
 // la estructura que existe y no está encendida**, y el contraste entre los dos
 // es lo que cuenta la historia. Ahí donde antes había un símbolo, ahora hay un
 // ANTES y un DESPUÉS en el mismo cuadro:

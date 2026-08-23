@@ -12,7 +12,7 @@ import { NOISE_GLSL } from "@/components/sections/protocol-labs/gl/noise";
 //
 // ── De dónde sale ─────────────────────────────────────────────────────────
 //
-// Del motor del hero de la home (`homepage-update/gl/foliage.ts`), entero:
+// Del motor del hero de la home (`homepage-a/gl/foliage.ts`), entero:
 //
 //   · un **punto de fuga** fuera del canvas al que apuntan las estrías;
 //   · el campo **estirado** a lo largo de esa dirección, con la compresión

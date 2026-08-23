@@ -77,6 +77,8 @@ Lo que falta antes de que esto pueda pasar a página real:
   *igualar medidas no es igualar diseño*.
 - `components/sections/quantum/README.md` — el ritmo (claro/oscuro,
   fuerte/suave) que las tres respetan.
-- `components/sections/homepage-update/` — la línea de diseño viva de la
+- `components/sections/homepage-a/` — la línea de diseño viva de la
   homepage: crema, Kepler en los acentos, cubos isométricos, `CtaPill`,
-  `ArrowCircle`, y el objeto de card que usa «Built for AI scale».
+  `ArrowCircle`, el objeto de card que usa «Built for AI scale» y el criterio de
+  iluminación del ensamble del stack, que es el que siguen los seis diagramas
+  del acto.

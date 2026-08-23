@@ -20,7 +20,7 @@ import {
 // Tres columnas de contenido sobre la retícula de doce: el riel (1), el arte
 // (2–6) y el texto (8–12).
 //
-// El **riel** es el patrón del eje de `homepage-update/ProofDatum` girado: una
+// El **riel** es el patrón del eje de `homepage-a/ProofDatum` girado: una
 // línea con seis marcas donde la activa se enciende. Lo que aporta no es
 // decoración — es lo único que responde "cuántas van y cuántas faltan", que en
 // un tramo pegado de seis pantallas es la pregunta que el lector se hace y la

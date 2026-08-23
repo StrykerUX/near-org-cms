@@ -20,7 +20,7 @@ import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 // y ya costó encontrar sus tres trampas una vez. Copiarlo tres veces no da tres
 // versiones para elegir: da tres sitios donde el mismo error puede volver.
 //
-// El mismo criterio que `homepage-e/stackAssembly.tsx` aplica a su ensamble.
+// El mismo criterio que `homepage-a/stackAssembly.tsx` aplica a su ensamble.
 //
 // ── El contrato ───────────────────────────────────────────────────────────
 //
