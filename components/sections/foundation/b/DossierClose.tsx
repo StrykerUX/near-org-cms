@@ -19,6 +19,11 @@ import { CLOSING, HERO } from "@/components/sections/foundation/foundationConten
 // This is the variant's only ink ground. A filed document ends by being signed,
 // and the change of ground is that: the same measure, in the register of an
 // execution page rather than a clause.
+//
+// Its rail carries the document's name and nothing else, and that is one of the
+// two blocks on the page where an empty-ish rail is right rather than a miss:
+// an execution page has no clause data — it is where the clauses stop. The
+// other is the annex.
 export default function DossierClose() {
   const rootRef = useScrollReveal<HTMLElement>({ start: "top 76%" });
 
@@ -26,11 +31,11 @@ export default function DossierClose() {
     <section ref={rootRef} data-nav-dark className="bg-ink py-[16svh] text-cream">
       <Container>
         <div className="grid-ds gap-y-10 border-t border-white/12 pt-8">
-          <div data-reveal className="col-span-12 lg:col-span-3">
+          <div data-reveal className="col-span-12 lg:col-span-2">
             <p className="text-micro-mono uppercase text-cream/50">{HERO.eyebrow}</p>
           </div>
 
-          <div className="col-span-12 lg:col-span-8 lg:col-start-5">
+          <div className="col-span-12 lg:col-span-9 lg:col-start-4">
             <h2 data-reveal className="max-w-[12ch] text-h1 text-balance">
               NEAR belongs to <Accent display>you</Accent>
             </h2>

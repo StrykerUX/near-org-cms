@@ -16,6 +16,12 @@ import {
 // the ecosystem is a population with no beginning and no end. In a document the
 // same list is a schedule: enumerated, ruled, countable. Same names, same
 // refusal of the logo grid, opposite claim about what a list of names IS.
+//
+// This is one of the two blocks whose rail carries only its label. It is not an
+// oversight: the register material of an annex IS the annex, and the twelve
+// numbered entries are already set as one. Repeating a count or a heading in
+// the margin would be filling the rail for the sake of filling it, which is the
+// other way to lose the variant.
 const ENTRIES = ECOSYSTEM_NAMES.map((name, i) => ({
   name,
   index: String(i + 1).padStart(2, "0"),

@@ -8,16 +8,16 @@ import { PILLARS } from "@/components/sections/foundation/foundationContent";
 // read in order — what the Foundation IS, what it DOES and what it is FOR make
 // one sentence. Numbering them says out loud what that note asserts.
 //
-// The rail carries the number and nothing else. It was drafted with the
-// pillar's key in it as well ("NONPROFIT", "GROWTH"), which turned out to be
-// the heading repeated in a smaller face two columns to its left. Density in
-// this variant is spent where there is something to be dense ABOUT, which is
-// the Stiftung block; here it would only be texture.
+// The rail carries the number over the pillar's KEY (`id`), not its title. The
+// key is what a record is indexed by and it is not the heading in a smaller
+// face two columns to the left: "growth" against "Ecosystem growth",
+// "nonprofit" against "Nonprofit". Set in mono under the clause number it reads
+// as the entry's handle, which is exactly what `id` is.
 export default function DossierPillars() {
   return (
     <section className="bg-cream">
       {PILLARS.map((pillar) => (
-        <Clause key={pillar.id} clause={pillar.index}>
+        <Clause key={pillar.id} clause={pillar.index} label={pillar.id}>
           <div data-reveal className="grid-ds gap-y-5">
             <h2 className="col-span-12 max-w-[14ch] text-h3 lg:col-span-4 text-pretty">
               {pillar.title}

@@ -56,12 +56,28 @@ La página como el instrumento legal que describe: densa, de registro, con aire
 de documento archivado — pero sigue siendo el mismo sitio, no un PDF.
 
 **La decisión que la distingue: la retícula la impone un componente, no cada
-sección.** `Clause.tsx` es dueño del raíl angosto de la izquierda (mono:
-número de cláusula, etiqueta de sección, términos y valores) y del filete que
-cruza **las dos columnas**. Si cada bloque declarara sus propios `col-span`, el
-borde izquierdo del argumento se correría una columna en algún punto de la
-página y con eso se iría el efecto entero: un documento es un documento porque
-su medida no cambia nunca.
+sección.** `Clause.tsx` es dueño del raíl angosto de la izquierda —**2 columnas
+de 12**, que es lo que mide un margen— y del filete que cruza **las dos
+columnas**. Si cada bloque declarara sus propios `col-span`, el borde izquierdo
+del argumento se correría una columna en algún punto de la página y con eso se
+iría el efecto entero: un documento es un documento porque su medida no cambia
+nunca.
+
+**Y el raíl va lleno.** La columna ancha lleva el argumento; el raíl lleva los
+**datos** del documento, en mono. Bloque por bloque:
+
+| Bloque | Qué va en el raíl |
+|---|---|
+| `DossierHero` | Membrete: nombre + dos de los cuatro hechos legales |
+| `DossierPillars` | Número de cláusula sobre la **clave** del pilar (`id`) |
+| `StiftungInstrument` | Los **cuatro** `STIFTUNG_FACTS`, término sobre valor |
+| `CouncilClause` | Los dos cuerpos en orden de autoridad, con `COUNCIL.relation` en el tramo que los separa |
+| `OperationsClauses` | Etiqueta de sección; después, número de cláusula sobre la clave de cada actividad |
+| `EcosystemAnnex`, `DossierClose` | Solo la etiqueta — las dos excepciones, y están comentadas en el código |
+
+Un raíl vacío no se lee como el margen de un documento: se lee como una columna
+que nadie llenó. Si una sección tiene material de registro y termina en la
+columna ancha, la variante se queda sin motivo.
 
 **Y el contraste que la salva de ser aburrida: `DevolutionBreak`.** Es el único
 bloque sin raíl, sin número y sobre blanco —el único blanco de la página, que el
@@ -73,9 +89,9 @@ un solo registro con una variante gritada.
 
 Dos detalles que parecen repetición y no lo son:
 
-- El hero lleva **dos** de los cuatro hechos legales en el raíl y la sección del
-  Stiftung lleva **los cuatro** en tabla de filetes. Es la distinción que hace
-  cualquier documento entre su membrete y su anexo.
+- El hero lleva **dos** de los cuatro hechos legales y la sección del Stiftung
+  lleva **los cuatro**. Es la distinción que hace cualquier documento entre su
+  membrete y su anexo.
 - La numeración **reinicia** en `01` en las actividades. Los pilares y las
   actividades no son una lista de seis: tres son rangos y tres son deberes, y
   cada grupo tiene su propio encabezado, como un 2.1/2.2/2.3.
@@ -133,8 +149,9 @@ escena en vez de como la página hablándole al lector después.
 | Flechas saliendo de un centro (A) | Es la ilustración de la idea, no la idea; y además es el trabajo de la variante C, hecho mejor |
 | Una caja que se achica (A) | Una forma que se achica es una transición, no una medida: no hay contra qué leerla |
 | Una cuarta pata de la medida con etiquetas («Foundation» arriba, «Ecosystem» abajo) | El gesto tiene que leerse en tres segundos sin pedir explicación. Etiquetado deja de ser una escala y pasa a ser un gráfico |
-| El nombre clave del pilar en el raíl de B (`NONPROFIT`, `GROWTH`) | Era el mismo título repetido dos columnas más a la izquierda en un cuerpo más chico. La densidad de B se gasta donde hay algo sobre lo cual ser denso, que es el bloque del Stiftung |
-| Un diagrama del Council en B y en C | En B, la única ilustración de un documento que no tiene ninguna, haciendo un trabajo que las dos entradas fichadas ya hacen. En C, un segundo diagrama en la antesala de una figura de tres pantallas |
+| El raíl de B a 3 columnas (~450px a 1440) | A ese ancho deja de ser un margen: una entrada de dos líneas mono deja el resto de la columna vacía, y lo vacío es lo que se lee. Quedó en 2, y el ancho recuperado se lo lleva el argumento |
+| Los cuatro hechos legales en tabla de filetes dentro de la columna ancha (B) | Se leía bien solo, y estaba mal dos veces: dejaba en blanco el margen del bloque más denso de la página, y ponía los cuatro hechos en la misma columna que el párrafo que ya los explica, uno debajo del otro. En el margen hacen otro trabajo — el párrafo dice qué te cuesta un Stiftung, el margen dice qué **es** |
+| Un diagrama del Council en B y en C | En B, la única ilustración de un documento que no tiene ninguna: los dos cuerpos y la dirección entre ellos van fichados en el raíl, en mono. En C, un segundo diagrama en la antesala de una figura de tres pantallas |
 | Cerrar C en tinta | Ver arriba: el negro ya está gastado, y el final se leería como cola de la escena |
 
 ## La grilla de logos de dApps

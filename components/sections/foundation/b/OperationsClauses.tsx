@@ -12,6 +12,9 @@ import { OPERATIONS } from "@/components/sections/foundation/foundationContent";
 // This is also the only numbering on the page that is a genuine mandate: the
 // content module says the pillars' order is an argument, but these three are
 // what the treasury is actually spent on.
+//
+// Same rail convention as the pillars: number over key, the key being the
+// activity's `id` and not its title.
 export default function OperationsClauses() {
   return (
     <section className="bg-cream">
@@ -25,7 +28,7 @@ export default function OperationsClauses() {
       </Clause>
 
       {OPERATIONS.activities.map((activity) => (
-        <Clause key={activity.id} clause={activity.index}>
+        <Clause key={activity.id} clause={activity.index} label={activity.id}>
           <div data-reveal className="grid-ds gap-y-4">
             <h3 className="col-span-12 max-w-[16ch] text-h3 lg:col-span-4 text-pretty">
               {activity.title}
