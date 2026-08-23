@@ -93,7 +93,7 @@ export default function HomepageGView() {
           verdad; y la sección espera a que la descubran antes de animar. Las
           otras cuatro vistas siguen con la cortina: ver el docblock de
           `SectionReveal.tsx`. */}
-      <SectionReveal>
+      <SectionReveal settleTo="[data-stack-notes]">
         <ProofDatum />
       </SectionReveal>
       <CustomerStories />

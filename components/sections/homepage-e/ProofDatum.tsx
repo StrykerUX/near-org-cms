@@ -269,7 +269,16 @@ export default function ProofDatum() {
   return (
     <section
       ref={rootRef}
-      className="flex flex-col justify-center bg-background py-24 text-ink lg:py-28"
+      // `bg-cream` y no `bg-background`: el blanco puro se leía como una hoja
+      // pegada entre dos secciones crema. `--cream` es el papel de esta página
+      // —lo usan la que sigue y el `main` entero—, así que el eje y las seis
+      // marcas quedan sobre el mismo fondo que todo lo demás en vez de sobre un
+      // rectángulo más claro que se recorta contra sus vecinas.
+      //
+      // El aire crece porque esta sección es lo primero que se ve al salir del
+      // negro: llegar con las fichas pegadas al borde de arriba las convierte
+      // en la continuación de la transición en vez de en un respiro.
+      className="flex flex-col justify-center bg-cream py-32 text-ink lg:py-44"
     >
       {/* Sin `flex flex-col gap-10`: el `Container` tuvo dos hijos mientras el
           eyebrow "Built to" estaba arriba, y un gap entre un solo hijo y nada no

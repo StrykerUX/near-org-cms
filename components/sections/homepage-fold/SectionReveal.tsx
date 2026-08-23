@@ -28,12 +28,15 @@ import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 // abajo en vez de cerrarse. Detrás está la sección real, así que lo que el
 // recorte descubre es contenido y no pintura.
 //
-// Eso arregla el segundo problema solo, sin coordinar nada a mano: el mismo
-// componente que tapa es el que decide cuándo lo de abajo anima. Mientras el
-// velo cubre, la sección revelada está quieta en su estado inicial; cuando el
-// recorte ya descubrió lo suficiente, se le da paso. Es el patrón inverso al
-// que venía mordiendo —una sección animando a ciegas porque algo la tapaba— y
-// acá no puede ocurrir por construcción.
+// Y el componente envuelve a esa sección, así que puede decidir cuándo anima en
+// vez de dejarla adivinar. Es el patrón inverso al que venía mordiendo —una
+// sección animando a ciegas porque algo la tapaba— y acá no puede ocurrir por
+// construcción: quien tapa es quien da paso.
+//
+// El paso llega cuando la sección ASOMA, no cuando el velo se abre. Los dos
+// momentos parecen el mismo y están separados por medio viewport; atarlos fue
+// el error de la primera versión, y se veía como una franja de fondo vacío
+// subiendo sin nada dentro. Ver el trigger `entrance` más abajo.
 //
 // ── El velo no nace cerrado, nace CALZADO ───────────────────────────────────
 //
@@ -65,10 +68,14 @@ import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 // que usaba `EASE.curtain`: adelanta tanto que a un 13% del recorrido ya había
 // descubierto medio viewport.)
 //
-// `power2.in` va por debajo de la diagonal en todo el rango, así que el negro
+// `power3.in` va por debajo de la diagonal en todo el rango, así que el negro
 // RETIENE: la sección asoma por abajo y el velo la sostiene, cediendo más
 // despacio de lo que el scroll pide, hasta soltarla al final. El borde del
 // recorte deja de ser un panel que se quita y pasa a ser lo que se mira.
+//
+// Cuánto retiene es cosa de la curva y no del tramo — ver el docblock de
+// `span`. La cuártica sostiene ~170px de sección tapada en su punto más
+// fuerte; la cúbica, ~120. Es el número que hace que la cortina se lea alta.
 //
 // Y con el velo calzado, la curva puede permitirse ser marcada. El retén se
 // mide sobre lo que queda por descubrir —el 45% de arriba, no la pantalla
@@ -111,28 +118,53 @@ export function useRevealGate() {
   return useContext(RevealContext);
 }
 
-/**
- * Cuánto del gesto tiene que haber pasado para darle paso al contenido.
- *
- * Pronto, porque con el velo calzado la sección de abajo se ve desde el primer
- * frame: a un quinto del recorrido ocupa ya dos tercios de la pantalla, con sus
- * títulos dentro. Esperar más la haría entrar cuando ya no queda nada que
- * revelar, y el revelado y la entrada se leerían como dos gestos pegados en vez
- * de uno.
- */
-const OPEN_AT = 0.2;
-
 export type SectionRevealProps = {
+  /**
+   * Selector del bloque cuyo borde inferior marca el final del gesto. Es el
+   * último contenido del mundo del que se sale — acá, las dos notas del stack.
+   *
+   * Se ancla al BLOQUE y no a su sección a propósito: la sección lleva pegado
+   * su propio padding, así que tocarlo desincronizaría el punto sin que nadie
+   * se entere.
+   */
+  settleTo?: string;
+  /**
+   * A qué altura del viewport, en porcentaje desde arriba, tiene que estar ese
+   * borde cuando la cortina termina de abrirse. 20 = ya casi salió.
+   */
+  settleAt?: number;
   /**
    * Cuánto mide el tramo previo, en svh. Es también lo que dura el gesto: el
    * recorte empieza cuando el tramo toca el techo y termina cuando lo cruza
    * entero.
+   *
+   * ⚠️ Este número no es una calibración de gusto: gobierna las DOS cosas que
+   * están en tensión, y en direcciones opuestas.
+   *
+   *   · Es cuánto scroll negro hay entre lo de arriba y el revelado.
+   *   · Es el techo del retén. El velo solo puede ocultar lo que todavía no se
+   *     descubrió, y eso es exactamente `span / viewport`. Con 14svh, el velo
+   *     puede retener como mucho un 14% de pantalla — ninguna curva lo sube.
+   *
+   * O sea: pedirle a la cortina que cierre apenas el texto de arriba sale
+   * IMPLICA un gesto sutil. No hay ajuste que dé las dos cosas; lo que hay es
+   * dónde poner el punto.
+   *
+   * Y desde que el gesto se ancla al texto de arriba, subirlo tiene un efecto
+   * de más: empuja hacia abajo el punto en que la sección revelada asoma, que
+   * es donde el gesto ARRANCA — así que un tramo más alto da un recorrido más
+   * corto. El retén se recupera con la curva, no con este número.
    */
   span?: number;
   children: React.ReactNode;
 };
 
-export default function SectionReveal({ span = 45, children }: SectionRevealProps) {
+export default function SectionReveal({
+  span = 24,
+  settleTo,
+  settleAt = 20,
+  children,
+}: SectionRevealProps) {
   // El estado del velo y sus suscriptores viven en un ref y no en estado de
   // React a propósito: esto cambia con el scroll, y un re-render por frame para
   // un dato que solo consume un tween sería trabajo puro.
@@ -191,7 +223,8 @@ export default function SectionReveal({ span = 45, children }: SectionRevealProp
 
       const veil = q("[data-reveal-veil]")[0];
       const track = q("[data-reveal-track]")[0];
-      if (!veil || !track) return;
+      const content = q("[data-reveal-content]")[0];
+      if (!veil || !track || !content) return;
 
       scope.dataset.reveal = "on";
 
@@ -211,36 +244,82 @@ export default function SectionReveal({ span = 45, children }: SectionRevealProp
         if (!self.isActive) setOpen(self.progress >= 1, true);
       };
 
-      // Dónde nace el recorte: pegado al borde de la sección de abajo.
+      // El paso al contenido NO cuelga del velo, y esa separación es la que
+      // quita la espera.
       //
-      // Se mide en cada refresh y no una sola vez —de ahí el
-      // `invalidateOnRefresh` de abajo— porque los dos números que lo deciden
-      // cambian con la ventana. `max(0, …)` cubre el tramo más alto que el
-      // viewport: ahí la sección todavía no asoma y el velo sí nace cerrado.
-      const seam = () =>
-        Math.max(0, 1 - track.getBoundingClientRect().height / window.innerHeight) * 100;
+      // Colgado del wipe, el contenido esperaba a que el velo se encendiera —y
+      // el velo no puede encenderse hasta que lo de arriba termina de salir—.
+      // Pero la sección de abajo asoma por el borde inferior mucho antes que
+      // eso, y durante todo ese tramo se la veía VACÍA: su fondo, sin una sola
+      // de sus piezas, porque seguía esperando un permiso que llegaba medio
+      // viewport después. Eso es lo que se leía como quedarse esperando.
+      //
+      // Con trigger propio, el contenido entra en cuanto asoma. Lo que aparece
+      // por abajo ya se está construyendo, y el velo pasa a hacer solo lo suyo:
+      // retener el último tramo.
+      const entrance = ScrollTrigger.create({
+        trigger: content,
+        start: "top bottom",
+        end: "bottom top",
+        markers: DEBUG_MARKERS,
+        onEnter: () => setOpen(true),
+        onLeaveBack: () => setOpen(false),
+        onRefresh: (self) => {
+          // Nacer ya pasado es instantáneo; nacer a media entrada, no: ahí
+          // todavía hay alguien mirando cómo llega.
+          if (self.progress > 0) setOpen(true, !self.isActive);
+        },
+      });
+
+      // Dónde termina el gesto: cuando el borde inferior del ancla llega a la
+      // altura pedida. Se devuelve como posición absoluta de scroll y se
+      // recalcula en cada refresh (`invalidateOnRefresh`), porque los dos
+      // números que lo deciden se mueven con la ventana.
+      //
+      // Sin ancla, el gesto termina cuando la sección revelada llena la
+      // pantalla, que es el final natural.
+      const settle = () => {
+        const anchor = settleTo ? document.querySelector(settleTo) : null;
+        if (!anchor) return "bottom top";
+        return (
+          anchor.getBoundingClientRect().bottom +
+          window.scrollY -
+          (settleAt / 100) * window.innerHeight
+        );
+      };
 
       const wipe = gsap.fromTo(
         veil,
-        { clipPath: () => `inset(0% 0% ${seam()}% 0%)` },
+        // Cerrado: el velo cubre el viewport ENTERO al encenderse.
+        //
+        // Puede permitírselo porque enciende en el frame en que la sección de
+        // abajo todavía no asomó —no hay nada suyo que borrar— y porque lo que
+        // queda arriba va por encima de él: las notas del stack declaran
+        // `z-[3]` contra el `z-[2]` de acá. Sin ese par, un velo de pantalla
+        // completa se comería el último párrafo a media frase; con él, el texto
+        // viaja sobre la cortina y se va por arriba mientras el negro se retira
+        // por abajo.
+        { clipPath: "inset(0% 0% 0% 0%)" },
         {
           // El borde inferior sube hasta comerse el velo entero. `bottom` es el
           // tercer valor de `inset()`, y llevarlo a 100% deja el panel sin
           // altura — abierto del todo, sin que en ningún frame haya un borde
           // que no sea horizontal.
           clipPath: "inset(0% 0% 100% 0%)",
-          ease: "power2.in",
+          ease: "power3.in",
           scrollTrigger: {
-            trigger: track,
-            // Los dos bordes del gesto: `top top` es el frame en que lo de
-            // arriba termina de salir, y `bottom top` aquel en que la sección
-            // de abajo llena la pantalla. El recorrido es el alto del tramo.
-            start: "top top",
-            end: "bottom top",
+            trigger: content,
+            // Los dos bordes del gesto:
+            //
+            //   start — la sección de abajo asoma por el borde inferior. Antes
+            //           de eso no hay nada que revelar, y el velo cerrado no
+            //           tapa nada suyo porque todavía no hay nada suyo.
+            //   end   — el ancla llega a la altura pedida. Ver `settle`.
+            start: "top bottom",
+            end: settle,
             scrub: true,
             invalidateOnRefresh: true,
             markers: DEBUG_MARKERS,
-            onUpdate: (self) => setOpen(self.progress >= OPEN_AT),
             // El encendido va en ESTE trigger y no en uno más ancho, y la
             // diferencia no es cosmética.
             //
@@ -259,6 +338,7 @@ export default function SectionReveal({ span = 45, children }: SectionRevealProp
       return () => {
         wipe.scrollTrigger?.kill();
         wipe.kill();
+        entrance.kill();
         gsap.set(veil, { clearProps: "clipPath,visibility" });
         delete scope.dataset.reveal;
         // Red de seguridad: si esta escena se revierte y el velo desaparece
@@ -269,7 +349,7 @@ export default function SectionReveal({ span = 45, children }: SectionRevealProp
         setOpen(true, true);
       };
     },
-    [setOpen]
+    [setOpen, settleTo, settleAt]
   );
 
   return (
@@ -286,7 +366,9 @@ export default function SectionReveal({ span = 45, children }: SectionRevealProp
         aria-hidden="true"
         className="bg-ink group-data-[reveal=on]/reveal:h-[var(--reveal-span)]"
       />
-      <RevealContext.Provider value={gate}>{children}</RevealContext.Provider>
+      <div data-reveal-content>
+        <RevealContext.Provider value={gate}>{children}</RevealContext.Provider>
+      </div>
       <div
         data-reveal-veil
         aria-hidden="true"
