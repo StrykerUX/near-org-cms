@@ -2,6 +2,9 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import { gsap } from "@/components/primitives/motion/gsapClient";
+import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
+import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { HERO_SURFACE_FRAG } from "@/components/sections/protocol-labs/a/heroSurface";
 import { hexToRgb } from "@/components/sections/protocol-labs/gl/color";
 import GlSurface from "@/components/sections/protocol-labs/opening-labs/GlSurface";
@@ -22,6 +25,65 @@ import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 // la derecha, la mitad superior entera para la superficie) y las seis cifras
 // vuelven a asomar por el borde inferior.
 //
+// ── El hero se recoge al scrollear ────────────────────────────────────────
+//
+// El mismo gesto que `/prototype/homepage-k` (`homepage-tuck/HeroTuck`): de
+// ocupar la pantalla entera a quedar guardado en una tarjeta con esquinas
+// blandas, y de ahí la página sigue. No desaparece nada ni se transforma nada —
+// lo único que se mueve es el ENCUADRE.
+//
+// Se copian sus tres constantes y su curva para que sea literalmente el mismo
+// gesto y no una versión parecida; el razonamiento largo está en aquel archivo.
+// Lo que importa acá:
+//
+// **Es `clip-path` y no un `transform`.** Un `scale` encogería el CONTENIDO: la
+// superficie se vería alejada, como si la cámara retrocediera. Lo que se busca
+// es lo contrario — que la ventana se cierre mientras lo que hay dentro sigue a
+// su tamaño. `inset()` hace eso, es interpolable de punta a punta (incluido su
+// `round`) y **no toca el layout**, que acá importa el doble: el canvas de
+// `GlSurface` no re-mide ni recompila su shader, cosa que un cambio de tamaño
+// real dispararía en cada frame del scroll.
+//
+// **El `overflow-hidden` va en el hijo pegado, nunca en la sección.** Un
+// ancestro con overflow distinto de `visible` se vuelve el contenedor de scroll
+// del sticky y éste deja de pegarse, en silencio.
+//
+// **Con `prefers-reduced-motion` se aplica el estado FINAL**, la tarjeta ya
+// recogida. Un hero a sangre que promete un gesto que nunca llega es peor que
+// uno que no lo promete.
+//
+// ── La copy sube con el borde, o se corta ─────────────────────────────────
+//
+// Ésta es la diferencia real con `homepage-k`, y no es un detalle: allá el
+// titular está CENTRADO en el encuadre, así que un recorte del 11% arriba y
+// abajo no lo toca nunca. Acá la copy está anclada al BORDE INFERIOR, a `pb-16`
+// de él — y el recorte se come justamente ese 11% de abajo, o sea bastante más
+// que los 4rem del padding. El titular quedaba partido por la mitad.
+//
+// La copy sube exactamente lo que sube el borde: `TUCK.y` por ciento del alto
+// del viewport. Así la distancia entre el texto y el filo de la tarjeta es la
+// misma al principio y al final, y el bloque nunca entra en la zona recortada.
+//
+// Va como `y` en píxeles calculados y no como una clase con `svh`: es un
+// `transform`, o sea que no dispara layout en ningún frame del scrub. Se
+// resuelve por función para que `invalidateOnRefresh` lo recalcule en cada
+// resize en lugar de dejar clavado el alto del primer render.
+//
+// Lo que NO se compensa es el recorte lateral (`TUCK.x`, 6% por lado). El
+// `Container` ya centra con un ancho máximo, así que en desktop sus márgenes son
+// mayores que ese 6% y no hay nada que cortar; el `scale` de la copy ayuda con
+// el resto. En pantallas angostas conviene mirarlo — si ahí muerde, la salida es
+// bajar `TUCK.x`, no meterle padding lateral a la copy.
+
+/** Cuánto scroll cuesta el recogido. */
+const TRAVEL = "80svh";
+
+/** Cuánto margen le queda a la tarjeta, en % del viewport. */
+const TUCK = { y: 11, x: 6 } as const;
+
+/** El radio de la tarjeta, en px. Constante: acá nada se escala. */
+const RADIUS = 34;
+
 // ── El hero no lleva cifras ───────────────────────────────────────────────
 //
 // Las tuvo, asomando cortadas por el borde inferior: el hero medía
@@ -93,59 +155,156 @@ const SURFACE = {
 };
 
 export default function Hero() {
+  const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
+    const q = gsap.utils.selector(scope) as (s: string) => HTMLElement[];
+    const mm = gsap.matchMedia();
+
+    const shut = `inset(${TUCK.y}% ${TUCK.x}% round ${RADIUS}px)`;
+
+    mm.add(MQ.reduce, () => {
+      const frame = q("[data-tuck-frame]")[0];
+      const copy = q("[data-tuck-copy]")[0];
+      if (!frame) return;
+
+      gsap.set(frame, { clipPath: shut });
+      if (copy) gsap.set(copy, { scale: 0.9, y: -window.innerHeight * (TUCK.y / 100) });
+
+      return () => gsap.set([frame, ...(copy ? [copy] : [])], { clearProps: "all" });
+    });
+
+    mm.add(MQ.motion, () => {
+      const frame = q("[data-tuck-frame]")[0];
+      const copy = q("[data-tuck-copy]")[0];
+      if (!frame) return;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: scope,
+          start: "top top",
+          // `bottom bottom` es el último frame en que la escena está pegada. Con
+          // `bottom top` el recogido terminaría un viewport más tarde, o sea con
+          // la tarjeta ya fuera de cuadro.
+          end: "bottom bottom",
+          scrub: true,
+          invalidateOnRefresh: true,
+          markers: DEBUG_MARKERS,
+        },
+      });
+
+      // El encuadre se cierra. `power2.inOut`: los primeros píxeles de scroll son
+      // exploratorios y un hero que salta al primer roce se siente frágil; el
+      // final frena, que es como se apoya algo que tiene peso.
+      tl.fromTo(
+        frame,
+        { clipPath: "inset(0% 0% round 0px)" },
+        { clipPath: shut, ease: "power2.inOut", duration: 0.72 },
+        0
+      );
+
+      // La copy hace dos cosas a la vez, y sólo una es estética.
+      //
+      // El `scale` acompaña, pero mucho menos que la caja: la tarjeta pierde
+      // ~22% de alto y ella sólo un 10%. Encogiéndola a la par se leería como un
+      // zoom-out del conjunto, que es justo la lectura que el `clip-path` viene
+      // a evitar.
+      //
+      // El `y` es obligatorio: sube lo mismo que sube el borde inferior del
+      // encuadre, o el texto queda partido por el recorte. Ver la nota de
+      // arriba.
+      if (copy) {
+        tl.fromTo(
+          copy,
+          { scale: 1, y: 0 },
+          {
+            scale: 0.9,
+            y: () => -window.innerHeight * (TUCK.y / 100),
+            ease: "power2.inOut",
+            duration: 0.72,
+          },
+          0
+        );
+      }
+
+      return () => {
+        tl.scrollTrigger?.kill();
+        tl.kill();
+        gsap.set([frame, ...(copy ? [copy] : [])], { clearProps: "all" });
+      };
+    });
+
+    return () => mm.revert();
+  }, []);
+
   return (
-    <section className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden pt-[var(--site-header-block)] text-foreground">
-      <GlSurface
-        fragment={HERO_SURFACE_FRAG}
-        uniforms={SURFACE}
-        tag="protocol-hero"
-        fallback="#eef0e4"
-        // Buffer a resolución plena, contra el 0.6 que trae `GlSurface`. Aquel
-        // valor está calibrado para superficies SIN bordes —el follaje de la
-        // home es blur puro y lo que se pierde al escalar no se ve— y ésta tiene
-        // estructura: nueve capas con su juntura y estrías finas. A 0.6 cada
-        // borde diagonal muestra escalones, y el grano se cuantiza en bloques de
-        // dos píxeles, con lo que deja de hacer de dither y el degradé bandea.
-        renderScale={1}
-        // 1:1 con la pantalla. El tope de 1.75 obliga a un reescalado
-        // FRACCIONARIO en cualquier display a dpr 2: la interpolación reparte
-        // cada píxel del buffer entre uno y dos de pantalla según dónde caiga,
-        // así que el suavizado no es uniforme y los bordes diagonales quedan
-        // escalonados de forma irregular.
-        maxDpr={2}
-        className="absolute inset-0 z-0 h-full w-full"
-      />
+    // La sección mide el recorrido MÁS una pantalla. No lleva `overflow` —va en
+    // el hijo pegado—, pero sí conserva el `isolate`: es lo que impide que los
+    // z-index de adentro compitan con el header fijo.
+    <section
+      ref={rootRef}
+      style={{ "--tuck-travel": TRAVEL } as React.CSSProperties}
+      className="relative isolate h-[calc(var(--tuck-travel)+100svh)] bg-cream text-foreground"
+    >
+      <div className="sticky top-0 h-svh overflow-hidden">
+        {/* La ventana. Todo lo que se ve del hero vive acá dentro y se recorta
+            con ella —la superficie, el velo y la copy a la vez—, que es lo que
+            hace que se lean como una sola pieza guardándose. */}
+        <div
+          data-tuck-frame
+          className="absolute inset-0 flex flex-col justify-end pt-[var(--site-header-block)] text-foreground"
+        >
+          <GlSurface
+            fragment={HERO_SURFACE_FRAG}
+            uniforms={SURFACE}
+            tag="protocol-hero"
+            fallback="#eef0e4"
+            // Buffer a resolución plena, contra el 0.6 que trae `GlSurface`. Aquel
+            // valor está calibrado para superficies SIN bordes —el follaje de la
+            // home es blur puro y lo que se pierde al escalar no se ve— y ésta tiene
+            // estructura: nueve capas con su juntura y estrías finas. A 0.6 cada
+            // borde diagonal muestra escalones, y el grano se cuantiza en bloques de
+            // dos píxeles, con lo que deja de hacer de dither y el degradé bandea.
+            renderScale={1}
+            // 1:1 con la pantalla. El tope de 1.75 obliga a un reescalado
+            // FRACCIONARIO en cualquier display a dpr 2: la interpolación reparte
+            // cada píxel del buffer entre uno y dos de pantalla según dónde caiga,
+            // así que el suavizado no es uniforme y los bordes diagonales quedan
+            // escalonados de forma irregular.
+            maxDpr={2}
+            className="absolute inset-0 z-0 h-full w-full"
+          />
 
-      {/* Velo de LEGIBILIDAD, plano y sólo al pie. El bloque de cuerpo y salida
-          cae sobre la zona donde las estrías todavía tienen contraste. No llega
-          al borde inferior con el color de la sección siguiente — eso sería un
-          degradé de transición, y acá el corte entre secciones se ve. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent 0%, transparent 46%, rgba(247,247,239,0.55) 74%, rgba(247,247,239,0.72) 100%)",
-        }}
-      />
+          {/* Velo de LEGIBILIDAD, plano y sólo al pie. El bloque de cuerpo y salida
+              cae sobre la zona donde las estrías todavía tienen contraste. No llega
+              al borde inferior con el color de la sección siguiente — eso sería un
+              degradé de transición, y acá el corte entre secciones se ve. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-10"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, transparent 46%, rgba(247,247,239,0.55) 74%, rgba(247,247,239,0.72) 100%)",
+            }}
+          />
 
-      <Container className="relative z-20 grid-ds items-end gap-y-8 pb-16">
-        <div className="col-span-full flex flex-col gap-6 lg:col-span-7">
-          <p className="uppercase text-eyebrow-mono text-gray-intermediate">{HERO.eyebrow}</p>
-          <h1 className="text-h1 text-balance">
-            {HERO.lead}
-            <br />
-            <Accent display>{HERO.accent}</Accent>
-          </h1>
+          <Container data-tuck-copy className="relative z-20 grid-ds items-end gap-y-8 pb-16">
+            <div className="col-span-full flex flex-col gap-6 lg:col-span-7">
+              <p className="uppercase text-eyebrow-mono text-gray-intermediate">{HERO.eyebrow}</p>
+              <h1 className="text-h1 text-balance">
+                {HERO.lead}
+                <br />
+                <Accent display>{HERO.accent}</Accent>
+              </h1>
+            </div>
+            <div className="col-span-full flex flex-col gap-6 lg:col-start-9 lg:col-span-4">
+              <p className="max-w-[36ch] text-body-lg text-ink-soft text-pretty">{HERO.body}</p>
+              <CtaPill href={HERO.cta.href} tone="filled" external>
+                {HERO.cta.label}
+              </CtaPill>
+            </div>
+          </Container>
+
         </div>
-        <div className="col-span-full flex flex-col gap-6 lg:col-start-9 lg:col-span-4">
-          <p className="max-w-[36ch] text-body-lg text-ink-soft text-pretty">{HERO.body}</p>
-          <CtaPill href={HERO.cta.href} tone="filled" external>
-            {HERO.cta.label}
-          </CtaPill>
-        </div>
-      </Container>
-
+      </div>
     </section>
   );
 }

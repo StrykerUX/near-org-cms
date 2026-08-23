@@ -46,7 +46,7 @@ export default function ScaleClaim() {
   const ref = useScrollReveal<HTMLDivElement>({ y: 20, stagger: 0.08 });
 
   return (
-    <section className="bg-background text-foreground">
+    <section className="bg-cream text-foreground">
       <Container className="py-28 lg:py-36">
         <div ref={ref} className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* La primera columna. En tablet ocupa las dos de la fila para no
