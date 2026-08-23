@@ -57,7 +57,12 @@ const TONE = {
 } as const;
 
 export type MediaFrameProps = {
-  /** Qué recurso va acá. Es el encargo, no un título: «Foto del meetup de Lisboa». */
+  /**
+   * Qué recurso va acá. Es el encargo, no un título decorativo.
+   *
+   * **En inglés**, como todo lo que este componente imprime: se ve en la página
+   * hasta que llegue el asset. «Lisbon meetup — room shot», no «Foto».
+   */
   label: string;
   /** Especificación técnica opcional: «1600×900 · JPG», «SVG monocromo». */
   spec?: string;
@@ -110,9 +115,15 @@ export default function MediaFrame({
     // `role="img"` + `aria-label`: para un lector de pantalla esto ES la imagen
     // que todavía no está, y anunciar su encargo es más útil que el silencio de
     // un div decorativo.
+    //
+    // El texto va en INGLÉS igual que el resto de lo que se renderiza: el sitio
+    // está en inglés, y un anuncio en español en medio de una página en inglés
+    // es exactamente el mismo error que un pie de figura en español. Los
+    // comentarios de este archivo son otra cosa — se leen en el editor, no en la
+    // página.
     <div
       role="img"
-      aria-label={`${label} — recurso pendiente`}
+      aria-label={`${label} — asset pending`}
       className={`relative w-full ${RATIO[ratio]} ${t.field} ${className}`}
     >
       <div className={t.mark} aria-hidden="true">

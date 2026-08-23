@@ -24,7 +24,14 @@ const TONE = {
 } as const;
 
 export type FigureProps = {
-  /** Qué muestra la figura. Una frase, no una etiqueta. */
+  /**
+   * Qué muestra la figura. Una frase, no una etiqueta.
+   *
+   * **En inglés.** El pie NO es material de trabajo que después se reemplaza:
+   * es contenido permanente de la página, se imprime bajo el dibujo y se queda
+   * ahí para siempre. En un sitio en inglés, un pie en español se lee como un
+   * error. (Los comentarios del código son otra cosa: se leen en el editor.)
+   */
   caption: string;
   /** «Fig. 01» — solo si las figuras de la sección forman una serie. */
   index?: string;
