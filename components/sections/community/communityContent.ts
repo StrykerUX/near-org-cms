@@ -509,3 +509,54 @@ export const MEDIA = {
     },
   },
 } as const;
+
+/**
+ * §9 — the chrome the instrument layout prints on its panels.
+ *
+ * Only `b/` reads this. A `Panel` carries two mono strings in its top corners —
+ * the identity of the apparatus on the left, its reading on the right — and
+ * both are rendered text, so they live here with the rest of the copy rather
+ * than as literals inside six sections. Same precedent as `CHANNEL_GROUPS` and
+ * `CITIES`, which only `c/` reads.
+ *
+ * ── `state.meta` is load-bearing and is not a joke ─────────────────────────
+ *
+ * A dark panel with four figures in it looks like a dashboard, and a dashboard
+ * implies a live feed. These four numbers are placeholders (see `STATS`) and
+ * even the real ones will be a quarterly count, so the panel says so out loud
+ * in the corner where a real instrument would print its status. It is the
+ * cheapest possible defence against the one misreading this treatment invites.
+ */
+export const INSTRUMENT = {
+  /** The routing index in the hero. Labels come from each section's eyebrow. */
+  index: "Jump to",
+  state: {
+    label: "Community · state",
+    meta: "Declared figures · not telemetry",
+  },
+  schedule: {
+    label: "Calendar",
+    meta: "In feed order · next entries",
+  },
+  /**
+   * Not a panel label: the three channel groups each carry their own, so this
+   * one runs as a footnote under the row. It is the line that keeps "eight" a
+   * checkable claim — if a ninth channel is ever added without being filed into
+   * a group, this is the sentence that goes wrong first.
+   */
+  channels: {
+    meta: "Eight destinations · each filed once",
+  },
+  doors: {
+    label: "Get involved · four inputs",
+    meta: "Each one ends in a link",
+  },
+  faq: {
+    label: "Questions",
+    meta: "Open one",
+  },
+  close: {
+    label: "Community · close",
+    meta: "Pick a door",
+  },
+} as const;
