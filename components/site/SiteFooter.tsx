@@ -164,7 +164,7 @@ const GROUPS: { title: string; links: FooterLink[] }[] = [
       { label: "NEAR Foundation", href: "/near-foundation" },
       { label: "Ecosystem", href: "/ecosystem" },
       { label: "Community", href: "/community" },
-      { label: "Governance", href: null },
+      { label: "Governance", href: "/governance" },
     ],
   },
   // Esta columna no está en el tab Footer del sitemap doc: ahí lo legal vive
