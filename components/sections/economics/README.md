@@ -13,10 +13,16 @@ la misma. Eso es deliberado y es lo que hace comparable la comparación: lo que
 cambia entre `/prototype/economics-a`, `-b` y `-c` es el LAYOUT, nunca las
 palabras. Si algo no cierra, se corrige ahí primero.
 
-Se agregó **un solo bloque** al módulo de copy: `PROJECTION`, las etiquetas del
-gráfico de la variante B. Está explicado más abajo, y su docstring en el propio
-módulo dice por qué la honestidad de ese gráfico tenía que ser DATO y no
-caption.
+Al módulo de copy se le agregaron tres cosas, y ninguna es un texto nuevo:
+
+| | Qué es | Quién lo usa |
+|---|---|---|
+| `PROJECTION` | Las etiquetas del gráfico de convergencia, con `label`, `axisNote` y `note` — las condiciones bajo las cuales esa figura tiene permiso de existir | `b/ProjectionPanel` |
+| `FLYWHEEL.steps[].intake` / `.emits` | Qué entra a cada etapa y qué sale. **La entrada de cada paso es literalmente la salida del anterior**, y la salida del cuarto es la entrada del primero | `b/LoopBench` |
+| `FLYWHEEL.restart` | El quinto tiempo: la etiqueta y la frase del retorno | `b/LoopBench`, `c/AscentLoop` |
+
+Los tres tienen su docstring en el propio módulo explicando por qué son DATO y
+no algo escrito dentro de un componente.
 
 ## La página, y la única cosa que las tres tienen que resolver
 
@@ -33,13 +39,16 @@ variantes:
 Las tres gastan ahí su dispositivo estructural, y lo gastan de tres formas
 distintas — que es toda la comparación:
 
-| | Variante | Cómo impide leerlos fuera de orden |
-|---|---|---|
-| `a/` | **Four-beat loop** | Los cuatro pasos son cuatro posiciones de UN trazo. El anillo se dibuja de nodo en nodo con el scroll, y no hay forma de ver el tercero sin haber visto llegar al segundo |
-| `b/` | **Ledger** | Cada asiento declara su ENTRADA y su SALIDA, y la entrada de cada uno es la salida del anterior. El encadenamiento está en los datos, no en un dibujo |
-| `c/` | **Descent** | Un paso por pantalla. El paso 3 es inalcanzable sin atravesar el 2, porque hay un viewport de tinta en el medio |
+| | Variante | Estilo | Cómo impide leerlos fuera de orden |
+|---|---|---|---|
+| `a/` | **Four-beat loop** | Editorial | Los cuatro pasos son cuatro posiciones de UN trazo. El anillo se dibuja de nodo en nodo con el scroll, y no hay forma de ver el tercero sin haber visto llegar al segundo |
+| `b/` | **The bench** | Instrumento | Cuatro estaciones de un conducto cerrado, con un riel de actos que declara cuántas son. Además, la lectura `In` de cada etapa es la `Out` de la anterior: el encadenamiento está en los datos |
+| `c/` | **The ascent** | Escenario | Una sola travesía que sube de izquierda a derecha sobre el terreno. Leerlos fuera de orden es leer la ruta al revés, y el dibujo lo hace obviamente incorrecto |
 
-## `a/` — Four-beat loop
+## `a/` — Four-beat loop · editorial
+
+**NO SE TOCA.** Es la variante de la primera pasada y es la vara de comparación:
+filete de 1px, fondo plano, sin cajas, tipografía primero.
 
 **La decisión:** el volante es una **escena pegada** y es el centro de gravedad
 de la página. Todo lo demás está calibrado para no competir con él — el hero es
@@ -54,76 +63,197 @@ termina su vuelta y frena es el diagrama de un ciclo; uno que se pasa de su
 propio arranque es el diagrama de un volante, que es lo que la copy afirma.
 
 Mecánica: `position: sticky` de CSS + un ScrollTrigger que solo LEE progreso
-(`stickyScene`), **nunca `pin: true`** — el razonamiento largo está en el README
-padre. El JSX renderiza el estado FINAL (todo dibujado) y la escena lo rebobina;
-sin JS, en móvil o con `prefers-reduced-motion` el lector recibe el anillo
-completo y cinco bloques apilados en orden.
+(`stickyScene`), **nunca `pin: true`**. El JSX renderiza el estado FINAL (todo
+dibujado) y la escena lo rebobina; sin JS, en móvil o con
+`prefers-reduced-motion` el lector recibe el anillo completo y cinco bloques
+apilados en orden.
 
-Progresión de fondo: crema, crema, **tinta**, blanco, crema. La tinta es el
-anillo —la única sección que se gana un corte duro— y el blanco son los
-productos, el único respiro y el único momento en que la página nombra dos cosas
-que existen. Volver a crema al final es el gesto del propio anillo a escala de
-página.
+Progresión de fondo: crema, crema, **tinta**, blanco, crema.
 
-## `b/` — Ledger
+## `b/` — The bench · instrumento
 
-**La decisión:** la economía como **cuenta corriente**. Denso, numérico, de
-registro. Es la variante para quien quiere ver los números y no la metáfora — y
-por eso el hero abre con el ÍNDICE de la página antes que con el argumento (los
-cuatro `eyebrow` leídos del módulo de copy, así que no pueden desincronizarse).
+**La decisión:** la economía como **banco de pruebas de una máquina**. La
+máquina existe, está corriendo, y cada sección es un aparato con su lectura. La
+página es oscura de punta a punta y su unidad de composición no es el párrafo,
+es el **panel**: un objeto con canto, etiqueta en la esquina y algo adentro que
+se mira.
 
-Mono en todas las etiquetas de dato. Los cuatro hechos son **filas de tabla** —
-índice, cifra, afirmación, cuerpo, siempre en las mismas cuatro posiciones — y
-los cuatro asientos del volante repiten esa forma.
+Monta el armazón [`shells/instrument/`](../shells/README.md) — `Panel`,
+`Readout`, `ActRail`, `Section` — sin variantes locales.
 
-**La circularidad vive en el margen.** No hay un segundo diagrama al costado
-explicando que la lista es un bucle: la salida del cuarto asiento deja la fila,
-dobla al margen izquierdo, sube por delante de los cuatro y vuelve a entrar en
-el primero. Son tres reglas de 1px con tres orígenes de transformación (fuera,
-arriba, adentro) y no un `<path>` SVG, porque la altura del riel es la que midan
-los cuatro asientos: un SVG estirado a una caja desconocida o distorsiona el
-grosor del trazo o exige una pasada de medición.
+### El sistema gráfico: un circuito con volumen
 
-**El gesto firmado es el gráfico** (`EmissionChart`): dos curvas a 1px —emisión
-y recompra— que convergen, dibujadas con `pathLength={100}` + `strokeDashoffset`,
-el mismo mecanismo sin plugins de `chain/ProofBand`. Las dos dibujan **a la vez
-y a la misma velocidad**: escalonadas, una llegaría al punto de encuentro y
-esperaría, y eso se lee como que una causa a la otra.
+El volante NO podía ser otro anillo. La variante A ya dibuja este bucle como un
+círculo de 1px sobre tinta, y repetirlo en una caja más oscura habría dejado a B
+como «la A pintada de negro», que es el único resultado que esta variante no
+puede tener.
 
-Fondos: crema, crema, **tinta** (el volante), crema (el gráfico), blanco (los
-dos productos), crema. El cierre es a propósito la sección más callada de la
-variante — un libro de registro cierra totalizando, no levantando la voz.
+Así que B dibuja la misma afirmación como **aparato**: los cuatro pasos son
+cuatro bloques que se paran sobre un plano, lo que los une es un **conducto con
+ancho** en vez de una línea, y lo que circula se ve adentro. Un anillo dice
+«ciclo» antes de decir qué se mueve; un ducto con algo adentro dice primero qué
+se mueve y deja que «ciclo» salga del hecho de que cierra. La geometría vive en
+[`b/circuit.ts`](./b/circuit.ts), con el razonamiento largo arriba.
 
-## `c/` — Descent
+**Deliberadamente NO es el campo de cubos isométricos de `/prototype/protocol-a`.**
+De protocol se toma la paleta y el peso, no las figuras — fue una decisión
+explícita del cliente: sistema gráfico nuevo por página.
 
-**La decisión:** editorial y grande. La página se lee **cayendo**. Cada paso del
-bucle es un panel de altura completa que se atraviesa, alternando crema y tinta,
-con su numeral colosal (`text-mural`, con su `@container` obligatorio) y una
-sola línea grande; el cuerpo va en una medida angosta al costado. El contraste
-entre una línea muy ancha y una columna muy angosta es todo el argumento
-tipográfico de la variante.
+### Las secciones
 
-**El retorno es una sección, no una frase al pie del panel 4.** En una página
-que se lee cayendo, «vuelve a empezar» tiene que ser un lugar al que se llega:
-el suelo vuelve a crema, la flecha apunta hacia arriba —la única de la página
-que lo hace— y el link lleva de verdad al ancla del primer panel.
+| Sección | Qué hace |
+|---|---|
+| `HeroBench` | El titular dentro de un panel, y en el pie del panel **la lista de etapas de la máquina** (los cuatro `short` leídos del módulo de copy, con las flechas y el retorno). Un instrumento declara sus etapas antes de correr. Server component, sin movimiento |
+| `FactBench` | Los cuatro hechos como **la cara del instrumento**: una banda de cuatro `Readout` a la misma altura, cada uno con su glifo en una placa hundida, y debajo —dentro del mismo panel— la fila de afirmaciones. `100%` es la única lectura encendida |
+| `LoopBench` | La escena firmada. Panel con retícula, figura a la izquierda, copy a la derecha, `ActRail` en el pie. Sticky + ScrollTrigger que solo lee progreso |
+| `ProjectionPanel` | El tercer tiempo del bucle, dibujado: las dos curvas convergiendo, enfrentadas a la captura del panel público de ingresos |
+| `EngineModules` | Los dos productos como **dos módulos del mismo aparato**: dos paneles a ancho completo, el arte alternando de lado |
+| `CenterSolid` | El activo como la pieza a la que llegan las tres líneas — y llegan a **tres caras del mismo sólido**, no a un punto |
 
-Dos cosas que parecen prolijas y romperían la variante:
+### Tres detalles de `LoopBench` que parecen decoración y no lo son
 
-- **Mover `FactRow` debajo de los paneles.** C gasta cuatro pantallas en una
-  metáfora antes de ofrecer algo verificable, y una página editorial que pide
-  esa confianza tiene que dar la prueba primero. Por eso los cuatro hechos van
-  apretados, en una fila, apenas pasado el fold: es la sección más corta de la
-  página a propósito.
-- **Meter el retorno dentro de `DescentPanels` como un párrafo más.** Es una
-  sección de altura completa porque tiene que sentirse como una llegada.
+- **El riel vuelve a 01 en el quinto tiempo.** Hay cinco slots y cuatro actos.
+  En el quinto el `ActRail` enciende 01 otra vez en vez de apagarse: es
+  `FLYWHEEL.closing` dicho por el instrumento y no por la frase de al lado. Por
+  eso el acto activo es estado de React alimentado desde el trigger — `ActRail`
+  es presentacional a propósito, así hay UNA fuente del paso en curso.
+- **Las lecturas `In`/`Out` cambian con el acto, y la del quinto es la del
+  primero, sin tocar.** El reinicio se ve en los datos en vez de afirmarse en
+  una oración.
+- **`In`/`Out` NO son `Readout`s.** Esa pieza pone su valor en Kepler itálica
+  para que una CIFRA gane sobre su etiqueta a cuerpo chico; con una frase de
+  tres palabras lo único que hace es gritarla. Van en mono, chicas y del mismo
+  peso las dos, porque el argumento no es ninguna de las dos frases: es que la
+  izquierda es literalmente la derecha del paso anterior.
 
-Los productos son **dos mitades a sangre**, tinta a la izquierda y crema a la
-derecha, sin filete ni gap entre ellas: dos suelos que se tocan en una vertical
-dura separan mejor que cualquier borde. Es el único momento en que la página
-abandona la retícula de 12 columnas, y cae justo donde el argumento deja de
-describir un mecanismo. El blanco se guarda para el cierre — que es el único
-suelo que no es ni crema ni tinta después de cinco pantallas alternando.
+### El portador, y por qué no es telemetría
+
+Una sola cuenta recorre la línea central cerrada del conducto, para siempre, con
+un tween propio sin relación con el scroll. Es un dibujo de mecanismo y no
+afirma ninguna magnitud: nada cuenta hacia arriba, ninguna lectura cambia sola,
+y no hay una tasa en ninguna parte de la página. Lo único que dice es lo que la
+copy dice —que esto no se detiene— y es lo que evita que el diagrama se lea como
+el esquema de algo que corrió una vez.
+
+Corre también en móvil, donde no hay escena pegada: es la forma más barata de
+que «está corriendo» siga siendo cierto en el layout que no recibe nada de la
+escena.
+
+### Los glifos de los hechos se reusan tal cual
+
+`FactBench` monta `../factGlyphs` sin redibujarlos. Son cuatro afirmaciones con
+un dibujo correcto cada una, y un dibujo no es layout — por eso se sacaron de las
+variantes en su momento. Lo que cambia en B es su **alojamiento**: cada uno va en
+una placa hundida bajo su lectura, que es la diferencia entre un dibujo en una
+columna y una ventana en un instrumento.
+
+El volumen que esta variante debe está en `LoopBench` y en `CenterSolid`, donde
+la figura ES el argumento. Extruir además cuatro glifos del tamaño de una línea
+de texto gastaría el mismo gesto dos veces y haría que la sección compitiera con
+la escena de abajo.
+
+## `c/` — The ascent · escenario
+
+**La decisión:** la economía como **paisaje que se levanta con el uso**. La
+superficie de curvas de nivel no es una metáfora forzada acá: más actividad, más
+relieve. La unidad de composición es la **card**, y el suelo es un terreno —
+primero como shader en el hero, después como figura dibujada en el medio.
+
+Monta el armazón [`shells/stage/`](../shells/README.md) — `Surface`, `Card`,
+`Section` — sin variantes locales.
+
+### La paleta, que es un argumento y no un humor
+
+De las cuatro páginas que comparten la superficie de contorno, **esta es la
+única cuya tesis es el crecimiento**, así que se lleva el extremo más verde y
+más cálido del rango: meseta baja arena-crema (`#efe9d5`), meseta alta verde
+cálido (`#a3d78d`), curva oliva (`#4e7a3f`). El terreno de community es
+terracota y el de foundation es más callado; la calibración existe para que un
+lector que ya vio dos sepa en cuál está antes de que resuelva el titular.
+
+Los otros tres números pesan igual que los colores: `bands` bajo (7) para
+**mesetas anchas** donde apoyar el display, `scale` bajo (1.5) para colinas
+amplias, `tilt` alto (0.62) para que el terreno tenga una dirección y esa
+dirección sea hacia arriba. El contenido va al PIE de la superficie, que es donde
+está la banda más plana.
+
+### Las secciones
+
+| Sección | Qué hace |
+|---|---|
+| `HeroTerrain` | `Surface` a pantalla completa con la paleta de arriba, el titular apoyado en la meseta baja |
+| `GrowthCards` | Los cuatro hechos como cuatro `Card`. La placa de arte lleva la lectura (`100%`) y el sólido que muestra su forma; el título de la card lleva la afirmación |
+| `AscentLoop` | La figura grande a sangre: cuatro estaciones sobre el terreno, la travesía que sube, y el retorno |
+| `EngineCards` | Los dos productos como dos cards grandes sobre blanco, con la captura en la placa de arte y el `claim` arriba de ella |
+| `CenterClose` | Los tres roles bajo filete, y el cierre sobre una banda del mismo terreno del hero |
+
+### Los glifos crecidos: `c/factReliefs.tsx`
+
+Es el único caso de la página en que un dibujo se duplica en vez de compartirse,
+y la razón está escrita arriba del archivo: los glifos de `../factGlyphs` son el
+dibujo correcto en el material equivocado para esta variante. Son marcas de 1px
+del tamaño de una línea de texto, hechas para vivir dentro de una columna de
+prosa; C pone cada hecho en una card con su propia placa de arte, y un filete en
+el medio de una placa blanca de 320px se lee como un accidente — la placa parece
+vacía y el dibujo parece haber perdido su párrafo.
+
+Así que son **las mismas cuatro afirmaciones ejecutando los mismos cuatro
+argumentos**, crecidas a sólidos: mismo orden, misma geometría, **mismas
+ausencias**. Lo que cambia es que son cuerpos que reciben luz, rellenos con la
+rampa del CTA (cara superior `--cta-lime`, frente `--cta-mint`, lado
+`--cta-deep`), a un tamaño en el que la placa tiene algo adentro. Un solo vector
+de extrusión para los cuatro, o serían cuatro piezas de clip-art con cuatro
+direcciones de luz.
+
+**Ninguna afirmación cambió con el material.** 01 siguen siendo ocho
+compartimentos sin hueco que buscar, 02 sigue siendo una magnitud y la mitad de
+ella con la mitad que falta simplemente faltando, 03 siguen siendo cuatro
+propuestas desiguales cruzando un umbral, 04 siguen siendo cinco marcas de año y
+una corrida que no se rompe en ninguna.
+
+### La figura grande: `c/AscentLoop`
+
+A dibuja este bucle como un círculo y B como un conducto cerrado. Las dos son
+correctas para lo que son, y las dos comparten un límite: **una forma cerrada
+vuelve exactamente a donde arrancó**, así que «una vuelta más fuerte» hay que
+agregarlo encima del dibujo (las dos lo hacen con una segunda pasada más
+brillante sobre la primera pata).
+
+C lo dibuja sobre un TERRENO, que es la única superficie donde el retorno puede
+aterrizar en otro lado. La travesía sube de izquierda a derecha por las cuatro
+estaciones; el retorno barre de vuelta por el primer plano y llega a la columna
+de la estación 01 **una banda más arriba que la estación 01**. El bucle cierra
+en x y no cierra en y, que es todo `FLYWHEEL.closing` sin nada escrito al lado.
+
+- **El portador no se detiene.** Una sola cuenta recorre subida-y-retorno como
+  un solo `<path>`, para siempre. Sin `MotionPathPlugin` —que no está en este
+  proyecto— con un `strokeDasharray` de una raya corta sobre `pathLength={100}`:
+  el hueco es el resto del circuito, así que nunca hay más de una cuenta.
+- **La marca del retorno es HUECA.** Es donde EMPIEZA la vuelta siguiente, no un
+  quinto evento que ya ocurrió.
+- **El relleno bajo la subida es la rampa del CTA de verdad**, no un acento. Es
+  la licencia de esta variante y de ninguna otra.
+- **Se lee en un scroll, no en cinco.** No hay escena pegada acá; el orden lo
+  impone la figura.
+- **La fila de texto NO está alineada a las estaciones.** Se probó y se
+  descartó: el padding del `Container` es un número distinto en cada breakpoint,
+  así que cualquier alineación cierta a un ancho es falsa al siguiente, y un
+  tick que casi conecta es peor que ninguno. Lo que carga el mapeo es la
+  numeración y el escalonado — cada bloque se sienta más arriba que el anterior,
+  en la misma proporción que su estación.
+
+### El cierre de C no tiene figura, y es una decisión
+
+La página ya gastó cuatro momentos gráficos: el terreno con shader, los cuatro
+sólidos, la travesía a sangre y las dos capturas. Un quinto dibujo ahí sería la
+segunda figura casi circular de la página, y el lector busca entre dos figuras
+así una relación que no existe. La regla es que un gráfico tiene que ser
+evidencia, argumento o estructura; «el cierre se veía vacío» no es ninguna de
+las tres.
+
+Lo que sí hace el cierre es volver al terreno del hero en una banda corta: la
+página vuelve a donde empezó, una vuelta más arriba, que es el gesto de su
+propia figura central a escala de documento.
 
 ## No hay contadores animados, y no es una cuestión de gusto
 
@@ -139,15 +269,12 @@ orden de peso:
    fila es «un vistazo = esto ya pasó», y un tally lo convierte en tres
    movimientos.
 3. **Movimiento ascendente implica telemetría en vivo**, y no habría nada
-   conectado detrás. Eso es fabricar actualidad sobre una cifra presentada como
-   hecho.
-4. **Es el ornamento por defecto del género.** Esta es una página de tokenómica:
-   contadores que suben y gradientes son precisamente lo que cualquier lector ya
-   vio cien veces, y lo único que no puede permitirse una página que se presenta
-   como un libro de registro es pedir prestado ese vocabulario.
-
-Lo que las cifras hacen en su lugar es llegar en el vocabulario de la casa: el
-filete se dibuja y el número sube desde debajo de él.
+   conectado detrás. En la variante B esto pesa el doble: una cifra subiendo
+   dentro de un panel oscuro con etiquetas en mono es exactamente el dashboard
+   conectado que esta página no tiene.
+4. **Es el ornamento por defecto del género.** Contadores que suben y gradientes
+   son precisamente lo que cualquier lector de una página de tokenómica ya vio
+   cien veces.
 
 ## La deflación NO se dibuja como hecho consumado
 
@@ -155,11 +282,9 @@ filete se dibuja y el número sube desde debajo de él.
 punto en que salen más tokens de circulación de los que entran. No dice que haya
 llegado, y ninguna de las tres variantes puede decirlo por su cuenta.
 
-El riesgo es concreto y es de la variante B, que es la única que dibuja esa
-afirmación: un gráfico es muchísimo mejor que un párrafo para afirmar algo por
-accidente. Con valores en un eje y fechas debajo, el lector lee un registro
-histórico, diga lo que diga el pie de foto. Por eso el gráfico retiene tres
-cosas, y ninguna es un olvido:
+El riesgo es de `b/ProjectionPanel`, la única sección que dibuja esa afirmación:
+un gráfico es muchísimo mejor que un párrafo para afirmar algo por accidente.
+Por eso la figura retiene **cuatro** cosas, y ninguna es un olvido:
 
 1. **Ningún valor en ningún eje.** No hay escala porque no hay dataset. La forma
    es la afirmación.
@@ -167,199 +292,112 @@ cosas, y ninguna es un olvido:
    graficado (ver `chain/ProofBand`); un contorno dice «acá van a dar las
    líneas», que es exactamente el estatus de ese punto.
 3. **La palabra `Projection` va dentro del área del gráfico**, no en un caption
-   debajo. Los captions se caen cuando alguien re-maqueta una sección; un chip
-   dentro del dibujo viaja con él.
+   debajo. Los captions se caen cuando alguien re-maqueta una sección; una
+   palabra parada en medio del dibujo viaja con él.
+4. **Ninguna de las dos curvas sigue más allá del punto de encuentro.**
+   Dibujarlas cruzándose sería dibujar el umbral deflacionario como algo ya
+   pasado. El dibujo se detiene donde se detiene la afirmación.
 
 Las tres cadenas —`label`, `axisNote` y `note`— viven en `PROJECTION`, en el
 módulo de copy y no en el componente. Esa es la parte importante: son las
 condiciones bajo las cuales la figura tiene permiso de existir, así que tienen
 que ser tan difíciles de borrar como los datos.
 
-## El aparato gráfico (segunda pasada)
+**Las dos curvas se dibujan a la vez y a la misma velocidad.** Escalonadas, una
+llegaría al punto de encuentro y esperaría, y esperar se lee como que una causa
+a la otra.
 
-La página arrancó con tres figuras —el anillo de `a/LoopScene`, la curva de
-emisión de `b/EmissionChart` y el riel de `b/LedgerFlow`— y con los dos tramos
-de alrededor resueltos solo con tipografía. Esta pasada llenó esos dos huecos, y
-**no tocó ninguna de las tres figuras que ya estaban**.
+## Los assets que hay que producir
 
-Todo lo que entró pasa la regla de las tres: es **evidencia** (el lugar de un
-recurso real, con `MediaFrame`), **argumento** (un dibujo que carga una
-afirmación, con SVG propio) o **estructura**. Nada entró para llenar.
-
-### 1. Cuatro micro-glifos para los hechos estructurales — `factGlyphs.tsx`
-
-`MATURITY.facts` era el bloque más dibujable de la página y eran cuatro párrafos
-con una cifra grande. Ahora cada hecho lleva su propio dibujo de 1px, y cada
-dibujo **ejecuta su afirmación** en vez de ilustrarla (mismo criterio que
-`chain/WhyItMatters`; ningún glifo es un pictograma):
-
-| | Hecho | Qué dibuja |
-|---|---|---|
-| 01 | Supply totalmente desbloqueado | Una barra cerrada de ocho compartimentos, **todos ocupados**. En otra red los últimos estarían vacíos y ese tramo vacío serían los tokens por liberar. El lector busca el hueco y no está |
-| 02 | Emisión partida a la mitad | Dos barras y un corte. La vertical es a la vez el corte, el extremo derecho de la barra de abajo, y se pasa de las dos para leerse como evento y no como borde |
-| 03 | Gobernanza onchain y en vivo | Cuatro propuestas de largo desigual llegando a un umbral; pasado el umbral son una sola línea con cuatro puntos **rellenos** — la marca de la casa para algo ya asentado. Ni urna ni martillo |
-| 04 | Cinco años sin caídas | Cinco marcas de año, y un trazo que las cruza **sin cortarse**. Las marcas existen para que el trazo tenga dónde romperse, y no rompe en ninguna |
-
-**Se dibujan una vez y las tres variantes los consumen.** Los hechos son los
-mismos en `a/`, `b/` y `c/` — lo que se compara entre variantes es el LAYOUT, y
-un glifo no es layout. Tres versiones a mano del mismo dibujo se despegan la
-primera vez que alguien toca una.
-
-Lo único que cambia por variante es **dónde se acomodan**:
-
-- `a/Thresholds` — columna bajo filete, entre la cifra y la afirmación. Entra en
-  la timeline que la sección ya tenía, como tercera ola (filetes → cifras →
-  glifos → afirmaciones).
-- `b/LedgerFacts` — dentro de la celda de la cifra, en la misma columna para las
-  cuatro filas. Es lo que hace que la tabla se gane su forma: cuatro glifos
-  comparables hacia abajo son una barra, una barra cortada, un umbral y una
-  corrida. Es además el único tipo de dibujo que B admite — son medidas, no
-  metáforas.
-- `c/FactRow` — fila apretada, bajo la etiqueta de la cifra. Es donde más
-  rinden: la banda es lo único que hay entre un hero enorme y cuatro pantallas
-  de metáfora, y duplican lo que se lleva un lector que va rápido sin agregar
-  una línea de copy.
-
-Ninguno se anima solo. Entran con el reveal que su sección ya tiene: cuatro
-dibujos del tamaño de una línea de texto no justifican doce ScrollTriggers.
-
-### 2. Evidencia — los dos productos, y el panel de ingresos
-
-Intents y NEAR AI son productos reales con interfaz, y la página no mostraba
-ninguno. Un diagrama de Intents sería el diagrama de algo que no lo necesita, así
-que acá va evidencia y no dibujo. Cada `MediaFrame` lleva su encargo escrito
-abajo, y **las proporciones y los lados varían a propósito** — ocho slots 16/9
-idénticos son una plantilla, no una composición.
-
-Además entra **una sola vez** en toda la página una captura de
-`revenue.near.org`, y entra en `b/EmissionChart`, que es donde más pesa: la
-sección termina en un link a ese panel para responder la única objeción justa que
-el gráfico invita («¿y los números?»), y un link es una respuesta débil porque
-obliga a irse a comprobar. Ahora las dos cosas están enfrentadas y dicen cosas
-distintas a propósito: forma dibujada a la derecha, que no afirma ninguna
-magnitud, y registro fotografiado a la izquierda, que no tiene que hacerlo.
-**Es una captura y no un embed**, y esa distinción es la honestidad del slot.
-
-### 3. Argumento — un activo, tres trabajos (`c/DescentClose`)
-
-`CENTER` afirma que los tres roles **se refuerzan entre sí**, y tres columnas de
-texto pueden enunciarlo pero no mostrarlo: tres columnas son tres cosas
-paralelas y la afirmación es sobre un retorno. La figura dibuja el retorno y nada
-más — un activo, tres lóbulos, y cada lóbulo sale del activo y **vuelve a entrar
-en él por otro punto**. La primera versión era un diagrama de rayos (un centro
-con tres líneas hacia afuera) y ese es el dibujo de un token con tres usos, que
-es justo lo que la copy dice que tienen los demás.
-
-Va en `c/` y en ninguna otra:
-
-- En `a/` sería el segundo anillo de la página después de `LoopScene`, y dos
-  figuras circulares en una página hacen que el lector busque una relación entre
-  ellas que no existe.
-- En `b/` sería una metáfora en la única variante que las rechaza.
-- `c/` era la única variante sin un solo dibujo propio, y es la que hace la
-  afirmación más difícil de sostener con puro tamaño tipográfico.
-
-Se apoya a la **izquierda** de `CENTER.body`, que invierte el hábito de la página
-(titular a la izquierda, prosa a la derecha). Si cayera del mismo lado y al mismo
-ancho que todo lo de arriba, no cambiaría el ritmo en nada, que es la única
-razón para meter una figura en un cierre.
-
-### Los assets que hay que producir
-
-Todos los `label` son la orden de trabajo. En inglés, porque se imprimen en la
-página; los comentarios del código siguen en inglés y este README en español.
+Todos los `label` son la orden de trabajo, y van en inglés porque se imprimen en
+la página. Son **tres productos, cinco encuadres**: la captura de Intents y la de
+NEAR AI de `a/` y `b/` son la MISMA foto (los `label` son idénticos palabra por
+palabra a propósito, para no duplicar la lista de tomas por una diferencia que
+nadie pidió).
 
 | Variante · sección | Asset | Proporción · spec |
 |---|---|---|
-| `a/RevenueEngines` | NEAR Intents — cross-chain swap in progress: the stated intent, the route it takes, and settlement on both chains | 16/9 · 2400×1350 · PNG @2x |
-| `a/RevenueEngines` | NEAR AI — agent infrastructure console: one agent running in a confidential environment, execution proof in view | 4/3 · 1600×1200 · PNG @2x |
-| `b/EmissionChart` | revenue.near.org — screenshot of the public dashboard: cumulative revenue and buybacks, with the date of the snapshot visible | 4/3 · 1600×1200 · PNG @2x, recorte del panel, sin cromo del navegador |
-| `b/LedgerEntries` | NEAR Intents inside a wallet — portrait capture of a cross-chain swap: the stated intent, the route, and the settled balance | 3/4 · 1200×1600 · PNG @2x, solo el device |
-| `b/LedgerEntries` | NEAR AI — wide crop of the agent console: active agents, their confidential environment, and the execution log | 21/9 · 2520×1080 · PNG @2x |
-| `c/SplitProducts` | NEAR Intents — wide strip of a cross-chain swap: the stated intent, the route between chains, and settlement | 5/2 · 2500×1000 · PNG @2x |
-| `c/SplitProducts` | NEAR AI — agent console: one agent running in a confidential environment, with its execution proof | 4/3 · 1600×1200 · PNG @2x |
+| `a/RevenueEngines` · `b/EngineModules` | NEAR Intents — cross-chain swap in progress: the stated intent, the route it takes, and settlement on both chains | 16/9 · 2400×1350 · PNG @2x |
+| `a/RevenueEngines` · `b/EngineModules` | NEAR AI — agent infrastructure console: one agent running in a confidential environment, execution proof in view | 4/3 · 1600×1200 · PNG @2x |
+| `b/ProjectionPanel` | revenue.near.org — screenshot of the public dashboard: cumulative revenue and buybacks, with the date of the snapshot visible | 4/3 · 1600×1200 · PNG @2x, recorte del panel, sin cromo del navegador |
+| `c/EngineCards` | NEAR Intents — wide strip of a cross-chain swap: the stated intent, the route between chains, and settlement | 5/2 · 2500×1000 · PNG @2x |
+| `c/EngineCards` | NEAR AI — agent console: one agent running in a confidential environment, with its execution proof | 16/9 · 2400×1350 · PNG @2x |
 
-Son siete capturas de tres productos: Intents (tres encuadres distintos, porque
-las tres variantes lo piden distinto), NEAR AI (tres) y el panel de ingresos
-(una). Mientras no existan, el hueco se ve como un área reservada con su encargo
-escrito, no como una imagen rota. Cuando lleguen, se les pasa `src` y el layout
-no se mueve.
+Mientras no existan, el hueco se ve como un área reservada con su encargo escrito
+abajo, no como una imagen rota. Cuando lleguen, se les pasa `src` y el layout no
+se mueve.
 
-## La honestidad no se relajó al agregar dibujos
+**El panel de ingresos entra UNA vez en toda la página**, y entra en
+`b/ProjectionPanel`, que es donde más pesa: la sección termina en un link a ese
+panel para responder la única objeción justa que el gráfico invita («¿y los
+números?»), y un link es una respuesta débil porque obliga a irse a comprobar.
+Enfrentados, los dos dicen cosas distintas a propósito: forma dibujada a la
+derecha, que no afirma ninguna magnitud, y registro fotografiado a la izquierda,
+que no tiene que hacerlo. **Es una captura y no un embed**, y esa distinción es
+la honestidad del slot.
 
-Un dibujo afirma más rápido que un párrafo, también cuando afirma de más. Lo que
-esta pasada NO hizo, y no puede hacerse después:
+## Detalles que es fácil deshacer sin querer
 
-- **Ningún glifo dibuja la deflación como hecho consumado.** El glifo 02 dibuja
-  el recorte de emisión, que ya ocurrió y es verificable. La convergencia
-  emisión/recompra sigue viviendo solo en `EmissionChart`, con sus tres
-  retenciones intactas (ejes sin valores, marca de encuentro hueca, `Projection`
-  dentro del área de trazado).
-- **Ninguna figura sugiere telemetría en vivo.** El panel de ingresos entra como
-  captura fechada dentro de marcas de registro, con su encargo en mono debajo. Un
-  embed, o peor un widget que parezca en vivo, sería actualidad fabricada.
-- **Sigue sin haber contadores animados**, por las cuatro razones de más abajo.
-- **Los glifos no llevan color propio.** Heredan `currentColor` del bloque que
-  los monta, igual que todo trazo de la casa. El verde sigue reservado a las
-  frases `reinforces` y a los `claim` de producto.
-
-## Los heroes se quedaron sin ancla visual, a propósito
-
-Se evaluó y se descartó en las tres. En `a/` y `c/` el hero es tipografía a
-tamaño deliberadamente grande y su trabajo es establecer la escala antes de que
-llegue la primera sección; cualquier figura al lado llega primero y se gasta la
-atención en el lugar equivocado — que es exactamente el argumento que ya está
-escrito en `a/Hero`. En `b/` el ancla ya existe y es el ÍNDICE: un libro de
-registro abre diciendo qué contiene, y eso es un dispositivo visual, no un
-adorno. Las tres variantes ganaron entre cinco y siete momentos gráficos sin
-tocarlos.
+- **El verde chico sobre claro es `text-green-ink` (#00a86b), nunca
+  `near-green-accent`.** El accent es un verde de UI y no llega a 3:1 sobre
+  crema. En tinta se invierte (`text-near-green-accent`). Las líneas
+  `reinforces` y los `claim` de producto son los usos de esta página.
+- **`pathLength` es 100 y no 1** en todo trazo dibujado. GSAP redondea valores en
+  píxeles por defecto (`autoRound`) y `stroke-dashoffset` es una propiedad en
+  píxeles: normalizado a 1 el dibujo SALTA de no-dibujado a dibujado sin nada en
+  el medio, y no da ningún error.
+- **Con `pathLength={100}`, `strokeDasharray` también está en unidades de path.**
+  Un `strokeDasharray="8 7"` no son 8 píxeles: es el 8% del recorrido, y el
+  retorno de `c/AscentLoop` llegaba como seis fragmentos enormes. Los valores
+  correctos ahí son del orden de `1.3 1.5`.
+- **Un trazo que se dibuja con `strokeDashoffset` no puede además llevar un
+  patrón de rayas.** Son la misma propiedad. Por eso el retorno de `c/AscentLoop`
+  entra con `autoAlpha` y no dibujándose.
+- **`loopRing.ts`, `b/circuit.ts` y `c/ascentRoute.ts` redondean a cuatro
+  decimales** antes de que las coordenadas lleguen al DOM. `Math.sin`/`Math.cos`
+  no están obligadas por la spec a estar correctamente redondeadas, así que Node
+  y el navegador difieren en el último ulp y React se niega a hidratar. Mismo
+  motivo que `chain/chainDiagram.ts`.
+- **El atributo de escena (`data-loop` en `a/`, `data-bench` en `b/`) lo escribe
+  SOLO `enableScene`.** En `b/LoopBench` esto importa de verdad y no en teoría:
+  esa sección TIENE estado de React (el acto activo del riel), así que declarar
+  el atributo en el JSX haría que el primer re-render lo devuelva a su estado
+  inicial y el sticky se desarme en silencio.
+- **Ningún ancestro del hijo pegado puede tener `overflow` distinto de
+  `visible`.** El `overflow-hidden` va sobre el elemento pegado, que sí puede
+  tenerlo.
+- **Las etiquetas de las figuras van en HTML y no en `<text>`**, posicionadas en
+  % de la misma geometría. Dentro de un viewBox escalado, el cuerpo de un
+  `<text>` se multiplica por la escala de la figura y deja de coincidir con la
+  escala mono del resto de la página.
+- **Un `top` en % se resuelve contra la ALTURA del bloque contenedor.** Las
+  etiquetas de `b/LoopBench` viven en el mismo `div` que el svg y no en un
+  hermano vacío: un `div` relativo sin altura mide 0 y las cuatro se apilan en el
+  origen.
+- **La placa de arte de `Card` recorta en silencio.** Es 4/3 del ancho interno de
+  la card con `p-6` adentro, y la card tiene `overflow-hidden`: un stack que se
+  pasa pierde su parte de abajo sin ningún error. El presupuesto de altura de
+  `c/GrowthCards` está anotado en el propio componente.
+- **El plato del banco de `b/circuit.ts` tiene que quedar DENTRO del viewBox.**
+  El svg dibuja con `overflow-visible` (el portador lo necesita), así que un
+  plato que se pasa no lo recorta el svg: lo recorta el `Panel`, y un plato
+  cortado por el borde de su propio panel se lee como un error.
 
 ## Lo que se descartó
 
 | Se probó / se consideró | Por qué no |
 |---|---|
 | Contadores animados en las cifras | Las cuatro razones de arriba |
-| Cards con borde para los cuatro hechos | La doctrina de la casa está en `chain/WhyItMatters.tsx`. Acá pesa una razón extra en la variante A: la sección de abajo es un ANILLO, y cuatro rectángulos entrando a un círculo hacen ver la página como dos argumentos engrapados |
-| El anillo de A también en B | Un anillo es una metáfora: dice «ciclo» antes de decir qué se mueve. B es para quien quiere la cuenta, no la metáfora |
-| Los dos productos lado a lado en A | Se leen como una comparación —«elegí uno»— y no son alternativas, son dos motores del mismo bucle. Apilados a ancho completo, el lector los recibe en el orden del deck |
-| Un quinto paso escrito en el copy para «cerrar el bucle» | El cierre ya existe (`FLYWHEEL.closing`). Agregar copy nueva para lo que el layout tiene que demostrar es la salida fácil, y es la que rompe la comparación entre variantes |
-| Fondo verde saturado para una mitad del split de C | Fuera de la paleta de suelos del DS (`cream`, `ink`, `ink-slate`, `background`). La costura tinta/crema ya es el corte más duro de la página |
-| `pin: true` de GSAP para la escena de A | Nunca, en ninguna sección de este repo. El razonamiento largo está en el README padre |
-| Un diagrama de rayos para `CENTER` (un centro y tres líneas hacia afuera) | Es el dibujo de «un token con tres usos», que es justo lo que la copy dice que tienen los DEMÁS tokens. Sin el trazo de vuelta la figura no dice nada que las tres columnas no digan |
-| La figura de `CENTER` también en `a/` y en `b/` | En `a/` sería el segundo anillo de la página; en `b/`, una metáfora en la variante que las rechaza. Ver arriba |
-| Un pictograma por hecho estructural (urna para gobernanza, reloj para uptime) | Un pictograma nombra el tema y le deja la afirmación al párrafo, que es exactamente el trabajo que el dibujo venía a ahorrar |
-| Animar cada glifo con su propio ScrollTrigger | Doce triggers más para animar cuatro objetos del tamaño de una línea de texto, en una página que ya tiene una escena pegada y un gráfico dibujado. Entran con el reveal de su sección |
-| Una figura en los tres heroes | Ver la sección de arriba: en `a/` y `c/` compite con la escala tipográfica, en `b/` el índice ya es el ancla |
+| El anillo de A también en B | Un anillo es una metáfora: dice «ciclo» antes de decir qué se mueve. B es el aparato, y un aparato muestra primero qué circula |
+| El campo de cubos isométricos de `/prototype/protocol-a` en B | De protocol se toma la paleta y el peso, no las figuras. Un segundo campo de cubos se leería como la página de protocol pintada de otro color |
+| Redibujar los cuatro glifos con volumen para B | El volumen de B está donde la figura ES el argumento (`LoopBench`, `CenterSolid`). Extruir además cuatro dibujos del tamaño de una línea de texto gasta el gesto dos veces y hace competir a la sección con la escena de abajo |
+| Un diagrama de rayos para `CENTER` (un centro y tres líneas hacia afuera) | Es el dibujo de «un token con tres usos», que es justo lo que la copy dice que tienen los DEMÁS tokens. Por eso las líneas van al revés y llegan a tres CARAS del mismo sólido |
+| La figura de `CENTER` también en `a/` | Sería el segundo anillo de la página después de `LoopScene`, y dos figuras circulares hacen que el lector busque una relación que no existe |
+| Cards con borde para los cuatro hechos en `a/` y `b/` | La doctrina de la casa está en `chain/WhyItMatters.tsx`. En `c/` sí van, y el porqué está escrito en `shells/stage/Card.tsx`: cada unidad tiene una FIGURA, y una figura necesita un fondo propio |
+| Una escena pegada para el volante de C | El encargo de C es una pantalla, no cinco. El orden lo impone la figura |
+| Alinear la fila de texto de `c/AscentLoop` a las estaciones con ticks | El padding del `Container` cambia por breakpoint; una alineación cierta a un ancho es falsa al siguiente |
+| Una figura en el cierre de C | Sería la segunda figura casi circular de la página. Una sección puede quedarse sin gráfico |
 | Un embed o un widget «en vivo» de revenue.near.org | Telemetría que este sitio no tiene. La captura fechada dentro de marcas de registro no se puede confundir con un feed |
-| Repetir la captura del panel de ingresos en las tres variantes | La sección tiene dos CTAs al panel, pero el respaldo se gasta una vez y donde más pesa: enfrentado al gráfico que se niega a poner valores en los ejes |
+| Repetir la captura del panel de ingresos en las tres variantes | El respaldo se gasta una vez y donde más pesa: enfrentado al gráfico que se niega a poner valores en los ejes |
 | Slots `MediaFrame` idénticos 16/9 apilados | Es una plantilla, no una composición: repetiría la simetría que el layout ya tiene y no cambiaría el ritmo de la página en nada |
-
-## Detalles que es fácil deshacer sin querer
-
-- **El verde chico sobre claro es `text-green-ink` (#00a86b), nunca
-  `near-green-accent`.** El accent es un verde de UI y no llega a 3:1 sobre
-  crema. Está escrito en `app/globals.css` y es la regla de la casa; en tinta se
-  invierte (`text-near-green-accent`). Las líneas `reinforces` y los `claim` de
-  producto son los usos de esta página, todos frases mono cortas — el mismo
-  patrón que `community/c/RallyLegion`.
-- **`pathLength` es 100 y no 1** en todo trazo dibujado (el anillo de A, las dos
-  curvas de B). GSAP redondea valores en píxeles por defecto (`autoRound`) y
-  `stroke-dashoffset` es una propiedad en píxeles: normalizado a 1 el dibujo
-  SALTA de no-dibujado a dibujado sin nada en el medio, y no da ningún error.
-- **`loopRing.ts` redondea a cuatro decimales** antes de que las coordenadas
-  lleguen al DOM. `Math.sin`/`Math.cos` no están obligadas por la spec a estar
-  correctamente redondeadas, así que Node y el navegador difieren en el último
-  ulp y React se niega a hidratar. Mismo motivo que `chain/chainDiagram.ts`.
-- **El atributo `data-loop` de la escena de A lo escribe SOLO `enableScene`.**
-  Declarado también en el JSX, el primer re-render lo devuelve a su estado
-  inicial y el sticky se desarma en silencio.
-- **Ningún ancestro del hijo pegado puede tener `overflow` distinto de
-  `visible`.** El `overflow-hidden` va sobre el elemento pegado, que sí puede
-  tenerlo.
-- **`text-mural` en C exige `@container` en el bloque.** Mide su cuerpo en `cqw`;
-  sin contenedor declarado resuelve contra el viewport y el numeral sigue
-  creciendo después de que el `Container` topó en su `max-width`.
-- **Cada panel de C tiene su propio ScrollTrigger** (un componente por panel).
-  Cuatro paneles de `min-h-svh` son más altos que cuatro viewports, así que una
-  sola timeline en el padre dispararía con tres de los cuatro todavía fuera de
-  cuadro y el lector llegaría a tres pantallas terminadas.
+| `pin: true` de GSAP para las escenas | Nunca, en ninguna sección de este repo. El razonamiento largo está en el README padre |
