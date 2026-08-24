@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/economics-c",
-  title: "Economics C · Descent",
+  title: "Economics C · Escenario",
   description:
-    "Paneles a pantalla completa, uno por paso, cada uno con su numeral colosal. Los dos productos, en dos mitades partidas.",
-  blurb: "economics, propuesta C",
+    "La economía sobre superficies con shader, con cards y arte a sangre. Mismo armazón que las variantes C del resto; el vocabulario gráfico es propio.",
+  blurb: "economics, escenario",
   nav: false,
   sitemap: false,
   robots: "noindex",

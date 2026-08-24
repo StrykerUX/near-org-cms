@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/community-c",
-  title: "Community C · Rally",
+  title: "Community C · Escenario",
   description:
-    "La Legión primero, las ciudades como marquesina, y una lectura cálida y centrada en la gente.",
-  blurb: "community, propuesta C",
+    "La comunidad sobre superficies con shader, con cards y arte a sangre. Mismo armazón que las variantes C del resto; el vocabulario gráfico es propio.",
+  blurb: "community, escenario",
   nav: false,
   sitemap: false,
   robots: "noindex",

@@ -2,8 +2,8 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import GlSurface, { hexToRgb } from "@/components/sections/protocol-labs/GlSurface";
-import { SPECTRUM_FRAG } from "@/components/sections/protocol-labs/gl/spectrum";
+import GlSurface, { hexToRgb } from "@/components/primitives/GlSurface";
+import { SPECTRUM_FRAG } from "@/components/primitives/gl/spectrum";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 

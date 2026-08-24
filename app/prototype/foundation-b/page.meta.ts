@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/foundation-b",
-  title: "Foundation B · Stiftung dossier",
+  title: "Foundation B · Instrumento",
   description:
-    "La página como instrumento legal: un raíl angosto de datos de registro en mono, la columna ancha del argumento, cláusulas numeradas y el bloque de escritura del Stiftung.",
-  blurb: "foundation, propuesta B",
+    "Página oscura de punta a punta, con paneles que convierten cada bloque en un aparato con lectura. Comparte armazón con las variantes B de about, community y economics; el vocabulario gráfico es propio de la página.",
+  blurb: "foundation, instrumento",
   nav: false,
   sitemap: false,
   robots: "noindex",

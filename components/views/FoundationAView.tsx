@@ -1,34 +1,34 @@
-import FoundationHero from "@/components/sections/foundation/a/FoundationHero";
-import Pillars from "@/components/sections/foundation/a/Pillars";
-import Devolution from "@/components/sections/foundation/a/Devolution";
-import Stiftung from "@/components/sections/foundation/a/Stiftung";
-import Council from "@/components/sections/foundation/a/Council";
-import Operations from "@/components/sections/foundation/a/Operations";
-import Ecosystem from "@/components/sections/foundation/a/Ecosystem";
-import Close from "@/components/sections/foundation/a/Close";
+import HandoffHero from "@/components/sections/foundation/a/HandoffHero";
+import HandoffPillars from "@/components/sections/foundation/a/HandoffPillars";
+import HandoffThesis from "@/components/sections/foundation/a/HandoffThesis";
+import HandoffStiftung from "@/components/sections/foundation/a/HandoffStiftung";
+import HandoffCouncil from "@/components/sections/foundation/a/HandoffCouncil";
+import HandoffScene from "@/components/sections/foundation/a/HandoffScene";
+import HandoffEcosystem from "@/components/sections/foundation/a/HandoffEcosystem";
+import HandoffClose from "@/components/sections/foundation/a/HandoffClose";
 
-// Variant A of the NEAR Foundation page — «receding column». The header and
-// the footer are NOT here: `app/prototype/layout.tsx` mounts both.
+// Variant C — «hand-off». One scene, and seven sections that get out of its way.
 //
-// The order is the copy deck's, and the thing to preserve if these are ever
-// reordered is the STROKE, not the sections. `FoundationHero` lays one hairline
-// across the full container, `Pillars` cuts it in three, and `Devolution` runs
-// the same rule out to a tick — that is the page's whole argument, and it only
-// works read in that order. `Close` carries what is left of it onto the ink.
+// The ground plan is the composition: cream from the hero to the Council, three
+// screens of ink for `HandoffScene`, and cream again to the end. That is one
+// cut in and one cut out, which is what makes a section that lasts three
+// viewports read as an event rather than as a long stretch of dark page.
 //
-// One ground change in the entire page, at the end. Cream is not a default
-// here; it is what makes the single cut worth anything.
+// `HandoffScene` sits in the deck's §6 slot and `HandoffEcosystem` follows it
+// immediately. That adjacency is load-bearing: the scene distributes the
+// Foundation's mass into twelve unlabelled clusters and the next section names
+// twelve builders. Putting anything between them spends the rhyme.
 export default function FoundationAView() {
   return (
     <main className="flex flex-col bg-cream">
-      <FoundationHero />
-      <Pillars />
-      <Devolution />
-      <Stiftung />
-      <Council />
-      <Operations />
-      <Ecosystem />
-      <Close />
+      <HandoffHero />
+      <HandoffPillars />
+      <HandoffThesis />
+      <HandoffStiftung />
+      <HandoffCouncil />
+      <HandoffScene />
+      <HandoffEcosystem />
+      <HandoffClose />
     </main>
   );
 }

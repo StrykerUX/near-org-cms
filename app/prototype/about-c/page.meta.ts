@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/about-c",
-  title: "About C · Index",
+  title: "About C · Escenario",
   description:
-    "Dos columnas densas: a la izquierda el año y una línea que se escanea, a la derecha la prosa. Las tres preguntas vuelven como estribillo.",
-  blurb: "about, propuesta C",
+    "La historia sobre superficies con shader, con cards y arte a sangre. Mismo armazón que las variantes C del resto; el vocabulario gráfico es propio.",
+  blurb: "about, escenario",
   nav: false,
   sitemap: false,
   robots: "noindex",

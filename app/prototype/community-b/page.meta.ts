@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/community-b",
-  title: "Community B · Board",
+  title: "Community B · Instrumento",
   description:
-    "Un tablero de salidas: mono, denso, filas en vez de cards, las cifras como ticker y los canales como tabla.",
-  blurb: "community, propuesta B",
+    "La comunidad como aparato: página oscura, paneles y lecturas. Mismo armazón que las variantes B del resto; el vocabulario gráfico es propio.",
+  blurb: "community, instrumento",
   nav: false,
   sitemap: false,
   robots: "noindex",

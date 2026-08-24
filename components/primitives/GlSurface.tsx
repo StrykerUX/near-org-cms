@@ -246,4 +246,4 @@ export default function GlSurface({
 // Re-export por compatibilidad: la función se mudó a `gl/color.ts` porque este
 // módulo es de cliente y ella se llama al armar la tabla de uniformes, que a
 // veces ocurre en un server component. Ver la nota de aquel archivo.
-export { hexToRgb } from "@/components/sections/protocol-labs/gl/color";
+export { hexToRgb } from "@/components/primitives/gl/color";

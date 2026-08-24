@@ -1,4 +1,4 @@
-import { NOISE_GLSL } from "@/components/sections/protocol-labs/gl/noise";
+import { NOISE_GLSL } from "@/components/primitives/gl/noise";
 
 // La superficie del hero de la página — capas paralelas que fluyen, cada una por
 // su cuenta.

@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/foundation-c",
-  title: "Foundation C · Hand-off",
+  title: "Foundation C · Escenario",
   description:
-    "Una escena pegada donde la masa de la Foundation migra hacia afuera, al ecosistema, a lo largo del scroll. El resto de la página se calla para dejarla hablar.",
-  blurb: "foundation, propuesta C",
+    "Superficie de curvas de nivel con shader, cards redondeadas y arte a sangre. Comparte armazón con las variantes C de about, community y economics; el vocabulario gráfico es propio de la página.",
+  blurb: "foundation, escenario",
   nav: false,
   sitemap: false,
   robots: "noindex",

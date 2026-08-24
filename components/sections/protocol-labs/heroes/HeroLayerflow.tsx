@@ -5,9 +5,9 @@ import Container from "@/components/primitives/Container";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { HERO_SURFACE_FRAG } from "@/components/sections/protocol-labs/gl/layerflow";
-import { hexToRgb } from "@/components/sections/protocol-labs/gl/color";
-import GlSurface from "@/components/sections/protocol-labs/GlSurface";
+import { HERO_SURFACE_FRAG } from "@/components/primitives/gl/layerflow";
+import { hexToRgb } from "@/components/primitives/gl/color";
+import GlSurface from "@/components/primitives/GlSurface";
 import CtaPill from "@/components/sections/quantum/CtaPill";
 import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 

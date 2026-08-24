@@ -2,10 +2,10 @@ import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
   route: "/prototype/economics-b",
-  title: "Economics B · Ledger",
+  title: "Economics B · Instrumento",
   description:
-    "La economía como cuenta corriente: filas en mono, cifras grandes, y la curva de emisión contra la de recompra cruzándose.",
-  blurb: "economics, propuesta B",
+    "La economía como tablero: página oscura, paneles, lecturas y riel de actos. Mismo armazón que las variantes B del resto; el vocabulario gráfico es propio.",
+  blurb: "economics, instrumento",
   nav: false,
   sitemap: false,
   robots: "noindex",
