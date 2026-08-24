@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Accent from "@/components/primitives/Accent";
+import Container from "@/components/primitives/Container";
 import { useLoopCarousel, buildLoopCells, stepStyle } from "./useLoopCarousel";
 import { CUSTOMER_STORIES as STORIES } from "@/components/sections/homepage-shared/homepageUpdateContent";
 
@@ -35,27 +36,42 @@ export default function CustomerStories() {
       // transiciones CSS de las cards los consumen, así que el tamaño de la
       // card y el desplazamiento del track salen del MISMO reloj y la MISMA
       // curva. Ver la nota larga de `STEP_SECONDS` en useLoopCarousel.
-      style={{
-        ...stepStyle,
-        // El ancho de una celda al frente, y cuánto queda cuando no lo está.
-        //
-        // Van como custom properties y no sueltos en la clase porque el ancho
-        // encogido se DERIVA del otro (`calc(var(--cell-w) * var(--cell-idle))`)
-        // y los dos tienen que salir del mismo lugar: si el clamp y su fracción
-        // viven en clases separadas, la primera vez que alguien mueva el clamp
-        // se olvida de la otra y la fila queda descalibrada sin síntoma obvio.
-        "--cell-w": "clamp(300px, 62vw, 1010px)",
-        "--cell-idle": "0.62",
-      } as React.CSSProperties}
+      style={
+        {
+          ...stepStyle,
+          // El ancho de una celda al frente, y cuánto queda cuando no lo está.
+          //
+          // Van como custom properties y no sueltos en la clase porque el ancho
+          // encogido se DERIVA del otro (`calc(var(--cell-w) * var(--cell-idle))`)
+          // y los dos tienen que salir del mismo lugar: si el clamp y su fracción
+          // viven en clases separadas, la primera vez que alguien mueva el clamp
+          // se olvida de la otra y la fila queda descalibrada sin síntoma obvio.
+          "--cell-w": "clamp(300px, 62vw, 1010px)",
+          "--cell-idle": "0.62",
+        } as React.CSSProperties
+      }
       className="overflow-hidden bg-cream py-[clamp(40px,7vh,96px)] text-foreground"
       aria-roledescription="carousel"
       aria-label="What the world is building on NEAR"
     >
-      <h2 className="mb-[clamp(30px,6vh,74px)] px-[clamp(24px,5vw,105px)] text-pretty text-h2">
-        What the world is
-        <br />
-        <Accent>building on NEAR</Accent>
-      </h2>
+      {/* El titular va en `Container` y no con el gutter propio del carrusel.
+          Son dos medidas distintas: el `clamp(24px, 5vw, 105px)` que usa el
+          pie de esta sección crece con el viewport, y el gutter del sitio son
+          60px fijos contra un bloque que topa en 1780px. Coinciden cerca de
+          los 1200px de ancho y se separan en todo lo demás — a 1920 el titular
+          arrancaba 36px más adentro que "Next gen self custody" arriba y
+          "NEAR in the news" abajo, que es un escalón que se ve.
+
+          La pista del carrusel NO entra al Container: sigue a sangre, y ese
+          desborde es lo que hace que las historias vecinas asomen por los
+          costados. Lo que se alinea es el encabezado. */}
+      <Container>
+        <h2 className="mb-[clamp(30px,6vh,74px)] text-pretty text-h2">
+          What the world is
+          <br />
+          <Accent>building on NEAR</Accent>
+        </h2>
+      </Container>
 
       <div
         ref={containerRef}
@@ -209,7 +225,9 @@ export default function CustomerStories() {
                         con `transform`, el titular mengua con ella y en la misma
                         proporción que todo lo demás — que es justamente lo que la
                         transición de cuerpo no lograba, y por eso desentonaba. */}
-                    <h3 className="max-w-[18ch] text-h3 text-pretty">{item.title}</h3>
+                    <h3 className="max-w-[18ch] text-h3 text-pretty">
+                      {item.title}
+                    </h3>
 
                     <div className="mt-[clamp(20px,3.4vh,44px)]">
                       <a
