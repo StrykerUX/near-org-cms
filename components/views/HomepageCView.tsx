@@ -2,7 +2,7 @@ import HeroTuck from "@/components/sections/homepage-tuck/HeroTuck";
 import StatementPlain from "@/components/sections/homepage-fold/StatementPlain";
 import OwnYourOwn from "@/components/sections/homepage-shared/OwnYourOwn";
 import StackAnchors from "@/components/sections/homepage-shared/StackAnchors";
-import ProofDatum from "@/components/sections/homepage-shared/ProofDatum";
+import ProofLedger from "@/components/sections/homepage-tuck/ProofLedger";
 import BelongsNewsletter from "@/components/sections/homepage-shared/BelongsNewsletter";
 import CustomerStories from "@/components/sections/homepage-shared/CustomerStories";
 import PressCarousel from "@/components/sections/homepage-shared/PressCarousel";
@@ -40,7 +40,12 @@ export default function HomepageCView() {
           se ve— y lo que hace en ese tramo es subir a su sitio. De eso se
           encarga el modo `frame`. */}
       <StackAnchors frame headEntrance={false} />
-      <ProofDatum />
+      {/* Las seis pruebas van en LEDGER acá y no en el eje alternado de
+          `homepage-shared/ProofDatum`, que sigue montado en `homepage-b`. Es
+          una columna de renglones: cifra a la izquierda, cuerpo alineado a la
+          derecha del bloque, y las dos pruebas sin número cerrando en pareja.
+          El porqué de la estructura está en el propio componente. */}
+      <ProofLedger />
       <CustomerStories />
       <PressCarousel />
       <BelongsNewsletter />

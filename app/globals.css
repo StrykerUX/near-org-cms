@@ -519,6 +519,62 @@
   --text-poster--line-height: 0.86;
   --text-poster--letter-spacing: -0.035em;
   --text-poster--font-weight: 500;
+
+  /* ── Ledger ──────────────────────────────────────────────────────────────
+     La cifra del balance: el numeral gigante de `homepage-tuck/ProofLedger`,
+     donde cada prueba es un renglón —eyebrow, cifra, glosa, cuerpo— colgado de
+     una plica vertical.
+
+     No alcanzaba ninguno de los roles que ya existen. `display` topa en 8rem y
+     ahí el numeral deja de ser la estructura del renglón; `poster` y
+     `kicker-xl` miden en `vw` y están hechos para titulares que cruzan el
+     viewport, no para una cifra que ocupa un quinto del bloque.
+
+     Va en `cqw` por el mismo motivo que `--text-mural`: lo que fija el diseño
+     es la PROPORCIÓN contra el ancho del bloque, no un tamaño. Con `vw` se
+     rompe en el punto exacto en que el Container topa en su `max-width` y el
+     texto sigue creciendo. Quien use el token declara `@container` en el bloque.
+
+     El coeficiente ya no es el del artboard. Ahí el numeral mide 212px sobre
+     1063px de contenido —19.9%— y a esa medida, con Montreal, la cifra pesa más
+     de lo que el renglón aguanta: se come la glosa y el eyebrow queda de
+     adorno. 17cqw es la misma figura con la cifra un punto por debajo de esa
+     proporción; lo que se conserva es que el numeral SEA la estructura del
+     renglón, y no el número.
+
+     El tope de 18rem no es un techo de encaje: es el valor al que la rampa
+     llega cuando el Container ya topó (1660px de contenido × 17%). Está ahí
+     porque `clamp` lo pide, no porque muerda.
+
+     Peso 400 y no 500: Montreal Book es en realidad un 350 declarado como 400
+     (ver lib/fonts.ts), y a 200px+ es el trazo del artboard. Con 500 el numeral
+     engorda y deja de ser una cifra para volverse un titular. */
+  --text-ledger: clamp(2.75rem, 17cqw, 18rem);
+  --text-ledger--line-height: 0.86;
+  --text-ledger--letter-spacing: -0.035em;
+  --text-ledger--font-weight: 400;
+
+  /* La glosa que acompaña al numeral: el signo (`%`, `+`) en sans y la palabra
+     en serif itálica, las dos al mismo cuerpo y las dos altas, arriba del
+     numeral en vez de sobre su línea de base.
+
+     Su rampa NO bajó con la del numeral, y es deliberado: lo que se achicó es
+     la cifra, no el renglón. A 5.97cqw contra un numeral de 17cqw la glosa pasa
+     de ser 0.3 de la cifra a ser 0.35, o sea que la palabra en itálica gana
+     peso relativo — que es exactamente lo que la cifra soltó.
+
+     Si algún día vuelve a moverse el numeral, esta es la que hay que mirar
+     primero: la relación entre las dos es lo que sostiene el renglón, y solo
+     una de las dos está escrita acá.
+
+     NO se llama `--text-ledger-gloss`. Dos tokens que comparten prefijo hacen
+     que Tailwind genere el corto y descarte el largo en silencio — está
+     documentado arriba, en `--text-poster` / `--text-kicker-xl`, y cuesta una
+     tarde encontrarlo. */
+  --text-gloss: clamp(1.5rem, 5.97cqw, 6.3rem);
+  --text-gloss--line-height: 1;
+  --text-gloss--letter-spacing: -0.02em;
+  --text-gloss--font-weight: 400;
 }
 
 /* ── Escalas serif ──────────────────────────────────────────────────────────
@@ -575,6 +631,27 @@
   font-family: var(--font-display);
   font-style: italic;
   font-size: 1.14em;
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* La glosa serif del ledger: la palabra en itálica que sigue al numeral
+   ("uptime", "billion", "blockchains") y, en el par de cierre, el titular que
+   ocupa el lugar del numeral porque esas dos pruebas no tienen cifra.
+
+   Empaqueta familia + escala como el resto de las escalas serif, y toma su
+   font-size de `--text-gloss`, que es el MISMO token que usa el signo en sans.
+   Los dos tienen que medir igual: en el artboard el `%` y `uptime` son un solo
+   gesto a dos familias, no dos tamaños.
+
+   Se llama `gloss-serif` y no `text-gloss-serif` por la colisión de prefijos
+   que ya documenta `serif-poster`: una utility que arranca igual que un token
+   de la escala compite con él y pierde. */
+@utility gloss-serif {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-gloss);
+  line-height: var(--text-gloss--line-height);
   letter-spacing: var(--text-serif--letter-spacing);
   font-weight: var(--text-serif--font-weight);
 }
