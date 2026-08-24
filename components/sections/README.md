@@ -59,51 +59,79 @@ dar por terminado un cambio.
 | `SearchField` | `BlogIndexView` | — |
 | `FilterPills` | `BlogIndexView` | — |
 | `CompanyGrid`, `ProductStage`, `CustomerStory` | `PrototypeLandingView` | `/prototype` — la landing de marketing, no un índice |
-| `LatestUpdates`, `UpdatesList` | `HomepageUpdateView` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado. Sobrevivieron a la limpieza porque la homepage viva las sigue montando. |
-| `homepage-update/*` | `HomepageUpdateView` | `/prototype/homepage-update` — **la línea de diseño viva**. Única superviviente de nueve homepages; ver `docs/labs-archivados.md` para las ocho archivadas. Tiene su propio [README](./homepage-update/README.md). |
+| `LatestUpdates`, `UpdatesList` | `HomepageAView` | Nacieron para el draft de landing animada de `/prototype/homepage`, retirado. Sobrevivieron a la limpieza porque la homepage viva las sigue montando. |
+| `homepage-a/*` | `HomepageAView` | `/prototype/homepage-a` — **la línea de diseño viva**, y lo que monta la home real. Tiene su propio [README](./homepage-a/README.md). |
+| `homepage-shared/*` | `HomepageBView`, `HomepageCView` | La base que comparten las dos exploraciones vivas. Nació como duplicado de `homepage-a` con ruta propia; la ruta se borró y la carpeta quedó. Ver su [README](./homepage-shared/README.md). |
+| `homepage-fold/*` | `HomepageBView`, `HomepageCView` | El hero que se pliega —«Own your world.» → «Own ⬡ world.»— y la obertura del stack. [README](./homepage-fold/README.md). |
+| `homepage-tuck/*` | `HomepageCView` | El hero que se recoge en una caja. |
+| `foundation/*` | `FoundationAView`, `FoundationBView`, `FoundationCView` | `/prototype/foundation-a\|b\|c` — **tres layouts de la misma página**, no tres páginas. Copy compartida en `foundationContent.ts`. [README](./foundation/README.md). |
+| `economics/*` | `EconomicsAView`, `EconomicsBView`, `EconomicsCView` | `/prototype/economics-a\|b\|c` — idem, copy en `economicsContent.ts`. [README](./economics/README.md). |
+| `about/*` | `AboutAView`, `AboutBView`, `AboutCView` | `/prototype/about-a\|b\|c` — idem, copy en `aboutContent.ts`. [README](./about/README.md). |
+| `community/*` | `CommunityAView`, `CommunityBView`, `CommunityCView` | `/prototype/community-a\|b\|c` — idem, copy en `communityContent.ts`. [README](./community/README.md). |
 | `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
 | `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
-| `protocol-labs/a/*` | `ProtocolLabAView` | `/prototype/protocol-a` — la estructura elegida para la página de Protocol, salida de comparar cuatro. Tiene su propio [README](./protocol-labs/README.md) |
-| `protocol-labs/hero-labs/*` | `ProtocolHeroesIndexView`, `ProtocolHeroLabView` | `/prototype/protocol-heroes` (+ `/h2`) — **laboratorio**: la alternativa viva para la primera pantalla. Eran ocho; ganó H4 · Cut, ya copiada en `protocol-labs/a/Hero.tsx`. Tiene su propio [README](./protocol-labs/hero-labs/README.md); **ninguna página real lo importa** |
-| `quantum-security-heroes/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` (+ `-h3`) — **laboratorio**: dos heroes para `/quantum-security`, cada uno con el acomodo de un hero de `protocol-labs/hero-labs/` (h2/h3) y su propio fondo ASCII. El resto de cada página reusa `quantum-security-copy/*` sin modificar. Tiene su propio [README](./quantum-security-heroes/README.md) |
-| `protocol-labs/opening-labs/*` | `ProtocolOpeningsIndexView`, `ProtocolOpeningLabView` | `/prototype/protocol-opening` (+ `/c`, `/e`, `/g`) — **laboratorio**: tres aperturas completas (hero + cifras + «Built for AI scale») con superficie propia — un shader WebGL y dos campos de caracteres en canvas. Tiene su propio [README](./protocol-labs/opening-labs/README.md) |
-| `quantum-security-labs/{h2,h3}/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` and `-h3` — **lab**: two proposals for everything BELOW the hero on `/quantum-security`. Hero, `Roadmap` and `InTheNews` untouched; copy stays `quantum-security-copy/quantumContent.ts`, shared and unedited. Both are assembled from devices that already exist on `homepage-update` and the two `chain-ab` proposals — H2 takes `propuesta-a`'s ruled temperament, H3 takes `propuesta-b`'s editorial one (and mounts `quantum-security-copy/BeyondAccountsAccordion` as-is). Its own [README](./quantum-security-labs/README.md); **no real page imports it** |
-| `analytics-labs/{a,b,c}/*` | `AnalyticsLabsIndexView`, `AnalyticsAView`, `AnalyticsBView`, `AnalyticsCView` | `/prototype/analytics` (+ `/a`, `/b`, `/c`) — **lab**: three proposals for the `/analytics` page, sharing one copy file (`analyticsContent.ts`) and differing only in composition. They separate along how much space the page spends per datum. It has its own [README](./analytics-labs/README.md); **no real page imports it** |
-| `protocol-labs/combo-labs/*` | `ProtocolCombosIndexView`, `ProtocolComboLabView` | `/prototype/protocol-combo` (+ `/h4`, `/h2`, `/c`, `/e`, `/g`) — **laboratorio**: qué va debajo de cada hero superviviente. Cinco propuestas para las secciones 2 y 3, una por hero; cada ruta monta la página entera. Tiene su propio [README](./protocol-labs/combo-labs/README.md) |
+| `protocol-labs/*` | `ProtocolLabAView`, `ProtocolLabBView`, `ProtocolLabCView` | `/prototype/protocol-a`, `-b` y `-c` — tres versiones de la página Protocol completa. Las siete secciones son las MISMAS en las tres; lo único que cambia es el hero (`heroes/`). Tiene su propio [README](./protocol-labs/README.md) |
+| `quantum-security-heroes/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` (+ `-h3`) — **laboratorio**: dos heroes para `/quantum-security`, cada uno con el acomodo de un hero de `protocol-labs/` (h2/h3, ya borrados) y su propio fondo ASCII. El resto de cada página reusa `quantum-security-copy/*` sin modificar. Tiene su propio [README](./quantum-security-heroes/README.md) |
+| `quantum-security-labs/{h2,h3}/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` y `-h3` — **laboratorio**: dos propuestas para todo lo que va DEBAJO del hero de `/quantum-security`. Hero, `Roadmap` e `InTheNews` quedan intactos; la copy sigue siendo `quantum-security-copy/quantumContent.ts`, compartida y sin editar. Las dos se arman con devices que ya existen en `homepage-a` y en las dos `chain-ab` — H2 toma el temple reglado de `propuesta-a`, H3 el editorial de `propuesta-b` (y monta `quantum-security-copy/BeyondAccountsAccordion` tal cual). Tiene su propio [README](./quantum-security-labs/README.md); **ninguna página real lo importa** |
+| `analytics-labs/{a,b,c}/*` | `AnalyticsLabsIndexView`, `AnalyticsAView`, `AnalyticsBView`, `AnalyticsCView`, `AnalyticsMixView` | `/prototype/analytics` (+ `/a`, `/b`, `/c`, `/mix`) — **laboratorio**: tres propuestas para la página `/analytics`, con un solo módulo de copy (`analyticsContent.ts`) y distinta composición. Se separan por cuánto espacio gasta la página por dato; `/mix` arma una página con secciones de las tres. Tiene su propio [README](./analytics-labs/README.md); **ninguna página real lo importa** |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
 son laboratorios y no se tocan a la ligera.
 
+## El patrón A/B/C: una copy, tres layouts
+
+`foundation/`, `economics/`, `about/` y `community/` comparten una forma que las
+distingue tanto de las páginas reales como de los laboratorios de antes:
+
+```
+components/sections/<page>/
+  <page>Content.ts   ← TODA la copy. La leen las tres variantes.
+  a/  b/  c/         ← tres layouts de la MISMA página
+  README.md
+```
+
+Que la copy viva en un solo módulo no es prolijidad: es lo que hace honesta la
+comparación. Con tres carpetas de secciones y tres copias del texto, la primera
+corrección de estilo entra en una sola y las tres dejan de ser comparables —
+cualquier diferencia que se vea podría ser de layout o de redacción, y no hay
+forma de saber cuál. Con un módulo, **toda** diferencia entre A, B y C es de
+layout, por construcción.
+
+No son laboratorios en el sentido de `protocol-labs/`: no hay una ruta índice
+que las compare, cada variante es una página completa que se abre y se enseña.
+Cuando el equipo elija una, se promueve a la ruta real de `(site)` —
+`/near-foundation`, `/economics`, `/about`, `/community`, hoy `StubView`— y las
+otras dos se borran junto con su carpeta.
+
 ## Laboratorios
 
-Hay cinco vivos. Tres bajo `protocol-labs/`: `hero-labs/` (la primera pantalla,
-decidida — queda H2 como alternativa), `opening-labs/` (tres aperturas completas
-con superficie, sin decidir) y `combo-labs/` (qué va debajo de cada hero: cinco
-propuestas para las secciones 2 y 3, sin decidir — es el que está en curso). La regla que gobierna a
-cualquiera: **un laboratorio alimenta una ruta de comparación, ninguna página real
-lo importa, y si una versión gana se COPIA** a la carpeta de la página que la
-reciba — no se importa desde ahí. Y cuando se copia, la del lab se borra: dos
-archivos que dicen ser el mismo componente divergen sin que nadie se entere.
+Quedan dos vivos, y ninguno cuelga de Protocol: `analytics-labs/` (tres
+propuestas para `/analytics`, más una ruta `/mix` que arma una página con
+secciones de las tres) y `quantum-security-labs/` (dos propuestas para el cuerpo
+de `/quantum-security`, con el hero, `Roadmap` e `InTheNews` fuera de la
+comparación). Los dos sin decidir.
 
-Two more do not hang off `protocol-labs/`, because they do not belong to that
-page: `analytics-labs/` (three proposals for `/analytics`) and
-`quantum-security-labs/` (two proposals for the body of `/quantum-security`).
-Both undecided.
+La regla que gobierna a cualquiera: **un laboratorio alimenta una ruta de
+comparación, ninguna página real lo importa, y si una versión gana se COPIA** a
+la carpeta de la página que la reciba. Y cuando se copia, la del lab se borra:
+dos archivos que dicen ser el mismo componente divergen sin que nadie se
+entere.
 
-`protocol-labs/a/` ya NO es un laboratorio: es la estructura elegida, esperando
-que se decida su apertura.
-
-`transition-labs/` —doce transiciones hero → contenido— se borró entero el
-2026-08-22 junto con seis heroes y cuatro aperturas: se descartaron por diseño,
-no por deuda. Está en el historial de git; el detalle de qué era cada pieza, en
+Los tres de Protocol —`hero-labs/`, `opening-labs/` y `combo-labs/`— se borraron
+el 2026-08-23, con sus rutas. Lo que sobrevivió de cada uno está montado en
+`/prototype/protocol-a`, `-b` y `-c`, que es donde se juzga de verdad; un
+laboratorio existe para elegir, y una vez elegido mantenerlo es mantener dos
+versiones de lo mismo. El detalle de qué se descartó está en
 [`protocol-labs/README.md`](./protocol-labs/README.md).
 
 Este README describía siete (`hero-alt`, `proof-alt`, `stack-labs`,
 `transition-labs`, `newsletter-labs`, `mural-labs`, `footer-labs`) y ocho
 homepages en paralelo. Se archivaron todos el 2026-08-21 al quedar
-`homepage-update` como la única línea viva.
+`homepage-a` como la única línea viva. Las exploraciones que siguieron —seis
+rutas de la `e` a la `k`— se podaron el 2026-08-23 hasta las dos que quedan,
+renombradas `b` y `c`.
 
 Están completos en el tag `v-pre-limpieza` y en la rama `Respaldo`, y
 **`docs/labs-archivados.md`** dice qué era cada uno y cómo traerlo de vuelta.

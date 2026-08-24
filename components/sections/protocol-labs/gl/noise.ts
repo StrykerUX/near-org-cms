@@ -8,7 +8,7 @@
 //
 // ── De dónde sale ──────────────────────────────────────────────────────────
 //
-// Del shader del hero de la homepage (`homepage-update/gl/foliage.ts`), que ya
+// Del shader del hero de la homepage (`homepage-a/gl/foliage.ts`), que ya
 // había resuelto estas tres decisiones y las dejó anotadas:
 //
 //   · **Value noise y no simplex.** El gradiente de simplex cuesta el doble de
@@ -19,7 +19,7 @@
 //   · **Rotación entre octavas.** Sin ella el value noise deja ejes visibles a
 //     0° y 90°, muy legibles en cuanto el campo se estira o se estratifica.
 //
-// Copiarlo de allá y no importarlo de allá: `homepage-update/` es la línea de
+// Copiarlo de allá y no importarlo de allá: `homepage-a/` es la línea de
 // diseño viva de la home y `protocol-labs/` es un laboratorio. La dependencia
 // tiene que ir del lab hacia la página, nunca al revés.
 //

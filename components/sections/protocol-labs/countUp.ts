@@ -7,7 +7,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 
 // El contador de cifras, una sola vez para todo el laboratorio de Protocol.
 //
-// Nació dentro de `hero-labs/H2Count` y salió de ahí cuando las ocho franjas de
+// Nació dentro de un hero del laboratorio y salió de ahí cuando las ocho franjas de
 // prueba lo necesitaron: nueve copias del mismo parser de "<$0.002" es
 // exactamente el tipo de cosa que diverge en la primera corrección.
 //

@@ -9,7 +9,7 @@ import { CONTENT_BLOCK as C } from "@/components/sections/quantum-security-labs/
 // ── H3 · §Content block ────────────────────────────────────────────────────
 // The deck's `[Content Block]` is one sentence with no heading and no eyebrow.
 // This proposal gives it the site's statement card: an `--ink` panel on cream at
-// `--text-manifesto`, which is the treatment `homepage-update/AgentEconomy`
+// `--text-manifesto`, which is the treatment `homepage-a/AgentEconomy`
 // uses for the homepage's one manifesto line.
 //
 // **`--text-manifesto` and its condition.** The token exists for "a paragraph

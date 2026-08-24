@@ -23,7 +23,7 @@ proposals' temperament they take.
 | Three-column staircase (`lg:mt-0 / lg:mt-14 / lg:mt-28`) with a hairline over each | `WhyItMatters`, both chain proposals |
 | Sticky accumulating scene (`enableScene` + `trackTimeline`, never `pin: true`) | `chain-ab-propuesta-{a,b}/StickyScrollCapabilities` |
 | Uneven two-column split `minmax(0,0.9fr) minmax(0,1.1fr)` | `chain-ab-propuesta-b/Proof` |
-| `--ink` statement card at `--text-manifesto` | `homepage-update/AgentEconomy` |
+| `--ink` statement card at `--text-manifesto` | `homepage-a/AgentEconomy` |
 | `Eyebrow` → `text-h2` with an `<Accent>` second line | every section on all three pages |
 | Mono small caps in `--gray-intermediate` for labels | all of the above |
 | `py-20 lg:py-28` section rhythm | both chain proposals |

@@ -22,7 +22,7 @@ import ClosingCard from "@/components/sections/quantum-security-labs/h3/ClosingC
 // splits (`lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]`), value-and-gloss on
 // one baseline joined by an em dash, and the sticky accumulating scene built on
 // `enableScene`/`trackTimeline`. The two dark statement cards are
-// `homepage-update/AgentEconomy`'s black card, and the FAQ badge is the current
+// `homepage-a/AgentEconomy`'s black card, and the FAQ badge is the current
 // build's. Nothing here is a new visual idea — it is this site's parts, put in
 // a different order than H2 puts them.
 //

@@ -1,6 +1,6 @@
 import PrototypeMotionProvider from "@/components/site/providers/PrototypeMotionProvider";
 
-// Same reasoning as `app/prototype/homepage-update/layout.tsx` and
+// Same reasoning as `app/prototype/homepage-a/layout.tsx` and
 // `app/prototype/chain-ab-propuesta-a/layout.tsx`: the provider lives here and
 // not in `app/prototype/`, so that `/prototype` and `/prototype/components`
 // keep running without Lenis and without a coordinated

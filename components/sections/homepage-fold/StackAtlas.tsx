@@ -6,9 +6,9 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import StackAssembly, { type StackStop } from "@/components/sections/homepage-e/stackAssembly";
-import StackCursorTag from "@/components/sections/homepage-e/StackCursorTag";
-import { useStackScene } from "@/components/sections/homepage-e/useStackScene";
+import StackAssembly, { type StackStop } from "@/components/sections/homepage-shared/stackAssembly";
+import StackCursorTag from "@/components/sections/homepage-shared/StackCursorTag";
+import { useStackScene } from "@/components/sections/homepage-shared/useStackScene";
 import {
   AI_BLOCK,
   INTENTS_BLOCK,
@@ -19,7 +19,7 @@ import {
   STACK_NOTES,
   STACK_PIECES,
   STACK_INTRO as INTRO,
-} from "@/components/sections/homepage-e/nearStackContent";
+} from "@/components/sections/homepage-shared/nearStackContent";
 
 // El NEAR Stack rehecho contra el audit de carga cognitiva.
 //

@@ -25,7 +25,7 @@ import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTo
 //
 // **Ink, not cream.** The page is cream and white all the way down. The house
 // uses a solid `--ink` field for exactly this — the black statement card in
-// `homepage-update/AgentEconomy`, the dark press card in `InTheNews` — so a
+// `homepage-a/AgentEconomy`, the dark press card in `InTheNews` — so a
 // full-bleed ink band is in the vocabulary and is the strongest pause available
 // without inventing anything.
 //
