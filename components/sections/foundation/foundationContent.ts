@@ -257,3 +257,38 @@ export const CLOSING = {
   primary: { label: "Join the community", href: "/community" },
   secondary: { label: "Careers", href: "https://careers.near.org" },
 } as const;
+
+/**
+ * The plates of the instrument layout (`b/`).
+ *
+ * A panel in that variant is a device, and a device has its identity engraved
+ * on the case: a name at top left and a state at top right. Those strings are
+ * page copy like any other — they are in English, they are read by whoever
+ * opens the page, and one day someone will want to change "Level and setpoint"
+ * without opening a `.tsx`. So they live here for exactly the reason
+ * `COUNCIL.relation` does: the alternative is a dozen English strings hidden
+ * inside components, which is what this module exists to prevent.
+ *
+ * What is NOT here: anything a layout can DERIVE. The hero plate reads its
+ * meta off `STIFTUNG_FACTS`, the council readouts build their labels out of
+ * `COUNCIL.bodies`, and the ecosystem panel counts `ECOSYSTEM_MARKS` itself.
+ * A second copy of a fact is a fact that can go stale.
+ *
+ * Figure captions are not here either, and that is deliberate rather than an
+ * oversight: a caption describes one specific drawing, so it belongs beside the
+ * drawing it describes and moves with it. Same convention as `chain/`.
+ */
+export const PLATES = {
+  hero: { label: "NEAR Foundation", meta: "Instrument, read from outside" },
+  mandate: { label: "Mandate", meta: "What it is · what it does · what it is for" },
+  mission: {
+    label: "Mission",
+    meta: "Level and setpoint",
+    /** The one lit readout of the page: the target the whole page argues for. */
+    target: { value: "Smaller", label: "Declared target" },
+  },
+  stiftung: { label: "Stiftung", meta: "Cutaway" },
+  council: { label: "Governing body", meta: "Separation of powers" },
+  operations: { label: "Treasury", meta: "Three activities" },
+  ecosystem: { label: "Annex — the ecosystem", meta: "Half served, half commissioned" },
+} as const;

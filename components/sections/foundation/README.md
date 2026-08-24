@@ -22,131 +22,20 @@ propósito, cuyo plan es devolverse. Las tres variantes atacan esa tensión desd
 la **estructura** de la página, no desde una ilustración: no hay flechas
 genéricas hacia afuera ni cajas que se achican de adorno en ninguna de las tres.
 
-## A — «Receding column» (`a/`)
-
-El estilo de la casa ejecutado con precisión. Crema de punta a punta con **un
-solo corte a tinta**, al final.
-
-**La decisión que la distingue: el trazo es uno solo y atraviesa tres
-secciones.** El hero baja un filete que cruza el `Container` entero —la medida
-completa—; `Pillars` corta esa medida en tres; y `Devolution` la repite hacia
-abajo cada vez más corta hasta dejar un tick. Nada crece, nada apunta a ningún
-lado: una escala que se retira. El kicker cae justo debajo del filete más corto,
-en el espacio que la medida dejó libre. `Close` se lleva ese resto a la tinta.
-
-Si se reordenan las secciones, lo que hay que preservar es **ese trazo**, no el
-orden nominal de los bloques.
-
-Otras dos decisiones que valen para leer el resto de la carpeta:
-
-- **Los pilares no escalonan.** `chain/WhyItMatters` desplaza sus tres columnas
-  en escalera porque son una secuencia con dirección. Estos tres no son una
-  secuencia sino tres rangos del mismo peso, y escalonarlos afirmaría una
-  jerarquía que el texto no tiene.
-- **El Council es un solo trazo cerrado**, un óvalo tipo pista entre los dos
-  bloques nombrados, con las dos etiquetas (`empowers`, `reports to`) contra su
-  propia pata. Dos flechas serían dos objetos y el lector contaría dos
-  relaciones; un lazo cerrado es la única circulación que el texto describe, y
-  además no necesita puntas de flecha, o sea que no sale del vocabulario de 1px
-  del resto de la página.
-
-**Lo gráfico que entró en A (segunda pasada):** solo dos cosas, y ninguna cerca
-del trazo.
-
-- La **marquesina de `Ecosystem`** dejó de ser nombres en tipo y corre celdas
-  `MediaFrame` de 16rem en `5/2` — cinco con su logo real, siete reservadas. La
-  forma no cambió (una banda sin principio ni final sigue siendo la única que
-  dice «hundreds»); cambió lo que lleva adentro.
-- Una **fila de cuatro retratos reservados** (`3/4`) al pie de `Council`,
-  colgada de la columna 5 en adelante. Arranca adentro a propósito: el lazo de
-  arriba es un dibujo chico que vive del aire, y una fila de cuatro marcos al
-  ancho completo debajo se lo cierra. Entran con el `[data-council-item]` que
-  la sección ya tenía — **el timeline del lazo no se tocó**.
-
-`Pillars` y `Devolution` quedaron **exactamente como estaban**. Es donde vive el
-gesto de la variante y lo que lo hace legible es el vacío alrededor.
-
-## B — «Stiftung dossier» (`b/`)
-
-La página como el instrumento legal que describe: densa, de registro, con aire
-de documento archivado — pero sigue siendo el mismo sitio, no un PDF.
-
-**La decisión que la distingue: la retícula la impone un componente, no cada
-sección.** `Clause.tsx` es dueño del raíl angosto de la izquierda —**2 columnas
-de 12**, que es lo que mide un margen— y del filete que cruza **las dos
-columnas**. Si cada bloque declarara sus propios `col-span`, el borde izquierdo
-del argumento se correría una columna en algún punto de la página y con eso se
-iría el efecto entero: un documento es un documento porque su medida no cambia
-nunca.
-
-**Y el raíl va lleno.** La columna ancha lleva el argumento; el raíl lleva los
-**datos** del documento, en mono. Bloque por bloque:
-
-| Bloque | Qué va en el raíl |
-|---|---|
-| `DossierHero` | Membrete: nombre + dos de los cuatro hechos legales |
-| `DossierPillars` | Número de cláusula sobre la **clave** del pilar (`id`) |
-| `StiftungInstrument` | Los **cuatro** `STIFTUNG_FACTS`, término sobre valor |
-| `CouncilClause` | Los dos cuerpos en orden de autoridad, con `COUNCIL.relation` en el tramo que los separa |
-| `OperationsClauses` | Etiqueta de sección; después, número de cláusula sobre la clave de cada actividad |
-| `EcosystemAnnex`, `DossierClose` | Solo la etiqueta — las dos excepciones, y están comentadas en el código |
-
-Un raíl vacío no se lee como el margen de un documento: se lee como una columna
-que nadie llenó. Si una sección tiene material de registro y termina en la
-columna ancha, la variante se queda sin motivo.
-
-**Y el contraste que la salva de ser aburrida: `DevolutionBreak`.** Es el único
-bloque sin raíl, sin número y sobre blanco —el único blanco de la página, que el
-DS permite una vez—. Es la frase en la que la organización dice que piensa dejar
-de ser lo que el resto del documento describe: el layout no ilustra eso, el
-layout **es** la excepción. Tiene que seguir siendo **la única**; dos
-excepciones son un ritmo, un ritmo es un formato, y ahí la página vuelve a tener
-un solo registro con una variante gritada.
-
-**El aparato gráfico de B (segunda pasada).** Era la única variante sin una sola
-pieza dibujada, que en un dossier de dos columnas es lo mismo que decir «texto».
-Entraron **dos figuras, cuatro retratos y la grilla**:
-
-| Bloque | Qué entró | Por qué ahí |
+| | Estilo | Qué es acá |
 |---|---|---|
-| `StiftungInstrument` | **Fig. 01** — un recipiente abierto arriba, con el piso cerrado salvo por una abertura; cinco trazos entran, cuatro se paran en el piso y solo el que cae sobre la abertura sigue | «Funds given to it cannot be removed for any reason except the fulfillment of that purpose» es la afirmación más dibujable de la página y la cargaba un párrafo. La figura no ilustra el párrafo: dice lo mismo más rápido |
-| `OperationsClauses` | **Fig. 02** — una barra con tres patas: dos terminan en un punto, la tercera se va por abajo del marco | El tesoro es una palanca repartida en tres, y la tercera actividad («devolution of functions to the ecosystem») es la única cuyo producto no vuelve. Una línea que se corta adentro de la caja es una cantidad; una que sale es una dirección |
-| `CouncilClause` | Cuatro retratos `3/4` chicos (2 columnas) en el cuerpo de la cláusula | Un expediente que nombra dos cuerpos y no muestra a ninguno es un expediente incompleto |
-| `EcosystemAnnex` | La grilla de marcas, con el número afuera de la celda | Ver abajo |
+| **A** | Editorial | «Hand-off» — una escena pegada sobre negro, y siete secciones que se corren para dejarla hablar |
+| **B** | Instrumento | «Un aparato con lectura pública» — página oscura, paneles, y un solo objeto leído cuatro veces |
+| **C** | Escenario | «El terreno que se entrega» — superficie de curvas de nivel, cards, color, y una figura a sangre |
 
-Tres decisiones de composición que valen para cualquier figura que se agregue
-después:
+Las letras significan lo mismo en las cuatro páginas A/B/C del sitio: el
+armazón de B y C sale de [`../shells`](../shells/README.md) —`Panel`, `Readout`,
+`ActRail`, `Surface`, `Card`— y **el vocabulario gráfico es propio de esta
+página**. Eso fue una decisión explícita: armazón compartido para que las cuatro
+B se lean como una familia, arte propio para que ninguna diga lo que no tiene
+que decir.
 
-1. **Las figuras van en la columna ancha, nunca en el raíl.** El raíl son 2
-   columnas de mono; un marco ahí no es un exhibit, es un sello.
-2. **Las dos figuras no cuelgan igual.** Fig. 01 va sola en las últimas 5
-   columnas del argumento (registro en los dos márgenes del bloque más denso, y
-   el kicker se queda con la medida entera abajo); Fig. 02 va **al lado** del
-   intro, en 4 columnas. Dos figuras al mismo ancho y sobre el mismo eje
-   convierten dos exhibits en una plantilla.
-3. **Las dos van numeradas** (`Fig. 01` / `Fig. 02`) aunque el texto no las
-   referencie, que es la excepción a la regla de `Figure`. Acá el número es
-   registro y no cross-reference: en esta variante están numeradas las
-   cláusulas, los pilares, las actividades y el anexo, y un exhibit sin numerar
-   dentro de un instrumento que numera hasta sus párrafos se lee como papel
-   suelto.
-
-`DevolutionBreak` sigue **sin nada**, y es deliberado: es la excepción de la
-página, y una excepción con una figura adentro deja de ser una excepción.
-
-Dos detalles que parecen repetición y no lo son:
-
-- El hero lleva **dos** de los cuatro hechos legales y la sección del Stiftung
-  lleva **los cuatro**. Es la distinción que hace cualquier documento entre su
-  membrete y su anexo.
-- La numeración **reinicia** en `01` en las actividades. Los pilares y las
-  actividades no son una lista de seis: tres son rangos y tres son deberes, y
-  cada grupo tiene su propio encabezado, como un 2.1/2.2/2.3.
-
-`DossierClose` repite la medida de `Clause` a mano en vez de usarlo, y es por un
-color: `border-rule` (#c9c7c1) es un filete sobre crema y nada sobre tinta.
-
-## C — «Hand-off» (`c/`)
+## A — «Hand-off» (`a/`)
 
 Una escena pegada en el corazón de la página y todo lo demás en silencio para
 dejarla hablar.
@@ -188,76 +77,162 @@ que paga la escena. Cierra en crema, no en tinta: la página ya gastó su negro 
 la escena y volver a cerrarlo dejaría el final leyéndose como la cola de la
 escena en vez de como la página hablándole al lector después.
 
-**Lo gráfico que entró en C (segunda pasada):** exactamente dos cosas, y las dos
-son evidencia, no gesto. La **grilla de marcas** en `HandoffEcosystem` (cuatro
-columnas, celdas `5/2`) y **cuatro retratos** al pie de `HandoffCouncil`, con la
-misma sangría a columna 5 que en A.
+**Lo gráfico de A:** exactamente dos cosas, y las dos son evidencia. La
+**grilla de marcas** en `HandoffEcosystem` (cuatro columnas, celdas `5/2`) y
+**cuatro retratos** al pie de `HandoffCouncil`, sangrados a columna 5. Nada más:
+el resto sigue callado para que hable la escena.
 
-Nada más, y eso es el trato de esta variante: el resto sigue callado para que
-hable la escena. Los retratos no la pisan porque un marco reservado no afirma
-nada —no se mueve, no dibuja, no compite—; y la grilla llega **después** del
-negro, donde lo único que corresponde es una constatación plana. Cualquier cosa
-con movimiento ahí se leería como la escena continuando.
+## B — «Instrumento» (`b/`)
+
+La página oscura de punta a punta, y **un solo objeto leído cuatro veces**.
+
+Una fundación que declara que su transparencia es estructural y no elegida está
+describiendo, literalmente, una caja con instrumentación: se ve qué entra, qué
+está retenido y qué sale. Así que la variante le da al lector ese objeto y
+después lo lee.
+
+| Sección | Qué muestra el aparato |
+|---|---|
+| `InstrumentHero` | La caja **cerrada**, en la placa de identificación, con dos de los cuatro hechos legales como `Readout` |
+| `DevolutionMeter` | La misma caja como **nivel y consigna**: el nivel donde está, la consigna punteada debajo, y un raíl con marcas sin números (**Fig. 01**) |
+| `CustodyCutaway` | La misma caja **abierta**: cinco entradas, cuatro se paran en el piso, la quinta sigue por la única abertura y se va del cuadro (**Fig. 02**) |
+| `OperationsScene` | La misma caja como **losa repartida** en tres actos con `ActRail`; dos parcelas quedan en el cuadro, la tercera lo cruza |
+
+La geometría de las cuatro vive en **`b/apparatus.ts`** y en ningún otro lado:
+cuatro dibujos de un objeto solo se sostienen si el objeto conserva su tamaño y
+su punto de vista. La proyección es **dimétrica plana (~20°)** y no la isométrica
+canónica de 30° a propósito — a 30° cualquier caja de este sitio se lee como el
+campo de cubos de `/prototype/protocol-a`.
+
+**Lo que hace que no sea «la A pintada de negro»:** la unidad de composición.
+Ahí es un párrafo, acá es un **panel** — un objeto con borde, etiqueta en una
+esquina, estado en la otra y una banda de lecturas al pie. Todas las secciones
+son un panel salvo dos, y las dos excepciones están argumentadas en el archivo:
+la escena de operaciones (que es un panel que **se mueve**) y el cierre (que no
+lleva caja porque las últimas cuatro líneas no las dice el instrumento).
+
+Detalles que valen para editarla:
+
+- **Una sola lectura encendida en toda la página**: `Smaller / Declared target`,
+  en `DevolutionMeter`. `accent` marca lo que la sección afirma; si se encienden
+  todas, ninguna es el argumento. (`CustodyCutaway` enciende `Bound to` dentro de
+  su propio bloque de cuatro, que es la lectura de la que habla su figura.)
+- **Sin magnitudes.** El raíl del medidor está marcado y sin números, y ninguna
+  parcela lleva cifra: el deck no da ninguna, y ponerle una al tesoro sería
+  inventar el único dato que esta página no puede inventar.
+- **Los `Readout` salen de `STIFTUNG_FACTS`** y las etiquetas del Council se
+  arman con `COUNCIL.bodies`. Nada se copia dos veces.
+- **`data-nav-dark` va en el `<main>`**, no por sección: el header lee el DOM, la
+  página es oscura entera, y es un trigger en vez de ocho.
+- Los paneles con celdas reservadas o retratos van en `tone="slate"` y no `ink`:
+  sobre #101010 las marcas de esquina de 1px se leen como agujeros.
+- La escena de operaciones sigue el mismo contrato que `a/HandoffScene`: sticky
+  de CSS, ScrollTrigger que solo lee, JSX en estado final, y `ActRail` recibiendo
+  `active` desde la timeline (fuera de rango = ningún acto encendido, que es lo
+  correcto cuando la escena está desarmada y los tres actos se leen apilados).
+
+**El Council de B no lleva diagrama** y es deliberado: la relación se dibuja una
+vez en toda la comparación, y le tocó a C. Acá va **fichada** —`empowers` y
+`reports to` como dos lecturas en la banda del panel— más los cuatro retratos.
+
+## C — «Escenario» (`c/`)
+
+El terreno que se entrega. La superficie de curvas de nivel del armazón se toma
+**literal**: la Foundation sostiene un territorio y su plan es soltarlo.
+
+La paleta es **fría y mineral** (`#e7eaec` / `#aebcc4` / `#46545c`, en
+`c/terrain.ts`) — suiza, no tropical, y a diez bandas: apretada para leerse como
+una medición, abierta para que quede meseta donde apoyar el titular. Fue lo
+primero que se calibró en pantalla: a catorce bandas el hero era legible y el
+suelo, ruido.
+
+**Todo lo que se dibuja en la página son curvas de nivel del mismo terreno.** No
+es una decisión estética: el hero ya le enseñó al lector que esta página dibuja
+suelo, así que una figura hecha de las mismas curvas se lee como una medición y
+no como una ilustración pegada encima.
+
+| Sección | Figura | Qué afirma |
+|---|---|---|
+| `PillarCards` 01 | Una **depresión cerrada**, con las marcas hacia adentro que un mapa usa para distinguir una cuenca de una cima | Lo que entra no puede salir: «legally bound to its purpose» |
+| `PillarCards` 02 | Una **repisa ancha** que drena hacia los relieves chicos de alrededor | Lo que la repisa cede es de lo que están hechos los otros |
+| `PillarCards` 03 | El mismo terreno **sin nada por encima del resto**, con el contorno punteado del relieve único que había | «Decentralized, self-sufficient» |
+| `DevolutionRelief` | **La figura grande a sangre**: la cima se retira mientras el lector baja, y el terreno queda | «Smaller», no «gone» |
+| `CouncilTerraces` | Dos **terrazas** y dos carriles entre ellas, con los verbos de `COUNCIL.relation` | La autoridad baja, la rendición sube |
+| `OperationsSlope` | Tres terrazas en una pendiente: dos circuitos se cierran, el tercero se va del cuadro | La devolución es la única cuyo producto no vuelve |
+
+Dos reglas que sostienen a C:
+
+1. **El color significa una cosa.** La rampa del CTA (`--cta-lime` → `--cta-mint`
+   → `--cta-deep`) se usa como **relleno**, no como acento, y siempre sobre lo
+   mismo: suelo que al final del dibujo es de otro. Por eso la figura del Council
+   es monocroma y el pilar de descentralización no.
+2. **Una sola figura se anima**, la del relieve, y se anima porque **el trazado
+   es la afirmación**: la cima que se retira ES la frase. Va con scrub y no
+   reproducida una vez, por el mismo motivo que `chain/CompletePicture` — la
+   animación y la oración son el mismo enunciado, así que el retiro tiene que
+   pasar al ritmo al que el lector baja. El JSX renderiza el estado **final**
+   (cima recogida, relleno drenado, la cota todavía marcada) y la escena lo
+   rebobina.
+
+Los fondos, en orden: `SURFACE · tint · cream · WHITE · tint · cream · tint ·
+cream`. El blanco se gasta **una vez**, en el Stiftung, que es lo más plano que
+dice la página. **No hay tinta en ninguna parte**: B es un objeto encendido en un
+cuarto oscuro y C es luz de día sobre campo abierto; una sección negra acá se
+leería como un pedazo de la otra página.
+
+Móvil: el relieve se **recorta** en vez de encogerse (`preserveAspectRatio
+xMinYMid slice` + alto en `svh`), porque escalado a 375px es una franja de 110px
+sin cima; y la pendiente de operaciones **scrollea** dentro de su caja, porque
+recortarla se comería una terraza — justo la tercera, que es de la que habla.
 
 ## Qué se descartó
 
 | Idea | Por qué no |
 |---|---|
-| Cards con borde para los pilares | La doctrina de la casa está escrita en `chain/WhyItMatters.tsx`: el filete separa sin encerrar. Tres rectángulos después de un hero hecho de aire se leen como otro sitio |
-| Flechas saliendo de un centro (A) | Es la ilustración de la idea, no la idea; y además es el trabajo de la variante C, hecho mejor |
-| Una caja que se achica (A) | Una forma que se achica es una transición, no una medida: no hay contra qué leerla |
-| Una cuarta pata de la medida con etiquetas («Foundation» arriba, «Ecosystem» abajo) | El gesto tiene que leerse en tres segundos sin pedir explicación. Etiquetado deja de ser una escala y pasa a ser un gráfico |
-| El raíl de B a 3 columnas (~450px a 1440) | A ese ancho deja de ser un margen: una entrada de dos líneas mono deja el resto de la columna vacía, y lo vacío es lo que se lee. Quedó en 2, y el ancho recuperado se lo lleva el argumento |
-| Los cuatro hechos legales en tabla de filetes dentro de la columna ancha (B) | Se leía bien solo, y estaba mal dos veces: dejaba en blanco el margen del bloque más denso de la página, y ponía los cuatro hechos en la misma columna que el párrafo que ya los explica, uno debajo del otro. En el margen hacen otro trabajo — el párrafo dice qué te cuesta un Stiftung, el margen dice qué **es** |
-| Un diagrama del Council en B y en C | En B, la única ilustración de un documento que no tiene ninguna: los dos cuerpos y la dirección entre ellos van fichados en el raíl, en mono. En C, un segundo diagrama en la antesala de una figura de tres pantallas |
-| Cerrar C en tinta | Ver arriba: el negro ya está gastado, y el final se leería como cola de la escena |
-| **Tres iconitos para los pilares** | Es el ejemplo de manual de lo prohibido. Solo entraban si los tres *ejecutaban* su afirmación como los glifos de `chain/WhyItMatters` —algo cerrado que no puede abrirse, recursos que salen, un centro que se disuelve—; lo que salía eran tres pictogramas. Y en A el trazo continuo ya atraviesa esa zona: no necesita compañía |
-| Una figura en `DevolutionBreak` (B) | Es **la** excepción del documento. Una excepción con un exhibit adentro vuelve a ser un bloque del documento |
-| Una figura en el raíl de B | 2 columnas de mono: ahí un dibujo no es un exhibit, es un sello |
-| Un gráfico en los cierres (`Close`, `DossierClose`, `HandoffClose`) | Un remate corto tiene que respirar. El objetivo no era 24 de 24 secciones |
-| Mapear un logo real a un proyecto que no es | Precedente en `chain-ab-propuesta-a/Proof.tsx`, y es un truco de laboratorio: pone la marca de Ledger sobre «Infinex». Acá los cinco assets se sirven a los cinco proyectos que efectivamente retratan, y los otros cinco nombres del deck salieron de la lista |
-| El nombre del proyecto repetido debajo de la celda | Los cinco logos son **wordmarks**: la marca ya dice el nombre. Y una línea extra solo bajo las celdas servidas deja las filas de la grilla desparejas |
+| Cards con borde para los pilares en A y B | La doctrina de la casa está en `chain/WhyItMatters.tsx`: el filete separa sin encerrar. En C sí hay cards, y el porqué está en `shells/stage/Card.tsx` — una unidad **con figura** necesita caja; tres columnas de prosa, no |
+| Tres iconitos para los pilares (A y B) | Es el ejemplo de manual de lo prohibido. Solo entraban si los tres *ejecutaban* su afirmación; lo que salía eran pictogramas. En C entran porque el mapa tiene gramática para las tres —cuenca, repisa que drena, campo parejo— y ninguna sobrevive convertida en símbolo |
+| Un diagrama del Council en B | La relación se dibuja **una vez** en la comparación. Dibujarla en dos variantes deja la diferencia entre ellas en la pintura |
+| Una caja que se achica (B) | Una forma que se encoge es una transición: no hay contra qué leerla. El medidor arregla exactamente eso — nivel, consigna, y la distancia entre los dos es la frase |
+| Animar el nivel bajando (B) | La copy declara una intención («our goal is»); un nivel que baja solo afirma que ya está pasando |
+| Números en el raíl del medidor o cifras en las parcelas (B) | El deck no da ninguna magnitud del tesoro |
+| Cerrar C con una segunda superficie con shader | La superficie es la frase de apertura; repetirla al final pliega el cierre sobre el arranque en vez de soltar al lector |
+| Un `Figure` alrededor de la caja del hero (B) | El panel ya la enmarca y la nombra. Dos marcos sobre un objeto |
+| Un `Figure` alrededor del relieve (C) | Su filete y su pie están medidos al ancho del arte, y un filete de 1px cruzando el viewport entero se lee como separador de sección, no como el techo de una figura. El pie va abajo, a la medida de la retícula |
+| Un gráfico en los cierres (`HandoffClose`, `InstrumentClose`, `StageClose`) | Un remate corto tiene que respirar. El objetivo no era 24 de 24 secciones |
+| Mapear un logo real a un proyecto que no es | Precedente en `chain-ab-propuesta-a/Proof.tsx`, y es un truco de laboratorio |
+| El nombre del proyecto repetido debajo de la celda | Los cinco logos son **wordmarks**: la marca ya dice el nombre, y una línea extra solo bajo las celdas servidas deja las filas desparejas |
 
 ## La grilla de logos de dApps
 
-El deck pide conservar la grilla de logos de dApps del sitio actual. **En la
-primera pasada se resolvió con nombres en tipo** (esa nota ya no vale): el repo
-tiene cinco assets de logo y una grilla habría sido cinco marcas reales al lado
-de siete huecos rotos.
-
-`MediaFrame` cambió la respuesta. Un hueco dejó de ser un hueco: es una celda
-reservada con marcas de registro y su propio encargo escrito adentro, así que la
-grilla puede existir hoy **en su estado real** —cinco servidas, siete
-encargadas—. Ver la mitad llena y la mitad reservada es más honesto y más útil
-que doce nombres en una tipografía: el lector ve el ecosistema, y quien produzca
-los assets ve exactamente qué falta.
+El deck pide conservar la grilla de logos del sitio actual. El repo tiene cinco
+assets, así que la grilla existe **en su estado real**: cinco servidas y siete
+reservadas, cada reserva con su encargo escrito adentro. Ver la mitad llena y la
+mitad encargada es más honesto y más útil que doce nombres en una tipografía.
 
 Las doce viven en `ECOSYSTEM_MARKS` y la celda es una sola para las tres
 variantes: **`EcosystemMark.tsx`**, que envuelve a `MediaFrame` y resuelve las
 dos cosas que no son layout —el encargo de la celda reservada, y
-`object-scale-down` para la servida, porque `object-cover` recorta un wordmark y
-`object-contain` lo agranda—. Que las tres compartan la celda es lo que mantiene
-honesta la comparación: cualquier diferencia entre A, B y C sigue siendo de
-acomodo.
+`object-scale-down` para la servida—. Que las tres compartan la celda es lo que
+mantiene honesta la comparación.
 
 | | Forma | Qué afirma |
 |---|---|---|
-| A | Marquesina continua de celdas de 16rem | Una población sin principio ni final — «hundreds» |
-| B | Anexo numerado: filete, número en mono **afuera** de la celda, celda debajo | Una lista enumerada, contable: un anexo con entradas todavía por presentar, que es como se ve un anexo de verdad |
-| C | Grilla tranquila de cuatro columnas, después del negro | Una constatación plana de a dónde fue la masa |
+| A | Grilla tranquila de cuatro columnas, después del negro | Una constatación plana de a dónde fue la masa |
+| B | Anexo dentro de un panel `slate`, con el link al pie | El registro de lo que el aparato **no** contiene |
+| C | Grilla de cuatro columnas sobre `tint`, sin caja propia | Los únicos de la página que la Foundation no sostiene: darles un contenedor nuestro contradice la sección |
 
 **Cinco nombres del deck salieron de la lista** para dejar entrar a los cinco que
 sí tienen asset (Ledger, Venice, Abound, Brave, ZODL — los cinco son case
-studies reales de NEAR). La alternativa era mapear `ledger.png` sobre «Aurora»,
-que es lo que hace `chain-ab-propuesta-a/Proof.tsx` y es un truco de
-laboratorio. Siguen siendo **doce**, y eso es estructural: `c/HandoffScene`
-manda la masa a doce clusters. Si la lista cambia de largo, `CLUSTERS` la sigue.
+studies reales de NEAR). Siguen siendo **doce**, y eso es estructural:
+`a/HandoffScene` manda la masa a doce clusters. Si la lista cambia de largo,
+`CLUSTERS` la sigue.
 
 ## Assets a producir
 
-La lista completa de lo que hay que encargar, que es literalmente lo que cada
-celda tiene escrito adentro. Cuando un asset llega, se le pasa `src` a la entrada
-correspondiente en `foundationContent.ts` y **ningún layout cambia**.
+La lista completa es literalmente lo que cada celda tiene escrito adentro.
+Cuando un asset llega, se le pasa `src` a la entrada correspondiente en
+`foundationContent.ts` y **ningún layout cambia**. Las tres variantes muestran
+las mismas celdas, así que la lista **no creció** con B y C.
 
 **Logos del ecosistema** — `ECOSYSTEM_MARKS`, celdas `5/2`, spec «Monochrome
 SVG». Siete pendientes:
@@ -278,7 +253,8 @@ SVG». Siete pendientes:
 | ZODL | ✅ `/logos/zodl.png` |
 
 **Retratos del Council** — `COUNCIL_PORTRAITS`, celdas `3/4`, spec «1200×1600 ·
-JPG». Los cuatro, pendientes:
+JPG». Los cuatro, pendientes, y aparecen en las tres variantes (en B con
+`tone="dark"`):
 
 | Encargo (`label`) |
 |---|
@@ -290,55 +266,40 @@ JPG». Los cuatro, pendientes:
 **Cuatro no es el Council.** El deck no dice cuántos miembros tiene, y en la
 página que argumenta que su transparencia es estructural, inventar un padrón
 sería fabricar el registro que dice llevar. Cuatro es la cantidad que compone
-en todos los breakpoints (4 · 2 · 1) y nada más. Cuando llegue el padrón real,
-ese array pasa a ser las personas.
+en todos los breakpoints (4 · 2 · 1) y nada más.
 
-> **Idioma: todo lo que se renderiza va en inglés.** Los `label`, los `spec` y
-> los `caption` de esta carpeta, como el resto de la copy de la página. Los
+> **Idioma: todo lo que se renderiza va en inglés.** Los `label`, los `spec`, los
+> `caption` y las placas de los paneles, como el resto de la copy. Los
 > comentarios del código y este README siguen en español, como en `chain/` y
 > `quantum/`.
 >
-> Hubo una primera versión con los `label` y los pies en español, con el
-> argumento de que son orden de trabajo y no copy. Para el `label` de
-> `MediaFrame` el argumento es cierto a medias —es un encargo, y desaparece en
-> cuanto llega el `src`— pero **hoy se ve**, así que va en el idioma de la
-> página; sigue siendo una orden de trabajo, solo que en inglés («Council member
-> — portrait», no «Image»). Para el `caption` de `Figure` era directamente
-> falso: el pie no es un placeholder, es contenido permanente que se imprime
-> debajo del dibujo y no desaparece nunca. Un pie en español bajo un párrafo en
-> inglés no se lee como registro interno, se lee como un error.
+> El `label` de `MediaFrame` es una orden de trabajo y desaparece cuando llega el
+> `src`, pero **hoy se ve**, así que va en el idioma de la página. El `caption`
+> de `Figure` ni siquiera es placeholder: es contenido permanente que se imprime
+> bajo el dibujo y no desaparece nunca.
 
 > **Ninguna celda `MediaFrame` de esta carpeta lleva `data-reveal`.** Es una
-> regla, no un olvido, y salió de un agujero real: los cuatro retratos de
-> `CouncilClause` dejaban ~400px de crema vacía entre «Executive team» y la
-> cláusula siguiente. `useScrollReveal` preesconde sus targets **al montar**
-> (`.from()` con `immediateRender`, documentado en el propio hook), así que una
-> celda reservada adentro de un reveal está invisible hasta que el stagger le
-> llega — y mientras tanto lo que hay es un hueco del tamaño exacto del asset
-> que falta. Es lo único que un placeholder no puede hacer: la celda existe
-> para **declarar** la falta, y una declaración que aparece con fade no declara
-> nada mientras no está. Se pintan en reposo.
->
-> El segundo factor del mismo agujero era el tamaño: en B las celdas estaban a
-> 3 columnas de la grilla anidada (~235 × 314, las más grandes de la página) y
-> cuatro en fila son una banda cuya única tinta son dieciséis marcas de esquina.
-> Pasaron a 2 columnas (~150 × 200), que es la fotografía adjunta de un
-> expediente y es lo que el bloque dice ser.
+> regla, no un olvido, y salió de un agujero real. `useScrollReveal` preesconde
+> sus targets **al montar** (`.from()` con `immediateRender`), así que una celda
+> reservada adentro de un reveal está invisible hasta que el stagger le llega — y
+> mientras tanto lo que hay es un hueco del tamaño exacto del asset que falta. Es
+> lo único que un placeholder no puede hacer: la celda existe para **declarar**
+> la falta. Se pintan en reposo. El razonamiento largo está en `EcosystemMark`.
 
 ## Lo que se tocó en `foundationContent.ts`
 
 Todo está comentado en el módulo:
 
 1. **El último elemento de `body` ES el kicker**, tanto en `MISSION` como en
-   `TRANSPARENCY`. La frase de remate estaba además enterrada al final del
-   último párrafo de `MISSION`, así que cualquier layout que la destacara —o
-   sea, los tres— la mostraba dos veces en tres renglones. Se sacó del párrafo y
-   quedó como última entrada: los layouts renderizan `body.slice(0, -1)` como
-   prosa y `kicker` aparte.
-2. **`COUNCIL.relation`** (`empowers` / `reports to`) son los dos verbos de la
-   relación, ya sueltos, para que el dibujo de la variante A no tenga que
-   hardcodear dos strings en inglés adentro de un componente.
-3. **`ECOSYSTEM_NAMES` pasó a ser `ECOSYSTEM_MARKS`** — de doce strings a doce
-   entradas con `id`, `name` y `src` opcional. Ver arriba: es lo único de
-   los cuatro que toca el texto y no solo la forma, y está argumentado.
-4. **`COUNCIL_PORTRAITS`** — cuatro lugares reservados, con su encargo. Nuevo.
+   `TRANSPARENCY`. Los layouts renderizan `body.slice(0, -1)` como prosa y
+   `kicker` aparte.
+2. **`COUNCIL.relation`** (`empowers` / `reports to`), los dos verbos sueltos
+   para que el dibujo de C no hardcodee dos strings en inglés.
+3. **`ECOSYSTEM_MARKS`** — doce entradas con `id`, `name` y `src` opcional.
+4. **`COUNCIL_PORTRAITS`** — cuatro lugares reservados, con su encargo.
+5. **`PLATES`** — las placas de los paneles de la variante B (nombre del
+   aparato y estado, más la lectura encendida de la misión). Van al módulo por
+   el mismo motivo que `COUNCIL.relation`: son texto que se ve, y la alternativa
+   era una docena de strings en inglés escondidos en componentes. Lo que un
+   layout puede **derivar** —los hechos legales, las etiquetas del Council, la
+   cuenta de marcas— no está ahí.
