@@ -5,7 +5,7 @@ const meta = {
   title: "Foundation B · Instrumento",
   description:
     "Página oscura de punta a punta, con paneles que convierten cada bloque en un aparato con lectura. Comparte armazón con las variantes B de about, community y economics; el vocabulario gráfico es propio de la página.",
-  blurb: "foundation, instrumento",
+  blurb: "caja de custodia, leída cuatro veces",
   nav: false,
   sitemap: false,
   robots: "noindex",

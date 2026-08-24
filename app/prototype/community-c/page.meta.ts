@@ -5,7 +5,7 @@ const meta = {
   title: "Community C · Escenario",
   description:
     "La comunidad sobre superficies con shader, con cards y arte a sangre. Mismo armazón que las variantes C del resto; el vocabulario gráfico es propio.",
-  blurb: "community, escenario",
+  blurb: "territorio poblado, en clave cálida",
   nav: false,
   sitemap: false,
   robots: "noindex",

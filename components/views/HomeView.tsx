@@ -35,6 +35,16 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 export type HomeViewVariant = {
   href: string;
   label: string;
+  /**
+   * La ruta real donde esta variante está montada, si lo está.
+   *
+   * Es el dato que faltaba a la hora de elegir: con tres propuestas abiertas en
+   * tres pestañas, «cuál es la que está puesta» se contesta hoy abriendo el
+   * `page.tsx`. Sale del manifiesto y no de una lista a mano — ver `view` en
+   * `lib/page-meta.ts`— porque una lista se pudre el día que alguien promueva
+   * otra variante cambiando un import.
+   */
+  live?: string;
 };
 
 export type HomeViewLink = {
@@ -170,9 +180,22 @@ function Row({ link }: { link: HomeViewLink }) {
             <li key={v.href}>
               <Link
                 href={v.href}
-                className="block rounded-full border border-rule px-2.5 py-0.5 text-caption-mono text-gray-intermediate transition-colors duration-200 hover:border-ink hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                // La variante montada se marca con el borde y el texto en ink, no
+                // con un color de marca: la tira ya vive dentro de un índice en
+                // grises, y un verde acá diría «esta es mejor» cuando lo que dice
+                // es «esta es la que está puesta».
+                className={`flex items-baseline gap-1.5 rounded-full border px-2.5 py-0.5 text-caption-mono transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
+                  v.live
+                    ? "border-ink text-ink"
+                    : "border-rule text-gray-intermediate hover:border-ink hover:text-ink"
+                }`}
               >
                 {v.label}
+                {v.live ? (
+                  // El `aria-label` lleva la frase entera porque «→ /about»
+                  // leído por un lector de pantalla no dice nada por sí solo.
+                  <span aria-label={`montada en ${v.live}`}>→ {v.live}</span>
+                ) : null}
               </Link>
             </li>
           ))}

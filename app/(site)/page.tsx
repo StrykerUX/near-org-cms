@@ -50,23 +50,55 @@ function groupOf(route: string, nav: (typeof ROUTES)[number]["nav"]) {
   return "site" as const;
 }
 
-// El nombre corto de una variante, para la píldora: el título completo repite
-// el del laboratorio ("Stack lab · C · Anchors") y a diez píldoras por fila eso
-// es diez veces la misma palabra.
+// ── Familias de propuestas ──────────────────────────────────────────────────
 //
-// Lista explícita y no un prefijo común calculado: los títulos no comparten uno
-// limpio ("Transiciones · índice" contra "Transición · C · ASCII" comparten
-// "Transici", que corta a mitad de palabra). Agregar un laboratorio es agregar
-// una línea acá.
-// Quedó vacío: los cuatro prefijos que había ("Stack lab · ", "Transición · ",
-// "Footer ", "Homepage · proof ") eran de laboratorios archivados en la
-// limpieza — ver docs/labs-archivados.md. La constante se queda porque el
-// mecanismo sigue siendo el correcto: si vuelve a haber un lab con variantes,
-// agregar su prefijo acá es una línea.
-const STRIP: RegExp[] = [];
+// Seis páginas tienen varias propuestas conviviendo, y hasta ahora el índice las
+// listaba planas: doce filas seguidas donde «las tres opciones de About» había
+// que ir a buscarlas leyendo. Ahora cada familia es UNA fila con su tira.
+//
+// El mecanismo ya existía —lo usan los laboratorios— pero pedía que las
+// variantes fueran rutas de cuatro segmentos colgando de un padre que existe.
+// Estas son de tres (`/prototype/about-a`) y no tienen padre: no hay
+// `/prototype/about`. Así que la familia es SINTÉTICA: la fila no lleva a
+// ningún lado propio, lleva a su primera variante.
+//
+// El nombre de cada familia va a mano y no derivado del slug, por el mismo
+// motivo que `FEATURED` de más abajo: «chain-ab-propuesta» no se convierte en
+// «Chain Abstraction» con ninguna regla, y forzar una regla que funcione para
+// seis casos y falle en el séptimo es peor que siete líneas.
+const FAMILIES: Record<string, string> = {
+  about: "About",
+  community: "Community",
+  economics: "Economics",
+  foundation: "Foundation",
+  homepage: "Homepage",
+  protocol: "Protocol",
+  "chain-ab-propuesta": "Chain Abstraction",
+};
 
-const shortLabel = (title: string) =>
-  STRIP.reduce((t, re) => t.replace(re, ""), title);
+// `/prototype/about-a` → `about`. Solo rutas de TRES segmentos terminadas en
+// una letra suelta: `/prototype/protocol-combo/mural` no matchea (cuatro
+// segmentos, y ya cuelga de su laboratorio), y `/prototype/quantum-security-h2`
+// tampoco (`h2` no es una letra suelta), que es lo correcto — son dos heroes de
+// una misma página, no dos propuestas de página entera.
+const familyOf = (route: string): string | null => {
+  const parts = route.split("/");
+  if (parts.length !== 3) return null;
+  const m = parts[2].match(/^(.+)-([a-z])$/);
+  if (!m) return null;
+  return m[1] in FAMILIES ? m[1] : null;
+};
+
+// El nombre corto de una variante, para la píldora: el título completo repite
+// el de la familia («About A · Editorial») y a tres píldoras por fila eso es
+// tres veces la misma palabra.
+//
+// Se arma desde el nombre de la familia y no con una lista de prefijos: los
+// títulos no comparten uno limpio —«Protocol · A — Datasheet» y «Protocol B —
+// Spectrum» difieren en el separador— así que se corta por el nombre y se
+// limpia lo que quede colgando adelante.
+const shortLabel = (title: string, family: string) =>
+  title.replace(family, "").replace(/^[\s·—–-]+/, "").trim() || title;
 
 // Páginas que EXISTEN y se buildean, pero que ningún menú enlaza todavía. Se
 // marcan en la lista para que el índice diga qué falta conectar, en vez de
@@ -154,14 +186,60 @@ const ALL = ROUTES.filter((r) => r.route !== "/");
 // `Set<string>` explícito: las rutas del manifiesto están tipadas como
 // `/${string}`, y un Set de ese tipo rechaza un `.has()` con un string común.
 const PARENTS = new Set<string>(ALL.map((r) => r.route));
+
+// Dónde está montada cada view: `AboutAView` → `/about`.
+//
+// `view` lo DERIVA el generador leyendo qué importa cada `page.tsx` (ver
+// `lib/page-meta.ts`), así que esto no es una lista que alguien tenga que
+// mantener — el día que se promueva otra variante cambiando ese import, la
+// marca se mueve sola.
+//
+// Solo cuentan las rutas que NO son de prototipo: una variante montada en otra
+// ruta de prototipo no está «en producción», está duplicada.
+const LIVE_AT = new Map<string, string>();
+for (const r of ROUTES) {
+  if (!r.view || r.route.startsWith("/prototype")) continue;
+  LIVE_AT.set(r.view, r.route);
+}
+
 const VARIANTS = new Map<string, HomeViewVariant[]>();
+
+// Las variantes de un laboratorio: rutas de cuatro segmentos colgando de un
+// padre que existe.
 for (const r of ALL) {
   if (!r.route.startsWith("/prototype/") || !isVariant(r.route)) continue;
   const parent = parentOf(r.route);
   if (!PARENTS.has(parent)) continue;
   const list = VARIANTS.get(parent) ?? [];
-  list.push({ href: r.route, label: shortLabel(r.title) });
+  list.push({ href: r.route, label: shortLabel(r.title, "") });
   VARIANTS.set(parent, list);
+}
+
+// Las propuestas de una página: rutas de tres segmentos terminadas en letra.
+// Su familia es sintética y se identifica con la clave `family:<slug>` para que
+// no pueda chocar con una ruta real.
+const FAMILY_ROWS = new Map<string, { label: string; first: string; blurb?: string }>();
+for (const r of ALL) {
+  const family = familyOf(r.route);
+  if (!family) continue;
+  const key = `family:${family}`;
+  const name = FAMILIES[family];
+
+  const list = VARIANTS.get(key) ?? [];
+  list.push({
+    href: r.route,
+    label: shortLabel(r.title, name),
+    live: r.view ? LIVE_AT.get(r.view) : undefined,
+  });
+  VARIANTS.set(key, list);
+
+  // La fila de la familia lleva a su primera variante por orden alfabético, que
+  // es la A. No es arbitrario: en las cuatro páginas del set la A es la que está
+  // montada, así que el nombre de la familia abre lo que el sitio sirve hoy.
+  const row = FAMILY_ROWS.get(key);
+  if (!row || r.route < row.first) {
+    FAMILY_ROWS.set(key, { label: name, first: r.route, blurb: row?.blurb ?? r.blurb });
+  }
 }
 
 // Las variantes se ordenan por su nombre corto, que empieza por la letra o el
@@ -176,8 +254,11 @@ for (const list of VARIANTS.values()) {
 // `isVariant` no es redundante: `parentOf` de una ruta de tres segmentos se
 // devuelve a SÍ MISMA, así que sin él cada laboratorio se filtraba a sí mismo y
 // los tres con variantes desaparecían del índice.
+// Fuera de la lista plana las variantes que ya cuelgan de algo: las de un
+// laboratorio (cuatro segmentos) y las de una familia de propuestas.
 const ENTRIES = ALL.filter(
-  (r) => !(isVariant(r.route) && VARIANTS.has(parentOf(r.route)))
+  (r) =>
+    !(isVariant(r.route) && VARIANTS.has(parentOf(r.route))) && !familyOf(r.route)
 ).map((r) => ({
   group: groupOf(r.route, r.nav),
   isLab: VARIANTS.has(r.route) || STACKED_LABS.includes(r.route),
@@ -191,10 +272,26 @@ const ENTRIES = ALL.filter(
   } satisfies HomeViewLink,
 }));
 
+// Y adentro, una fila por familia. Van al grupo de prototipos porque eso es lo
+// que son: páginas completas que se abren y se enseñan, no comparaciones de una
+// decisión suelta como los laboratorios.
+const FAMILY_ENTRIES = [...FAMILY_ROWS.entries()].map(([key, row]) => ({
+  group: "demo" as const,
+  isLab: false,
+  link: {
+    href: row.first,
+    label: row.label,
+    blurb: row.blurb,
+    variants: VARIANTS.get(key),
+  } satisfies HomeViewLink,
+}));
+
+const ALL_ENTRIES = [...ENTRIES, ...FAMILY_ENTRIES];
+
 const pick = (group: string, lab?: boolean) =>
-  ENTRIES.filter((e) => e.group === group && (lab === undefined || e.isLab === lab)).map(
-    (e) => e.link
-  );
+  ALL_ENTRIES.filter(
+    (e) => e.group === group && (lab === undefined || e.isLab === lab)
+  ).map((e) => e.link);
 
 // Alfabético por etiqueta, que en una lista larga es lo único que hace que
 // buscar una página sea buscar y no barrer. `localeCompare` y no `<`: el orden

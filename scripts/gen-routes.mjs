@@ -103,9 +103,26 @@ for (const dirAbs of walk(APP_DIR)) {
   const pageSource = readFileSync(pagePath, "utf8");
   const isStub = /^\s*import\s+StubView\s+from\s+["'`]/m.test(pageSource);
 
+  // Qué view monta esta ruta.
+  //
+  // Se deriva por el mismo motivo que `stub`, y es el mismo tipo de dato: un
+  // hecho verificable del código, no algo que la página afirme sobre sí misma.
+  // El índice de `/` lo necesita para poder decir cuál de las tres variantes de
+  // una página es la que se sirve de verdad — y esa es justo la información que
+  // se pudre si se mantiene a mano, porque el día que alguien cambie el import
+  // para promover otra variante no se va a acordar de tocar una lista.
+  //
+  // Solo se busca un import de `@/components/views/...`: es la convención del
+  // repo (`page.tsx` hace fetch y delega el JSX a una view) y una ruta que no la
+  // siga simplemente no reporta nada, en vez de reportar algo equivocado.
+  const viewMatch = pageSource.match(
+    /^\s*import\s+(\w+)\s+from\s+["'`]@\/components\/views\/[\w/-]+["'`]/m
+  );
+
   routes.push({
     route,
     stub: isStub,
+    view: viewMatch ? viewMatch[1] : null,
     file: path.relative(ROOT, metaPath),
     // Alias @/app/... en vez de relativo — evita ambigüedad con los
     // paréntesis literales de los grupos de ruta en especificadores de
@@ -131,7 +148,12 @@ routes.sort((a, b) => a.route.localeCompare(b.route));
 
 const imports = routes.map((r, i) => `import m${i} from "${r.importSpecifier}";`).join("\n");
 const entries = routes
-  .map((r, i) => `  { ...m${i}, route: "${r.route}", stub: ${r.stub}, file: "${r.file}" },`)
+  .map(
+    (r, i) =>
+      `  { ...m${i}, route: "${r.route}", stub: ${r.stub}, view: ${
+        r.view ? `"${r.view}"` : "null"
+      }, file: "${r.file}" },`
+  )
   .join("\n");
 
 const output = `// AUTO-GENERADO por scripts/gen-routes.mjs — NO EDITAR A MANO.

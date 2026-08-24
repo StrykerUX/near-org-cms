@@ -49,4 +49,17 @@ export type PageMeta = {
 // que la página afirma sobre sí misma (`nav`, `blurb`) y uno que es un hecho
 // verificable de su código — y este segundo tipo se pudre si hay que mantenerlo
 // a mano: nadie se acuerda de bajar la bandera el día que le escribe contenido.
-export type RouteEntry = PageMeta & { file: string; stub: boolean };
+export type RouteEntry = PageMeta & {
+  file: string;
+  stub: boolean;
+  /**
+   * El nombre de la view que la ruta monta, o `null` si su `page.tsx` no importa
+   * ninguna de `@/components/views/`.
+   *
+   * Mismo estatus que `stub`: es un hecho DERIVADO del código y no algo que la
+   * página declare. Lo consume el índice de `/` para decir cuál de las tres
+   * variantes de una página es la que se sirve en la ruta real — un dato que
+   * mantenido a mano se pudre en el primer cambio de import.
+   */
+  view: string | null;
+};
