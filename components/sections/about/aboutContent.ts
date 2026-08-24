@@ -300,3 +300,75 @@ export const FIGURES = {
       "The upper line is the models, and it stops in 2018. The detour it forced is the lower one. When the models come back, the two arrive at the same point — and keep going.",
   },
 } as const;
+
+/**
+ * The eight chapters, grouped into four acts.
+ *
+ * Variant B needs this and the other two do not, so the obvious place for it is
+ * `b/`. It lives here anyway, for the reason everything else on this page does:
+ * it is a claim about the CONTENT — that these eight chapters are four
+ * movements and not eight equal beats — and a claim about the content that lives
+ * in one layout is a claim the other two silently contradict.
+ *
+ * ── Why these four cuts ────────────────────────────────────────────────────
+ *
+ * Each act is the span over which the thing they were building STAYS THE SAME
+ * THING, and each boundary is a place where it changes:
+ *
+ *   research     — two people trying to make models write code, and the
+ *                  payments problem that stopped them. Ends when they decide to
+ *                  build the network instead.
+ *   foundations  — the network itself: sharding, then the first attack on the
+ *                  walls between chains. Ends when the question stops being
+ *                  "how do we scale this" and becomes "why should a user know
+ *                  which chain they are on".
+ *   abstraction  — Chain Abstraction named, then shipped as Chain Signatures
+ *                  and Intents. Ends when the models finally arrive.
+ *   agents       — the infrastructure operating, and the original thesis
+ *                  arriving with it.
+ *
+ * No labels. An act's label is derived from its chapters' own years
+ * (`2017 — 2018`), so the rail carries data and not four headings someone wrote
+ * to name four groups the deck never named.
+ */
+export const ACTS = [
+  { id: "research", chapters: ["paper", "problem"] },
+  { id: "foundations", chapters: ["sharding", "unifying"] },
+  { id: "abstraction", chapters: ["chain-abstraction", "ai"] },
+  { id: "agents", chapters: ["intents", "now"] },
+] as const;
+
+/**
+ * The four numbers in this history, lifted out.
+ *
+ * A layout that reads as an instrument needs readings, and a reading is a
+ * figure with a unit. These are the only four the page can honestly show, and
+ * every one of them is already asserted somewhere on this site:
+ *
+ *   `6 months`  — this chapter's own last line, verbatim: "They thought it
+ *                 would take six months." It is the best number on the page,
+ *                 because the reader already knows how it ends.
+ *   `1M`        — the 2021 chapter: "the ecosystem hit one million accounts".
+ *   `5+ years`  — the site's standing uptime claim, worded exactly as
+ *                 `quantum/quantumContent.ts` and `protocol-labs` word it.
+ *   `35+`       — the site's standing chain count, worded exactly as
+ *                 `chain/chainContent.ts` words it. It is what "Chain
+ *                 Signatures expanded across additional ecosystems" means in
+ *                 the 2025 chapter.
+ *
+ * `chapter` ties each reading back to the chapter that earns it, so a layout can
+ * place a reading beside its own paragraph instead of collecting four figures
+ * into a scoreboard that belongs to no part of the story.
+ */
+export const READOUTS = [
+  {
+    id: "estimate",
+    value: "6 months",
+    label: "The estimate, 2018",
+    note: "They thought it would take six months.",
+    chapter: "problem",
+  },
+  { id: "accounts", value: "1M", label: "Accounts, 2021", note: "", chapter: "unifying" },
+  { id: "uptime", value: "5+ years", label: "100% mainnet uptime", note: "", chapter: "now" },
+  { id: "chains", value: "35+", label: "Chains connected", note: "", chapter: "intents" },
+] as const;
