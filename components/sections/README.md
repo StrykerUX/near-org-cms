@@ -68,6 +68,8 @@ dar por terminado un cambio.
 | `protocol-labs/hero-labs/*` | `ProtocolHeroesIndexView`, `ProtocolHeroLabView` | `/prototype/protocol-heroes` (+ `/h2`) — **laboratorio**: la alternativa viva para la primera pantalla. Eran ocho; ganó H4 · Cut, ya copiada en `protocol-labs/a/Hero.tsx`. Tiene su propio [README](./protocol-labs/hero-labs/README.md); **ninguna página real lo importa** |
 | `quantum-security-heroes/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` (+ `-h3`) — **laboratorio**: dos heroes para `/quantum-security`, cada uno con el acomodo de un hero de `protocol-labs/hero-labs/` (h2/h3) y su propio fondo ASCII. El resto de cada página reusa `quantum-security-copy/*` sin modificar. Tiene su propio [README](./quantum-security-heroes/README.md) |
 | `protocol-labs/opening-labs/*` | `ProtocolOpeningsIndexView`, `ProtocolOpeningLabView` | `/prototype/protocol-opening` (+ `/c`, `/e`, `/g`) — **laboratorio**: tres aperturas completas (hero + cifras + «Built for AI scale») con superficie propia — un shader WebGL y dos campos de caracteres en canvas. Tiene su propio [README](./protocol-labs/opening-labs/README.md) |
+| `quantum-security-labs/{h2,h3}/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` and `-h3` — **lab**: two proposals for everything BELOW the hero on `/quantum-security`. Hero, `Roadmap` and `InTheNews` untouched; copy stays `quantum-security-copy/quantumContent.ts`, shared and unedited. Both are assembled from devices that already exist on `homepage-update` and the two `chain-ab` proposals — H2 takes `propuesta-a`'s ruled temperament, H3 takes `propuesta-b`'s editorial one (and mounts `quantum-security-copy/BeyondAccountsAccordion` as-is). Its own [README](./quantum-security-labs/README.md); **no real page imports it** |
+| `analytics-labs/{a,b,c}/*` | `AnalyticsLabsIndexView`, `AnalyticsAView`, `AnalyticsBView`, `AnalyticsCView` | `/prototype/analytics` (+ `/a`, `/b`, `/c`) — **lab**: three proposals for the `/analytics` page, sharing one copy file (`analyticsContent.ts`) and differing only in composition. They separate along how much space the page spends per datum. It has its own [README](./analytics-labs/README.md); **no real page imports it** |
 | `protocol-labs/combo-labs/*` | `ProtocolCombosIndexView`, `ProtocolComboLabView` | `/prototype/protocol-combo` (+ `/h4`, `/h2`, `/c`, `/e`, `/g`) — **laboratorio**: qué va debajo de cada hero superviviente. Cinco propuestas para las secciones 2 y 3, una por hero; cada ruta monta la página entera. Tiene su propio [README](./protocol-labs/combo-labs/README.md) |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
@@ -76,7 +78,7 @@ son laboratorios y no se tocan a la ligera.
 
 ## Laboratorios
 
-Hay tres vivos, todos bajo `protocol-labs/`: `hero-labs/` (la primera pantalla,
+Hay cinco vivos. Tres bajo `protocol-labs/`: `hero-labs/` (la primera pantalla,
 decidida — queda H2 como alternativa), `opening-labs/` (tres aperturas completas
 con superficie, sin decidir) y `combo-labs/` (qué va debajo de cada hero: cinco
 propuestas para las secciones 2 y 3, sin decidir — es el que está en curso). La regla que gobierna a
@@ -84,6 +86,11 @@ cualquiera: **un laboratorio alimenta una ruta de comparación, ninguna página 
 lo importa, y si una versión gana se COPIA** a la carpeta de la página que la
 reciba — no se importa desde ahí. Y cuando se copia, la del lab se borra: dos
 archivos que dicen ser el mismo componente divergen sin que nadie se entere.
+
+Two more do not hang off `protocol-labs/`, because they do not belong to that
+page: `analytics-labs/` (three proposals for `/analytics`) and
+`quantum-security-labs/` (two proposals for the body of `/quantum-security`).
+Both undecided.
 
 `protocol-labs/a/` ya NO es un laboratorio: es la estructura elegida, esperando
 que se decida su apertura.
