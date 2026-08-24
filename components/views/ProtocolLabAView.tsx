@@ -1,14 +1,12 @@
 import { GridOverlay } from "@/components/primitives/Grid";
-import Hero from "@/components/sections/protocol-labs/a/Hero";
-import ProofRow from "@/components/sections/protocol-labs/a/ProofRow";
-import ScaleClaim from "@/components/sections/protocol-labs/a/ScaleClaim";
-import ScaleClaimRow from "@/components/sections/protocol-labs/a/ScaleClaimRow";
-import ScaleClaimSplit from "@/components/sections/protocol-labs/a/ScaleClaimSplit";
-import Assembly from "@/components/sections/protocol-labs/a/Assembly";
-import DevRuntime from "@/components/sections/protocol-labs/a/DevRuntime";
-import Deployment from "@/components/sections/protocol-labs/a/Deployment";
-import Appendix from "@/components/sections/protocol-labs/a/Appendix";
-import MachineClose from "@/components/sections/protocol-labs/a/MachineClose";
+import Hero from "@/components/sections/protocol-labs/heroes/HeroLayerflow";
+import ProofRow from "@/components/sections/protocol-labs/ProofRow";
+import ScaleClaim from "@/components/sections/protocol-labs/ScaleClaim";
+import Assembly from "@/components/sections/protocol-labs/Assembly";
+import DevRuntime from "@/components/sections/protocol-labs/DevRuntime";
+import Deployment from "@/components/sections/protocol-labs/Deployment";
+import Appendix from "@/components/sections/protocol-labs/Appendix";
+import MachineClose from "@/components/sections/protocol-labs/MachineClose";
 
 // La estructura elegida para la página Protocol — /prototype/protocol-a
 //
@@ -56,8 +54,6 @@ import MachineClose from "@/components/sections/protocol-labs/a/MachineClose";
 // Claro · claro · OSCURO · claro · claro · claro · OSCURO. Nada fuerte sigue a
 // nada fuerte, que es la regla de ritmo que traen quantum y la página viva.
 //
-// ── Por qué `ScaleClaim` va con `proof="top"` ─────────────────────────────
-//
 // Porque el hero no prueba nada. Con la franja al pie de esa sección, el lector
 // atraviesa una pantalla de afirmación y otra de explicación antes de ver el
 // primer dato duro; arriba, la evidencia es lo primero que aparece al moverse.
@@ -88,19 +84,7 @@ export default function ProtocolLabAView() {
       <main>
         <Hero />
         <ProofRow />
-        <ScaleClaim proof={false} />
-        {/* Dos variantes de la misma sección, montadas a continuación para
-            compararlas seguidas. Las tres comparten copy, card y arte vía
-            `ScaleCard`, así que lo único que las distingue es el layout:
-            
-              · `ScaleClaimRow`   — mismo reparto, cajas ACOSTADAS (panel a la
-                                    izquierda) para que no crezcan de alto.
-              · `ScaleClaimSplit` — texto en una cuarta columna y cards más
-                                    estrechas.
-            
-            Queda una de las tres al elegir. */}
-        <ScaleClaimRow />
-        <ScaleClaimSplit />
+        <ScaleClaim />
         <Assembly />
         <DevRuntime />
         <Deployment />

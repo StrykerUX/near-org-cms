@@ -1,7 +1,7 @@
 # `homepage-fold` — el hero que se pliega
 
-Las dos variantes montadas en `/prototype/homepage-f` y `/prototype/homepage-g`.
-Rige el contrato general de [`../README.md`](../README.md).
+Montado en `/prototype/homepage-b`. Rige el contrato general de
+[`../README.md`](../README.md).
 
 ## Qué es
 
@@ -20,16 +20,21 @@ va), y la **recomposición** (el hueco se contrae y la frase se cierra sobre él
 contar su secuencia una sola vez; este gesto se maneja con el dedo y se puede
 volver a mirar subiendo.
 
-## Las dos variantes
+## Cómo está calibrado
 
 | Ruta | Qué contiene al paisaje | Intercambio | Recorrido |
 |---|---|---|---|
-| `/prototype/homepage-f` | **El logo** (`contain: "mask"`). El follaje queda recortado por la silueta del mark; la N está calada y por el hueco se ve el crema. Sin caja. | `flip` — la palabra gira sobre su eje y el objeto se asienta con un contra-giro | 130svh |
-| `/prototype/homepage-g` | **Una caja** (`contain: "frame"`). El encuadre se cierra a un cuadrado de esquinas blandas con el follaje dentro, y el mark aparece encima en crema sólido. | `fade` — la palabra se desvanece, el objeto aparece. Nada rota. | 75svh, con `autoplay` |
+| `/prototype/homepage-b` | **Una caja** (`contain: "frame"`). El encuadre se cierra a un cuadrado de esquinas blandas con el follaje dentro, y el mark aparece encima en crema sólido. | `fade` — la palabra se desvanece, el objeto aparece. Nada rota. | 75svh, con `autoplay` |
 
-Las tres props son toda la diferencia entre las dos páginas. El intercambio y el
-recorrido van de la mano: en un recorrido corto una rotación no llega a leerse
-como tal y solo se percibe como un parpadeo.
+`HeroFold` conserva las otras dos opciones aunque nadie las monte:
+`contain: "mask"` recorta el follaje contra la silueta del mark —la N calada,
+el crema por el hueco, sin caja— y `exchange: "flip"` hace girar la palabra
+sobre su eje con un contra-giro del objeto. Las montaba `/prototype/homepage-f`,
+borrada el 2026-08-23.
+
+El intercambio y el recorrido van de la mano, y es lo que descartó a `flip`
+acá: en un recorrido corto una rotación no llega a leerse como tal y solo se
+percibe como un parpadeo. `mask` necesitaba los 130svh de `f` para sostenerse.
 
 ## La obertura del stack (`StackOverture`)
 
@@ -51,9 +56,17 @@ el borde del recorte.
 
 | Ruta | `mode` | Cómo llega el negro |
 |---|---|---|
-| `/prototype/homepage-g` | `bleed` | **Sube desde abajo** hasta llenar la pantalla. El filo cruza el título una vez y de lado a lado, que es lo que la inversión necesita para leerse. Misma dirección que el takeover del footer. |
-| `/prototype/homepage-h` | `brush` | **Lo trae el objeto del hero.** El cuadro de `Own ⬡ world.` baja cruzando la pantalla y deja el negro detrás, como un pincel. Ata las dos secciones de forma literal. |
-| `/prototype/homepage-i` | `cut` | **Sin transición.** El fondo se da vuelta en un frame, seco, como pasar la página de una revista. Va contra todo lo demás, que es suave. |
+| `/prototype/homepage-b` | `bleed` | **Sube desde abajo** hasta llenar la pantalla. El filo cruza el título una vez y de lado a lado, que es lo que la inversión necesita para leerse. Misma dirección que el takeover del footer. |
+
+Los otros dos modos siguen en el componente sin consumidor, los dos porque su
+ruta se borró el 2026-08-23:
+
+- `brush` — el negro lo traía el objeto del hero: el cuadro de `Own ⬡ world.`
+  bajaba cruzando la pantalla y lo dejaba detrás, como un pincel. Ataba las dos
+  secciones de forma literal. Lo montaba `/prototype/homepage-h`.
+- `cut` — sin transición. El fondo se da vuelta en un frame, seco, como pasar la
+  página de una revista. Va contra todo lo demás, que es suave. Lo montaba
+  `/prototype/homepage-i`.
 
 **El título que se encoge es el que se queda.** La obertura se solapa un
 viewport con la sección siguiente (`-mb-[100svh]` + `z-10`), así que el relevo
@@ -71,7 +84,7 @@ del stack durante toda la salida).
 
 ## Qué se monta y qué no
 
-De la cintura para abajo, las dos son **exactamente `homepage-e`**: montan sus
+De la cintura para abajo, las dos son **exactamente `homepage-shared`**: montan sus
 secciones sin copiarlas, porque no son otra línea de diseño sino la misma con
 otro hero. Un ajuste en cualquiera de esas secciones se ve en las tres, que es
 lo que se quiere mientras se comparan entre sí.

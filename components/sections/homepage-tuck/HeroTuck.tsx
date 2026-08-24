@@ -5,7 +5,7 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
-import HeroFoliage from "@/components/sections/homepage-e/HeroFoliage";
+import HeroFoliage from "@/components/sections/homepage-shared/HeroFoliage";
 
 // El hero que se recoge: de ocupar la pantalla entera a quedar guardado en una
 // tarjeta, y de ahí la página sigue.

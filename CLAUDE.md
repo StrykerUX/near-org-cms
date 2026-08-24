@@ -254,14 +254,26 @@ nunca el `ScrollTrigger.refresh()` global (congela Lenis).
 
 **Una sola línea de diseño viva.** Hasta el 2026-08-21 el repo tenía nueve
 homepages en paralelo y siete laboratorios de secciones. Se archivaron todos:
-queda `components/sections/homepage-update/` (montada en
-`/prototype/homepage-update`), más las tres páginas reales — `protocol/`,
+queda `components/sections/homepage-a/` (montada en
+`/prototype/homepage-a` y en la home real), más las dos exploraciones vivas
+—`/prototype/homepage-b` y `-c`, que comparten `homepage-shared/`,
+`homepage-fold/` y `homepage-tuck/`— y las tres páginas reales — `protocol/`,
 `chain/` y `quantum/`, que se importan entre sí y no son laboratorios.
 
 Lo archivado está completo en el tag `v-pre-limpieza` y en la rama `Respaldo`;
 **`docs/labs-archivados.md`** dice qué era cada lab y el comando para traerlo de
 vuelta. Antes de dar por perdido un efecto (transiciones, murales, shaders de
 hero, las catorce bandas de newsletter), mirá ahí.
+
+**Cuatro páginas nuevas, con tres layouts cada una.** `/about`, `/economics`,
+`/community` y `/near-foundation` dejaron de ser `StubView` el 2026-08-23:
+montan su variante A y se mudaron de `(site)` a `(motion)` porque usan
+ScrollTrigger (el porqué está en `app/(motion)/layout.tsx`). Las tres propuestas
+de cada una viven en `/prototype/<page>-a|b|c` y **comparten un único módulo de
+copy** (`components/sections/<page>/<page>Content.ts`), que es lo que hace que
+toda diferencia entre A, B y C sea de layout y nunca de redacción. Elegir otra
+propuesta es cambiar el import de una línea en el `page.tsx` real. El detalle
+del patrón está en `components/sections/README.md`.
 
 **Página nueva:** la skill `/new-page <slug> "<Título>"` (o
 `node scripts/new-page.mjs <slug> "<Título>"` a mano) es un atajo — genera
@@ -284,4 +296,4 @@ Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`
 
 ---
 
-*Last updated: 2026-08-21 — limpieza del árbol; `homepage-update` queda como única línea de diseño viva (ver docs/labs-archivados.md)*
+*Last updated: 2026-08-23 — cuatro páginas nuevas (`/about`, `/economics`, `/community`, `/near-foundation`) con tres layouts cada una y una copy compartida por página; las cuatro dejan de ser stubs y pasan a `(motion)`.*
