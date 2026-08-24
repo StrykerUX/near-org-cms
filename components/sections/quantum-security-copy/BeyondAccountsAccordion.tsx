@@ -62,6 +62,11 @@ const COMPRESSED_BASIS = "clamp(180px,26vw,320px)";
 // en cada una), pero la duración/easing es una sola.
 const TRANSITION_TIMING = "duration-[650ms] ease-[cubic-bezier(.22,.61,.36,1)] motion-reduce:transition-none";
 
+// NOTA (2026-08-23): estas tres rutas apuntaban a `/prototype/homepage-update/`,
+// carpeta que dejó de existir cuando `homepage-update` pasó a llamarse
+// `homepage-a` (commit c76db74). Las imágenes quedaron rotas en main; se
+// corrigen acá porque `/prototype/quantum-security-h3` monta este acordeón.
+//
 // Imágenes propias de este acordeón, no las de BEYOND_ACCOUNTS_CARDS — el
 // título/body sí vienen de ahí sin tocar, pero el `src` de cada card se pisa
 // acá, en el mismo orden (Wallets/Cross-chain/Ownership research). Son los
@@ -70,9 +75,9 @@ const TRANSITION_TIMING = "duration-[650ms] ease-[cubic-bezier(.22,.61,.36,1)] m
 // bg-cream: con esas imágenes bg-ink dejaba un cuadro crema visible contra el
 // plate negro, igual que ya pasaba con iso-22 (Wallets) antes de este cambio.
 const IMAGE_OVERRIDES = [
-  "/prototype/homepage-update/icon-assets.webp",
-  "/prototype/homepage-update/icon-data.webp",
-  "/prototype/homepage-update/icon-intelligence.webp",
+  "/prototype/homepage-a/icon-assets.webp",
+  "/prototype/homepage-a/icon-data.webp",
+  "/prototype/homepage-a/icon-intelligence.webp",
 ] as const;
 
 export default function BeyondAccountsAccordion() {

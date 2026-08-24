@@ -73,6 +73,7 @@ const FAMILIES: Record<string, string> = {
   foundation: "Foundation",
   homepage: "Homepage",
   protocol: "Protocol",
+  solutions: "Solutions",
   "chain-ab-propuesta": "Chain Abstraction",
 };
 
