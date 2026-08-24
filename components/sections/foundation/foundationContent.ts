@@ -176,11 +176,10 @@ export const ECOSYSTEM = {
   headline: "Built by an ecosystem, not a company",
   body: "Hundreds of applications, wallets, and protocols build on NEAR. The Foundation supports the ecosystem that builds them. The builders own what they make.",
   linkLabel: "Explore the ecosystem",
-  // ⚠ `/ecosystem` NO EXISTE todavía — hoy es un 404. Es la URL que pide el
-  // deck y la que la página tendrá, así que se deja escrita en vez de
-  // desviarla a una ruta parecida: un link correcto que aún no resuelve se
-  // arregla creando la página; uno desviado hay que acordarse de volver a
-  // apuntar. Antes de publicar: crear la página o quitar este bloque.
+  // La página existe desde el 2026-08-24. Estuvo escrita acá como 404 a
+  // propósito durante un tiempo —un link correcto que todavía no resuelve se
+  // arregla creando la página; uno desviado a una ruta parecida hay que
+  // acordarse de volver a apuntar— y ese es el arreglo.
   href: "/ecosystem",
 } as const;
 

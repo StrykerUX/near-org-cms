@@ -162,6 +162,7 @@ const GROUPS: { title: string; links: FooterLink[] }[] = [
     title: "Ecosystem",
     links: [
       { label: "NEAR Foundation", href: "/near-foundation" },
+      { label: "Ecosystem", href: "/ecosystem" },
       { label: "Community", href: "/community" },
       { label: "Governance", href: null },
     ],
