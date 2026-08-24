@@ -575,6 +575,35 @@
   --text-gloss--line-height: 1;
   --text-gloss--letter-spacing: -0.02em;
   --text-gloss--font-weight: 400;
+
+  /* ── Cita ────────────────────────────────────────────────────────────────
+     La cita a la que se le da tribuna: el testimonio que ocupa media sección
+     en `homepage-tuck/TestimonialDeck`. Sans, grande, y con interlineado de
+     LECTURA — que es lo que la separa de todo lo que ya existe.
+
+     No alcanzaba ninguno de los roles de la escala, y el que faltaba no era un
+     tamaño sino un interlineado. `h2` (1.1), `statement` (1) y `manifesto`
+     (1.06) están apretados a propósito: son titulares, y un titular quiere que
+     sus renglones se lean como un bloque. Una cita de tres renglones a 1.06 se
+     lee igual de compacta y ahí deja de sonar a alguien hablando para sonar a
+     un titular más — que es exactamente lo que la sección NO quiere, porque su
+     argumento entero es que esto lo dijo otra persona.
+
+     1.3 es interlineado de párrafo aplicado a cuerpo de titular. Sale del
+     artboard, donde los renglones caen a 52px sobre 40px de cuerpo.
+
+     Va en `cqw` como `manifesto` y por el mismo motivo: se mide contra la
+     media sección que ocupa, no contra el viewport, así que un monitor ancho no
+     la hace crecer más allá del bloque que la contiene. Quien la use declara
+     `@container`.
+
+     Peso 400: Montreal Book, que es el trazo del artboard. Con el 500 de la
+     escala sans la cita empuja y vuelve a competir con los titulares de la
+     página. */
+  --text-quote: clamp(1.625rem, 2.95cqw, 3.25rem);
+  --text-quote--line-height: 1.3;
+  --text-quote--letter-spacing: -0.015em;
+  --text-quote--font-weight: 400;
 }
 
 /* ── Escalas serif ──────────────────────────────────────────────────────────

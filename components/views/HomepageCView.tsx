@@ -4,6 +4,7 @@ import OwnYourOwn from "@/components/sections/homepage-shared/OwnYourOwn";
 import StackAnchors from "@/components/sections/homepage-shared/StackAnchors";
 import ProofLedger from "@/components/sections/homepage-tuck/ProofLedger";
 import BelongsNewsletter from "@/components/sections/homepage-shared/BelongsNewsletter";
+import TestimonialDeck from "@/components/sections/homepage-tuck/TestimonialDeck";
 import CustomerStories from "@/components/sections/homepage-shared/CustomerStories";
 import PressCarousel from "@/components/sections/homepage-shared/PressCarousel";
 import LatestUpdates from "@/components/sections/LatestUpdates";
@@ -49,6 +50,12 @@ export default function HomepageCView() {
       <CustomerStories />
       <PressCarousel />
       <BelongsNewsletter />
+      {/* El único tramo oscuro del final. Va después del newsletter porque es
+          el cambio de VOZ: hasta acá la página viene hablando de NEAR en
+          primera persona, y esto es lo que dijeron otros. La card de adelante
+          del mazo y la cita gigante de la izquierda son la misma persona — el
+          porqué está en el componente. */}
+      <TestimonialDeck />
       <LatestUpdates />
       <UpdatesList />
     </main>

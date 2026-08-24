@@ -52,3 +52,56 @@ le roban un solo píxel al recorrido del arte. Y el pie de gobernanza/economía
 pasa a montarse siempre DENTRO de la escena: su montaje de afuera es una sección
 hermana con `bg-ink` a sangre, que fuera del recorte aparece como una banda
 negra pegada bajo la caja.
+
+## Las otras dos secciones de la carpeta
+
+La carpeta empezó siendo el hero y ya no lo es. Las dos que siguieron nacieron
+para esta ruta y se montan solo acá, aunque no tengan nada que ver con el
+recogido.
+
+### `ProofLedger` — las seis pruebas como un balance
+
+Reemplaza a `homepage-shared/ProofDatum` (el eje horizontal con seis fichas
+alternadas) **solo en esta ruta**; aquella sigue montada en `homepage-b`.
+
+Cada prueba ocupa un renglón entero colgado de su plica, con la cifra a la
+izquierda y el cuerpo alineado a la derecha del bloque. Dos cosas que conviene
+saber antes de tocarla:
+
+- **Todo mide en `cqw`** contra un `@container` propio. El artboard fija
+  proporciones, no píxeles, y en `vw` se rompen justo cuando el `Container` topa
+  en su `max-width`.
+- **Dos ScrollTriggers por renglón**, y son dos porque los límites no caen en el
+  mismo punto del scroll: uno reproduce en `top 88%`, el otro rebobina en
+  `top bottom`. Con el rebobinado colgado del primero, el bloque se apagaba a la
+  vista de quien subía.
+- **El numeral es lo único que no se parte en letras.** El contador reescribe
+  `textContent` en cada cuadro y eso borraría los spans de SplitText.
+
+### `TestimonialDeck` — lo que otros dicen, en un mazo que avanza
+
+El único tramo oscuro del final de la página, y va después del newsletter porque
+es el cambio de **voz**: hasta ahí NEAR habla de sí misma.
+
+**La idea es que el mazo ES el índice.** La card de adelante y la cita gigante
+de la izquierda son la misma persona; avanza el mazo y cambia la cita. Un mazo
+en perspectiva al lado de una cita fija es decoración —tres rectángulos en
+diagonal—; un mazo donde lo que está adelante es lo que se está leyendo
+convierte a las cards de atrás en testimonios esperando turno.
+
+- **Las posiciones van en anchos de card, no en píxeles**, y GSAP las aplica con
+  `xPercent`/`yPercent`. El abanico se reacomoda solo al cambiar el ancho de la
+  card: no hay `resize` que escuchar. `transform-origin: top left` es lo que
+  hace legibles esos números — con el origen en la esquina, el `scale` no mueve
+  el punto que la posición declara.
+- **La card que deja el frente no viaja hasta el fondo**: sale hacia el lector,
+  se apaga, se teletransporta y vuelve a encenderse atrás. Interpolar esa
+  distancia se lee como una card que se escapó, no como una que se fue al fondo.
+- **El `style` inicial de cada card no puede depender del estado de React.** Es
+  el abanico para cuando no hay JS, y sale de `i` y no del slot vivo: React solo
+  reescribe las propiedades de `style` que cambiaron, y un `transform` que
+  cambia con el índice se lo pisa a GSAP a mitad del tween.
+- **⚠️ Las citas no están verificadas.** Dos son reconstrucciones de fragmentos
+  tapados en el artboard y un cargo dice literalmente "Company xxx". Son cuatro
+  personas reales: leer la cabecera de `testimonialDeckContent.ts` antes de
+  sacar esto de `/prototype`.
