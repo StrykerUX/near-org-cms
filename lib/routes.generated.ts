@@ -52,10 +52,12 @@ import m45 from "@/app/prototype/protocol-c/page.meta";
 import m46 from "@/app/prototype/quantum-security-copy/page.meta";
 import m47 from "@/app/prototype/quantum-security-h2/page.meta";
 import m48 from "@/app/prototype/quantum-security-h3/page.meta";
-import m49 from "@/app/(motion)/quantum-security/page.meta";
-import m50 from "@/app/(site)/research/page.meta";
-import m51 from "@/app/(site)/solutions/page.meta";
-import m52 from "@/app/(site)/terms-of-use/page.meta";
+import m49 from "@/app/prototype/solutions-a/page.meta";
+import m50 from "@/app/prototype/solutions-b/page.meta";
+import m51 from "@/app/(motion)/quantum-security/page.meta";
+import m52 from "@/app/(site)/research/page.meta";
+import m53 from "@/app/(site)/solutions/page.meta";
+import m54 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, file: "app/(site)/page.meta.ts" },
@@ -107,8 +109,10 @@ export const ROUTES: RouteEntry[] = [
   { ...m46, route: "/prototype/quantum-security-copy", stub: false, file: "app/prototype/quantum-security-copy/page.meta.ts" },
   { ...m47, route: "/prototype/quantum-security-h2", stub: false, file: "app/prototype/quantum-security-h2/page.meta.ts" },
   { ...m48, route: "/prototype/quantum-security-h3", stub: false, file: "app/prototype/quantum-security-h3/page.meta.ts" },
-  { ...m49, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m50, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
-  { ...m51, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
-  { ...m52, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m49, route: "/prototype/solutions-a", stub: false, file: "app/prototype/solutions-a/page.meta.ts" },
+  { ...m50, route: "/prototype/solutions-b", stub: false, file: "app/prototype/solutions-b/page.meta.ts" },
+  { ...m51, route: "/quantum-security", stub: false, file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m52, route: "/research", stub: true, file: "app/(site)/research/page.meta.ts" },
+  { ...m53, route: "/solutions", stub: true, file: "app/(site)/solutions/page.meta.ts" },
+  { ...m54, route: "/terms-of-use", stub: true, file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
