@@ -18,9 +18,20 @@ import type { ReactNode } from "react";
 // `index` sí es opcional: numerar tiene sentido cuando las figuras forman una
 // serie que el texto referencia, y no cuando hay una sola en la sección.
 
+// El tercero existe porque los dos primeros están calibrados para fondos
+// PLANOS. Sobre una superficie con shader —el terreno de curvas de nivel de las
+// variantes C— el filete de `light` se lee como una curva de nivel perdida, y el
+// pie al 60% de valor cae a ~3:1 contra un fondo que además varía de píxel a
+// píxel. Una página lo resolvió construyendo su propio `<figure>` a mano, que es
+// la señal de que faltaba el tono y no de que la figura fuera especial.
+//
+// `surface` sube las dos cosas al máximo de contraste que la superficie tolera y
+// le da al pie un fondo propio: sobre un terreno que se mueve, un pie sin caja
+// es ilegible en algún cuadro aunque sea legible en éste.
 const TONE = {
   light: { rule: "bg-rule", caption: "text-gray-intermediate", art: "text-ink" },
   dark: { rule: "bg-white/15", caption: "text-white/50", art: "text-cream" },
+  surface: { rule: "bg-ink/25", caption: "text-ink", art: "text-ink" },
 } as const;
 
 export type FigureProps = {
@@ -57,7 +68,9 @@ export default function Figure({
           una figura no tiene que saber sobre qué fondo la montaron. */}
       <div className={`mt-6 ${t.art}`}>{children}</div>
       <figcaption
-        className={`mt-6 flex items-baseline gap-3 text-caption-mono ${t.caption}`}
+        className={`mt-6 flex w-fit items-baseline gap-3 text-caption-mono ${t.caption} ${
+          tone === "surface" ? "rounded-full bg-cream/80 px-4 py-2" : ""
+        }`}
       >
         {index ? <span aria-hidden="true">{index}</span> : null}
         <span>{caption}</span>

@@ -37,7 +37,7 @@ parece en ninguna.
 |---|---|
 | `Surface` | El suelo con shader, y el contenido encima (hermano del canvas, nunca hijo). |
 | `contour.ts` | El shader: un terreno de curvas de nivel que deriva. |
-| `Card` | Caja de arte sobre caja de texto. **Acá sí hay cajas**, y el porqué está en el archivo: la doctrina anti-card vale para una sección de argumento, no para una unidad que tiene figura. |
+| `Card` | Caja de arte sobre caja de texto. **Acá sí hay cajas**, y el porqué está en el archivo: la doctrina anti-card vale para una sección de argumento, no para una unidad que tiene figura. `ratio` y `flush` existen porque dos páginas construyeron su propia card local por el mismo motivo —un asset tiene su propia proporción y no quiere papel debajo—, y dos soluciones locales al mismo problema son un hueco del armazón. |
 | `Section` | Fondo claro, tres tonos que no son intercambiables, más aire que el hermano oscuro. |
 
 ## Una sola superficie con shader para las cuatro páginas
@@ -59,6 +59,22 @@ romper.
 
 Cada página lo calibra con su paleta y su escala. Un terreno de colinas anchas y
 verdes no se confunde con uno de crestas apretadas y frías.
+
+## Los huecos que aparecieron al usarlos, y qué se hizo
+
+Los armazones se escribieron antes que las ocho variantes, así que era esperable
+que faltaran piezas. Aparecieron tres, y las tres tienen la misma forma: **dos
+páginas resolviendo lo mismo por su cuenta**, que es la única señal fiable de que
+el hueco es del armazón y no de la página.
+
+| Hueco | Qué pasaba | Resuelto |
+|---|---|---|
+| La caja de arte de `Card` estaba fija en 4/3 y con papel blanco | Correcto para un dibujo; para una foto o una pieza de archivo recorta una proporción que es un hecho del asset | `ratio` y `flush` |
+| `Figure` no tenía tono para una superficie con shader | El filete se lee como una curva de nivel perdida y el pie cae a ~3:1 sobre un fondo que además varía | `tone="surface"` |
+| `InstrumentSection` / `StageSection` no aceptan `ref` ni `data-*` | El reveal tiene que colgar de un `div` envolvente | **Sin resolver.** Una sola página lo pidió, y el envoltorio no cuesta nada. Si una segunda lo necesita, ahí sí |
+
+La tercera queda anotada a propósito: un hueco que una sola página siente no es
+un hueco, es una preferencia.
 
 ## Lo que estos armazones NO hacen
 

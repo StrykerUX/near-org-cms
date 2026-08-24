@@ -22,8 +22,27 @@ import { ArrowUpRight } from "lucide-react";
 // superficies, no una. La de afuera agrupa, la de adentro es el papel del
 // dibujo.
 
+// La caja de arte tiene proporción fija por defecto, y eso es correcto mientras
+// lo que va adentro sea un DIBUJO: en una retícula de tres, el alto tiene que
+// salir del ancho de la celda o las tres se desalinean en cuanto una tiene el
+// título más largo.
+//
+// Deja de ser correcto en cuanto adentro va un asset. La proporción de una foto
+// o de una pieza de archivo es un hecho del asset —está declarada donde se
+// declara el encargo— y forzarla a 4/3 la recorta. Dos páginas resolvieron esto
+// por su cuenta con una card local, que es la señal de que el hueco era del
+// armazón y no de ellas.
+const RATIO = {
+  "4/3": "aspect-[4/3]",
+  "16/9": "aspect-[16/9]",
+  "1/1": "aspect-square",
+  "3/4": "aspect-[3/4]",
+  "21/9": "aspect-[21/9]",
+  "5/2": "aspect-[5/2]",
+} as const;
+
 export type CardProps = {
-  /** El dibujo. Hereda color por `currentColor`. */
+  /** El dibujo, o el asset. Un dibujo hereda color por `currentColor`. */
   art: ReactNode;
   title: string;
   body: string;
@@ -32,6 +51,15 @@ export type CardProps = {
   linkLabel?: string;
   /** La card que la sección está afirmando: fondo encendido y no neutro. */
   accent?: boolean;
+  /** La proporción de la caja de arte. Con un asset, la que el asset declara. */
+  ratio?: keyof typeof RATIO;
+  /**
+   * Saca el papel: la caja pierde su fondo blanco y su padding, y el contenido
+   * llega al radio. Para una FOTO — el papel con margen es lo correcto para un
+   * dibujo y lo incorrecto para una imagen, que no necesita que la monten sobre
+   * nada.
+   */
+  flush?: boolean;
   className?: string;
 };
 
@@ -42,6 +70,8 @@ export default function Card({
   href,
   linkLabel,
   accent = false,
+  ratio = "4/3",
+  flush = false,
   className = "",
 }: CardProps) {
   const isExternal = !!href && /^https?:\/\//.test(href);
@@ -55,10 +85,14 @@ export default function Card({
 
   const inner = (
     <>
-      {/* La caja del arte. `aspect-[4/3]` y no altura fija: la card vive en una
+      {/* La caja del arte. Proporción y no altura fija: la card vive en una
           retícula de tres y el alto tiene que salir del ancho de la celda, o
           las tres se desalinean en cuanto una tiene el título más largo. */}
-      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[1.25rem] bg-background p-6 text-ink">
+      <div
+        className={`flex items-center justify-center overflow-hidden rounded-[1.25rem] text-ink ${RATIO[ratio]} ${
+          flush ? "" : "bg-background p-6"
+        }`}
+      >
         {art}
       </div>
       <h3 className="mt-7 text-h3-serif italic text-ink text-pretty">{title}</h3>
