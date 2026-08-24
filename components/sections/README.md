@@ -64,7 +64,8 @@ dar por terminado un cambio.
 | `homepage-shared/*` | `HomepageBView`, `HomepageCView` | La base que comparten las dos exploraciones vivas. Nació como duplicado de `homepage-a` con ruta propia; la ruta se borró y la carpeta quedó. Ver su [README](./homepage-shared/README.md). |
 | `homepage-fold/*` | `HomepageBView`, `HomepageCView` | El hero que se pliega —«Own your world.» → «Own ⬡ world.»— y la obertura del stack. [README](./homepage-fold/README.md). |
 | `homepage-tuck/*` | `HomepageCView` | El hero que se recoge en una caja. |
-| `foundation/*` | `FoundationAView`, `FoundationBView`, `FoundationCView` | `/prototype/foundation-a\|b\|c` — **tres layouts de la misma página**, no tres páginas. Copy compartida en `foundationContent.ts`. [README](./foundation/README.md). |
+| `shells/*` | las ocho variantes B y C | Los dos armazones —`instrument/` y `stage/`— que comparten las cuatro páginas. [README](./shells/README.md), y `/prototype/shells` los monta sueltos. |
+| `foundation/*` | `FoundationAView`, `FoundationBView`, `FoundationCView` | `/prototype/foundation-a\|b\|c` — **tres estilos de la misma página**, no tres páginas. Copy compartida en `foundationContent.ts`. [README](./foundation/README.md). |
 | `economics/*` | `EconomicsAView`, `EconomicsBView`, `EconomicsCView` | `/prototype/economics-a\|b\|c` — idem, copy en `economicsContent.ts`. [README](./economics/README.md). |
 | `about/*` | `AboutAView`, `AboutBView`, `AboutCView` | `/prototype/about-a\|b\|c` — idem, copy en `aboutContent.ts`. [README](./about/README.md). |
 | `community/*` | `CommunityAView`, `CommunityBView`, `CommunityCView` | `/prototype/community-a\|b\|c` — idem, copy en `communityContent.ts`. [README](./community/README.md). |
@@ -78,7 +79,7 @@ Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importa
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
 son laboratorios y no se tocan a la ligera.
 
-## El patrón A/B/C: una copy, tres layouts
+## El patrón A/B/C: una copy, tres ESTILOS
 
 `foundation/`, `economics/`, `about/` y `community/` comparten una forma que las
 distingue tanto de las páginas reales como de los laboratorios de antes:
@@ -86,9 +87,23 @@ distingue tanto de las páginas reales como de los laboratorios de antes:
 ```
 components/sections/<page>/
   <page>Content.ts   ← TODA la copy. La leen las tres variantes.
-  a/  b/  c/         ← tres layouts de la MISMA página
+  a/  b/  c/         ← tres ESTILOS de la MISMA página
   README.md
 ```
+
+Y la letra significa lo mismo en las cuatro páginas:
+
+| | Estilo | De dónde sale |
+|---|---|---|
+| **A** | **Editorial** — filete de 1px, fondo plano, sin cajas, tipografía primero | La primera pasada. Su doctrina está en `chain/WhyItMatters.tsx` |
+| **B** | **Instrumento** — página oscura, paneles con borde, lecturas, riel de actos | `shells/instrument/` |
+| **C** | **Escenario** — superficies con shader, cards, color, arte a sangre | `shells/stage/` |
+
+Los armazones se comparten y **el vocabulario gráfico no**: la figura de
+economics no se parece a la de about porque lo que cada una tiene que decir no
+se parece. Si además cada página trajera su propio panel y su propio suelo, las
+cuatro B no se leerían como una familia y la comparación dejaría de medir un
+estilo — mediría cuatro.
 
 Que la copy viva en un solo módulo no es prolijidad: es lo que hace honesta la
 comparación. Con tres carpetas de secciones y tres copias del texto, la primera
