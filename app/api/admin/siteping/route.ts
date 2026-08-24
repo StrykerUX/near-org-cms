@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@near/cms-core/lib/auth";
-import { sitepingHandler, withApiKey } from "@/lib/siteping-handler";
+import {
+  hasSitepingApiKey,
+  sitepingHandler,
+  withApiKey,
+} from "@/lib/siteping-handler";
 
 // Endpoint del inbox de admin. Existe por una razón concreta: cambiar el estado
 // de un comentario o borrarlo exige `Authorization: Bearer <SITEPING_API_KEY>`,
@@ -24,6 +28,16 @@ async function requireSession(write: boolean) {
   }
   if (write && !WRITE_ROLES.has(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  // Sin key no hay operación destructiva. El 401 lo ponía el adapter, pero
+  // exigírselo lo hace lanzar al construirse en producción y eso tumba el
+  // build; el detalle está en `lib/siteping-handler.ts`. La respuesta que ve
+  // el inbox es la misma de siempre.
+  if (write && !hasSitepingApiKey) {
+    return NextResponse.json(
+      { error: "apiKey required for destructive operations" },
+      { status: 401 },
+    );
   }
   return null;
 }

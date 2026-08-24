@@ -19,9 +19,32 @@ import { createR2ScreenshotStorage } from "@/lib/siteping-screenshots";
 
 const apiKey = process.env.SITEPING_API_KEY;
 
+/**
+ * Si la key está puesta. Lo consume `/api/admin/siteping` para rechazar PATCH y
+ * DELETE cuando falta — ver abajo por qué el rechazo se mudó a la ruta.
+ */
+export const hasSitepingApiKey = Boolean(apiKey);
+
+// ── Por qué `requireAuthForDestructive` se apaga cuando no hay key ───────────
+// Con la bandera en `true` y sin key, el adapter LANZA al construirse si
+// `NODE_ENV === "production"`. Como este módulo se evalúa al importar la ruta,
+// eso no degrada la herramienta de feedback: tumba el `next build` entero en
+// "Collecting page data", y con él el deploy del sitio completo. Ya pasó una
+// vez en Railway.
+//
+// Apagarla NO abre nada. Las dos rutas que exponen el handler ponen su gate
+// delante: `/api/siteping` ni siquiera exporta PATCH/DELETE, y
+// `/api/admin/siteping` exige sesión de NextAuth con rol ADMIN o EDITOR y, si
+// no hay key, corta ahí mismo con el 401 que antes ponía el adapter. El
+// comportamiento visible es idéntico al documentado; lo único que cambia es
+// QUIÉN lo aplica.
+//
+// Misma doctrina que `createR2ScreenshotStorage`, que devuelve `undefined` en
+// vez de lanzar: una env var faltante degrada su propia función y nada más.
 export const sitepingHandler = createSitepingHandler({
   prisma,
   apiKey,
+  requireAuthForDestructive: hasSitepingApiKey,
   publicEndpoints: ["OPTIONS", "GET", "POST"],
   screenshotStorage: createR2ScreenshotStorage(),
 });

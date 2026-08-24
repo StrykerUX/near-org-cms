@@ -31,9 +31,25 @@ tumba el sitio si falta** — comprobado arrancando sin cada una:
 
 | Falta | Qué pasa |
 |---|---|
-| `SITEPING_API_KEY` | Se pueden crear y leer comentarios, pero no resolverlos ni borrarlos (401 en PATCH/DELETE). El arranque NO falla, pese a lo que dice su documentación |
+| `SITEPING_API_KEY` | Se pueden crear y leer comentarios, pero no resolverlos ni borrarlos (401 en PATCH/DELETE). El arranque no falla — ver la nota de abajo, porque no salía gratis |
 | `REVIEW_ACCESS_SECRET` | `/admin/feedback` no puede emitir links y revienta; el widget nunca se activa porque ningún token verifica |
 | Cualquiera de las dos | El sitio público, el blog y el resto del admin siguen intactos |
+
+### La degradación de `SITEPING_API_KEY` es nuestra, no del paquete
+
+El adapter **lanza al construirse** si no hay key y `NODE_ENV === "production"`.
+Como el handler se instancia al importar la ruta, eso no degradaba la
+herramienta: reventaba `next build` en «Collecting page data» y con él el deploy
+del sitio entero. Pasó en Railway el 2026-08-24, con la key sin poner en el
+entorno de producción.
+
+Ahora `lib/siteping-handler.ts` pasa `requireAuthForDestructive` **atado a si
+hay key**, y el 401 de PATCH/DELETE lo pone `app/api/admin/siteping/route.ts`,
+que es donde ya vivían todos los demás gates. Lo que se ve desde fuera es
+idéntico; lo que cambió es quién lo aplica y que una env var faltante ya no se
+lleva puesto el build.
+
+Igual conviene ponerla en producción: sin ella el inbox lee pero no resuelve.
 
 Rotar `REVIEW_ACCESS_SECRET` **invalida todos los links de revisión emitidos**.
 Es la única forma de revocar: los tokens son autocontenidos y no se guardan en
