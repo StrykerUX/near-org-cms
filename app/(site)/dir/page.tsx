@@ -178,7 +178,11 @@ const STACKED_LABS = [
 // cada página en su meta, el segundo lo deriva el generador leyendo si el
 // page.tsx renderiza `StubView`. Ninguno de los dos se decide acá — este
 // archivo solo reparte y ordena.
-const ALL = ROUTES.filter((r) => r.route !== "/");
+// El índice no se lista a sí mismo. Antes el excluido era `/` porque el índice
+// VIVÍA ahí; ahora `/` es la homepage del sitio y entra a la lista como una
+// página más, que es lo que corresponde: es la primera que alguien quiere
+// abrir.
+const ALL = ROUTES.filter((r) => r.route !== "/dir");
 
 // Las variantes, agrupadas por su laboratorio. Solo cuelgan si el padre EXISTE
 // en el manifiesto: `/prototype/homepage-proof/*` son tres homepages completas
@@ -357,6 +361,6 @@ const GROUPS: HomeViewGroup[] = [
   },
 ];
 
-export default function HomePage() {
+export default function DirectoryPage() {
   return <HomeView groups={GROUPS} />;
 }
