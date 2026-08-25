@@ -676,12 +676,20 @@ function FigureLine({ row, first }: { row: LedgerRow; first: boolean }) {
               Es lo que hace que el bloque se lea como una sola pieza de dos
               renglones y no como una palabra puesta debajo de un número.
 
-              El margen negativo es óptico y va en `em` de la propia glosa: el
-              numeral tiene interlineado 0.86 pero su caja de línea sigue
-              reservando el hueco de los descendentes que los dígitos no usan, y
-              sin subir la itálica queda un aire que no está en el diseño. En
-              `em` se mueve con la escala en vez de descuadrarse a otro tamaño. */}
-          <span data-gloss className="gloss-serif -mt-[0.22em]">
+              El margen va en `em` de la propia glosa, así que se mueve con la
+              escala en vez de descuadrarse a otro tamaño.
+
+              Fue NEGATIVO y pasó a positivo, y el motivo es que estaba
+              corrigiendo el síntoma equivocado. El numeral lleva interlineado
+              0.86, o sea que su caja de línea es MÁS CORTA que el dibujo de los
+              dígitos: la caja termina por encima de donde terminan los trazos.
+              Con la glosa además subida un quinto de em, los ascendentes de
+              «blockchains» se le montaban al cero — «billion», que no tiene
+              tantos, apenas rozaba.
+
+              Lo que hace falta es lo contrario: bajar la itálica hasta que
+              despeje el dibujo del numeral, no la caja que lo declara. */}
+          <span data-gloss className="gloss-serif mt-[0.3em]">
             {split.gloss}
           </span>
         </p>
