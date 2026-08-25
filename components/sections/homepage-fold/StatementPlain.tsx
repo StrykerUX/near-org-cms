@@ -31,9 +31,12 @@ import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-shared/hom
 // tocaría y la frase se encendería con dos agujeros verdes ya a pleno. La
 // opacidad atenúa las dos voces por igual.
 //
-// **Y por PALABRAS y no por líneas.** Con líneas el relleno avanza a saltos de
-// renglón —seis pasos para seis líneas— y se lee como seis bloques que se
-// prenden, no como algo que se lee.
+// **Y por LETRAS.** Con líneas el relleno avanza a saltos de renglón —seis
+// pasos para seis líneas— y se lee como seis bloques que se prenden. Con
+// palabras ya se lee, pero el frente de avance sigue siendo escalonado: la
+// palabra entera cambia de golpe. Carácter por carácter el frente es continuo,
+// que es lo que hace que parezca que algo se está RELLENANDO en vez de
+// encendiéndose por partes.
 //
 // Sin JS o con `prefers-reduced-motion` la frase está entera y a pleno: la
 // opacidad tenue la aplica el tween, no el CSS. Es la misma degradación que
@@ -77,6 +80,15 @@ const CONNECTOR = "and";
  * verde desaparece, y la frase quedaría con dos agujeros.
  */
 const DIM = 0.18;
+
+/**
+ * El ancho del frente de avance, en letras.
+ *
+ * Es la duración de cada carácter contra un stagger de 1, así que se lee
+ * directo: catorce letras a medio encender en cualquier instante. Es lo que
+ * separa un degradado que recorre la frase de un borde duro que la cruza.
+ */
+const FRONT = 14;
 
 /**
  * El tramo de scroll en el que la frase se enciende entera.
@@ -200,32 +212,63 @@ export default function StatementPlain({ topAir = false }: StatementPlainProps =
       // mount de dev.
       const prepare = () => {
         if (cancelled || split) return;
-        split = SplitText.create(copy, { type: "words" });
+        // `chars,words` y no `chars` a secas: sin los envoltorios de palabra,
+        // cada carácter es su propio inline-block y el navegador puede quebrar
+        // la línea DENTRO de una palabra. Con las dos capas, el quiebre vuelve
+        // a caer entre palabras y las letras se animan igual.
+        split = SplitText.create(copy, { type: "chars,words" });
+        const chars = split.chars;
 
-        tween = gsap.fromTo(
-          split.words,
-          { opacity: DIM },
-          {
-            opacity: 1,
-            // `ease: "none"` y `stagger: 1`: el barrido tiene que avanzar al
-            // ritmo del scroll y no acelerar en ningún tramo. Con una curva, la
-            // mitad de las palabras se encendería en el primer cuarto del
-            // recorrido y el resto repartiría lo que queda.
-            //
-            // El `stagger` en 1 no es un segundo: dentro de un timeline
-            // scrubbeado GSAP normaliza la duración total, así que `1` reparte
-            // las palabras a lo largo de TODO el recorrido, una detrás de otra.
-            ease: "none",
-            stagger: 1,
-            scrollTrigger: {
-              trigger: scope,
-              start: START,
-              end: END,
-              scrub: true,
-              invalidateOnRefresh: true,
-            },
+        // `gsap.set` + `.to()`, y NUNCA un `.from()`/`fromTo` con stagger.
+        //
+        // Éste fue el bug: un stagger dentro de un tween scrubbeado aplica el
+        // estado inicial SOLO al primer elemento. El resto se queda en su valor
+        // del DOM —opacidad 1— hasta que el scrub los alcanza, así que la frase
+        // llegaba ya encendida salvo la primera palabra, que era lo único que
+        // se veía rellenarse.
+        //
+        // Es la razón por la que todos los staggers del repo se escriben así
+        // (ver `ProofLedger`, tres veces): el `set` toca a los N elementos de
+        // una y el `to` los recorre.
+        gsap.set(chars, { opacity: DIM });
+
+        tween = gsap.to(chars, {
+          opacity: 1,
+          // La duración de CADA letra, contra un stagger de 1 entre una y la
+          // siguiente. El cociente de los dos es lo único que hay que mirar:
+          // son cuántas letras están a medio encender en un momento dado, o sea
+          // el ancho del frente de avance.
+          //
+          // Con la duración por defecto (0.5) el frente medía media letra:
+          // cada carácter pasaba de tenue a pleno de un tirón y el barrido se
+          // leía como una fila de interruptores. A 14 el frente cubre unas dos
+          // o tres palabras, así que en cualquier instante hay un degradado
+          // recorriendo la frase en vez de un borde duro.
+          //
+          // No conviene subirlo mucho más: pasado el largo de una línea el
+          // frente deja de leerse como un frente y la frase entera empieza a
+          // subir de opacidad a la vez.
+          duration: FRONT,
+          // La curva es de cada letra, no del conjunto. `power1.inOut` le quita
+          // las dos puntas al fundido —arranca y termina sin escalón— que es lo
+          // que hace que el degradado se vea continuo y no como catorce pasos.
+          ease: "power1.inOut",
+          // El REPARTO de los arranques, en cambio, va lineal: es lo que sigue
+          // al scroll. Con una curva acá, media frase se encendería en el
+          // primer cuarto del recorrido y el resto repartiría lo que queda.
+          //
+          // El `each: 1` no es un segundo: dentro de un tween scrubbeado GSAP
+          // normaliza la duración total, así que lo que importa es la
+          // proporción contra `FRONT`.
+          stagger: { each: 1, ease: "none" },
+          scrollTrigger: {
+            trigger: scope,
+            start: START,
+            end: END,
+            scrub: true,
+            invalidateOnRefresh: true,
           },
-        );
+        });
         // Si la sección YA está en cuadro cuando el split termina (recarga a
         // media página), el trigger nuevo tiene que evaluarse contra el layout
         // vigente o el texto queda a medio encender hasta el próximo scroll.
