@@ -15,10 +15,36 @@ import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-shared/hom
 // su propio gesto (`HeroFold`) y no le entrega nada a nadie— así que el
 // statement necesita ser una sección que se sostenga sola.
 //
-// Acá es una sección normal de una pantalla: el icono apoyado en la baseline y
-// el texto entrando línea por línea CUANDO LA SECCIÓN LLEGA, con un
-// ScrollTrigger de solo lectura, `once: true`. Al volver a subir, el texto está
-// ahí, quieto y entero. Sin JS o con `prefers-reduced-motion`, también.
+// ── El texto se ENCIENDE, no entra ─────────────────────────────────────────
+//
+// La frase está siempre en su sitio y lo único que cambia es su opacidad:
+// arranca tenue y se rellena palabra por palabra AL RITMO DEL SCROLL. No es una
+// entrada —no ocurre y se acaba— sino un estado atado a la posición, y por eso
+// va con `scrub` y no con `once`. Subir la deshace; bajar la vuelve a hacer.
+//
+// Reemplaza a una entrada por líneas con máscara (`autoAlpha` + `yPercent`,
+// `once: true`) que sí ocurría una vez y se gastaba.
+//
+// **Es OPACIDAD y no color**, que es la otra forma de hacer esto. Los dos
+// tramos en acento no tienen color propio: son `text-transparent` con un
+// degradé recortado por `bg-clip-text`, así que un tween sobre `color` no los
+// tocaría y la frase se encendería con dos agujeros verdes ya a pleno. La
+// opacidad atenúa las dos voces por igual.
+//
+// **Y por PALABRAS y no por líneas.** Con líneas el relleno avanza a saltos de
+// renglón —seis pasos para seis líneas— y se lee como seis bloques que se
+// prenden, no como algo que se lee.
+//
+// Sin JS o con `prefers-reduced-motion` la frase está entera y a pleno: la
+// opacidad tenue la aplica el tween, no el CSS. Es la misma degradación que
+// documenta `useScrollReveal` y por el mismo motivo — con el estado tenue en
+// una clase, un fallo de JS dejaría la sección medio invisible para siempre.
+//
+// ⚠️ Lo que hay que mirar en el navegador es cómo se atenúa el ACENTO. SplitText
+// envuelve cada palabra en un span, y el degradé de `<Accented>` se recorta
+// contra el texto de todos sus descendientes: si la opacidad del span no llega
+// a atenuarlo, el acento se ve a pleno desde el principio y los dos tramos
+// verdes quedan fuera del barrido.
 //
 // El verde del acento es el mismo literal que en el statement vivo — hoja,
 // tomado del gradiente del icono; no existe en los tokens (ver la nota de
@@ -37,6 +63,32 @@ const PIVOT = "the agent economy.";
 
 /** La conjunción que cierra el cuerpo y arrastra al acento a su propia línea. */
 const CONNECTOR = "and";
+
+/**
+ * La opacidad de una palabra que todavía no se leyó.
+ *
+ * 0.18 y no 0.3: por encima del umbral de lectura cómoda el ojo lee el párrafo
+ * entero de una y el barrido deja de notarse — pasa a ser un cambio de énfasis
+ * en un texto que ya se leyó. Por debajo, hay que esperar a que la palabra
+ * llegue, que es el punto.
+ *
+ * No baja más porque el acento verde va sobre crema y arranca con menos
+ * contraste que la tinta: lo que en negro al 12% todavía se intuye, en este
+ * verde desaparece, y la frase quedaría con dos agujeros.
+ */
+const DIM = 0.18;
+
+/**
+ * El tramo de scroll en el que la frase se enciende entera.
+ *
+ * Arranca con el bloque a tres cuartos del viewport —o sea apenas asoma— y
+ * termina cuando su borde inferior pasa el medio. Es un recorrido corto a
+ * propósito: la frase mide seis líneas y son el titular de su sección, no un
+ * texto largo. Estirarlo hasta que el bloque salga de cuadro dejaría la última
+ * palabra encendiéndose cuando el lector ya está mirando la sección siguiente.
+ */
+const START = "top 78%";
+const END = "bottom 55%";
 
 const PALETTE = {
   "--statement-accent": "#5cb946",
@@ -140,32 +192,43 @@ export default function StatementPlain({ topAir = false }: StatementPlainProps =
       if (!copy) return;
 
       let split: SplitText | null = null;
-      let tl: gsap.core.Timeline | null = null;
+      let tween: gsap.core.Tween | null = null;
       let cancelled = false;
 
-      // Igual que el statement vivo: el split espera a que las fuentes midan
-      // (parte por LÍNEAS y una línea es geometría de fuente), y el flag cubre
-      // el cleanup que corre antes de que la promesa resuelva — StrictMode lo
-      // hace en cada mount de dev.
+      // El split espera a que las fuentes midan y el flag cubre el cleanup que
+      // corre antes de que la promesa resuelva — StrictMode lo hace en cada
+      // mount de dev.
       const prepare = () => {
         if (cancelled || split) return;
-        split = SplitText.create(copy, { type: "lines", mask: "lines" });
-        const lines = split.lines;
-        gsap.set(lines, { autoAlpha: 0, yPercent: 110 });
+        split = SplitText.create(copy, { type: "words" });
 
-        tl = gsap.timeline({
-          scrollTrigger: { trigger: scope, start: "top 55%", once: true },
-        });
-        tl.to(lines, {
-          autoAlpha: 1,
-          yPercent: 0,
-          stagger: 0.14,
-          duration: 0.85,
-          ease: "power2.out",
-        });
+        tween = gsap.fromTo(
+          split.words,
+          { opacity: DIM },
+          {
+            opacity: 1,
+            // `ease: "none"` y `stagger: 1`: el barrido tiene que avanzar al
+            // ritmo del scroll y no acelerar en ningún tramo. Con una curva, la
+            // mitad de las palabras se encendería en el primer cuarto del
+            // recorrido y el resto repartiría lo que queda.
+            //
+            // El `stagger` en 1 no es un segundo: dentro de un timeline
+            // scrubbeado GSAP normaliza la duración total, así que `1` reparte
+            // las palabras a lo largo de TODO el recorrido, una detrás de otra.
+            ease: "none",
+            stagger: 1,
+            scrollTrigger: {
+              trigger: scope,
+              start: START,
+              end: END,
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          },
+        );
         // Si la sección YA está en cuadro cuando el split termina (recarga a
         // media página), el trigger nuevo tiene que evaluarse contra el layout
-        // vigente o el texto queda apagado hasta el próximo scroll.
+        // vigente o el texto queda a medio encender hasta el próximo scroll.
         ScrollTrigger.refresh();
       };
 
@@ -174,8 +237,8 @@ export default function StatementPlain({ topAir = false }: StatementPlainProps =
 
       return () => {
         cancelled = true;
-        tl?.scrollTrigger?.kill();
-        tl?.kill();
+        tween?.scrollTrigger?.kill();
+        tween?.kill();
         split?.revert();
         gsap.set(copy, { clearProps: "opacity,visibility" });
       };
