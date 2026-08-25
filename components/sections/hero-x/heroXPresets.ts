@@ -3,188 +3,238 @@ import type { HeroXPage } from "@/components/sections/hero-x/heroXContent";
 
 // Los nueve presets de la superficie, uno por página.
 //
-// ── Qué varía y qué no ─────────────────────────────────────────────────────
+// ══ La regla ═══════════════════════════════════════════════════════════════
 //
-// El shader es el mismo (`HERO_SURFACE_FRAG`, layerflow) y el layout es el
-// mismo. Lo único que cambia entre una página y otra son CUATRO cosas, y las
-// cuatro están elegidas porque se leen a un metro de distancia sin que la pieza
-// deje de reconocerse:
+// **La paleta no cambia. Las capas no cambian.** Las nueve páginas comparten
+// exactamente los cinco colores y exactamente nueve carriles.
 //
-//   · **La rampa de color** — las cinco paradas. Es lo que da la temperatura.
-//   · **El ángulo de la luz** (`u_gradAngle`) — de dónde entra la sombra.
-//   · **Las capas** (`u_layers`) — cuántas franjas cruzan el campo.
-//   · **El estirado** (`u_blur`) — cuánto se funden las estrías de cada capa.
+// Lo que cambia es dónde apunta el campo, con cuánta fuerza y qué dibuja:
 //
-// Todo lo demás sale de `BASE` y no se toca. Es lo que hace que las nueve
-// aperturas se lean como la misma pieza: si además cambiaran el contraste, el
-// grano, la deriva y el foco, cada página tendría un shader propio y la familia
-// se perdería.
+//   · **DIRECCIÓN** — el punto de fuga al que apuntan las estrías, y el ángulo
+//     por el que entra la sombra.
+//   · **INTENSIDAD** — cuánto separa claros de oscuros, cuánto pesa el degradé
+//     sobre el campo y dónde arranca el piso.
+//   · **MOTIVO** — la frecuencia del campo, cuánto se doblan las estrías, el
+//     estirado, el detalle fino, el ancho de la juntura y la velocidad.
 //
-// ── Por qué la rampa nunca llega al blanco ni al negro ─────────────────────
+// ── Por qué así y no al revés ──────────────────────────────────────────────
 //
-// Ninguna paleta arranca en `#ffffff` ni termina en `#000000`, y no es un
-// descuido: esos dos topes son buena parte de por qué la referencia se lee como
-// una película velada y no como un degradé sintético. El primer tono es un
-// papel teñido y el último se detiene antes del negro.
+// Porque el color y el conteo de capas son lo que hace que una superficie se
+// RECONOZCA, y el resto es lo que hace que se distinga. Con nueve paletas, cada
+// página tenía un shader propio y la familia se perdía: se leían como nueve
+// piezas parecidas en vez de como la misma pieza en nueve estados. Con una
+// paleta y una cuenta de carriles, lo que varía es el gesto y no la identidad.
 //
-// ── Y por qué todas las claras son casi el mismo crema ─────────────────────
+// La consecuencia práctica es que estos presets se pueden empujar mucho más
+// lejos de lo que se podrían empujar nueve paletas: mover `u_curl` de 0.55 a
+// 2.1 cambia el dibujo entero sin que nadie dude de que es el mismo material.
 //
-// Porque debajo hay un titular en tinta. El tono profundo de cada página
-// aparece en UNA esquina —la que el ángulo de la luz deja en sombra— y el resto
-// del cuadro es papel. Una página cuya rampa oscurece pronto se queda sin sitio
-// donde poner el titular, y ahí la única salida sería un velo más opaco, que es
-// tapar el shader con una cortina.
+// ── El único límite duro: dónde cae la luz ─────────────────────────────────
 //
-// ── El ángulo, en vueltas ──────────────────────────────────────────────────
+// `u_gradAngle` es lo más tentador de randomizar y es lo que menos margen
+// tiene. El titular está abajo a la izquierda en las nueve páginas y va en
+// tinta, así que necesita el papel más limpio del cuadro justo ahí. Los nueve
+// valores se mueven entre 0.44 y 0.94 radianes (25°–54°), que es el arco en el
+// que la sombra cierra arriba a la derecha.
 //
-// `u_gradAngle` va en vueltas (0..1), no en grados. 0.62 es ~223°: la sombra
-// cierra arriba a la derecha y la luz queda abajo a la izquierda, debajo del
-// titular. Los nueve valores se mueven en una franja estrecha alrededor de ese
-// número por el mismo motivo que las paletas: el titular siempre está en el
-// mismo sitio, así que la luz tiene que estar cerca del mismo sitio también.
+// Fuera de ese arco el hero no se rompe: se vuelve ilegible, que es peor porque
+// no avisa. Si alguna vez hay que abrirlo, la salida es mover el titular, no el
+// ángulo.
+//
+// `u_focus` sí se mueve a gusto —de −0.34 a 1.9— porque orienta las ESTRÍAS y
+// no la luz. Es el parámetro con más rendimiento visual por unidad de riesgo.
 
 /**
- * Lo que las nueve comparten. Sale del preset de `protocol-labs/HeroLayerflow`,
- * que es de donde viene esta apertura; el razonamiento de cada valor está allá.
+ * Los cinco tonos, iguales en las nueve.
+ *
+ * Ni el primero es blanco ni el último negro, y esos dos topes son buena parte
+ * de por qué la referencia se lee como una película velada y no como un degradé
+ * sintético.
  */
+const PALETTE = ["#f7f7ef", "#e6ecd2", "#c2d8b4", "#8fb894", "#4a7a63"] as const;
+
+/**
+ * Nueve carriles, iguales en las nueve páginas.
+ *
+ * El número no es libre aunque no varíe: con menos se leen como tres franjas
+ * decorativas, y con más el ancho de cada capa baja del de sus propias estrías
+ * —con lo que la estructura desaparece y vuelve a ser un solo campo—.
+ */
+const LAYERS = 9.0;
+
+/** Lo que las nueve comparten además de la paleta y las capas. */
 const BASE = {
-  u_focus: [1.24, 0.62],
-  u_scale: 3.1,
-  u_curl: 1.25,
-  u_curlScale: 1.05,
-  u_detail: 0.68,
-  u_detailFall: 1.35,
-  u_contrast: 1.3,
-  u_lift: 0.0,
   u_gradSpread: 1.1,
-  u_gradGamma: 1.55,
-  u_gradMix: 0.36,
-  u_grain: 0.032,
-  u_drift: 0.035,
-  u_seam: 0.16,
+  u_detailFall: 1.35,
   u_seamLift: 0.2,
+  u_grain: 0.032,
+  // Un nivel de 8 bits medido sobre el ÍNDICE de la rampa, no sobre el color: el
+  // índice recorre 0..1 en cuatro tramos y cada tramo cubre la distancia entre
+  // dos paradas, así que un nivel son ~0.006 y no 1/256.
   u_dither: 0.007,
-  // Sin `as const`: `GlSurface` pide `Record<string, number | number[]>` y una
-  // tupla `readonly` no es asignable a `number[]`. Congelar esto no compraría
-  // nada —es un objeto de módulo que nadie muta— y costaría un cast en el
-  // consumidor.
+  u_layers: LAYERS,
+  u_c0: hexToRgb(PALETTE[0]),
+  u_c1: hexToRgb(PALETTE[1]),
+  u_c2: hexToRgb(PALETTE[2]),
+  u_c3: hexToRgb(PALETTE[3]),
+  u_c4: hexToRgb(PALETTE[4]),
 };
 
-/** Los cuatro grados de libertad de cada página. */
+/** Los doce grados de libertad, repartidos en las tres familias de la regla. */
 type HeroXVariation = {
-  /** Las cinco paradas de la rampa, de la luz a la sombra. */
-  ramp: [string, string, string, string, string];
-  /** De dónde entra la sombra, en vueltas. */
+  // ── dirección ──
+  /** El punto de fuga al que apuntan las estrías. Vive fuera del canvas. */
+  focus: [number, number];
+  /** Por dónde entra la sombra, EN RADIANES. Entre 0.44 y 0.94 — ver la nota. */
   gradAngle: number;
-  /** Cuántas franjas cruzan el campo. */
-  layers: number;
-  /** Cuánto se funden las estrías. Más alto, más liso. */
+
+  // ── intensidad ──
+  /** Cuánto separa claros de oscuros. */
+  contrast: number;
+  /** El piso: por encima de 0 el negro nunca llega. */
+  lift: number;
+  /** Cuánto abolla el campo al degradé maestro. */
+  gradMix: number;
+  /** Cómo se reparte la rampa. >1 comprime las sombras contra su esquina. */
+  gradGamma: number;
+
+  // ── motivo ──
+  /** Frecuencia base del campo. Alto = más denso. */
+  scale: number;
+  /** Cuánto se doblan las estrías respecto del radial puro. */
+  curl: number;
+  /** El tamaño de esa curvatura. Bajo = ondas cortas. */
+  curlScale: number;
+  /** Longitud del estirado. Alto = las estrías se funden. */
   blur: number;
+  /** La segunda capa de alta frecuencia. */
+  detail: number;
+  /** Ancho de la juntura entre carriles. */
+  seam: number;
+  /** La deriva temporal. Es todo el movimiento que tiene la pantalla. */
+  drift: number;
 };
 
 const VARIATION: Record<HeroXPage, HeroXVariation> = {
-  // El original, sin tocar: verde protocolo, nueve capas, la luz abajo a la
-  // izquierda. Es la referencia contra la que se calibraron las otras ocho.
+  // El original de `/prototype/protocol-a`, intacto. Es la referencia contra la
+  // que se calibraron las otras ocho, y por eso no se toca ni un valor: si
+  // alguna se va de rango, se compara contra ésta.
   protocol: {
-    ramp: ["#f7f7ef", "#e6ecd2", "#c2d8b4", "#8fb894", "#4a7a63"],
-    gradAngle: 0.62,
-    layers: 9,
-    blur: 2.6,
+    focus: [1.24, 0.62], gradAngle: 0.62,
+    contrast: 1.3, lift: 0.0, gradMix: 0.36, gradGamma: 1.55,
+    scale: 3.1, curl: 1.25, curlScale: 1.05, blur: 2.6, detail: 0.68,
+    seam: 0.16, drift: 0.035,
   },
-  // Chain abstraction: el verde vira a agua. Es la página de las cadenas que se
-  // funden en una, y las capas suben a doce con el estirado más alto de las
-  // nueve — las franjas se distinguen menos entre sí, que es el argumento de la
-  // página dicho en el fondo.
+
+  // Chain abstraction: el `curl` más alto del set con ondas cortas, así que las
+  // estrías se doblan mucho y ninguna cruza recta. El estirado también es el
+  // máximo: los carriles se distinguen menos entre sí. Es el argumento de la
+  // página dicho en el fondo — las cadenas siguen ahí y ya no se ven.
   chain: {
-    ramp: ["#f5f8f4", "#dfeceb", "#b4d5d4", "#7fb3b5", "#3c6f74"],
-    gradAngle: 0.66,
-    layers: 12,
-    blur: 3.2,
+    focus: [1.45, 0.28], gradAngle: 0.70,
+    contrast: 1.15, lift: 0.02, gradMix: 0.30, gradGamma: 1.70,
+    scale: 2.6, curl: 1.9, curlScale: 0.8, blur: 3.3, detail: 0.5,
+    seam: 0.1, drift: 0.028,
   },
-  // Quantum: el frío del set, y el único que se va al azul. Seis capas anchas y
-  // el estirado más bajo, así que las estrías se ven una por una: es lo más
-  // cerca de una estructura legible que el shader llega a dibujar.
+
+  // Quantum: el `curl` más bajo y el `curlScale` más alto — o sea estrías casi
+  // rectas, que es lo más cerca de una rejilla que el shader llega a dibujar.
+  // Contraste y detalle en el techo, estirado en el piso: se ve una por una.
+  // Y la deriva casi detenida.
   quantum: {
-    ramp: ["#f4f6fa", "#e0e7f2", "#bccbe4", "#8a9fc6", "#465a86"],
-    gradAngle: 0.58,
-    layers: 6,
-    blur: 2.1,
+    focus: [0.86, 1.42], gradAngle: 0.44,
+    contrast: 1.55, lift: 0.0, gradMix: 0.44, gradGamma: 1.35,
+    scale: 3.9, curl: 0.55, curlScale: 1.5, blur: 2.0, detail: 0.92,
+    seam: 0.24, drift: 0.018,
   },
-  // Historia: papel envejecido. La única rampa cálida sin verde, y la que menos
-  // contraste recorre — se detiene en un pardo, no en una tinta.
+
+  // Historia: el foco se va a la IZQUIERDA, único caso, así que las estrías
+  // apuntan al lado contrario que en las otras ocho. Con el detalle bajo y el
+  // `lift` alto —el negro nunca llega— queda velado, que es lo que se le pide a
+  // una página que mira hacia atrás. Deriva mínima.
   about: {
-    ramp: ["#f8f5ec", "#eee6d2", "#dbc9a8", "#b89e78", "#7d6449"],
-    gradAngle: 0.68,
-    layers: 8,
-    blur: 2.8,
+    focus: [-0.34, 1.18], gradAngle: 0.86,
+    contrast: 1.05, lift: 0.05, gradMix: 0.26, gradGamma: 1.85,
+    scale: 2.3, curl: 1.55, curlScale: 1.25, blur: 3.0, detail: 0.42,
+    seam: 0.12, drift: 0.012,
   },
-  // Comunidad: el verde de marca es el más saturado del set, y es a propósito —
-  // es la página que más cerca está de la identidad. Catorce capas: muchas
-  // franjas angostas, que es lo que se parece a mucha gente.
+
+  // Comunidad: el más agitado. Curl alto con ondas cortas, la juntura más ancha
+  // del set —los nueve carriles se ven separarse— y la deriva más rápida, casi
+  // cinco veces la de `about`.
   community: {
-    ramp: ["#f6faf2", "#e4f2dc", "#bfe4b6", "#83c98d", "#3d8a5c"],
-    gradAngle: 0.6,
-    layers: 14,
-    blur: 2.5,
+    focus: [1.6, 1.05], gradAngle: 0.52,
+    contrast: 1.35, lift: 0.0, gradMix: 0.40, gradGamma: 1.45,
+    scale: 3.4, curl: 2.1, curlScale: 0.72, blur: 2.4, detail: 0.85,
+    seam: 0.28, drift: 0.058,
   },
-  // Economía: verde profundo con el estirado bajo y solo siete capas anchas. Es
-  // la más quieta de las nueve, que es lo que la página pide — un sistema que
-  // compone, no uno que se agita.
+
+  // Economía: la frecuencia más baja del set, así que el campo es ancho y
+  // pausado. Curl bajo con la curvatura más grande: las estrías se doblan una
+  // vez, largo, en vez de ondular. Un sistema que compone, no uno que se agita.
   economics: {
-    ramp: ["#f6f8ee", "#e5eccd", "#c4d7a5", "#93b581", "#4f7448"],
-    gradAngle: 0.64,
-    layers: 7,
-    blur: 2.3,
+    focus: [1.1, -0.24], gradAngle: 0.66,
+    contrast: 1.22, lift: 0.03, gradMix: 0.34, gradGamma: 1.60,
+    scale: 2.0, curl: 0.85, curlScale: 1.7, blur: 2.2, detail: 0.55,
+    seam: 0.14, drift: 0.022,
   },
-  // Ecosistema: la rampa más larga en tono, del papel a un verde casi negro.
-  // Dieciséis capas, el máximo del set: son cientos de proyectos y ninguno
-  // manda.
+
+  // Ecosistema: la frecuencia más alta y la juntura más fina. Los nueve
+  // carriles siguen ahí pero casi no se distinguen entre sí, y lo que se ve es
+  // densidad. Cientos de proyectos y ninguno manda.
   ecosystem: {
-    ramp: ["#f7f8f1", "#e8eede", "#c8dcc3", "#8db8a0", "#3f6b58"],
-    gradAngle: 0.7,
-    layers: 16,
-    blur: 3.0,
+    focus: [1.9, 0.5], gradAngle: 0.58,
+    contrast: 1.28, lift: 0.0, gradMix: 0.38, gradGamma: 1.50,
+    scale: 4.4, curl: 1.4, curlScale: 0.62, blur: 2.9, detail: 0.78,
+    seam: 0.08, drift: 0.042,
   },
-  // Gobernanza: gris verdoso, la más sobria. Cinco capas —el mínimo— y anchas:
-  // pocas decisiones, grandes. Es la única donde las capas se cuentan de un
-  // vistazo.
+
+  // Gobernanza: la más sobria. Contraste y detalle en el piso, la juntura más
+  // ancha de todas y el curl casi apagado. Es la única donde los nueve carriles
+  // se cuentan de un vistazo: pocas decisiones, grandes, y visibles.
   governance: {
-    ramp: ["#f6f7f3", "#e5e8de", "#c6cdbe", "#96a292", "#4e5b4e"],
-    gradAngle: 0.56,
-    layers: 5,
-    blur: 2.4,
+    focus: [0.5, 1.55], gradAngle: 0.78,
+    contrast: 1.10, lift: 0.06, gradMix: 0.28, gradGamma: 1.75,
+    scale: 2.15, curl: 0.65, curlScale: 1.9, blur: 2.35, detail: 0.38,
+    seam: 0.3, drift: 0.015,
   },
-  // Fundación: el verde institucional, entre el de protocolo y el de economía,
-  // con la luz más baja del set. Diez capas: la mediana exacta, que es lo que
-  // le queda a la página que sostiene a todas las demás.
+
+  // Fundación: la mediana de casi todo, con el ángulo más abierto del arco.
+  // Es lo que le queda a la página que sostiene a las demás — no se distingue
+  // por un extremo sino por estar en el centro de los ocho.
   foundation: {
-    ramp: ["#f7f8ef", "#e7edd6", "#c9dcbc", "#95bc9d", "#48765f"],
-    gradAngle: 0.72,
-    layers: 10,
-    blur: 2.7,
+    focus: [1.35, 0.9], gradAngle: 0.94,
+    contrast: 1.25, lift: 0.02, gradMix: 0.35, gradGamma: 1.58,
+    scale: 2.85, curl: 1.15, curlScale: 1.35, blur: 2.7, detail: 0.62,
+    seam: 0.18, drift: 0.03,
   },
 };
 
 /**
- * El preset completo de una página: la base más sus cuatro variaciones, con la
- * rampa ya convertida a los cinco uniformes que el shader espera.
+ * El preset completo de una página: la base compartida más sus doce
+ * variaciones, con los nombres del shader.
  *
- * La conversión pasa acá y no en el componente para que `VARIATION` se pueda
- * leer como lo que es —una tabla de decisiones de diseño, en hex— sin que la
- * mecánica del shader se le mezcle.
+ * La traducción pasa acá y no en el componente para que `VARIATION` se pueda
+ * leer como lo que es —una tabla de decisiones de diseño— sin que la
+ * nomenclatura `u_*` del shader se le mezcle.
  */
 export function heroXSurface(page: HeroXPage) {
   const v = VARIATION[page];
   return {
     ...BASE,
-    u_blur: v.blur,
+    u_focus: v.focus,
     u_gradAngle: v.gradAngle,
-    u_layers: v.layers,
-    u_c0: hexToRgb(v.ramp[0]),
-    u_c1: hexToRgb(v.ramp[1]),
-    u_c2: hexToRgb(v.ramp[2]),
-    u_c3: hexToRgb(v.ramp[3]),
-    u_c4: hexToRgb(v.ramp[4]),
+    u_contrast: v.contrast,
+    u_lift: v.lift,
+    u_gradMix: v.gradMix,
+    u_gradGamma: v.gradGamma,
+    u_scale: v.scale,
+    u_curl: v.curl,
+    u_curlScale: v.curlScale,
+    u_blur: v.blur,
+    u_detail: v.detail,
+    u_seam: v.seam,
+    u_drift: v.drift,
   };
 }
 
@@ -195,24 +245,20 @@ export function heroXSurface(page: HeroXPage) {
  * de la página, así que un fallback ahí deja el hero indistinguible del fondo
  * hasta que el canvas arranca. La segunda ya es un tono, y el corte contra la
  * sección siguiente se ve desde el primer frame.
+ *
+ * Es una constante y no una función de la página, como todo lo que salga de la
+ * paleta: las nueve comparten los cinco tonos.
  */
-export function heroXFallback(page: HeroXPage) {
-  return VARIATION[page].ramp[1];
-}
+export const HERO_X_FALLBACK = PALETTE[1];
 
 /**
- * El velo de legibilidad al pie, en el tono claro de la página.
+ * El velo de legibilidad al pie, sobre el tono claro de la rampa.
  *
- * Va sobre el color más claro de SU rampa y no sobre un crema fijo: el velo
- * tiene que desaparecer contra la superficie que cubre, y un crema común sobre
- * la rampa fría de quantum o la parda de about se ve como una mancha.
+ * Plano y sólo al pie: el bloque de cuerpo y salida cae donde las estrías
+ * todavía tienen contraste. No llega al borde inferior con el color de la
+ * sección siguiente — eso sería un degradé de transición, y acá el corte entre
+ * secciones se ve.
  */
-export function heroXVeil(page: HeroXPage) {
-  const [r, g, b] = hexToRgb(VARIATION[page].ramp[0]).map((n: number) =>
-    Math.round(n * 255),
-  );
-  return (
-    `linear-gradient(to bottom, transparent 0%, transparent 46%, ` +
-    `rgba(${r},${g},${b},0.55) 74%, rgba(${r},${g},${b},0.72) 100%)`
-  );
-}
+export const HERO_X_VEIL =
+  "linear-gradient(to bottom, transparent 0%, transparent 46%," +
+  " rgba(247,247,239,0.55) 74%, rgba(247,247,239,0.72) 100%)";

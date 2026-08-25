@@ -13,9 +13,9 @@ import {
   type HeroXPage,
 } from "@/components/sections/hero-x/heroXContent";
 import {
-  heroXFallback,
+  HERO_X_FALLBACK,
+  HERO_X_VEIL,
   heroXSurface,
-  heroXVeil,
 } from "@/components/sections/hero-x/heroXPresets";
 
 // La apertura común de las nueve páginas del sitio.
@@ -33,11 +33,11 @@ import {
 //
 // ── Una sola pieza, nueve temperaturas ─────────────────────────────────────
 //
-// El layout y la animación son IDÉNTICOS en las nueve. Lo que cambia es la
-// rampa de color, el ángulo de la luz, cuántas capas cruzan el campo y cuánto
-// se funden sus estrías — cuatro cosas, elegidas porque se leen de lejos sin
-// que la pieza deje de reconocerse. El porqué de cada una está en
-// `heroXPresets`.
+// El layout, la animación, la PALETA y el número de capas son idénticos en las
+// nueve. Lo que cambia es dónde apunta el campo, con cuánta fuerza y qué
+// dibuja — dirección, intensidad y motivo. El color y los nueve carriles son lo
+// que hace que la superficie se RECONOZCA; el resto es lo que hace que se
+// distinga. El porqué de cada valor está en `heroXPresets`.
 //
 // Eso es lo que esta sección viene a probar: si nueve páginas que abren igual
 // se leen como un sitio, o como nueve veces la misma página.
@@ -205,7 +205,7 @@ export default function HeroX({ page }: HeroXProps) {
             // los nueve presets son del mismo shader pero con uniformes
             // distintos.
             tag={`hero-x-${page}`}
-            fallback={heroXFallback(page)}
+            fallback={HERO_X_FALLBACK}
             // Buffer a resolución plena, contra el 0.6 que trae `GlSurface`.
             // Aquel valor está calibrado para superficies SIN bordes, y ésta
             // tiene estructura: capas con su juntura y estrías finas. A 0.6
@@ -222,14 +222,14 @@ export default function HeroX({ page }: HeroXProps) {
 
           {/* Velo de LEGIBILIDAD, plano y sólo al pie: el bloque de cuerpo y
               salida cae sobre la zona donde las estrías todavía tienen
-              contraste. Va en el tono claro de SU página — ver `heroXVeil`. No
-              llega al borde inferior con el color de la sección siguiente: eso
-              sería un degradé de transición, y acá el corte entre secciones se
-              ve. */}
+              contraste. Es el mismo en las nueve, como todo lo que salga de la
+              paleta. No llega al borde inferior con el color de la sección
+              siguiente: eso sería un degradé de transición, y acá el corte
+              entre secciones se ve. */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-10"
-            style={{ background: heroXVeil(page) }}
+            style={{ background: HERO_X_VEIL }}
           />
 
           <Container

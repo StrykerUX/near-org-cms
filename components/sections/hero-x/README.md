@@ -26,33 +26,49 @@ con él, y el lab queda como registro de dónde estaba el diseño.
 
 ## Qué varía entre una página y otra
 
-El layout y la animación son **idénticos** en las nueve. Cambian cuatro cosas, y
-solo cuatro:
+**La paleta no cambia. Las capas no cambian.** Las nueve comparten exactamente
+los cinco colores y exactamente nueve carriles. El layout y la animación
+también son idénticos.
 
-| | Qué hace |
+Lo que cambia es dónde apunta el campo, con cuánta fuerza y qué dibuja:
+
+| Familia | Uniformes |
 |---|---|
-| La rampa de color | Las cinco paradas. Es lo que da la temperatura. |
-| El ángulo de la luz | De qué esquina entra la sombra. |
-| Las capas | Cuántas franjas cruzan el campo (5 a 16). |
-| El estirado | Cuánto se funden las estrías de cada capa. |
+| **Dirección** | el punto de fuga al que apuntan las estrías, y el ángulo por el que entra la sombra |
+| **Intensidad** | contraste, piso, cuánto pesa el degradé sobre el campo, cómo se reparte la rampa |
+| **Motivo** | frecuencia, curvatura y su tamaño, estirado, detalle fino, ancho de la juntura, velocidad |
 
-Todo lo demás sale de `BASE` en `heroXPresets.ts` y no se toca. Es lo que hace
-que las nueve aperturas se lean como la misma pieza: si además variaran el
-contraste, el grano, la deriva y el foco, cada página tendría un shader propio y
-la familia se perdería.
+El color y el conteo de carriles son lo que hace que la superficie se
+**reconozca**; el resto es lo que hace que se **distinga**. Con nueve paletas
+cada página tenía un shader propio y la familia se perdía: se leían como nueve
+piezas parecidas en vez de como la misma pieza en nueve estados.
 
-**Ninguna rampa llega al blanco ni al negro**, y ninguna oscurece pronto. Debajo
-hay un titular en tinta, así que el tono profundo aparece en UNA esquina —la que
-el ángulo deja en sombra— y el resto del cuadro es papel. Una página que
-oscurezca antes se queda sin sitio donde poner el titular, y la única salida
-sería un velo más opaco: tapar el shader con una cortina.
+La consecuencia práctica es que estos presets se pueden empujar mucho más lejos
+de lo que se podrían empujar nueve paletas. `u_curl` va de 0.55 en quantum
+—estrías casi rectas, lo más cerca de una rejilla que el shader llega a
+dibujar— a 2.1 en community, y nadie duda de que es el mismo material.
+
+### El único límite duro: dónde cae la luz
+
+`u_gradAngle` es lo más tentador de mover y lo que menos margen tiene. El
+titular está abajo a la izquierda en las nueve y va en tinta, así que necesita
+el papel más limpio del cuadro justo ahí. Los nueve valores viven entre **0.44 y
+0.94 radianes** (25°–54°), que es el arco en el que la sombra cierra arriba a la
+derecha.
+
+Fuera de ese arco el hero no se rompe: se vuelve ilegible, que es peor porque no
+avisa. Si alguna vez hay que abrirlo, la salida es mover el titular.
+
+`u_focus` sí se mueve a gusto —de −0.34 en about a 1.9 en ecosystem— porque
+orienta las **estrías** y no la luz. Es el parámetro con más rendimiento visual
+por unidad de riesgo.
 
 ## Los tres archivos
 
 ```
 HeroX.tsx          el componente. Una prop: `page`.
 heroXContent.ts    la copy de las nueve, normalizada
-heroXPresets.ts    los nueve presets del shader
+heroXPresets.ts    PALETTE + LAYERS + BASE, y las nueve variaciones
 ```
 
 **La copy no se inventa: se reacomoda.** Cada página guardaba su hero como le
