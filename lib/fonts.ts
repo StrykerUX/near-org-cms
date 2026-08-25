@@ -108,20 +108,29 @@ export const montrealMono = localFont({
 // falta de opción: alimenta escalas de 34 a 88px, y el master de texto está
 // dibujado para 9–13pt mientras Subhead lo está para ~14–24pt.
 //
-// ── Ancho normal, no condensed ───────────────────────────────────────────────
-// Fueron condensed hasta acá, heredado del kit de Typekit. El problema es que
-// `--text-serif--optical-scale` compensa ALTURA y no ancho, y las condensed son
-// ~25% más angostas: el acento quedaba con la x-height correcta de Montreal y el
-// ancho de otra fuente, o sea legible como "más chico" al lado de la sans.
+// ── Condensed ────────────────────────────────────────────────────────────────
+// Los cuatro cortes son los masters CONDENSED (`Cn`), en 400 normal e itálica.
+//
+// Fueron condensed (del kit de Typekit), pasaron a ancho normal al medir un
+// desbalance, y volvieron por decisión de diseño. El desbalance sigue siendo
+// real y conviene tenerlo a mano:
 //
 //                       x-height   avance    con ×1.18
 //     Montreal             510       520         —
 //     Kepler CnItSubh      433       360        425   (−18% vs la sans)
 //     Kepler ItSubh        433       450        531   (+2%)
 //
-// Subir la escala no lo arreglaba: igualar el avance del condensed pedía 1.44, y
-// ahí la x-height se iba 22% por encima de la de Montreal. La palanca era el
-// master, no el tamaño. Ver el perfil en scripts/fonts/build-webfonts.py.
+// `--text-serif--optical-scale` compensa ALTURA y no ancho, así que un acento
+// serif embebido en un renglón sans queda con la x-height correcta y el ancho de
+// otra fuente. Subir la escala no lo arregla: igualar el avance del condensed
+// pide 1.44, y ahí la x-height se va 22% por encima de la de Montreal.
+//
+// Muerde SOLO donde la serif convive con la sans en el mismo renglón, que es
+// para lo que la escala óptica existe: `accent-serif`, `accent-display` y
+// `serif-inline`. Donde la serif es el elemento entero —`serif-roster`,
+// `gloss-serif`, `text-h1-serif`— no hay contra qué compararla y el ancho
+// angosto es el dibujo elegido. Ver el perfil en
+// scripts/fonts/build-webfonts.py y el detalle en docs/fonts.md.
 //
 // Dos familias y no una porque los masters ópticos son dibujos distintos, no
 // dos tamaños del mismo. Cuál usa cada escala lo decide `--font-serif` /
@@ -154,12 +163,12 @@ export const montrealMono = localFont({
 export const kepler = localFont({
   src: [
     {
-      path: "../assets/fonts/kepler/KeplerStd-Subh.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnSubh.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../assets/fonts/kepler/KeplerStd-ItSubh.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnItSubh.woff2",
       weight: "400",
       style: "italic",
     },
@@ -177,12 +186,12 @@ export const kepler = localFont({
 export const keplerDisplay = localFont({
   src: [
     {
-      path: "../assets/fonts/kepler/KeplerStd-Disp.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnDisp.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../assets/fonts/kepler/KeplerStd-ItDisp.woff2",
+      path: "../assets/fonts/kepler/KeplerStd-CnItDisp.woff2",
       weight: "400",
       style: "italic",
     },

@@ -1,4 +1,4 @@
-import AboutHero from "@/components/sections/about/a/AboutHero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import ChapterSpine from "@/components/sections/about/a/ChapterSpine";
 import ClosingRefrain from "@/components/sections/about/a/ClosingRefrain";
 
@@ -17,7 +17,12 @@ import ClosingRefrain from "@/components/sections/about/a/ClosingRefrain";
 export default function AboutAView() {
   return (
     <main className="flex flex-col bg-cream">
-      <AboutHero />
+      {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+          `about/a/AboutHero`, que sigue en el árbol y ya
+          no la monta nadie — se conserva a la espera de que el hero X se
+          juzgue con las nueve páginas delante. El porqué del preset de
+          esta página está en `hero-x/heroXPresets.ts`. */}
+      <HeroX page="about" />
       <ChapterSpine />
       <ClosingRefrain />
     </main>

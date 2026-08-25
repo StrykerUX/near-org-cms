@@ -1,4 +1,4 @@
-import GovernanceHero from "@/components/sections/governance/GovernanceHero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import GovernanceLayers from "@/components/sections/governance/GovernanceLayers";
 import GovernanceDirection from "@/components/sections/governance/GovernanceDirection";
 import GovernanceClose from "@/components/sections/governance/GovernanceClose";
@@ -14,7 +14,12 @@ import GovernanceClose from "@/components/sections/governance/GovernanceClose";
 export default function GovernanceView() {
   return (
     <main data-nav-dark className="flex flex-col bg-ink">
-      <GovernanceHero />
+      {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+          `governance/GovernanceHero`, que sigue en el árbol y ya
+          no la monta nadie — se conserva a la espera de que el hero X se
+          juzgue con las nueve páginas delante. El porqué del preset de
+          esta página está en `hero-x/heroXPresets.ts`. */}
+      <HeroX page="governance" />
       <GovernanceLayers />
       <GovernanceDirection />
       <GovernanceClose />

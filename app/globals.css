@@ -309,17 +309,20 @@
 
      ── El coeficiente no es el del artboard, y la razón es la fuente ────────
 
-     El diseño está compuesto en Kepler Std **Semicondensed** Display y este
-     proyecto solo tiene los masters de ancho normal (Display y Subhead; ver
-     `lib/fonts.ts`, que además documenta por qué se salió de las condensed).
-     La misma palabra al mismo cuerpo mide acá ~16% más: a la proporción del
-     artboard —153px sobre 1280 de contenido, o sea 11.95cqw— "THE AGENT
-     ECONOMY" y "QUANTUM-RESISTANT" se pasaban ~245px de su caja.
+     El diseño está compuesto en Kepler Std **Semicondensed** Display, y este
+     proyecto sirve los masters CONDENSED (ver `lib/fonts.ts`). El 10.2cqw se
+     calibró contra los de ancho normal, que era lo que había cuando se escribió
+     esto: la misma palabra medía ~16% más que en el artboard, así que a la
+     proporción original —153px sobre 1280 de contenido, o sea 11.95cqw— "THE
+     AGENT ECONOMY" y "QUANTUM-RESISTANT" se pasaban ~245px de su caja.
 
-     10.2cqw es esa proporción corregida por el ancho de la fuente que sí
-     tenemos. Lo que se conserva es lo que el diseño busca —la palabra cruzando
-     la sección de borde a borde— y no el número. Si algún día entra el master
-     Semicondensed, esto vuelve a 11.95.
+     ⚠️ Al volver a las condensed ese cálculo quedó viejo, y en la dirección
+     contraria: la condensed es más angosta que la semicondensed del artboard,
+     así que el coeficiente corregido a la baja ahora corrige de más y la
+     palabra ya no llega de borde a borde. **Falta recalibrarlo contra el
+     render, no contra la tabla.** El destino está entre 11.95 —la proporción
+     del artboard— y algo por encima, porque el master que servimos es más
+     estrecho que aquel.
 
      El tope de 11rem (176px) es el techo de encuadre que sale del mismo
      cálculo. */
@@ -454,16 +457,10 @@
      −0.01 en h2, 0 en h4) y acá es −0.02em en todas las escalas. O sea que a
      tamaño h1/h2 la serif queda más apretada que la sans.
 
-     OJO: ese −0.02em se eligió cuando lib/fonts.ts servía los masters
-     CONDENSED, y la justificación era que iba con ellos. Ya no son condensed
-     (ver la nota larga en lib/fonts.ts), así que este valor quedó sin el
-     razonamiento que lo sostenía: hoy aprieta una serif de ancho normal, que es
-     lo contrario de lo que el cambio de master buscaba.
-
-     Se deja en −0.02em a propósito y no se ajusta de arrastre: mover el master
-     y el tracking en el mismo paso hace imposible atribuir el resultado. Es lo
-     primero a revisar si el acento todavía no encaja, con las páginas
-     delante. */
+     Ese −0.02em se eligió cuando lib/fonts.ts servía los masters CONDENSED, y
+     la justificación era que iba con ellos. Estuvo un tiempo sin razonamiento
+     —el repo pasó a los de ancho normal y el valor se quedó— y con la vuelta a
+     las condensed vuelve a ser el que se calibró. No se toca. */
   --text-serif--letter-spacing: -0.02em;
   --text-serif--font-weight: 400;
   /* Compensa la x-height de Kepler contra Montreal cuando un span serif va
@@ -751,7 +748,7 @@
      `text-display-serif` y `serif-poster`; lo que faltaba era el encaje a
      cuerpo de h1.
    · **Es itálica**, y declarada como tal, no sintetizada. Kepler trae la face
-     real (`KeplerStd-ItDisp`), y la diferencia se ve a este tamaño: la `a`
+     real (`KeplerStd-CnItDisp`), y la diferencia se ve a este tamaño: la `a`
      itálica de Kepler es de una sola panza y la romana inclinada por el
      navegador, de dos. Es el mismo criterio que documenta lib/fonts.ts para
      `accent-display` y `gloss-serif`.

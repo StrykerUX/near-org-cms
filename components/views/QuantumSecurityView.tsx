@@ -1,4 +1,4 @@
-import QuantumHero from "@/components/sections/quantum/QuantumHero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import ProofMarquee from "@/components/sections/quantum/ProofMarquee";
 import ThreatSequence from "@/components/sections/quantum/ThreatSequence";
 import MathStatement from "@/components/sections/quantum/MathStatement";
@@ -18,7 +18,12 @@ import ClosingRing from "@/components/sections/quantum/ClosingRing";
 export default function QuantumSecurityView() {
   return (
     <main className="flex flex-col bg-cream">
-      <QuantumHero />
+      {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+          `quantum/QuantumHero`, que sigue en el árbol y ya
+          no la monta nadie — se conserva a la espera de que el hero X se
+          juzgue con las nueve páginas delante. El porqué del preset de
+          esta página está en `hero-x/heroXPresets.ts`. */}
+      <HeroX page="quantum" />
       <ProofMarquee />
       <ThreatSequence />
       <MathStatement />

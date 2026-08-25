@@ -1,4 +1,4 @@
-import ChainHero from "@/components/sections/chain/ChainHero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import WhyItMatters from "@/components/sections/chain/WhyItMatters";
 import CapabilityStack from "@/components/sections/chain/CapabilityStack";
 import ProofBand from "@/components/sections/chain/ProofBand";
@@ -21,7 +21,12 @@ import BuildersCta from "@/components/sections/chain/BuildersCta";
 export default function ChainAbstractionView() {
   return (
     <main className="flex flex-col bg-cream">
-      <ChainHero />
+      {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+          `chain/ChainHero`, que sigue en el árbol y ya
+          no la monta nadie — se conserva a la espera de que el hero X se
+          juzgue con las nueve páginas delante. El porqué del preset de
+          esta página está en `hero-x/heroXPresets.ts`. */}
+      <HeroX page="chain" />
       <WhyItMatters />
       <CapabilityStack />
       <ProofBand />

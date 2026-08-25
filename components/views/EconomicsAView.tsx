@@ -1,4 +1,4 @@
-import Hero from "@/components/sections/economics/a/Hero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import Thresholds from "@/components/sections/economics/a/Thresholds";
 import LoopScene from "@/components/sections/economics/a/LoopScene";
 import RevenueEngines from "@/components/sections/economics/a/RevenueEngines";
@@ -22,7 +22,12 @@ import AssetCenter from "@/components/sections/economics/a/AssetCenter";
 export default function EconomicsAView() {
   return (
     <main className="flex flex-col bg-cream">
-      <Hero />
+      {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+          `economics/a/Hero`, que sigue en el árbol y ya
+          no la monta nadie — se conserva a la espera de que el hero X se
+          juzgue con las nueve páginas delante. El porqué del preset de
+          esta página está en `hero-x/heroXPresets.ts`. */}
+      <HeroX page="economics" />
       <Thresholds />
       <LoopScene />
       <RevenueEngines />

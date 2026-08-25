@@ -1,4 +1,4 @@
-import HubHero from "@/components/sections/community/a/HubHero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import HubStats from "@/components/sections/community/a/HubStats";
 import HubEvents from "@/components/sections/community/a/HubEvents";
 import LegionBand from "@/components/sections/community/a/LegionBand";
@@ -39,7 +39,12 @@ export default function CommunityAView() {
 
   return (
     <main className="flex flex-col bg-cream">
-      <HubHero />
+      {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+          `community/a/HubHero`, que sigue en el árbol y ya
+          no la monta nadie — se conserva a la espera de que el hero X se
+          juzgue con las nueve páginas delante. El porqué del preset de
+          esta página está en `hero-x/heroXPresets.ts`. */}
+      <HeroX page="community" />
       <HubStats cities={cities} />
       <HubEvents events={SAMPLE_EVENTS} />
       <LegionBand />

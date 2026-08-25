@@ -1,4 +1,4 @@
-import HandoffHero from "@/components/sections/foundation/a/HandoffHero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import HandoffPillars from "@/components/sections/foundation/a/HandoffPillars";
 import HandoffThesis from "@/components/sections/foundation/a/HandoffThesis";
 import HandoffStiftung from "@/components/sections/foundation/a/HandoffStiftung";
@@ -21,7 +21,12 @@ import HandoffClose from "@/components/sections/foundation/a/HandoffClose";
 export default function FoundationAView() {
   return (
     <main className="flex flex-col bg-cream">
-      <HandoffHero />
+      {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+          `foundation/a/HandoffHero`, que sigue en el árbol y ya
+          no la monta nadie — se conserva a la espera de que el hero X se
+          juzgue con las nueve páginas delante. El porqué del preset de
+          esta página está en `hero-x/heroXPresets.ts`. */}
+      <HeroX page="foundation" />
       <HandoffPillars />
       <HandoffThesis />
       <HandoffStiftung />

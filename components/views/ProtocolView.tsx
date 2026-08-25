@@ -1,5 +1,5 @@
 import { GridOverlay } from "@/components/primitives/Grid";
-import ProtocolHero from "@/components/sections/protocol/ProtocolHero";
+import HeroX from "@/components/sections/hero-x/HeroX";
 import AiScale from "@/components/sections/protocol/AiScale";
 import ProtocolSpine from "@/components/sections/protocol/ProtocolSpine";
 import DeveloperBlock from "@/components/sections/protocol/DeveloperBlock";
@@ -34,7 +34,12 @@ export default function ProtocolView() {
   return (
     <>
       <main>
-        <ProtocolHero />
+        {/* La apertura común de las nueve páginas del sitio. Reemplaza a
+            `protocol/ProtocolHero`, que sigue en el árbol y ya
+            no la monta nadie — se conserva a la espera de que el hero X se
+            juzgue con las nueve páginas delante. El porqué del preset de
+            esta página está en `hero-x/heroXPresets.ts`. */}
+        <HeroX page="protocol" />
         <AiScale />
         <ProtocolSpine />
         <DeveloperBlock />

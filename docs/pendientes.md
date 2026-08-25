@@ -110,12 +110,22 @@ una fuente que solo usa el admin: `GeistSans.variable` está en el `<html>` del
 layout raíz. Es más peso que cualquier face individual de Montreal. Moverlo al
 layout de admin lo resolvería, pero puede romper el estilado del admin.
 
-**El `--text-serif--optical-scale` con las condensed.** El 1.18 compensa la
-x-height de Kepler contra Montreal, y la x-height no cambió al pasar a los
-masters condensed — pero el ancho bajó 24%, y ese token compensa altura, no
-ancho. Si los `<Accent>` embebidos en headings sans se leen subdimensionados, se
-sube ese token y se mueven los 13 acentos a la vez. Falta mirarlo con calma en
-el navegador.
+**El `--text-serif--optical-scale` con las condensed.** Vuelve a estar abierto:
+el repo pasó a los masters de ancho normal —donde el 1.18 igualaba altura Y
+ancho— y volvió a las condensed por decisión de diseño.
+
+El 1.18 compensa la x-height de Kepler contra Montreal, y la x-height es la
+misma en todos los masters. Lo que cambia es el ancho: la condensed avanza 360
+milésimas de em contra 450 de la normal, así que ×1.18 el acento queda 18% más
+angosto que la sans que lo rodea. Subirlo tampoco alcanza — igualar el avance
+pide 1.44 y ahí la x-height se va 22% por encima.
+
+Afecta SOLO a la serif embebida en un renglón sans (`accent-serif`,
+`accent-display`, `serif-inline`), que es para lo que la escala existe; donde la
+serif es el elemento entero no hay contra qué compararla. Falta mirar los 13
+acentos en el navegador y decidir si el desbalance molesta o si es el precio
+aceptado del dibujo angosto. La tabla medida está en
+[`fonts.md`](./fonts.md).
 
 ---
 
