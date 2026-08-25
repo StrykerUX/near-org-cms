@@ -7,8 +7,6 @@ import BelongsNewsletter from "@/components/sections/homepage-shared/BelongsNews
 import TestimonialDeck from "@/components/sections/homepage-tuck/TestimonialDeck";
 import GetIntoNear from "@/components/sections/homepage-tuck/GetIntoNear";
 import CustomerStories from "@/components/sections/homepage-shared/CustomerStories";
-import PressCarousel from "@/components/sections/homepage-shared/PressCarousel";
-import LatestUpdates from "@/components/sections/LatestUpdates";
 import UpdatesList from "@/components/sections/homepage-shared/UpdatesList";
 
 // /prototype/homepage-c — el hero que se recoge.
@@ -53,7 +51,14 @@ export default function HomepageCView() {
           El porqué de la estructura está en el propio componente. */}
       <ProofLedger />
       <CustomerStories />
-      <PressCarousel />
+      {/* Oculta: `PressCarousel` — la cinta de citas de prensa con logos
+          (Venice, Abound, Brave, Zodl). Sale de esta ruta y sigue montada en
+          `HomepageBView`. Para traerla de vuelta: importar
+          `@/components/sections/homepage-shared/PressCarousel` y montarla acá.
+
+          ⚠️ Ojo si vuelve: `TestimonialDeck`, más abajo, es la MISMA idea
+          —testimonios de terceros— con otro acomodo. Las dos en la misma
+          página se leen como el mismo bloque contado dos veces. */}
       <BelongsNewsletter />
       {/* El único tramo oscuro del final. Va después del newsletter porque es
           el cambio de VOZ: hasta acá la página viene hablando de NEAR en
@@ -66,7 +71,10 @@ export default function HomepageCView() {
           pide algo al visitante, y entre las dos cosas no debería haber nada.
           Vuelve al cream después del único tramo oscuro del final. */}
       <GetIntoNear />
-      <LatestUpdates />
+      {/* Oculta: `LatestUpdates` — "The latest from NEAR", las tres cards de
+          blog. Sale de esta ruta y sigue montada en `HomepageAView`. Para
+          traerla de vuelta: importar
+          `@/components/sections/LatestUpdates` y montarla acá. */}
       <UpdatesList />
     </main>
   );

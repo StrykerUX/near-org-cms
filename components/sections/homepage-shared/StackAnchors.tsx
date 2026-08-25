@@ -6,8 +6,14 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import { DUR, EASE, STAGGER } from "@/components/sections/homepage-shared/motion";
-import StackAssembly, { type StackStop } from "@/components/sections/homepage-shared/stackAssembly";
+import {
+  DUR,
+  EASE,
+  STAGGER,
+} from "@/components/sections/homepage-shared/motion";
+import StackAssembly, {
+  type StackStop,
+} from "@/components/sections/homepage-shared/stackAssembly";
 import StackFlow from "@/components/sections/homepage-shared/StackFlow";
 import StackCursorTag from "@/components/sections/homepage-shared/StackCursorTag";
 import { useStackScene } from "@/components/sections/homepage-shared/useStackScene";
@@ -166,8 +172,17 @@ export default function StackAnchors({
   //
   // Fuera de `frame` (homepage-a, homepage-b) el recorrido sigue colgado del
   // scroll, como estaba.
-  const { rootRef, stageRef, stage, stop, hover, enhanced, goTo, stageProps, tagRef } =
-    useStackScene({ stops: !frame });
+  const {
+    rootRef,
+    stageRef,
+    stage,
+    stop,
+    hover,
+    enhanced,
+    goTo,
+    stageProps,
+    tagRef,
+  } = useStackScene({ stops: !frame });
   // Solo `frame` salta la entrada del contenido, y `soloActive` NO.
   //
   // Estuvieron los dos, y era un error con síntoma claro: en `soloActive` la
@@ -190,8 +205,10 @@ export default function StackAnchors({
     // Un cubo de la columna partida es la capa `protocol`: no tiene `key`
     // propia, se identifica por índice.
     if (hover?.kind === "cube") return key === "protocol";
-    if (hover) return hover.key === key || (key === "ai" && hover.kind === "seg");
-    if (key === "ai") return stop === "ai" || AI_BLOCK.subs.some((s) => s.key === stop);
+    if (hover)
+      return hover.key === key || (key === "ai" && hover.kind === "seg");
+    if (key === "ai")
+      return stop === "ai" || AI_BLOCK.subs.some((s) => s.key === stop);
     return stop === key;
   };
 
@@ -231,30 +248,49 @@ export default function StackAnchors({
             <StackFlow className="pointer-events-none absolute inset-0" />
           ) : null}
 
-          {/* `data-stack-inner`: es el bloque que se ENCOGE mientras la caja
-              se cierra al salir. El porqué está en `useFrameReveal`, junto al
-              tramo de cierre. El fondo (`StackFlow`) queda afuera a propósito
-              — es fondo, y encogerlo dejaría un borde de crema entre el shader
-              y el filo de la caja. */}
-          <Container
-            data-stack-inner
-            // El `pb` extra es solo de `frame`, y va acá y no en la sección.
-            //
-            // Con caja, el borde inferior es un FILO redondeado a 34px que pasa
-            // a centímetros del pie de gobernanza/economía: los 40px del `py-10`
-            // alcanzaban cuando lo de abajo era el borde de la pantalla, y
-            // contra un filo se leen como texto pegado. Sin caja el pie ni
-            // siquiera está adentro de la escena (`StackNotesSection` va afuera),
-            // así que ahí este aire solo le comería alto al arte.
-            //
-            // `pb-*` gana sobre `py-*` sin depender del orden en el string:
-            // Tailwind emite las utilidades de un solo lado después de las de
-            // eje, siempre.
-            className={`pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)] ${
-              frame ? "pb-16 lg:pb-24" : ""
-            }`}
-          >
-            {/* El titular del stack, DENTRO de la escena pegada.
+          {/* Dos envoltorios, y cada uno hace UNA cosa.
+
+              `data-stack-inner` mide lo mismo que la caja y es lo que se ENCOGE
+              al cerrarse (ver `useFrameReveal`). Tiene que ser del tamaño de la
+              caja y no del contenido: el `scale` va con origen al centro, y el
+              centro de un bloque más alto que la pantalla cae fuera de cuadro.
+
+              `data-stack-reel` es el contenido, que SÍ es más alto que la caja
+              —la escena ocupa una pantalla y el pie va debajo— y se desplaza
+              hacia arriba con el scroll. Es lo que hace que gobernanza y
+              economía estén DENTRO del mismo negro y aun así haya que
+              scrollear para llegar a ellas.
+
+              El fondo (`StackFlow`) queda afuera de los dos a propósito: es
+              fondo. Desplazándolo con el carrete se despegaría del filo, y
+              encogiéndolo con el cierre dejaría un borde de crema entre el
+              shader y la caja. */}
+          <div data-stack-inner className="relative h-full">
+            <div data-stack-reel className="relative">
+              <Container
+                // El `pb` extra es solo de `frame`, y ahora el que respira contra
+                // el filo es el borde inferior de las dos fichas de abajo.
+                //
+                // Con caja, ese borde es un FILO redondeado a 34px, no el borde de
+                // la pantalla: los 40px del `py-10` alcanzaban cuando abajo no
+                // había nada, y contra un filo se leen como contenido pegado. Sin
+                // caja no hay filo contra el que respirar y este aire solo le
+                // comería alto al arte.
+                //
+                // `pb-*` gana sobre `py-*` sin depender del orden en el string:
+                // Tailwind emite las utilidades de un solo lado después de las de
+                // eje, siempre.
+                // `h-svh` en modo track y no `h-full`: el padre dejó de ser la
+                // caja —ahora hay un carrete en medio, más alto que ella— así que
+                // un porcentaje resolvería contra el contenido y la escena crecería
+                // con el pie que tiene debajo. Lo que la escena tiene que medir es
+                // UNA PANTALLA, y eso se dice `h-svh`. Fuera de track sigue siendo
+                // alto automático, igual que antes.
+                className={`pointer-events-none relative flex flex-col py-10 group-data-[mode=track]/anchors:h-svh group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)] ${
+                  frame ? "pb-16 lg:pb-24" : ""
+                }`}
+              >
+                {/* El titular del stack, DENTRO de la escena pegada.
 
                 Vivía en su propia sección (`StackIntro`) justo encima, y por eso
                 se leía una vez y se iba con el scroll: cuando el arte se armaba,
@@ -267,30 +303,37 @@ export default function StackAnchors({
                 alto a las cuatro fichas) sigue siendo cierto para el MEDIO; acá
                 está arriba y en `text-h2` en vez de `text-h1`, así que lo que
                 descuenta es bastante menos. */}
-            <div data-stack-head ref={headRef} className="shrink-0 pb-6 text-center lg:pb-8">
-              <h2 data-stack-line className="text-h2 text-balance">
-                {INTRO.lead} <Accent>{INTRO.accent}</Accent>
-              </h2>
-              {/* Sin `mt`: el aire entre titular y subtítulo ya lo pone el
+                <div
+                  data-stack-head
+                  ref={headRef}
+                  className="shrink-0 pb-6 text-center lg:pb-8"
+                >
+                  <h2 data-stack-line className="text-h2 text-balance">
+                    {INTRO.lead} <Accent>{INTRO.accent}</Accent>
+                  </h2>
+                  {/* Sin `mt`: el aire entre titular y subtítulo ya lo pone el
                   interlineado del `text-h2`, que a esta escala son ~14px de
                   descuelgue bajo la última línea. El `mt-3` que había acá se
                   sumaba a eso y separaba los dos como si fueran bloques
                   distintos, cuando son una sola entrada. */}
-              <p
-                data-stack-line
-                data-stack-sub
-                className="mx-auto max-w-[42ch] text-body text-cream/70 text-balance"
-              >
-                {INTRO.sub}
-              </p>
-            </div>
+                  <p
+                    data-stack-line
+                    data-stack-sub
+                    className="mx-auto max-w-[42ch] text-body text-cream/70 text-balance"
+                  >
+                    {INTRO.sub}
+                  </p>
+                </div>
 
-            {/* El área de anclaje: el arte centrado y las cuatro fichas en las
+                {/* El área de anclaje: el arte centrado y las cuatro fichas en las
                 esquinas. `min-h-0` para que el arte pueda encogerse dentro del
                 sticky en vez de desbordarlo. */}
-            <div className="relative min-h-0 flex-1">
-              {/* `h-[80%]` y no `h-full`: el ensamble isométrico se pidió un 20%
-                  más chico.
+                <div className="relative min-h-0 flex-1">
+                  {/* `h-[88%]` y no `h-full`: el ensamble isométrico va algo más
+                  chico que su caja. Fue 80% mientras el pie de
+                  gobernanza/economía compartía la pantalla con la escena; con
+                  el pie fuera del reparto hay alto de sobra y el ensamble se
+                  queda con una parte.
 
                   El tamaño se toca ACÁ, en el alto del stage, y no con un
                   `scale()` sobre el arte: el `w-auto` del SVG deriva su ancho de
@@ -300,37 +343,41 @@ export default function StackAnchors({
                   esta caja, así que se habrían quedado separadas del arte. El
                   centrado no se toca: `left-1/2 top-1/2` con las traslaciones
                   sigue centrando la caja, mida lo que mida. */}
-              <div
-                data-stack-art
-                ref={stageRef}
-                {...stageProps}
-                className="pointer-events-auto absolute left-1/2 top-1/2 h-[80%] -translate-x-1/2 -translate-y-1/2"
-              >
-                <StackAssembly stage={stage} hover={hover} className="h-full w-auto" />
-                <StackCursorTag ref={tagRef} hover={hover} />
-              </div>
+                  <div
+                    data-stack-art
+                    ref={stageRef}
+                    {...stageProps}
+                    className="pointer-events-auto absolute left-1/2 top-1/2 h-[88%] -translate-x-1/2 -translate-y-1/2"
+                  >
+                    <StackAssembly
+                      stage={stage}
+                      hover={hover}
+                      className="h-full w-auto"
+                    />
+                    <StackCursorTag ref={tagRef} hover={hover} />
+                  </div>
 
-              {/* Sin `pieces`: las del protocolo son los cubos de la columna, y
+                  {/* Sin `pieces`: las del protocolo son los cubos de la columna, y
                   cada uno se cuenta solo al pasar el puntero. Ver el docblock de
                   `STACK_PIECES`. */}
-              <Anchor
-                side="left"
-                leaf={PROTOCOL_BLOCK}
-                on={on("protocol")}
-                solo={soloActive}
-                onSelect={() => goTo("protocol")}
-                className="left-0 top-0"
-              />
-              <Anchor
-                side="right"
-                leaf={INTENTS_BLOCK}
-                pieces={STACK_PIECES.intents}
-                on={on("intents")}
-                solo={soloActive}
-                onSelect={() => goTo("intents")}
-                className="right-0 top-0"
-              />
-              {/* Las dos de abajo no se apoyan en el borde: `bottom-[7%]`.
+                  <Anchor
+                    side="left"
+                    leaf={PROTOCOL_BLOCK}
+                    on={on("protocol")}
+                    solo={soloActive}
+                    onSelect={() => goTo("protocol")}
+                    className="left-0 top-0"
+                  />
+                  <Anchor
+                    side="right"
+                    leaf={INTENTS_BLOCK}
+                    pieces={STACK_PIECES.intents}
+                    on={on("intents")}
+                    solo={soloActive}
+                    onSelect={() => goTo("intents")}
+                    className="right-0 top-0"
+                  />
+                  {/* Las dos de abajo no se apoyan en el borde: `bottom-[7%]`.
                   
                   Con el cuerpo reservando su espacio aunque no se vea, una
                   ficha anclada al borde inferior empuja su encabezado hasta
@@ -338,66 +385,64 @@ export default function StackAnchors({
                   permanente de las fichas— quedan repartidos como dos arriba y
                   dos casi en el centro. Subidas, los cuatro forman un marco
                   alrededor del arte en vez de un bloque desbalanceado. */}
-              <Anchor
-                side="left"
-                leaf={{ ...AI_BLOCK, body: AI_BLOCK.intro }}
-                pieces={STACK_PIECES.ai}
-                on={on("ai")}
-                solo={soloActive}
-                onSelect={() => goTo("ai")}
-                className="bottom-[7%] left-0"
-              />
-              <Anchor
-                side="right"
-                leaf={NEARCOM_BLOCK}
-                on={on("nearcom")}
-                solo={soloActive}
-                onSelect={() => goTo("nearcom")}
-                className="bottom-[7%] right-0"
-              />
-            </div>
+                  <Anchor
+                    side="left"
+                    leaf={{ ...AI_BLOCK, body: AI_BLOCK.intro }}
+                    pieces={STACK_PIECES.ai}
+                    on={on("ai")}
+                    solo={soloActive}
+                    onSelect={() => goTo("ai")}
+                    className="bottom-[7%] left-0"
+                  />
+                  <Anchor
+                    side="right"
+                    leaf={NEARCOM_BLOCK}
+                    on={on("nearcom")}
+                    solo={soloActive}
+                    onSelect={() => goTo("nearcom")}
+                    className="bottom-[7%] right-0"
+                  />
+                </div>
 
-            {/* El pie DENTRO de la escena. Solo en pantallas altas — ver el
-                docblock de `StackNotes`.
-
-                `shrink-0`, como el titular de arriba: lo que cede alto es el
-                `flex-1` del medio, o sea el arte. Eso es lo que lo empuja todo
-                hacia arriba sin tocar ningún número: el ensamble deriva su ancho
-                del alto del stage (`h-[80%]` + `w-auto`), así que se achica y sube
-                solo, y las cuatro fichas se anclan contra esa misma caja y lo
-                acompañan.
-
-                `pointer-events-none` lo hereda del `Container` y no se revierte:
-                estas dos notas no son interactivas, y devolverles el puntero les
-                robaría hover al arte, que ocupa el centro y llega hasta acá
-                abajo. */}
-            {/* El pie va adentro SOLO con caja, y por una razón mecánica: el
-                montaje de afuera es una sección hermana con su propio `bg-ink`
-                a sangre, y fuera del recorte aparece como una banda negra
-                pegada bajo la caja que la deja de leerse como caja.
-
-                Sin caja, va afuera SIEMPRE — ver `StackNotesSection`. */}
-            {frame && <StackNotes className="grid shrink-0 pt-8 lg:pt-10" />}
-
-            {/* Ancla del recorte. Un nodo vacío y no un ref sobre la sección
+                {/* Ancla del recorte. Un nodo vacío y no un ref sobre la sección
                 porque el ref de la sección ya es de `useStackScene`, y dos
                 hooks escribiendo sobre el mismo elemento se pisan el
                 `gsap.context`. Desde acá se llega a los dos por `closest`. */}
-            <span ref={frameRef} aria-hidden="true" className="hidden" />
-          </Container>
+                <span ref={frameRef} aria-hidden="true" className="hidden" />
+              </Container>
+
+              {/* El pie, DEBAJO de la escena y dentro del mismo negro.
+                  
+                  Solo con caja: sin ella el carrete no se desplaza —no hay
+                  tramo de scroll que lo mueva— y estas dos notas quedarían
+                  fuera de cuadro para siempre. Ahí van en su propia sección,
+                  más abajo.
+
+                  El aire de arriba es grande a propósito. Al llegar acá el
+                  lector viene de una pantalla llena; si el filete apareciera
+                  pegado al borde inferior de la escena, las notas se leerían
+                  como el pie de las cuatro fichas y no como lo que son — otra
+                  cosa, dentro de la misma caja. */}
+              {frame && (
+                <Container className="pb-[clamp(96px,15svh,208px)] pt-[clamp(72px,12svh,160px)]">
+                  <StackNotes />
+                </Container>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* El pie FUERA de la escena, para cuando adentro no entra.
+      {/* El pie FUERA de la escena — solo SIN caja.
 
-          Hermano de la `<section>` de arriba y no un bloque más adentro de ella,
-          por dos razones que apuntan al mismo lado. La primera es el
-          `end: "bottom bottom"` del ScrollTrigger de la escena: mide la sección
-          ENTERA, así que cualquier alto agregado ahí estira el recorrido de las
-          seis etapas del ensamble — el texto tardaría en aparecer y, peor, las
-          etapas se separarían entre sí. La segunda es que en modo track esa
-          sección tiene alto FIJO (`--travel` + 100svh), y un hijo después del
-          sticky se le sale por abajo. */}
+          Hermano de la `<section>` de arriba y no un bloque más adentro de
+          ella: en modo track esa sección tiene alto FIJO (`--travel` + 100svh),
+          y un hijo puesto después del sticky se le sale por abajo sin que nada
+          lo muestre nunca.
+
+          Con caja el pie sí va adentro, y por eso existe el carrete: el
+          contenido de la caja se desplaza con el scroll en vez de crecer la
+          sección. Ver `useFrameReveal`. */}
       {/* Gobernanza y economía, en su propia sección. Ver su docblock. */}
       {!frame && <StackNotesSection />}
     </>
@@ -441,162 +486,177 @@ export default function StackAnchors({
  * fichas entran siempre; nadie las trae de antes.
  */
 function useSceneEntrance(enabled: boolean, frame: boolean) {
-  return useGsapContext<HTMLDivElement>((_self, scope) => {
-    const section = scope.closest("section");
-    if (!section) return;
+  return useGsapContext<HTMLDivElement>(
+    (_self, scope) => {
+      const section = scope.closest("section");
+      if (!section) return;
 
-    const mm = gsap.matchMedia();
-    mm.add(MQ.motion, () => {
-      // Sin `enabled`, el TITULAR llega relevado de la obertura y no debe
-      // animar: repetir su entrada acá lo haría parpadear justo en el punto en
-      // que la obertura lo deja quieto. Pero el subtítulo no viaja en ese
-      // relevo —la obertura solo lleva el `h2`—, así que estaba quedando fuera
-      // de todo y apareciendo de golpe con el destape. Entra él solo.
-      const lines = Array.from(
-        scope.querySelectorAll<HTMLElement>(enabled ? "[data-stack-line]" : "[data-stack-sub]")
-      );
-      // Con caja, las fichas y el arte NO entran acá: los maneja el scrub de la
-      // apertura (`useFrameReveal`), atados al mismo recorrido que el encuadre.
-      //
-      // Repartirlos entre dos triggers parecía equivalente y no lo es: este es
-      // un `once` sobre una posición, y el de la caja es un scrub sobre un
-      // rango. Cualquier cosa que evalúe el `once` antes de tiempo —una recarga
-      // a media página, un salto de posición, un refresh con la sección ya
-      // dentro del rango— muestra el contenido mientras la caja todavía se está
-      // abriendo, que es exactamente lo que la caja viene a evitar. Colgados
-      // del mismo scrub, el orden no puede romperse.
-      const cards = frame
-        ? []
-        : Array.from(section.querySelectorAll<HTMLElement>("[data-stack-card]"));
-      // El arte va aparte de las fichas: su caja está centrada con dos
-      // `translate` de la hoja de estilos, y un `y` de GSAP los pisaría — el
-      // ensamble saltaría media pantalla en el primer frame. Solo opacidad.
-      const art = frame ? null : section.querySelector<HTMLElement>("[data-stack-art]");
-      if (lines.length === 0 && cards.length === 0) return;
-
-      // `set` + `to`, nunca `from` con stagger: un `.from()` escalonado deja
-      // aplicado el estado inicial SOLO del primer elemento y el resto arranca
-      // visible. Documentado con su síntoma en `useFrameReveal`.
-      //
-      // La curva es `EASE.out` — la del sistema de motion de esta página, la
-      // misma que usan todas las demás entradas.
-      //
-      // El timeline arranca en pausa y lo gobierna un trigger propio, y no el
-      // `once` de `enterTimeline`: acá la entrada tiene que poder REARMARSE al
-      // subir, y un `once` solo sabe ocurrir una vez. Ver el gate más abajo.
-
-      // El aire antes de la entrada, en TIEMPO y no en recorrido de scroll.
-      //
-      // Fue un `start` corrido 140px y no podía quedarse así: el punto donde la
-      // escena se destapa y el punto donde la entrada arranca tienen que ser el
-      // mismo, o el tramo intermedio queda con la escena a la vista y todavía
-      // invisible. El aire sigue estando —el título aterriza limpio sobre el
-      // negro antes de que entre nada— pero ahora lo pone el timeline.
-      const ENTER_DELAY = 0.26;
-
-      const tl = gsap.timeline({
-        paused: true,
-        defaults: { ease: EASE.out, duration: DUR.base },
-      });
-      if (lines.length) {
-        gsap.set(lines, { autoAlpha: 0, y: 18 });
-        tl.to(lines, { autoAlpha: 1, y: 0, stagger: STAGGER, duration: DUR.slow }, ENTER_DELAY);
-      }
-      // Las fichas arrancan con el encabezado ya en camino, no después de que
-      // termine: esperarlo deja un hueco muerto de medio segundo con la
-      // pantalla casi vacía. El escalonado entre ellas es más largo que el de
-      // los renglones del encabezado porque son cuatro bloques enteros — al
-      // ritmo de un renglón se leerían como una sola cosa apareciendo de a
-      // partes.
-      if (cards.length) {
-        gsap.set(cards, { autoAlpha: 0, y: 24 });
-        tl.to(
-          cards,
-          { autoAlpha: 1, y: 0, stagger: STAGGER * 1.6, duration: DUR.slow },
-          ENTER_DELAY + 0.18
+      const mm = gsap.matchMedia();
+      mm.add(MQ.motion, () => {
+        // Sin `enabled`, el TITULAR llega relevado de la obertura y no debe
+        // animar: repetir su entrada acá lo haría parpadear justo en el punto en
+        // que la obertura lo deja quieto. Pero el subtítulo no viaja en ese
+        // relevo —la obertura solo lleva el `h2`—, así que estaba quedando fuera
+        // de todo y apareciendo de golpe con el destape. Entra él solo.
+        const lines = Array.from(
+          scope.querySelectorAll<HTMLElement>(
+            enabled ? "[data-stack-line]" : "[data-stack-sub]",
+          ),
         );
-      }
-      // El arte, primero de todo lo que no es texto: es el centro de la escena
-      // y lo que el encabezado acaba de anunciar. Su propio build-in —los seis
-      // cubos subiendo— arranca en este mismo punto y se monta encima de este
-      // fade, así que lo que se ve es la columna construyéndose mientras
-      // aparece, no dos cosas seguidas.
-      if (art) {
-        gsap.set(art, { autoAlpha: 0 });
-        tl.to(art, { autoAlpha: 1, duration: DUR.slow }, ENTER_DELAY + 0.06);
-      }
+        // Con caja, las fichas y el arte NO entran acá: los maneja el scrub de la
+        // apertura (`useFrameReveal`), atados al mismo recorrido que el encuadre.
+        //
+        // Repartirlos entre dos triggers parecía equivalente y no lo es: este es
+        // un `once` sobre una posición, y el de la caja es un scrub sobre un
+        // rango. Cualquier cosa que evalúe el `once` antes de tiempo —una recarga
+        // a media página, un salto de posición, un refresh con la sección ya
+        // dentro del rango— muestra el contenido mientras la caja todavía se está
+        // abriendo, que es exactamente lo que la caja viene a evitar. Colgados
+        // del mismo scrub, el orden no puede romperse.
+        const cards = frame
+          ? []
+          : Array.from(
+              section.querySelectorAll<HTMLElement>("[data-stack-card]"),
+            );
+        // El arte va aparte de las fichas: su caja está centrada con dos
+        // `translate` de la hoja de estilos, y un `y` de GSAP los pisaría — el
+        // ensamble saltaría media pantalla en el primer frame. Solo opacidad.
+        const art = frame
+          ? null
+          : section.querySelector<HTMLElement>("[data-stack-art]");
+        if (lines.length === 0 && cards.length === 0) return;
 
-      // El tramo que este trigger vigila NO es la escena: es lo que pasa
-      // JUSTO ANTES de que se vea.
-      //
-      //   start "top bottom" — la sección asoma por el borde inferior
-      //   end   "top top"    — la sección se pega arriba: el destape
-      //
-      // Así los dos bordes caen donde hacen falta. `onLeave` (cruzar el end
-      // bajando) es exactamente el instante del destape, y `onLeaveBack`
-      // (cruzar el start subiendo) es un punto en el que la sección está
-      // ENTERA fuera de cuadro — el único lugar seguro para rebobinar sin que
-      // se vea desaparecer nada.
-      //
-      // El rango es de un viewport, y la obertura ocupa la pantalla durante
-      // todo ese tramo, así que el rebobinado siempre ocurre a cubierto.
-      const play = () => {
-        if (tl.progress() === 0 && !tl.isActive()) tl.play();
-      };
-      const reset = () => {
-        if (tl.progress() !== 0 || tl.isActive()) tl.pause(0);
-      };
+        // `set` + `to`, nunca `from` con stagger: un `.from()` escalonado deja
+        // aplicado el estado inicial SOLO del primer elemento y el resto arranca
+        // visible. Documentado con su síntoma en `useFrameReveal`.
+        //
+        // La curva es `EASE.out` — la del sistema de motion de esta página, la
+        // misma que usan todas las demás entradas.
+        //
+        // El timeline arranca en pausa y lo gobierna un trigger propio, y no el
+        // `once` de `enterTimeline`: acá la entrada tiene que poder REARMARSE al
+        // subir, y un `once` solo sabe ocurrir una vez. Ver el gate más abajo.
 
-      // Rebobinar es reversible SOLO cuando el encabezado viene de afuera.
-      //
-      // `enabled === false` significa literalmente que algo delante ya trajo el
-      // título a esta posición: la obertura. Y eso es justo lo que hace seguro
-      // rearmar la entrada al subir — mientras el lector está por encima del
-      // destape, la obertura le está tapando la escena, así que el rebobinado
-      // es invisible y al volver a bajar la entrada se ve de nuevo.
-      //
-      // Sin obertura delante (`enabled === true`, el resto de las rutas) no hay
-      // nada que garantice esa cobertura: la sección se despega y sigue a la
-      // vista mientras sube. Ahí la entrada se queda como estaba, una sola vez,
-      // porque rebobinarla haría desaparecer lo que el lector está mirando.
-      const rewinds = !enabled;
+        // El aire antes de la entrada, en TIEMPO y no en recorrido de scroll.
+        //
+        // Fue un `start` corrido 140px y no podía quedarse así: el punto donde la
+        // escena se destapa y el punto donde la entrada arranca tienen que ser el
+        // mismo, o el tramo intermedio queda con la escena a la vista y todavía
+        // invisible. El aire sigue estando —el título aterriza limpio sobre el
+        // negro antes de que entre nada— pero ahora lo pone el timeline.
+        const ENTER_DELAY = 0.26;
 
-      // El refresh INICIAL es el único que puede saltar al final: si la página
-      // nace con la sección ya pasada —recarga a media página, llegada por
-      // ancla— nadie debe ver una entrada que ya debería haber ocurrido. Los
-      // refreshes posteriores no deciden nada.
-      let armed = false;
+        const tl = gsap.timeline({
+          paused: true,
+          defaults: { ease: EASE.out, duration: DUR.base },
+        });
+        if (lines.length) {
+          gsap.set(lines, { autoAlpha: 0, y: 18 });
+          tl.to(
+            lines,
+            { autoAlpha: 1, y: 0, stagger: STAGGER, duration: DUR.slow },
+            ENTER_DELAY,
+          );
+        }
+        // Las fichas arrancan con el encabezado ya en camino, no después de que
+        // termine: esperarlo deja un hueco muerto de medio segundo con la
+        // pantalla casi vacía. El escalonado entre ellas es más largo que el de
+        // los renglones del encabezado porque son cuatro bloques enteros — al
+        // ritmo de un renglón se leerían como una sola cosa apareciendo de a
+        // partes.
+        if (cards.length) {
+          gsap.set(cards, { autoAlpha: 0, y: 24 });
+          tl.to(
+            cards,
+            { autoAlpha: 1, y: 0, stagger: STAGGER * 1.6, duration: DUR.slow },
+            ENTER_DELAY + 0.18,
+          );
+        }
+        // El arte, primero de todo lo que no es texto: es el centro de la escena
+        // y lo que el encabezado acaba de anunciar. Su propio build-in —los seis
+        // cubos subiendo— arranca en este mismo punto y se monta encima de este
+        // fade, así que lo que se ve es la columna construyéndose mientras
+        // aparece, no dos cosas seguidas.
+        if (art) {
+          gsap.set(art, { autoAlpha: 0 });
+          tl.to(art, { autoAlpha: 1, duration: DUR.slow }, ENTER_DELAY + 0.06);
+        }
 
-      const gate = ScrollTrigger.create({
-        trigger: section,
-        start: "top bottom",
-        end: "top top",
-        markers: DEBUG_MARKERS,
-        onLeave: play,
-        // Volver a entrar al rango por arriba = el lector subió por encima del
-        // destape. Con la obertura cubriendo, se rearma para la próxima bajada.
-        onEnterBack: () => {
-          if (rewinds) reset();
-        },
-        onLeaveBack: () => {
-          if (rewinds) reset();
-        },
-        onRefresh: (self) => {
-          if (armed) return;
-          armed = true;
-          if (self.progress >= 1) tl.progress(1).pause();
-        },
+        // El tramo que este trigger vigila NO es la escena: es lo que pasa
+        // JUSTO ANTES de que se vea.
+        //
+        //   start "top bottom" — la sección asoma por el borde inferior
+        //   end   "top top"    — la sección se pega arriba: el destape
+        //
+        // Así los dos bordes caen donde hacen falta. `onLeave` (cruzar el end
+        // bajando) es exactamente el instante del destape, y `onLeaveBack`
+        // (cruzar el start subiendo) es un punto en el que la sección está
+        // ENTERA fuera de cuadro — el único lugar seguro para rebobinar sin que
+        // se vea desaparecer nada.
+        //
+        // El rango es de un viewport, y la obertura ocupa la pantalla durante
+        // todo ese tramo, así que el rebobinado siempre ocurre a cubierto.
+        const play = () => {
+          if (tl.progress() === 0 && !tl.isActive()) tl.play();
+        };
+        const reset = () => {
+          if (tl.progress() !== 0 || tl.isActive()) tl.pause(0);
+        };
+
+        // Rebobinar es reversible SOLO cuando el encabezado viene de afuera.
+        //
+        // `enabled === false` significa literalmente que algo delante ya trajo el
+        // título a esta posición: la obertura. Y eso es justo lo que hace seguro
+        // rearmar la entrada al subir — mientras el lector está por encima del
+        // destape, la obertura le está tapando la escena, así que el rebobinado
+        // es invisible y al volver a bajar la entrada se ve de nuevo.
+        //
+        // Sin obertura delante (`enabled === true`, el resto de las rutas) no hay
+        // nada que garantice esa cobertura: la sección se despega y sigue a la
+        // vista mientras sube. Ahí la entrada se queda como estaba, una sola vez,
+        // porque rebobinarla haría desaparecer lo que el lector está mirando.
+        const rewinds = !enabled;
+
+        // El refresh INICIAL es el único que puede saltar al final: si la página
+        // nace con la sección ya pasada —recarga a media página, llegada por
+        // ancla— nadie debe ver una entrada que ya debería haber ocurrido. Los
+        // refreshes posteriores no deciden nada.
+        let armed = false;
+
+        const gate = ScrollTrigger.create({
+          trigger: section,
+          start: "top bottom",
+          end: "top top",
+          markers: DEBUG_MARKERS,
+          onLeave: play,
+          // Volver a entrar al rango por arriba = el lector subió por encima del
+          // destape. Con la obertura cubriendo, se rearma para la próxima bajada.
+          onEnterBack: () => {
+            if (rewinds) reset();
+          },
+          onLeaveBack: () => {
+            if (rewinds) reset();
+          },
+          onRefresh: (self) => {
+            if (armed) return;
+            armed = true;
+            if (self.progress >= 1) tl.progress(1).pause();
+          },
+        });
+
+        return () => {
+          gate.kill();
+          tl.kill();
+          gsap.set([...lines, ...cards, ...(art ? [art] : [])], {
+            clearProps: "all",
+          });
+        };
       });
 
-      return () => {
-        gate.kill();
-        tl.kill();
-        gsap.set([...lines, ...cards, ...(art ? [art] : [])], { clearProps: "all" });
-      };
-    });
-
-    return () => mm.revert();
-  }, [enabled, frame]);
+      return () => mm.revert();
+    },
+    [enabled, frame],
+  );
 }
 
 /* ── La caja que se abre ─────────────────────────────────────────────────── */
@@ -671,184 +731,244 @@ const FRAME_SCALE = 1 - (2 * FRAME_TUCK.y) / 100;
  * saliendo.
  */
 function useFrameReveal(enabled: boolean) {
-  return useGsapContext<HTMLElement>((_self, scope) => {
-    if (!enabled) return;
+  return useGsapContext<HTMLElement>(
+    (_self, scope) => {
+      if (!enabled) return;
 
-    const mm = gsap.matchMedia();
-    mm.add(MQ.motion, () => {
-      // El scope es un ancla vacía dentro de la sección; el elemento que se
-      // recorta y la sección contra la que se mide son sus ancestros.
-      const section = scope.closest("section");
-      const box = section?.querySelector<HTMLElement>("[data-stack-frame]");
-      if (!section || !box) return;
+      const mm = gsap.matchMedia();
+      mm.add(MQ.motion, () => {
+        // El scope es un ancla vacía dentro de la sección; el elemento que se
+        // recorta y la sección contra la que se mide son sus ancestros.
+        const section = scope.closest("section");
+        const box = section?.querySelector<HTMLElement>("[data-stack-frame]");
+        if (!section || !box) return;
 
-      const shut = `inset(${FRAME_TUCK.y}% ${FRAME_TUCK.x}% round ${FRAME_RADIUS}px)`;
-      const open = "inset(0% 0% round 0px)";
-      const head = section.querySelector<HTMLElement>("[data-stack-head]");
+        const shut = `inset(${FRAME_TUCK.y}% ${FRAME_TUCK.x}% round ${FRAME_RADIUS}px)`;
+        const open = "inset(0% 0% round 0px)";
+        const head = section.querySelector<HTMLElement>("[data-stack-head]");
 
-      // Mientras la caja crece, lo único que se ve es el encabezado — y no en
-      // su sitio definitivo, sino más abajo, con aire alrededor.
-      //
-      // Es lo que le da sentido al tramo. Una caja que se abre sobre la escena
-      // completa es solo un encuadre agrandándose: el contenido ya estaba y el
-      // gesto no aporta nada. Con el título solo y descolgado, la caja llega
-      // ANUNCIANDO, y lo que anuncia aparece cuando termina de abrirse.
-      //
-      // El desplazamiento va en fracción del viewport y no en px: es distancia
-      // de PANTALLA —cuánto respira el título dentro de la caja— y tiene que
-      // valer lo mismo en un portátil que en un monitor grande.
-      const openTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top bottom",
-          end: "top top",
-          scrub: true,
-          invalidateOnRefresh: true,
-          markers: DEBUG_MARKERS,
-        },
-      });
-
-      openTl.fromTo(
-        box,
-        { clipPath: shut },
-        { clipPath: open, ease: "power2.inOut", duration: 1 },
-        0
-      );
-
-      if (head) {
-        // Sube al final del tramo, no durante: mientras la caja crece el
-        // título se queda donde está, y solo cuando el encuadre ya casi llenó
-        // la pantalla se acomoda arriba para dejarle sitio a la escena. Los dos
-        // a la vez se leen como una sola cosa deslizándose.
-        openTl.fromTo(
-          head,
-          { y: () => 0.17 * window.innerHeight },
-          { y: 0, ease: "power2.inOut", duration: 0.45 },
-          0.55
-        );
-      }
-
-      // Y detrás del título, la escena. Entra cuando la caja ya casi terminó de
-      // abrirse y el encabezado va camino a su sitio: el orden es caja →
-      // título en su lugar → contenido, y los tres cuelgan del mismo scrub, así
-      // que no hay forma de que se adelanten entre sí.
-      const cards = Array.from(
-        section.querySelectorAll<HTMLElement>("[data-stack-card]")
-      );
-      // El arte va aparte: su caja está centrada con dos `translate` de la hoja
-      // de estilos, y un `y` de GSAP los pisaría — el ensamble saltaría media
-      // pantalla en el primer frame. Solo opacidad.
-      const art = section.querySelector<HTMLElement>("[data-stack-art]");
-
-      // ⚠️ Nada de esto puede terminar después de 1, y el stagger cuenta.
-      //
-      // Un timeline scrubbed reparte su duración TOTAL sobre el rango de
-      // scroll, y esa total es el final del último tween — stagger incluido.
-      // Con un escalonado que empujaba el cierre a 1.28, los 800px del tramo
-      // pasaban a cubrir 1.28 de timeline: el clip (que dura 1) terminaba de
-      // abrirse al 78% del scroll y las fichas empezaban a aparecer al 53%, con
-      // la caja todavía a media pantalla. Los números se leían bien y el
-      // resultado era otro.
-      //
-      // Con 6 fichas y 0.03 de escalonado, la última arranca en 0.83 y cierra
-      // en 0.99. El total sigue siendo 1 y las posiciones significan lo que
-      // dicen.
-      // ⚠️ `set` + `to`, y NUNCA `from` con stagger.
-      //
-      // Un `.from()` con `stagger` dentro de un timeline scrubbed solo deja
-      // aplicado el estado inicial del PRIMER elemento: los demás arrancan con
-      // sus valores naturales hasta que su sub-tween empieza. El síntoma es
-      // exactamente lo que se ve — una ficha correctamente oculta y las otras
-      // cinco a plena vista mientras la caja todavía se abre, que es el bug que
-      // este bloque existe para evitar.
-      //
-      // Con el estado inicial declarado a mano y un `.to()` encima, no hay nada
-      // implícito: las seis empiezan ocultas, avanzan escalonadas, y al
-      // retroceder el scrub vuelven al estado del `set`.
-      if (art) {
-        gsap.set(art, { autoAlpha: 0 });
-        openTl.to(art, { autoAlpha: 1, duration: 0.2 }, 0.62);
-      }
-      if (cards.length) {
-        gsap.set(cards, { autoAlpha: 0, y: 24 });
-        openTl.to(
-          cards,
-          { autoAlpha: 1, y: 0, stagger: 0.03, duration: 0.16 },
-          0.68
-        );
-      }
-
-      // El bloque de contenido de la escena — todo menos el fondo. Se encoge
-      // con la caja al salir; ver la nota del hook.
-      const inner = section.querySelector<HTMLElement>("[data-stack-inner]");
-
-      const shutTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "bottom bottom",
-          end: "bottom top",
-          scrub: true,
-          markers: DEBUG_MARKERS,
-        },
-      });
-
-      shutTl.fromTo(
-        box,
-        { clipPath: open },
-        {
-          clipPath: shut,
-          ease: "power2.inOut",
-          duration: 1,
-          // `immediateRender: false` o este `from` se aplica al construir el
-          // timeline y pisa al de arriba: la caja nacería abierta y el tramo de
-          // apertura no tendría nada que abrir.
-          immediateRender: false,
-        },
-        0
-      );
-
-      if (inner) {
-        // Misma posición, misma duración y misma curva que el clip: los dos
-        // cuelgan del mismo scrub, así que el filo de la caja y el borde del
-        // contenido llegan juntos a cada cuadro. Con easings distintos el texto
-        // adelantaría o atrasaría al filo y volvería a asomar cortado en el
-        // medio del recorrido.
+        // Mientras la caja crece, lo único que se ve es el encabezado — y no en
+        // su sitio definitivo, sino más abajo, con aire alrededor.
         //
-        // `transformOrigin` al centro (el que ya trae GSAP) porque el `inset`
-        // cierra hacia el centro por los cuatro lados.
+        // Es lo que le da sentido al tramo. Una caja que se abre sobre la escena
+        // completa es solo un encuadre agrandándose: el contenido ya estaba y el
+        // gesto no aporta nada. Con el título solo y descolgado, la caja llega
+        // ANUNCIANDO, y lo que anuncia aparece cuando termina de abrirse.
+        //
+        // El desplazamiento va en fracción del viewport y no en px: es distancia
+        // de PANTALLA —cuánto respira el título dentro de la caja— y tiene que
+        // valer lo mismo en un portátil que en un monitor grande.
+        const openTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "top top",
+            scrub: true,
+            invalidateOnRefresh: true,
+            markers: DEBUG_MARKERS,
+          },
+        });
+
+        openTl.fromTo(
+          box,
+          { clipPath: shut },
+          { clipPath: open, ease: "power2.inOut", duration: 1 },
+          0,
+        );
+
+        if (head) {
+          // Sube al final del tramo, no durante: mientras la caja crece el
+          // título se queda donde está, y solo cuando el encuadre ya casi llenó
+          // la pantalla se acomoda arriba para dejarle sitio a la escena. Los dos
+          // a la vez se leen como una sola cosa deslizándose.
+          openTl.fromTo(
+            head,
+            { y: () => 0.17 * window.innerHeight },
+            { y: 0, ease: "power2.inOut", duration: 0.45 },
+            0.55,
+          );
+        }
+
+        // Y detrás del título, la escena. Entra cuando la caja ya casi terminó de
+        // abrirse y el encabezado va camino a su sitio: el orden es caja →
+        // título en su lugar → contenido, y los tres cuelgan del mismo scrub, así
+        // que no hay forma de que se adelanten entre sí.
+        const cards = Array.from(
+          section.querySelectorAll<HTMLElement>("[data-stack-card]"),
+        );
+        // El arte va aparte: su caja está centrada con dos `translate` de la hoja
+        // de estilos, y un `y` de GSAP los pisaría — el ensamble saltaría media
+        // pantalla en el primer frame. Solo opacidad.
+        const art = section.querySelector<HTMLElement>("[data-stack-art]");
+
+        // ⚠️ Nada de esto puede terminar después de 1, y el stagger cuenta.
+        //
+        // Un timeline scrubbed reparte su duración TOTAL sobre el rango de
+        // scroll, y esa total es el final del último tween — stagger incluido.
+        // Con un escalonado que empujaba el cierre a 1.28, los 800px del tramo
+        // pasaban a cubrir 1.28 de timeline: el clip (que dura 1) terminaba de
+        // abrirse al 78% del scroll y las fichas empezaban a aparecer al 53%, con
+        // la caja todavía a media pantalla. Los números se leían bien y el
+        // resultado era otro.
+        //
+        // Con 6 fichas y 0.03 de escalonado, la última arranca en 0.83 y cierra
+        // en 0.99. El total sigue siendo 1 y las posiciones significan lo que
+        // dicen.
+        // ⚠️ `set` + `to`, y NUNCA `from` con stagger.
+        //
+        // Un `.from()` con `stagger` dentro de un timeline scrubbed solo deja
+        // aplicado el estado inicial del PRIMER elemento: los demás arrancan con
+        // sus valores naturales hasta que su sub-tween empieza. El síntoma es
+        // exactamente lo que se ve — una ficha correctamente oculta y las otras
+        // cinco a plena vista mientras la caja todavía se abre, que es el bug que
+        // este bloque existe para evitar.
+        //
+        // Con el estado inicial declarado a mano y un `.to()` encima, no hay nada
+        // implícito: las seis empiezan ocultas, avanzan escalonadas, y al
+        // retroceder el scrub vuelven al estado del `set`.
+        if (art) {
+          gsap.set(art, { autoAlpha: 0 });
+          openTl.to(art, { autoAlpha: 1, duration: 0.2 }, 0.62);
+        }
+        if (cards.length) {
+          gsap.set(cards, { autoAlpha: 0, y: 24 });
+          openTl.to(
+            cards,
+            { autoAlpha: 1, y: 0, stagger: 0.03, duration: 0.16 },
+            0.68,
+          );
+        }
+
+        // El bloque de contenido de la escena — todo menos el fondo. Se encoge
+        // con la caja al salir; ver la nota del hook.
+        const inner = section.querySelector<HTMLElement>("[data-stack-inner]");
+
+        /* ── El carrete ───────────────────────────────────────────────────────
+         *
+         * Dentro de la caja hay más alto del que se ve: la escena ocupa una
+         * pantalla y el pie de gobernanza/economía va debajo. Este tramo lo
+         * sube, así que las dos notas están en el MISMO negro y aun así hay que
+         * scrollear para llegar a ellas.
+         *
+         * ── El recorrido, y por qué empieza tarde ────────────────────────────
+         *
+         * De `top top-=1 pantalla` a `bottom bottom`: arranca cuando la escena
+         * ya lleva una pantalla plantada y termina justo cuando la caja empieza
+         * a cerrarse. Antes de eso no se mueve nada — el visitante tiene una
+         * pantalla entera para mirar el ensamble armarse y recorrer sus siete
+         * paradas, que es lo que la sección viene a mostrar.
+         *
+         * El `start` va como función y no como `"top top-=100%"` para no
+         * depender de contra qué resuelve ese porcentaje. `innerHeight` no deja
+         * lugar a dudas, e `invalidateOnRefresh` lo vuelve a leer al
+         * redimensionar.
+         *
+         * ── La distancia se MIDE, no se declara ──────────────────────────────
+         *
+         * `scrollHeight - clientHeight` es exactamente lo que sobra del
+         * contenido: al final del tramo el fondo del carrete queda a ras del
+         * fondo de la caja, ni un píxel de más. Escrita a mano, la distancia se
+         * desincroniza en cuanto el pie cambie de largo —otra nota, un párrafo
+         * más, otro breakpoint— y el síntoma sería texto cortado por el filo o
+         * un hueco negro al final.
+         *
+         * `ease: "none"` porque esto NO es una animación: es scroll. Cualquier
+         * curva haría que el contenido se moviera a distinta velocidad que la
+         * rueda, que es la definición de scroll roto.
+         */
+        const reel = section.querySelector<HTMLElement>("[data-stack-reel]");
+        const reelTl =
+          reel && box
+            ? gsap.fromTo(
+                reel,
+                { y: 0 },
+                {
+                  y: () => -Math.max(0, reel.scrollHeight - box.clientHeight),
+                  ease: "none",
+                  scrollTrigger: {
+                    trigger: section,
+                    start: () => `top top-=${window.innerHeight}`,
+                    end: "bottom bottom",
+                    scrub: true,
+                    invalidateOnRefresh: true,
+                    markers: DEBUG_MARKERS,
+                  },
+                }
+              )
+            : null;
+
+        const shutTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "bottom bottom",
+            end: "bottom top",
+            scrub: true,
+            markers: DEBUG_MARKERS,
+          },
+        });
+
         shutTl.fromTo(
-          inner,
-          { scale: 1 },
+          box,
+          { clipPath: open },
           {
-            scale: FRAME_SCALE,
+            clipPath: shut,
             ease: "power2.inOut",
             duration: 1,
+            // `immediateRender: false` o este `from` se aplica al construir el
+            // timeline y pisa al de arriba: la caja nacería abierta y el tramo de
+            // apertura no tendría nada que abrir.
             immediateRender: false,
           },
-          0
+          0,
         );
-      }
 
-      return () => {
-        openTl.scrollTrigger?.kill();
-        openTl.kill();
-        shutTl.scrollTrigger?.kill();
-        shutTl.kill();
-        gsap.set(
-          [
-            box,
-            ...(head ? [head] : []),
-            ...(inner ? [inner] : []),
-            ...cards,
-            ...(art ? [art] : []),
-          ],
-          { clearProps: "clipPath,transform,opacity,visibility" }
-        );
-      };
-    });
+        if (inner) {
+          // Misma posición, misma duración y misma curva que el clip: los dos
+          // cuelgan del mismo scrub, así que el filo de la caja y el borde del
+          // contenido llegan juntos a cada cuadro. Con easings distintos el texto
+          // adelantaría o atrasaría al filo y volvería a asomar cortado en el
+          // medio del recorrido.
+          //
+          // `transformOrigin` al centro (el que ya trae GSAP) porque el `inset`
+          // cierra hacia el centro por los cuatro lados.
+          shutTl.fromTo(
+            inner,
+            { scale: 1 },
+            {
+              scale: FRAME_SCALE,
+              ease: "power2.inOut",
+              duration: 1,
+              immediateRender: false,
+            },
+            0,
+          );
+        }
 
-    return () => mm.revert();
-  }, [enabled]);
+        return () => {
+          openTl.scrollTrigger?.kill();
+          openTl.kill();
+          shutTl.scrollTrigger?.kill();
+          shutTl.kill();
+          reelTl?.scrollTrigger?.kill();
+          reelTl?.kill();
+          gsap.set(
+            [
+              box,
+              ...(head ? [head] : []),
+              ...(inner ? [inner] : []),
+              ...(reel ? [reel] : []),
+              ...cards,
+              ...(art ? [art] : []),
+            ],
+            { clearProps: "clipPath,transform,opacity,visibility" },
+          );
+        };
+      });
+
+      return () => mm.revert();
+    },
+    [enabled],
+  );
 }
 
 /* ── El pie: gobernanza y economía ────────────────────────────────────────── */
@@ -870,27 +990,66 @@ function useFrameReveal(enabled: boolean) {
 //
 // Y el arte gana el alto que ocupaban, en todas las ventanas.
 //
-// La excepción es el modo `frame`, donde el pie tiene que quedar dentro del
-// recorte o rompe la caja.
+// ── Con caja el pie sigue adentro, pero DEBAJO ─────────────────────────────
+//
+// En modo `frame` no puede irse afuera: el montaje de afuera es una sección
+// hermana con su propio `bg-ink` a sangre, y fuera del recorte aparece como una
+// banda negra pegada bajo la caja, que la deja de leerse como caja.
+//
+// Pero tampoco comparte pantalla con la escena, que era el otro extremo. Va
+// dentro del mismo negro y una pantalla más abajo: el carrete de
+// `useFrameReveal` sube el contenido de la caja con el scroll, así que la
+// escena ocupa el viewport entero y estas dos notas se alcanzan scrolleando,
+// sin salir del recorte.
+//
+// ── El acomodo: una regla y dos extremos ───────────────────────────────────
+//
+// Un filete cruza el bloque entero y debajo cuelgan las dos notas, una contra
+// cada borde y alineadas hacia afuera. No es una retícula de dos columnas
+// centrada: son dos extremos, y el filete es lo que dice que pertenecen al
+// mismo renglón.
+//
+// La medida de línea se mantiene corta (~38ch) aunque el bloque sea ancho. Es
+// lo que hace que se lean como dos NOTAS al pie y no como dos columnas de
+// texto corrido; con la línea larga, los dos párrafos se tocan en el medio y el
+// espacio que los separa deja de existir.
 
-function StackNotes({ className = "" }: { className?: string }) {
+function StackNotes() {
   return (
-    // `max-w` en `ch` y no en px: son dos bloques de TEXTO y lo que tiene que
-    // quedar constante es la medida de línea, no el ancho de la caja.
-    <div className={`mx-auto max-w-5xl grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-16 ${className}`}>
-      {STACK_NOTES.map((note) => (
-        <div key={note.label} data-stack-card className="flex max-w-[52ch] flex-col gap-3">
-          <Eyebrow className="text-cream/70">{note.label}</Eyebrow>
-          {/* `cream/70` (~8.5:1) y no `/50` (~5.2:1).
-              
-              El 50% venía de cuando esto era el pie DE LA ESCENA y tenía que
-              ceder ante el subtítulo del titular: pasaba AA por poco, y el
-              escalón siguiente (40%) ya caía a ~3.9:1. Fuera de la escena no
-              compite con nada, así que no hay razón para dejarlo al borde del
-              mínimo. */}
-          <p className="text-body-sm text-cream/70 text-pretty">{note.body}</p>
-        </div>
-      ))}
+    <div>
+      {/* El filete. Cruza el bloque entero y es lo único que ata las dos notas:
+          sin él son dos textos sueltos en las esquinas opuestas de una banda
+          negra. */}
+      <span aria-hidden="true" className="block h-px w-full bg-cream/20" />
+
+      <div className="mt-9 grid gap-12 sm:grid-cols-2 sm:gap-16 lg:mt-11">
+        {STACK_NOTES.map((note, i) => {
+          // La segunda nota se alinea hacia AFUERA, contra el borde derecho.
+          // Es posicional a propósito y no un campo de la copy: la alineación
+          // depende de en qué mitad del bloque cae la nota —dónde está su
+          // borde— y eso lo sabe el layout, no el texto.
+          const right = i % 2 === 1;
+          return (
+            <div
+              key={note.label}
+              className={`flex flex-col gap-3 ${right ? "sm:items-end sm:text-right" : ""}`}
+            >
+              <Eyebrow className="text-cream/70">{note.label}</Eyebrow>
+              {/* `max-w` en `ch` y no en px: lo que tiene que quedar constante
+                  es la medida de línea, no el ancho de la caja.
+
+                  `cream/70` (~8.5:1) y no `/50` (~5.2:1). El 50% venía de
+                  cuando esto era el pie DE LA ESCENA y tenía que ceder ante el
+                  subtítulo del titular: pasaba AA por poco, y el escalón
+                  siguiente (40%) ya caía a ~3.9:1. Fuera de la escena no
+                  compite con nada. */}
+              <p className="max-w-[38ch] text-body-sm text-cream/70 text-pretty">
+                {note.body}
+              </p>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -928,7 +1087,7 @@ function StackNotesSection() {
     // nada avise.
     <section className="bg-ink pb-32 pt-24 text-cream lg:pb-44 lg:pt-32">
       <Container>
-        <StackNotes className="grid" />
+        <StackNotes />
       </Container>
     </section>
   );
@@ -1027,7 +1186,9 @@ function Anchor({
                 pasaba a ser la destacada de la escena sin que nadie lo hubiera
                 decidido: el verde es el color con el que el arte marca lo
                 activo. Fuera de ahí, no marca nada. */}
-            <span className={head ? "text-cream" : "text-cream/70"}>{leaf.name}</span>
+            <span className={head ? "text-cream" : "text-cream/70"}>
+              {leaf.name}
+            </span>
           </button>
 
           {visit && (
@@ -1072,13 +1233,9 @@ function Anchor({
             : ""
         }`}
       >
-        <p
-        className="text-body-sm text-cream/80 text-pretty"
-      >
-        {leaf.body}
-      </p>
+        <p className="text-body-sm text-cream/80 text-pretty">{leaf.body}</p>
 
-      {/* Las piezas de la capa, separadas por un punto medio.
+        {/* Las piezas de la capa, separadas por un punto medio.
       
           Fueron viñetas cuadradas —un cuadrito antes de cada nombre— y la idea
           era marcarlas como enumeración sin gastar una viñeta redonda, que
@@ -1096,33 +1253,33 @@ function Anchor({
           El separador va `aria-hidden` y en un `<span>` propio: la semántica de
           lista ya la dan `<ul>`/`<li>`, y un lector de pantalla que anuncie
           «punto medio» entre cada item está leyendo decoración. */}
-      {pieces && (
-        <ul
-          className={`flex flex-wrap items-center gap-x-2.5 gap-y-1.5 ${
-            right ? "justify-end" : ""
-          }`}
-        >
-          {pieces.map((piece, i) => (
-            <li key={piece} className="flex items-center gap-2.5">
-              {i > 0 && (
-                <span aria-hidden="true" className="text-cream/40">
-                  ·
-                </span>
-              )}
-              {/* El mismo crema que el cuerpo, no el pleno: con el peso en bold,
+        {pieces && (
+          <ul
+            className={`flex flex-wrap items-center gap-x-2.5 gap-y-1.5 ${
+              right ? "justify-end" : ""
+            }`}
+          >
+            {pieces.map((piece, i) => (
+              <li key={piece} className="flex items-center gap-2.5">
+                {i > 0 && (
+                  <span aria-hidden="true" className="text-cream/40">
+                    ·
+                  </span>
+                )}
+                {/* El mismo crema que el cuerpo, no el pleno: con el peso en bold,
                   el blanco al 100% los sacaba del párrafo en vez de destacarlos
                   dentro de él. `cream/80` sigue en ~10:1 sobre `--ink`, así que
                   el peso hace el trabajo y el color no lo duplica. */}
-              {/* ds-exempt: nombres de producto, más pesados que su enumeración */}
-              <span className="text-body-sm font-bold text-cream/80">
-                {piece}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+                {/* ds-exempt: nombres de producto, más pesados que su enumeración */}
+                <span className="text-body-sm font-bold text-cream/80">
+                  {piece}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {/* Acá iban las seis capacidades entre corchetes —[ CONFIDENTIAL ],
+        {/* Acá iban las seis capacidades entre corchetes —[ CONFIDENTIAL ],
           [ CROSS-CHAIN ], …— repetidas idénticas en las cuatro fichas. La
           repetición ERA el mensaje (son propiedades del stack, no de una capa;
           el argumento sigue escrito en `STACK_CAPABILITIES`), pero en pantalla

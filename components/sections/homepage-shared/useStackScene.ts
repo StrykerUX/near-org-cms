@@ -68,7 +68,7 @@ const WALK_BEAT = 0.7;
  * encenderse los anillos: sin él las dos cosas se pisan y el último cubo cae
  * mientras el primer anillo ya está entrando.
  */
-const WALK_LEAD = 0.35;
+const WALK_LEAD = 0.25;
 
 export type StackSceneOptions = {
   mode?: StackSceneMode;
@@ -209,42 +209,123 @@ export function useStackScene({
       }
 
       // La columna no ESTÁ al llegar: se CONSTRUYE — los seis cubos suben a
-      // escena de abajo hacia arriba, una sola vez. Cada índice agrupa sus
-      // instancias (wire+verde × las dos mitades del z-layering) más el mark.
-      builtRef.current = false;
+      // escena de abajo hacia arriba. Cada índice agrupa sus instancias
+      // (wire+verde × las dos mitades del z-layering) más el mark.
       const cubes = scope.querySelectorAll<SVGGElement>("[data-stack-cube]");
-      // `transition: none` inline mientras dura el build: los grupos traen una
-      // transition CSS que interceptaba y RE-EASEABA cada frame que GSAP
-      // escribía. Se restaura al final con el clearProps.
-      gsap.set(cubes, { autoAlpha: 0, y: -90, transition: "none" });
+      const shadows = scope.querySelectorAll("[data-shadow-when]");
+
+      /**
+       * Deja el arte como estaba antes de construirse: cubos arriba e
+       * invisibles, sombras apagadas, paseo sin empezar.
+       *
+       * Existe como función y no como un `gsap.set` suelto porque ahora corre
+       * DOS veces —al montar y cada vez que la sección se rebobina— y las dos
+       * tienen que dejar exactamente el mismo estado. Con el `set` escrito dos
+       * veces, la segunda se olvida de una propiedad y el síntoma aparece solo
+       * en la repetición, que es donde nadie mira.
+       *
+       * `transition: none` inline mientras dura el build: los grupos traen una
+       * transition CSS que interceptaba y RE-EASEABA cada frame que GSAP
+       * escribía. Se restaura al final con el clearProps del `onComplete`, y
+       * hay que volver a ponerla acá porque ese clearProps ya se la llevó.
+       *
+       * `builtRef` en false apaga al efecto de hover mientras dura la caída: si
+       * escribiera transform/opacity sobre los cubos en ese lapso, pisaría el
+       * tween de entrada.
+       */
+      const primeArt = () => {
+        builtRef.current = false;
+        gsap.set(cubes, { autoAlpha: 0, y: -90, transition: "none" });
+        gsap.set(shadows, { autoAlpha: 0 });
+        if (mode === "track" && !stops) setScrollIdx(-1);
+      };
+      primeArt();
 
       const buildTl = gsap.timeline({
-        // En modo track, cuando el stage YA está pegado (`top top`) y no antes.
-        //
-        // El valor viejo era "top 30%" —el arte asomando por el borde de abajo—
-        // y dejó de servir cuando la sección quedó encerrada entre las dos
-        // cortinas (`InkCurtain`): durante ese tramo el panel de la cortina
-        // cubre el viewport entero, así que un build disparado ahí se armaba
-        // DETRÁS del negro y el lector llegaba a una columna ya construida. El
-        // gesto de la sección es que la columna se levante frente a él.
-        //
-        // En modo `static` no hay cortina ni sticky y la regla vieja sigue
-        // siendo la correcta: el arte se construye cuando asoma.
-        scrollTrigger: {
-          trigger: scope,
-          start: mode === "track" ? "top top" : "top 30%",
-          once: true,
-        },
+        paused: true,
+        onStart: primeArt,
         onComplete: () => {
           builtRef.current = true;
           gsap.set(cubes, { clearProps: "opacity,visibility,transform,transition" });
           // Y acá arranca el paseo, si lo hay. Colgado del `onComplete` y no de
-          // un `delay` propio: el build-in tiene `timeScale(1.3)` y su propio
+          // un `delay` propio: el build-in tiene su `timeScale` y su propio
           // trigger, así que cualquier retardo calculado a mano quedaría
           // desfasado en cuanto alguno de los dos cambie.
           walkTl?.play(0);
         },
       });
+
+      /* ── La entrada se REPITE ─────────────────────────────────────────────
+       *
+       * DOS triggers y no uno, porque los dos límites no caen en el mismo punto
+       * del scroll:
+       *
+       *   construye  `top top`     (o `top 30%` en `static`)
+       *   rebobina   `top bottom`  — la sección entera por debajo del viewport
+       *
+       * Colgado del mismo límite, la columna se desarmaría en cuanto el lector
+       * subiera un poco: `top top` se cruza hacia arriba apenas la escena se
+       * despega, con el arte todavía a la vista. Lo que se vería es que el
+       * ensamble desaparece y se rearma EN PANTALLA, que es peor que no
+       * repetirse. Con el rebobinado en `top bottom`, para cuando se desarma ya
+       * no lo ve nadie.
+       *
+       * `armed` es lo que impide que la construcción se dispare dos veces sin
+       * un rebobinado en medio. Sin él, subir hasta cruzar `top top` y volver a
+       * bajar la re-lanzaría — exactamente el caso que el trigger de abajo
+       * existe para evitar.
+       *
+       * ── Por qué `onRefresh` además de `onEnter` ──────────────────────────
+       *
+       * `onEnter` no dispara cuando la sección YA está pasada al crearse el
+       * trigger: una recarga a media página, una llegada por ancla. En ese caso
+       * el arte se quedaba con los cubos invisibles, para siempre. `onRefresh`
+       * corre en la creación y en cada re-medición, y con el `armed` de por
+       * medio no puede reproducir de más.
+       *
+       * ── Por qué el arranque es `top top` y no antes ──────────────────────
+       *
+       * En modo track, cuando el stage YA está pegado. El valor viejo era
+       * "top 30%" —el arte asomando por el borde de abajo— y dejó de servir
+       * cuando la sección quedó encerrada entre las dos cortinas (`InkCurtain`):
+       * durante ese tramo el panel de la cortina cubre el viewport entero, así
+       * que un build disparado ahí se armaba DETRÁS del negro y el lector
+       * llegaba a una columna ya construida. El gesto de la sección es que la
+       * columna se levante frente a él.
+       *
+       * En modo `static` no hay cortina ni sticky y la regla vieja sigue siendo
+       * la correcta: el arte se construye cuando asoma.
+       */
+      let armed = true;
+      const build = () => {
+        if (!armed) return;
+        armed = false;
+        buildTl.play(0);
+      };
+
+      triggers.push(
+        ScrollTrigger.create({
+          trigger: scope,
+          start: mode === "track" ? "top top" : "top 30%",
+          onEnter: build,
+          onRefresh: (self) => {
+            if (self.isActive) build();
+          },
+        })
+      );
+
+      triggers.push(
+        ScrollTrigger.create({
+          trigger: scope,
+          start: "top bottom",
+          onLeaveBack: () => {
+            armed = true;
+            buildTl.pause(0);
+            walkTl?.pause(0);
+            primeArt();
+          },
+        })
+      );
 
       // Secuencial de verdad, no ola: cada cubo arranca cuando el anterior va
       // por ~2/3 de su caída. La caída va en DOS tweens encadenados porque
@@ -261,8 +342,8 @@ export function useStackScene({
         buildTl.to(nodes, { autoAlpha: 1, duration: 0.22, ease: "sine.inOut" }, at);
       }
 
-      // Las sombras esperan a su bloque: sin bloque encima, sin sombra.
-      gsap.set(scope.querySelectorAll("[data-shadow-when]"), { autoAlpha: 0 });
+      // Las sombras esperan a su bloque: sin bloque encima, sin sombra. El
+      // apagado inicial lo pone `primeArt`, que es quien tiene que repetirlo.
       buildTl.to(
         scope.querySelectorAll('[data-shadow-when="base"]'),
         { autoAlpha: 1, duration: 0.35, ease: "sine.inOut" },
@@ -273,13 +354,18 @@ export function useStackScene({
         { autoAlpha: 1, duration: 0.35, ease: "sine.inOut" },
         2.0
       );
-      buildTl.timeScale(1.3);
+      // 1.7 = un 30% más rápido que el 1.3 con el que vivía.
+      //
+      // Va como `timeScale` del timeline y no repartido entre los `duration` de
+      // arriba: esos números son la FÍSICA de la caída —72px lineales a 200px/s
+      // y 18px de freno—, y multiplicados uno por uno dejan de poder leerse.
+      // La velocidad global es una sola perilla.
+      buildTl.timeScale(1.7);
 
       return () => {
         builtRef.current = true;
         setEnhanced(false);
         triggers.forEach((t) => t.kill());
-        buildTl.scrollTrigger?.kill();
         buildTl.kill();
         walkTl?.kill();
         delete scope.dataset.mode;
