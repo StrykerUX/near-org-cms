@@ -48,8 +48,54 @@ const SPLIT_GAP = 32;
 /** Alto del viewBox de la columna — el que convierte px de pantalla a unidades. */
 const COLUMN_VB_H = 634;
 
+/* ── El paseo cronometrado (`stops: false` en modo `track`) ─────────────────
+ *
+ * El recorrido es EL MISMO —las siete paradas de `STAGE_ORDER`, en su orden—;
+ * lo único que cambia es quién lo sirve: un reloj en vez de la barra de scroll.
+ *
+ * El compás sale de las transiciones del propio ensamble, que son CSS y no
+ * GSAP: los segmentos cruzan en 300ms y los cubos en 380ms. Con un compás por
+ * debajo de eso, cada parada empieza antes de que la anterior haya terminado y
+ * lo que se ve es un parpadeo; a 0.7s cada cambio llega a asentarse y todavía
+ * se lee como un movimiento continuo y no como siete pasos sueltos.
+ */
+const WALK_BEAT = 0.7;
+
+/**
+ * El aire entre el final del build-in y la primera parada.
+ *
+ * La columna termina de construirse y hay un respiro antes de que empiecen a
+ * encenderse los anillos: sin él las dos cosas se pisan y el último cubo cae
+ * mientras el primer anillo ya está entrando.
+ */
+const WALK_LEAD = 0.35;
+
 export type StackSceneOptions = {
   mode?: StackSceneMode;
+  /**
+   * Si el recorrido reparte SEIS PARADAS sobre el scroll de la sección.
+   *
+   * Con `false` en modo `track` el recorrido NO desaparece: cambia de motor.
+   * Las siete paradas siguen siendo las mismas y en el mismo orden, pero las
+   * sirve un reloj —arranca al terminar el build-in, un compás por parada— en
+   * vez de la posición del scroll. La pista y el sticky se conservan enteros,
+   * así que la escena llega, se planta y se va igual.
+   *
+   * Lo que se gana es que el recorrido se ve SIEMPRE, y completo. Colgado del
+   * scroll, la velocidad del paseo la ponía la rueda del lector: un gesto de
+   * trackpad se comía las siete paradas en dos cuadros y el arte parecía
+   * parpadear. Con reloj, cada parada dura lo que tiene que durar.
+   *
+   * El hover no pasa por acá y queda entero — capas, segmentos y los seis
+   * cubos—, y manda sobre la parada mientras el puntero esté encima.
+   *
+   * Existe para el modo `frame`: ahí la caja que se abre y se cierra YA es la
+   * narrativa de la sección, y las seis paradas contaban una segunda encima de
+   * la misma barra de scroll. Y desde que las cuatro fichas se ven todas al
+   * máximo, las paradas no tenían nada que destacar en el texto — solo movían
+   * el arte.
+   */
+  stops?: boolean;
 };
 
 export type StackScene = {
@@ -77,7 +123,10 @@ export type StackScene = {
   tagRef: React.RefObject<HTMLDivElement | null>;
 };
 
-export function useStackScene({ mode = "track" }: StackSceneOptions = {}): StackScene {
+export function useStackScene({
+  mode = "track",
+  stops = true,
+}: StackSceneOptions = {}): StackScene {
   // -1 = todavía no arrancó (solo la columna en escena), 0..6 = STAGE_ORDER.
   const [scrollIdx, setScrollIdx] = useState(-1);
   const [hover, setHover] = useState<StackHover>(null);
@@ -104,7 +153,13 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
 
       const triggers: ScrollTrigger[] = [];
 
-      if (mode === "track") {
+      // El paseo cronometrado. Se arma acá y lo dispara el `onComplete` del
+      // build-in, más abajo: la columna se construye primero y recién después
+      // empiezan a encenderse los anillos, que es el orden que tenía cuando lo
+      // servía el scroll.
+      let walkTl: ReturnType<typeof gsap.timeline> | null = null;
+
+      if (mode === "track" && stops) {
         triggers.push(
           ScrollTrigger.create({
             trigger: scope,
@@ -121,8 +176,24 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
             },
           })
         );
+      } else if (mode === "track") {
+        // Las mismas siete paradas, servidas por reloj.
+        //
+        // `-1` de arranque —solo la columna en escena— es exactamente donde
+        // estaba el recorrido de scroll antes de que la sección se plantara, y
+        // es lo que hace que el build-in tenga algo que construir.
+        //
+        // `.call()` y no un tween sobre un proxy: lo que avanza es un índice de
+        // React, no un número que se interpole. Cada parada es un solo
+        // `setScrollIdx`, así que cada elemento del ensamble hace su transición
+        // CSS una vez y no una por cuadro.
+        setScrollIdx(-1);
+        walkTl = gsap.timeline({ paused: true });
+        STAGE_ORDER.forEach((_, i) => {
+          walkTl?.call(() => setScrollIdx(i), undefined, WALK_LEAD + i * WALK_BEAT);
+        });
       } else {
-        // Sin recorrido: el ensamble está COMPLETO desde el principio.
+        // `static`: el ensamble está COMPLETO desde el principio.
         //
         // Se setea acá y no desde un ScrollTrigger `onEnter`, y el motivo es un
         // modo de fallo real: `onEnter` no dispara cuando la sección YA está
@@ -167,6 +238,11 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
         onComplete: () => {
           builtRef.current = true;
           gsap.set(cubes, { clearProps: "opacity,visibility,transform,transition" });
+          // Y acá arranca el paseo, si lo hay. Colgado del `onComplete` y no de
+          // un `delay` propio: el build-in tiene `timeScale(1.3)` y su propio
+          // trigger, así que cualquier retardo calculado a mano quedaría
+          // desfasado en cuanto alguno de los dos cambie.
+          walkTl?.play(0);
         },
       });
 
@@ -205,10 +281,11 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
         triggers.forEach((t) => t.kill());
         buildTl.scrollTrigger?.kill();
         buildTl.kill();
+        walkTl?.kill();
         delete scope.dataset.mode;
       };
     },
-    [mode]
+    [mode, stops]
   );
 
   const stop: StackStop | null = scrollIdx >= 0 ? STAGE_ORDER[scrollIdx] : null;
@@ -309,7 +386,10 @@ export function useStackScene({ mode = "track" }: StackSceneOptions = {}): Stack
 
   const goTo = (key: StackStop) => {
     const section = rootRef.current;
-    if (!section || !enhanced || mode !== "track") return;
+    // `!stops` también sale: sin paradas no hay a dónde saltar, y el tween de
+    // scroll aterrizaría en un punto que no significa nada. El click en una
+    // ficha se vuelve un no-op en vez de un salto arbitrario.
+    if (!section || !enhanced || mode !== "track" || !stops) return;
     const i = STAGE_ORDER.indexOf(key);
     const top = section.getBoundingClientRect().top + window.scrollY;
     const span = section.offsetHeight - window.innerHeight;

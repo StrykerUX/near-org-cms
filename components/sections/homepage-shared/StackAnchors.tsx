@@ -16,7 +16,6 @@ import {
   INTENTS_BLOCK,
   NEARCOM_BLOCK,
   PROTOCOL_BLOCK,
-  STACK_CAPABILITIES,
   STACK_NOTES,
   STACK_PIECES,
   STACK_INTRO as INTRO,
@@ -103,9 +102,13 @@ export type StackAnchorsProps = {
    * caja se abre.
    *
    * Reemplaza a la cortina y a la obertura: el negro ya no llega tapando ni
-   * subiendo, llega DENTRO de algo. Y como el recorrido de la caja pasa
-   * mientras la sección entra y sale, no le roba un solo píxel a las seis
-   * paradas del ensamble, que siguen midiéndose contra la sección entera.
+   * subiendo, llega DENTRO de algo. Los dos tramos de la caja pasan mientras la
+   * sección entra y sale, así que no le roban un solo píxel al tiempo en que la
+   * escena está plantada.
+   *
+   * Con `frame` el ensamble además deja de recorrer sus paradas con el scroll y
+   * pasa a recorrerlas por reloj — ver `stops` en `useStackScene`, unas líneas
+   * más abajo.
    */
   frame?: boolean;
   /**
@@ -145,8 +148,26 @@ export default function StackAnchors({
   soloActive = false,
   flow = false,
 }: StackAnchorsProps = {}) {
+  // `stops: !frame` — con caja, el recorrido cambia de MOTOR, no desaparece.
+  //
+  // Las siete paradas son las mismas y en el mismo orden; lo que las sirve es
+  // un reloj que arranca al terminar el build-in, no la posición del scroll.
+  //
+  // Dos razones, y la segunda es la que importa. Una: la caja que se abre al
+  // plantarse y se cierra al salir ya es la narrativa de la sección, y las
+  // paradas contaban una segunda sobre la misma barra de scroll. La otra:
+  // colgado del scroll, la velocidad del paseo la ponía la rueda del lector, y
+  // un gesto de trackpad se comía las siete paradas en dos cuadros — el arte no
+  // se recorría, parpadeaba. Con reloj, cada parada dura lo que tiene que
+  // durar y el recorrido se ve entero siempre.
+  //
+  // El hover no pasa por el recorrido, así que sigue completo: capas,
+  // segmentos de AI y los seis cubos de la columna con su split.
+  //
+  // Fuera de `frame` (homepage-a, homepage-b) el recorrido sigue colgado del
+  // scroll, como estaba.
   const { rootRef, stageRef, stage, stop, hover, enhanced, goTo, stageProps, tagRef } =
-    useStackScene();
+    useStackScene({ stops: !frame });
   // Solo `frame` salta la entrada del contenido, y `soloActive` NO.
   //
   // Estuvieron los dos, y era un error con síntoma claro: en `soloActive` la
@@ -210,7 +231,29 @@ export default function StackAnchors({
             <StackFlow className="pointer-events-none absolute inset-0" />
           ) : null}
 
-          <Container className="pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)]">
+          {/* `data-stack-inner`: es el bloque que se ENCOGE mientras la caja
+              se cierra al salir. El porqué está en `useFrameReveal`, junto al
+              tramo de cierre. El fondo (`StackFlow`) queda afuera a propósito
+              — es fondo, y encogerlo dejaría un borde de crema entre el shader
+              y el filo de la caja. */}
+          <Container
+            data-stack-inner
+            // El `pb` extra es solo de `frame`, y va acá y no en la sección.
+            //
+            // Con caja, el borde inferior es un FILO redondeado a 34px que pasa
+            // a centímetros del pie de gobernanza/economía: los 40px del `py-10`
+            // alcanzaban cuando lo de abajo era el borde de la pantalla, y
+            // contra un filo se leen como texto pegado. Sin caja el pie ni
+            // siquiera está adentro de la escena (`StackNotesSection` va afuera),
+            // así que ahí este aire solo le comería alto al arte.
+            //
+            // `pb-*` gana sobre `py-*` sin depender del orden en el string:
+            // Tailwind emite las utilidades de un solo lado después de las de
+            // eje, siempre.
+            className={`pointer-events-none relative flex h-full flex-col py-10 group-data-[mode=track]/anchors:pt-[calc(var(--site-header-block)+1rem)] ${
+              frame ? "pb-16 lg:pb-24" : ""
+            }`}
+          >
             {/* El titular del stack, DENTRO de la escena pegada.
 
                 Vivía en su propia sección (`StackIntro`) justo encima, y por eso
@@ -307,10 +350,6 @@ export default function StackAnchors({
               <Anchor
                 side="right"
                 leaf={NEARCOM_BLOCK}
-                // El único nombre partido en dos colores: "NEAR" es la marca y
-                // ".com" el dominio, y el prototipo tiñe solo la marca. Los otros
-                // tres van enteros porque no tienen esa costura.
-                tint="NEAR"
                 on={on("nearcom")}
                 solo={soloActive}
                 onSelect={() => goTo("nearcom")}
@@ -565,8 +604,24 @@ function useSceneEntrance(enabled: boolean, frame: boolean) {
 /** Cuánto margen le queda a la caja cerrada, en % del viewport. */
 const FRAME_TUCK = { y: 11, x: 6 } as const;
 
-/** El radio de la caja, en px. Constante: acá nada se escala. */
+/** El radio de la caja, en px. Constante: el ENCUADRE nunca se escala. */
 const FRAME_RADIUS = 34;
+
+/**
+ * Cuánto se encoge el CONTENIDO mientras la caja se cierra al salir.
+ *
+ * Es exactamente lo que le queda de alto a la caja cerrada
+ * (`1 - 2 × FRAME_TUCK.y`), y se deriva y no se escribe a mano porque las dos
+ * cosas tienen que moverse juntas: subir el margen de la caja sin bajar esto
+ * vuelve a cortar el contenido, en silencio.
+ *
+ * Va contra el eje Y y no contra el X —que cierra menos, 6%— porque el corte
+ * que se ve es VERTICAL: el pie de gobernanza/economía queda partido a mitad
+ * de renglón. Con 0.78 uniforme el bloque entra holgado en los dos ejes; con
+ * un `scaleX`/`scaleY` distintos calzaría exacto contra el filo y el texto
+ * saldría deformado un 11%.
+ */
+const FRAME_SCALE = 1 - (2 * FRAME_TUCK.y) / 100;
 
 /**
  * La escena entra y sale metida en una caja, y se abre a pantalla completa
@@ -594,6 +649,26 @@ const FRAME_RADIUS = 34;
  * se quiere es que el encuadre se cierre sobre una escena que no cambia de
  * tamaño. Además `inset()` no toca el layout, así que ni el sticky ni los
  * ScrollTrigger del ensamble se enteran.
+ *
+ * ── La excepción: el contenido SÍ se encoge, y solo al salir ────────────────
+ *
+ * La doctrina de arriba vale para el ENCUADRE, y vale entera mientras la caja
+ * se abre: ahí lo único visible es el titular, el arte todavía no entró, y no
+ * hay nada que se pueda ver cortado.
+ *
+ * Al cerrar es al revés. La escena está completa —titular, arte, cuatro fichas
+ * y el pie de gobernanza/economía— y el filo de la caja avanza por encima:
+ * lo que se ve no es una escena guardándose sino un párrafo TAJEADO a mitad de
+ * renglón. Un texto cortado no se lee como un encuadre, se lee como un bug.
+ *
+ * Así que el bloque de contenido baja a `FRAME_SCALE` con el mismo scrub y la
+ * misma curva que el clip: la caja se cierra y lo que hay adentro se va con
+ * ella. El fondo (`StackFlow`) queda afuera del encogido a propósito — es
+ * fondo, y encogerlo abriría una banda de crema entre el shader y el filo.
+ *
+ * El arte sigue sin verse "lejos" porque este tramo dura lo que la sección
+ * tarda en irse de pantalla: para cuando el encogido se nota, la escena ya está
+ * saliendo.
  */
 function useFrameReveal(enabled: boolean) {
   return useGsapContext<HTMLElement>((_self, scope) => {
@@ -703,34 +778,72 @@ function useFrameReveal(enabled: boolean) {
         );
       }
 
-      const shutTl = gsap.fromTo(
+      // El bloque de contenido de la escena — todo menos el fondo. Se encoge
+      // con la caja al salir; ver la nota del hook.
+      const inner = section.querySelector<HTMLElement>("[data-stack-inner]");
+
+      const shutTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "bottom bottom",
+          end: "bottom top",
+          scrub: true,
+          markers: DEBUG_MARKERS,
+        },
+      });
+
+      shutTl.fromTo(
         box,
         { clipPath: open },
         {
           clipPath: shut,
           ease: "power2.inOut",
+          duration: 1,
           // `immediateRender: false` o este `from` se aplica al construir el
           // timeline y pisa al de arriba: la caja nacería abierta y el tramo de
           // apertura no tendría nada que abrir.
           immediateRender: false,
-          scrollTrigger: {
-            trigger: section,
-            start: "bottom bottom",
-            end: "bottom top",
-            scrub: true,
-            markers: DEBUG_MARKERS,
-          },
-        }
+        },
+        0
       );
+
+      if (inner) {
+        // Misma posición, misma duración y misma curva que el clip: los dos
+        // cuelgan del mismo scrub, así que el filo de la caja y el borde del
+        // contenido llegan juntos a cada cuadro. Con easings distintos el texto
+        // adelantaría o atrasaría al filo y volvería a asomar cortado en el
+        // medio del recorrido.
+        //
+        // `transformOrigin` al centro (el que ya trae GSAP) porque el `inset`
+        // cierra hacia el centro por los cuatro lados.
+        shutTl.fromTo(
+          inner,
+          { scale: 1 },
+          {
+            scale: FRAME_SCALE,
+            ease: "power2.inOut",
+            duration: 1,
+            immediateRender: false,
+          },
+          0
+        );
+      }
 
       return () => {
         openTl.scrollTrigger?.kill();
         openTl.kill();
         shutTl.scrollTrigger?.kill();
         shutTl.kill();
-        gsap.set([box, ...(head ? [head] : []), ...cards, ...(art ? [art] : [])], {
-          clearProps: "clipPath,transform,opacity,visibility",
-        });
+        gsap.set(
+          [
+            box,
+            ...(head ? [head] : []),
+            ...(inner ? [inner] : []),
+            ...cards,
+            ...(art ? [art] : []),
+          ],
+          { clearProps: "clipPath,transform,opacity,visibility" }
+        );
       };
     });
 
@@ -832,7 +945,6 @@ type AnchorLeaf = {
 function Anchor({
   side,
   leaf,
-  tint,
   pieces,
   on,
   solo,
@@ -841,8 +953,6 @@ function Anchor({
 }: {
   side: "left" | "right";
   leaf: AnchorLeaf;
-  /** Prefijo del nombre que va en verde, si lo hay. */
-  tint?: string;
   pieces?: readonly string[];
   on: boolean;
   /** Modo «solo la activa»: esta ficha está o no está, sin estados a media tinta. */
@@ -852,22 +962,24 @@ function Anchor({
 }) {
   const right = side === "right";
 
-  // `lit` gobierna los tintes del CUERPO. En modo `solo` el cuerpo que se ve es
-  // siempre el de la capa activa —no hay tres hermanas contra las que
-  // destacarse—, así que atenuar cualquier parte de él no comunicaría nada y
-  // solo bajaría el contraste.
-  const lit = solo ? true : on;
-
-  // El ENCABEZADO es otra cosa: los cuatro están presentes todo el tiempo, así
-  // que ahí sí hay que distinguir cuál es el activo. Pero con valores que pasen
-  // AA en los DOS estados, que es lo que el diseño anterior no hacía: `/60` da
-  // ~6.8:1 y `/70` ~8.5:1 sobre `--ink`, mientras que los `/25` y `/30` que
-  // usaba antes se quedaban en 2.1–2.3:1.
+  // ── Las cuatro fichas se ven SIEMPRE al máximo, y eso es deliberado ───────
   //
-  // Y el color no es el único canal: lo que de verdad dice cuál es la activa es
-  // que debajo de ella hay un cuerpo y debajo de las otras no. El tinte solo
-  // acompaña.
-  const head = solo ? on : lit;
+  // Antes el cuerpo y el encabezado bajaban de tinte cuando la ficha no era la
+  // parada activa: `text-cream/40` contra `/80`, la regla en `cream/25` contra
+  // el mint. Tres de las cuatro estaban apagadas en todo momento, y como las
+  // cuatro capas se leen a la vez —no es un acordeón, están todas escritas—,
+  // lo que producía era una pantalla con tres bloques de texto en gris bajo y
+  // uno legible.
+  //
+  // Cuál es la parada activa NO se pierde: lo dice el ARTE, que sigue
+  // encendiendo la pieza que corresponde, y ahí es donde el lector está
+  // mirando. Los tintes de las fichas solo lo repetían, y lo repetían
+  // rompiendo el contraste de las otras tres.
+  //
+  // Queda `solo` intacto (`homepage-b`), que es otro trato: ahí el cuerpo de
+  // las inactivas no está atenuado sino AUSENTE, y el encabezado es lo único
+  // que distingue cuál está abierta.
+  const head = solo ? on : true;
 
   // Solo el host, sin verbo.
   //
@@ -909,10 +1021,13 @@ function Anchor({
               right ? "text-right" : "text-left"
             }`}
           >
-            {tint && <span className="text-cta-mint">{tint}</span>}
-            <span className={head ? "text-cream" : "text-cream/70"}>
-              {tint ? leaf.name.slice(tint.length) : leaf.name}
-            </span>
+            {/* Los cuatro nombres van de un solo color. "NEAR.com" tenía la
+                marca en `cta-mint` y el dominio en crema —era el único partido
+                en dos— y con las cuatro fichas encendidas a la vez esa ficha
+                pasaba a ser la destacada de la escena sin que nadie lo hubiera
+                decidido: el verde es el color con el que el arte marca lo
+                activo. Fuera de ahí, no marca nada. */}
+            <span className={head ? "text-cream" : "text-cream/70"}>{leaf.name}</span>
           </button>
 
           {visit && (
@@ -958,9 +1073,7 @@ function Anchor({
         }`}
       >
         <p
-        className={`text-body-sm text-pretty transition-colors duration-300 ${
-          lit ? "text-cream/80" : "text-cream/40"
-        }`}
+        className="text-body-sm text-cream/80 text-pretty"
       >
         {leaf.body}
       </p>
@@ -992,12 +1105,7 @@ function Anchor({
           {pieces.map((piece, i) => (
             <li key={piece} className="flex items-center gap-2.5">
               {i > 0 && (
-                <span
-                  aria-hidden="true"
-                  className={`transition-colors duration-300 ${
-                    lit ? "text-cream/40" : "text-cream/25"
-                  }`}
-                >
+                <span aria-hidden="true" className="text-cream/40">
                   ·
                 </span>
               )}
@@ -1006,7 +1114,7 @@ function Anchor({
                   dentro de él. `cream/80` sigue en ~10:1 sobre `--ink`, así que
                   el peso hace el trabajo y el color no lo duplica. */}
               {/* ds-exempt: nombres de producto, más pesados que su enumeración */}
-              <span className={`text-body-sm font-bold transition-colors duration-300 ${lit ? "text-cream/80" : "text-cream/45"}`}>
+              <span className="text-body-sm font-bold text-cream/80">
                 {piece}
               </span>
             </li>
@@ -1014,25 +1122,14 @@ function Anchor({
         </ul>
       )}
 
-      {/* Las capacidades del stack, iguales en las cuatro fichas — la
-          repetición es el mensaje, ver `nearStackContent.ts`. Los corchetes van
-          en el JSX y no en la copy: son notación tipográfica, no parte de la
-          palabra, y en el dato harían que "Confidential" no se pudiera reusar
-          en ningún otro sitio sin arrastrarlos. */}
-        <ul
-          className={`flex flex-wrap gap-x-4 gap-y-1 ${right ? "justify-end" : ""}`}
-        >
-          {STACK_CAPABILITIES.map((cap) => (
-            <li
-              key={cap}
-              className={`whitespace-nowrap uppercase text-micro-mono transition-colors duration-300 ${
-                lit ? "text-cream/55" : "text-cream/25"
-              }`}
-            >
-              [ {cap} ]
-            </li>
-          ))}
-        </ul>
+      {/* Acá iban las seis capacidades entre corchetes —[ CONFIDENTIAL ],
+          [ CROSS-CHAIN ], …— repetidas idénticas en las cuatro fichas. La
+          repetición ERA el mensaje (son propiedades del stack, no de una capa;
+          el argumento sigue escrito en `STACK_CAPABILITIES`), pero en pantalla
+          no se leía como una afirmación: se leía como el pie de cada ficha, y
+          cuatro pies iguales pasan a ser textura. Se quitaron de estas dos
+          rutas; la lista sigue exportada y `homepage-a` y `StackAtlas` la
+          siguen montando. */}
       </div>
     </div>
   );

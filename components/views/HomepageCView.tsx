@@ -5,6 +5,7 @@ import StackAnchors from "@/components/sections/homepage-shared/StackAnchors";
 import ProofLedger from "@/components/sections/homepage-tuck/ProofLedger";
 import BelongsNewsletter from "@/components/sections/homepage-shared/BelongsNewsletter";
 import TestimonialDeck from "@/components/sections/homepage-tuck/TestimonialDeck";
+import GetIntoNear from "@/components/sections/homepage-tuck/GetIntoNear";
 import CustomerStories from "@/components/sections/homepage-shared/CustomerStories";
 import PressCarousel from "@/components/sections/homepage-shared/PressCarousel";
 import LatestUpdates from "@/components/sections/LatestUpdates";
@@ -25,7 +26,11 @@ export default function HomepageCView() {
   return (
     <main className="flex flex-col bg-cream">
       <HeroTuck />
-      <StatementPlain />
+      {/* `topAir` porque acá arriba no hay crema al aire: está la tarjeta en
+          la que el hero se guarda. Pegada a su borde, la frase se leía como el
+          pie de esa tarjeta. En `homepage-b` la sección va sin aire — el
+          porqué de las dos está en el prop. */}
+      <StatementPlain topAir />
       <OwnYourOwn />
       {/* El stack, tal cual la línea viva —su propio encabezado, sus seis
           paradas, su pie— pero CONTENIDO EN UNA CAJA. Sube desde abajo
@@ -56,6 +61,11 @@ export default function HomepageCView() {
           del mazo y la cita gigante de la izquierda son la misma persona — el
           porqué está en el componente. */}
       <TestimonialDeck />
+      {/* Y el cierre: las tres puertas de entrada. Va inmediatamente después
+          del mazo porque es la contrapartida — ahí hablan otros, acá se le
+          pide algo al visitante, y entre las dos cosas no debería haber nada.
+          Vuelve al cream después del único tramo oscuro del final. */}
+      <GetIntoNear />
       <LatestUpdates />
       <UpdatesList />
     </main>

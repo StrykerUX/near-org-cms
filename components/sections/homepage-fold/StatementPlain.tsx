@@ -92,7 +92,27 @@ function Accented({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function StatementPlain() {
+export type StatementPlainProps = {
+  /**
+   * Un respiro arriba de la frase. Apagado por defecto.
+   *
+   * La sección nació SIN aire arriba, y el porqué está escrito largo abajo, en
+   * el `<section>`: en `homepage-b` lo que queda encima es el lockup del
+   * pliegue sobre el mismo crema, así que un hueco propio se sumaba al del hero
+   * y dejaba casi dos pantallas vacías.
+   *
+   * En `homepage-c` lo de arriba no es crema al aire: es la tarjeta en la que
+   * el hero se guarda, con su borde. Pegada a ese borde, la frase se lee como
+   * el pie de la tarjeta en vez de como la sección siguiente — y ahí el hueco
+   * sí separa dos cosas distintas.
+   *
+   * Va como prop y no como cambio a secas porque son las DOS rutas las que
+   * montan esta sección, y el aire correcto depende de con qué limita arriba.
+   */
+  topAir?: boolean;
+};
+
+export default function StatementPlain({ topAir = false }: StatementPlainProps = {}) {
   // El cuerpo, partido en los dos tramos que quedan en voz corrida. `rest`
   // llega `undefined` si el pivote ya no está en el copy — ahí el primer
   // acento no se dibuja y la frase sigue entera, que es la degradación que se
@@ -179,7 +199,9 @@ export default function StatementPlain() {
       //
       // Queda el `pb`, que sí separa: lo que sigue es `OwnYourOwn`, que trae su
       // propio encabezado.
-      className="relative overflow-hidden bg-cream pb-24 text-foreground lg:pb-32"
+      className={`relative overflow-hidden bg-cream pb-24 text-foreground lg:pb-32 ${
+        topAir ? "pt-12 lg:pt-20" : ""
+      }`}
       style={PALETTE}
     >
       <Container>
