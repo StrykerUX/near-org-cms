@@ -1,6 +1,6 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import Surface from "@/components/sections/shells/stage/Surface";
 import { HERO } from "@/components/sections/economics/economicsContent";
 

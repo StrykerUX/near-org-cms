@@ -8,7 +8,7 @@ import { onViewportToggle } from "@/components/primitives/motion/pauseOffscreen"
 import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import {
   createQuantumLattice,
   type LatticeHandle,

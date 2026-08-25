@@ -3,7 +3,7 @@
 import Container from "@/components/primitives/Container";
 import MachineArt from "@/components/sections/protocol-labs/machineArt";
 import { useActScene } from "@/components/sections/protocol-labs/useActScene";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import {
   CAPABILITIES,
   PROOF_BY_ID,

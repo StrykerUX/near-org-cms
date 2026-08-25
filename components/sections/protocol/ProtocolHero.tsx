@@ -7,7 +7,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { createShardField, type ShardFieldHandle } from "@/components/sections/protocol/shardField";
 
 // Section 1. Structurally a sibling of QuantumHero — full viewport, optically

@@ -1,7 +1,7 @@
 "use client";
 
 import Container from "@/components/primitives/Container";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { TOOLS, TOOLS_HEADER } from "@/components/sections/analytics-labs/analyticsContent";
 

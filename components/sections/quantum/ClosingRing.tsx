@@ -6,7 +6,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { pauseOffscreen } from "@/components/primitives/motion/pauseOffscreen";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { EXTERNAL_LINKS } from "@/components/sections/quantum/quantumContent";
 
 // Closing call to action: the copy sits inside an orbit that assembles once on

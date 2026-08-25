@@ -18,6 +18,23 @@ function getTrustedImageHostnames(): { protocol: "https"; hostname: string }[] {
 }
 
 const nextConfig: NextConfig = {
+  // ── Rutas que cambiaron de nombre ──────────────────────────────────────────
+  //
+  // Una ruta pública que se renombra no puede simplemente desaparecer: estuvo en
+  // el sitemap, la indexaron los buscadores y puede estar enlazada desde fuera.
+  // El 308 conserva el peso del enlace y manda al lector al sitio correcto en
+  // vez de a un 404.
+  //
+  // `permanent: true` y no `false` a propósito: el cambio de nombre es
+  // definitivo. Un 307 le dice al buscador que siga indexando la vieja.
+  async redirects() {
+    return [
+      // `/blockchain` → `/protocol`. La ruta se llamó `/blockchain` porque así
+      // estaba en el sitemap doc de near.org; el label del menú siempre dijo
+      // «Protocol», y ahora coinciden.
+      { source: "/blockchain", destination: "/protocol", permanent: true },
+    ];
+  },
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
   serverExternalPackages: ["@prisma/client", ".prisma/client"],

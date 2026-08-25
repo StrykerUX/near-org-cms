@@ -6,7 +6,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import BloomField from "@/components/sections/quantum-security-heroes/BloomField";
 import { HERO_BODY, HERO_CTA } from "@/components/sections/quantum-security-heroes/heroContent";
 

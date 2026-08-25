@@ -454,5 +454,5 @@ Las tres variantes importan `CtaPill` de [`../quantum`](../quantum/README.md),
 igual que `chain` y `protocol`. `ArchiveSlot` y `ChapterFigure` los comparten las
 tres sin modificar, y B y C montan además los armazones de
 [`../shells`](../shells/README.md) tal como están. El link secundario del cierre es interno
-(`/blockchain`) y va con `next/link`, no con la pill: la pill siempre renderiza
+(`/protocol`) y va con `next/link`, no con la pill: la pill siempre renderiza
 un `<a>` pelado, y dos pills juntas además dejarían al par sin jerarquía.

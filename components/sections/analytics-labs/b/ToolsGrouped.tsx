@@ -1,5 +1,5 @@
 import Container from "@/components/primitives/Container";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { TOOLS, TOOLS_HEADER } from "@/components/sections/analytics-labs/analyticsContent";
 
 // ── Proposal B · §5 ────────────────────────────────────────────────────────

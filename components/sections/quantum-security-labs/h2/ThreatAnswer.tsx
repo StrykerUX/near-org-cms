@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { NEAR_MARK_PATH } from "@/components/sections/quantum-security-copy/NearMark";
 import { keyField, KEY_SLOTS, slotPoint, round4 } from "@/components/sections/quantum-security-labs/quantumArt";
 import { PROBLEM_SOLUTION_LEAD } from "@/components/sections/quantum-security-labs/labContent";

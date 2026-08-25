@@ -2,7 +2,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import Surface from "@/components/sections/shells/stage/Surface";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { GROUND, GROUND_HERO } from "@/components/sections/community/c/ground";
 import { HERO } from "@/components/sections/community/communityContent";
 

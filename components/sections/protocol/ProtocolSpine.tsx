@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Container from "@/components/primitives/Container";
 import Accent from "@/components/primitives/Accent";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";

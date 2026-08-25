@@ -7,7 +7,7 @@ import { enableScene, trackTimeline } from "@/components/primitives/motion/stick
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";
 import { hermiteRamp } from "@/components/primitives/motion/velocityRamp";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { SEQUENCE_BEATS as BEATS } from "@/components/sections/quantum-security-copy/quantumContent";
 
 // §3 + §4 of the copy deck, as ONE pinned composition.

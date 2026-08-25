@@ -8,7 +8,7 @@ encuadre que se recoge en una tarjeta al scrollear.
 
 | Página | Ruta | `page=` |
 |---|---|---|
-| Protocol | `/blockchain` | `protocol` |
+| Protocol | `/protocol` | `protocol` |
 | Chain Abstraction | `/chain-abstraction` | `chain` |
 | Quantum Security | `/quantum-security` | `quantum` |
 | History | `/about` | `about` |

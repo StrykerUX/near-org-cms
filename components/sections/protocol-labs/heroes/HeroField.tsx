@@ -3,7 +3,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import GlyphField from "@/components/sections/protocol-labs/GlyphField";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 
 // El hero de E · Field, suelto.

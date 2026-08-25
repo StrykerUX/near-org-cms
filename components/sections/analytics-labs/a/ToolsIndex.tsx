@@ -1,5 +1,5 @@
 import Container from "@/components/primitives/Container";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { AxisRule } from "@/components/sections/analytics-labs/a/Hero";
 import { TOOLS, TOOLS_HEADER } from "@/components/sections/analytics-labs/analyticsContent";
 

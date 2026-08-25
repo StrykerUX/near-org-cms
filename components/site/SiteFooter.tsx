@@ -120,9 +120,12 @@ const GROUPS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Stack",
     links: [
-      // "Protocol" es el label del sitemap doc; la ruta se llama /blockchain.
+      // El label y la ruta ya coinciden: la ruta se llamó `/blockchain` hasta
+      // que se renombró a `/protocol`, que es como la nombra el sitemap doc.
+      // `/blockchain` sigue resolviendo por la redirección permanente de
+      // next.config.ts — era una URL pública y no se rompe.
       // Acá apuntaba a /prototype/protocol, que ya no existe.
-      { label: "Protocol", href: "/blockchain" },
+      { label: "Protocol", href: "/protocol" },
       { label: "Chain Abstraction", href: "/chain-abstraction" },
       { label: "Quantum Security", href: "/quantum-security" },
     ],

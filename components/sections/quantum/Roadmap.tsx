@@ -6,7 +6,7 @@ import Eyebrow from "@/components/primitives/Eyebrow";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import {
   ROADMAP_STAGES as STAGES,
   type RoadmapStage,

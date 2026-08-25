@@ -9,6 +9,19 @@
 // too.
 //
 // The rule lives in `[data-q-arrow]` in app/globals.css. Server component.
+//
+// ── Por qué `tone` y no una clase por `className` ──────────────────────────
+//
+// El disco va verde en casi todo el sitio y crema en las cards de InTheNews de
+// `/quantum-security`. Eso vivió como un ARCHIVO COPIADO —`NewsArrowCircle`—
+// que difería en una sola línea, y la copia existía por una razón real: pasarle
+// `bg-cream` por `className` no funciona. Las dos clases declaran la misma
+// propiedad y cuál gana lo decide el orden en que Tailwind las EMITE, no el
+// orden en el atributo. El resultado es un disco que a veces sale verde y a
+// veces crema según qué más se haya compilado.
+//
+// Un mapa literal de tonos elige una sola clase, así que no hay competencia
+// posible. Es el mismo patrón que `CtaPill` ya usaba al lado.
 
 function Arrow({ slot }: { slot: "in" | "out" }) {
   return (
@@ -29,14 +42,28 @@ function Arrow({ slot }: { slot: "in" | "out" }) {
   );
 }
 
-export default function ArrowCircle({ className = "" }: { className?: string }) {
+const TONE = {
+  green: "bg-near-green-accent text-black",
+  cream: "bg-cream text-ink",
+} as const;
+
+export type ArrowCircleProps = {
+  /** El relleno del disco. `cream` es el de las cards de prensa sobre tinta. */
+  tone?: keyof typeof TONE;
+  className?: string;
+};
+
+export default function ArrowCircle({
+  tone = "green",
+  className = "",
+}: ArrowCircleProps = {}) {
   return (
     // overflow-hidden IS wanted here: it is what crops the arrows against the
     // edge of the disc as they cross it.
     <span
       data-q-arrow
       aria-hidden="true"
-      className={`relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-near-green-accent text-black ${className}`}
+      className={`relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full ${TONE[tone]} ${className}`}
     >
       <Arrow slot="out" />
       <Arrow slot="in" />

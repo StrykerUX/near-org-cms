@@ -1,5 +1,5 @@
 import Container from "@/components/primitives/Container";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import Panel from "@/components/sections/shells/instrument/Panel";
 import { HERO, FLYWHEEL } from "@/components/sections/economics/economicsContent";
 

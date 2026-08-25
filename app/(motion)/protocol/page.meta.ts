@@ -1,7 +1,7 @@
 import type { PageMeta } from "@/lib/page-meta";
 
 const meta = {
-  route: "/blockchain",
+  route: "/protocol",
   title: "Protocol",
   description:
     "The settlement layer for the agent economy — sub-second finality, zero downtime, quantum-adaptable from day one.",

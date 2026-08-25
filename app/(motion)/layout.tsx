@@ -18,7 +18,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 // las páginas animadas necesitan el chrome del sitio pero NO el provider de
 // `(site)`, y cada una trae el suyo en su propio `layout.tsx`.
 //
-// Un grupo entre paréntesis no aparece en la URL, así que `/blockchain` sale
+// Un grupo entre paréntesis no aparece en la URL, así que `/protocol` sale
 // igual desde acá que desde cualquier otro sitio.
 //
 // El `SiteFooter` SÍ se monta acá, igual que en `(site)` y en `/prototype`.

@@ -7,25 +7,25 @@ import m0 from "@/app/(motion)/(home)/page.meta";
 import m1 from "@/app/(motion)/about/page.meta";
 import m2 from "@/app/(site)/ai/page.meta";
 import m3 from "@/app/(motion)/analytics/page.meta";
-import m4 from "@/app/(motion)/blockchain/page.meta";
-import m5 from "@/app/(site)/blog/page.meta";
-import m6 from "@/app/(site)/brand/page.meta";
-import m7 from "@/app/(motion)/chain-abstraction/page.meta";
-import m8 from "@/app/(motion)/community/page.meta";
-import m9 from "@/app/(site)/confidential-intents/page.meta";
-import m10 from "@/app/(site)/contact-us/page.meta";
-import m11 from "@/app/(site)/cookie-policy/page.meta";
-import m12 from "@/app/(site)/design-system/page.meta";
-import m13 from "@/app/(site)/dir/page.meta";
-import m14 from "@/app/(motion)/economics/page.meta";
-import m15 from "@/app/(motion)/ecosystem/page.meta";
-import m16 from "@/app/(motion)/governance/page.meta";
-import m17 from "@/app/(site)/intents/page.meta";
-import m18 from "@/app/(site)/near-ai/page.meta";
-import m19 from "@/app/(motion)/near-foundation/page.meta";
-import m20 from "@/app/(site)/nearcom/page.meta";
-import m21 from "@/app/(site)/official-rules/page.meta";
-import m22 from "@/app/(site)/privacy/page.meta";
+import m4 from "@/app/(site)/blog/page.meta";
+import m5 from "@/app/(site)/brand/page.meta";
+import m6 from "@/app/(motion)/chain-abstraction/page.meta";
+import m7 from "@/app/(motion)/community/page.meta";
+import m8 from "@/app/(site)/confidential-intents/page.meta";
+import m9 from "@/app/(site)/contact-us/page.meta";
+import m10 from "@/app/(site)/cookie-policy/page.meta";
+import m11 from "@/app/(site)/design-system/page.meta";
+import m12 from "@/app/(site)/dir/page.meta";
+import m13 from "@/app/(motion)/economics/page.meta";
+import m14 from "@/app/(motion)/ecosystem/page.meta";
+import m15 from "@/app/(motion)/governance/page.meta";
+import m16 from "@/app/(site)/intents/page.meta";
+import m17 from "@/app/(site)/near-ai/page.meta";
+import m18 from "@/app/(motion)/near-foundation/page.meta";
+import m19 from "@/app/(site)/nearcom/page.meta";
+import m20 from "@/app/(site)/official-rules/page.meta";
+import m21 from "@/app/(site)/privacy/page.meta";
+import m22 from "@/app/(motion)/protocol/page.meta";
 import m23 from "@/app/prototype/about-a/page.meta";
 import m24 from "@/app/prototype/about-b/page.meta";
 import m25 from "@/app/prototype/about-c/page.meta";
@@ -74,25 +74,25 @@ export const ROUTES: RouteEntry[] = [
   { ...m1, route: "/about", stub: false, view: "AboutAView", file: "app/(motion)/about/page.meta.ts" },
   { ...m2, route: "/ai", stub: true, view: "StubView", file: "app/(site)/ai/page.meta.ts" },
   { ...m3, route: "/analytics", stub: false, view: "AnalyticsView", file: "app/(motion)/analytics/page.meta.ts" },
-  { ...m4, route: "/blockchain", stub: false, view: "ProtocolView", file: "app/(motion)/blockchain/page.meta.ts" },
-  { ...m5, route: "/blog", stub: false, view: "BlogIndexView", file: "app/(site)/blog/page.meta.ts" },
-  { ...m6, route: "/brand", stub: true, view: "StubView", file: "app/(site)/brand/page.meta.ts" },
-  { ...m7, route: "/chain-abstraction", stub: false, view: "ChainAbstractionView", file: "app/(motion)/chain-abstraction/page.meta.ts" },
-  { ...m8, route: "/community", stub: false, view: "CommunityAView", file: "app/(motion)/community/page.meta.ts" },
-  { ...m9, route: "/confidential-intents", stub: true, view: "StubView", file: "app/(site)/confidential-intents/page.meta.ts" },
-  { ...m10, route: "/contact-us", stub: true, view: "StubView", file: "app/(site)/contact-us/page.meta.ts" },
-  { ...m11, route: "/cookie-policy", stub: true, view: "StubView", file: "app/(site)/cookie-policy/page.meta.ts" },
-  { ...m12, route: "/design-system", stub: false, view: null, file: "app/(site)/design-system/page.meta.ts" },
-  { ...m13, route: "/dir", stub: false, view: null, file: "app/(site)/dir/page.meta.ts" },
-  { ...m14, route: "/economics", stub: false, view: "EconomicsAView", file: "app/(motion)/economics/page.meta.ts" },
-  { ...m15, route: "/ecosystem", stub: false, view: "EcosystemView", file: "app/(motion)/ecosystem/page.meta.ts" },
-  { ...m16, route: "/governance", stub: false, view: "GovernanceView", file: "app/(motion)/governance/page.meta.ts" },
-  { ...m17, route: "/intents", stub: true, view: "StubView", file: "app/(site)/intents/page.meta.ts" },
-  { ...m18, route: "/near-ai", stub: true, view: "StubView", file: "app/(site)/near-ai/page.meta.ts" },
-  { ...m19, route: "/near-foundation", stub: false, view: "FoundationAView", file: "app/(motion)/near-foundation/page.meta.ts" },
-  { ...m20, route: "/nearcom", stub: true, view: "StubView", file: "app/(site)/nearcom/page.meta.ts" },
-  { ...m21, route: "/official-rules", stub: true, view: "StubView", file: "app/(site)/official-rules/page.meta.ts" },
-  { ...m22, route: "/privacy", stub: true, view: "StubView", file: "app/(site)/privacy/page.meta.ts" },
+  { ...m4, route: "/blog", stub: false, view: "BlogIndexView", file: "app/(site)/blog/page.meta.ts" },
+  { ...m5, route: "/brand", stub: true, view: "StubView", file: "app/(site)/brand/page.meta.ts" },
+  { ...m6, route: "/chain-abstraction", stub: false, view: "ChainAbstractionView", file: "app/(motion)/chain-abstraction/page.meta.ts" },
+  { ...m7, route: "/community", stub: false, view: "CommunityAView", file: "app/(motion)/community/page.meta.ts" },
+  { ...m8, route: "/confidential-intents", stub: true, view: "StubView", file: "app/(site)/confidential-intents/page.meta.ts" },
+  { ...m9, route: "/contact-us", stub: true, view: "StubView", file: "app/(site)/contact-us/page.meta.ts" },
+  { ...m10, route: "/cookie-policy", stub: true, view: "StubView", file: "app/(site)/cookie-policy/page.meta.ts" },
+  { ...m11, route: "/design-system", stub: false, view: null, file: "app/(site)/design-system/page.meta.ts" },
+  { ...m12, route: "/dir", stub: false, view: null, file: "app/(site)/dir/page.meta.ts" },
+  { ...m13, route: "/economics", stub: false, view: "EconomicsAView", file: "app/(motion)/economics/page.meta.ts" },
+  { ...m14, route: "/ecosystem", stub: false, view: "EcosystemView", file: "app/(motion)/ecosystem/page.meta.ts" },
+  { ...m15, route: "/governance", stub: false, view: "GovernanceView", file: "app/(motion)/governance/page.meta.ts" },
+  { ...m16, route: "/intents", stub: true, view: "StubView", file: "app/(site)/intents/page.meta.ts" },
+  { ...m17, route: "/near-ai", stub: true, view: "StubView", file: "app/(site)/near-ai/page.meta.ts" },
+  { ...m18, route: "/near-foundation", stub: false, view: "FoundationAView", file: "app/(motion)/near-foundation/page.meta.ts" },
+  { ...m19, route: "/nearcom", stub: true, view: "StubView", file: "app/(site)/nearcom/page.meta.ts" },
+  { ...m20, route: "/official-rules", stub: true, view: "StubView", file: "app/(site)/official-rules/page.meta.ts" },
+  { ...m21, route: "/privacy", stub: true, view: "StubView", file: "app/(site)/privacy/page.meta.ts" },
+  { ...m22, route: "/protocol", stub: false, view: "ProtocolView", file: "app/(motion)/protocol/page.meta.ts" },
   { ...m23, route: "/prototype/about-a", stub: false, view: "AboutAView", file: "app/prototype/about-a/page.meta.ts" },
   { ...m24, route: "/prototype/about-b", stub: false, view: "AboutBView", file: "app/prototype/about-b/page.meta.ts" },
   { ...m25, route: "/prototype/about-c", stub: false, view: "AboutCView", file: "app/prototype/about-c/page.meta.ts" },

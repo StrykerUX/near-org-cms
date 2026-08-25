@@ -1,6 +1,6 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { HERO } from "@/components/sections/economics/economicsContent";
 
 // §1 of variant A — the statement, and nothing performing next to it.

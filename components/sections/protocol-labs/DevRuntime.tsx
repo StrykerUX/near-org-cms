@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import CodeSample from "@/components/sections/protocol-labs/CodeSample";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { DEVELOPERS } from "@/components/sections/protocol-labs/protocolContent";
 
 // Alternativa B · sección 10.

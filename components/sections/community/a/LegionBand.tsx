@@ -3,7 +3,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import MediaFrame from "@/components/primitives/MediaFrame";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { LEGION, MEDIA } from "@/components/sections/community/communityContent";
 

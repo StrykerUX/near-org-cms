@@ -11,7 +11,7 @@ import { deviceRatio } from "@/components/primitives/motion/dpr";
 import { createSeededRandom } from "@/components/primitives/motion/seededRandom";
 import { pickDigit, monoFont, setupCanvas } from "@/components/sections/quantum-security-heroes/asciiField";
 import { createWordReveal } from "@/components/sections/quantum-security-heroes/wordReveal";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { HERO_BODY, HERO_CTA } from "@/components/sections/quantum-security-heroes/heroContent";
 
 const CELL_DESKTOP = 15;

@@ -8,7 +8,7 @@ import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { HERO_SURFACE_FRAG } from "@/components/primitives/gl/layerflow";
 import { hexToRgb } from "@/components/primitives/gl/color";
 import GlSurface from "@/components/primitives/GlSurface";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 
 // Sección 1 — el hero de la página.

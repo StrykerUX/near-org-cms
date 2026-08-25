@@ -2,7 +2,7 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";

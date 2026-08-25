@@ -54,7 +54,7 @@ export const GET_INTO_ROWS: readonly GetIntoRow[] = [
     id: "build",
     label: "Build on NEAR",
     body: "Ship on a network that finalizes in a second, for a fraction of a cent.",
-    href: "/blockchain",
+    href: "/protocol",
   },
 ] as const;
 

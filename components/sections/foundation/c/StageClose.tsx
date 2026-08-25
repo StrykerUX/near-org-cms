@@ -2,7 +2,7 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { CLOSING } from "@/components/sections/foundation/foundationContent";
 

@@ -1,5 +1,5 @@
 import Container from "@/components/primitives/Container";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import LiveDot from "@/components/sections/analytics-labs/b/LiveDot";
 import { DeltaInline } from "@/components/sections/analytics-labs/b/Hero";
 import { sparkGeometry, uptimeBars } from "@/components/sections/analytics-labs/analyticsArt";

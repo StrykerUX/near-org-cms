@@ -2,12 +2,13 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
+import Eyebrow from "@/components/primitives/Eyebrow";
 import GlSurface from "@/components/primitives/GlSurface";
 import { HERO_SURFACE_FRAG } from "@/components/primitives/gl/layerflow";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { DEBUG_MARKERS, MQ } from "@/components/primitives/motion/motionTokens";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import {
   HERO_X,
   type HeroXPage,
@@ -237,9 +238,9 @@ export default function HeroX({ page }: HeroXProps) {
             className="relative z-20 grid-ds items-end gap-y-8 pb-16"
           >
             <div className="col-span-full flex flex-col gap-6 lg:col-span-7">
-              <p className="text-eyebrow-mono uppercase text-gray-intermediate">
+              <Eyebrow mono className="text-gray-intermediate">
                 {content.eyebrow}
-              </p>
+              </Eyebrow>
               <h1 className="text-h1 text-balance">
                 {content.lead}
                 <br />

@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import NewsArrowCircle from "./NewsArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { NEWS_STORIES as STORIES, type NewsStory } from "@/components/sections/quantum-security-copy/quantumContent";
 
 // Press coverage of the quantum threat and of NEAR's readiness. Three cards,
@@ -71,7 +71,7 @@ export default function InTheNews() {
                   data-q-arrow-host
                   className="mt-auto flex w-fit items-center gap-3 text-label"
                 >
-                  <NewsArrowCircle />
+                  <ArrowCircle tone="cream" />
                   {story.cta}
                 </a>
               </article>

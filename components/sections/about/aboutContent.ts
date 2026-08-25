@@ -171,7 +171,7 @@ export const CLOSING = {
   headline: "The goal remains the same as it was in the beginning",
   body: "Make powerful technology accessible, usable, and open to everyone.",
   primary: { label: "Read the docs", href: "https://docs.near.org" },
-  secondary: { label: "Explore the protocol", href: "/blockchain" },
+  secondary: { label: "Explore the protocol", href: "/protocol" },
 } as const;
 
 /**

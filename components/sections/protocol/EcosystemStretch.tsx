@@ -3,7 +3,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 
 // Doc sections 11, 12 and 13 — the AI layer, NEAR One, and the two ways to
 // participate. Three short blocks that each said one thing; run consecutively

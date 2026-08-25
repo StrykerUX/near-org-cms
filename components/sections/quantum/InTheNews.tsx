@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { NEWS_STORIES as STORIES } from "@/components/sections/quantum/quantumContent";
 
 // Press coverage of the quantum threat and of NEAR's readiness. Three cards,

@@ -7,7 +7,7 @@ import EcosystemStretch from "@/components/sections/protocol/EcosystemStretch";
 import ContentGallery from "@/components/sections/protocol/ContentGallery";
 import ClosingCta from "@/components/sections/protocol/ClosingCta";
 
-// Composition for /blockchain (was /prototype/protocol until the sitemap gave
+// Composition for /protocol (was /prototype/protocol until the sitemap gave
 // it its real URL). Content from the sitemap doc's Protocol
 // tab; direction in docs/protocol-page-brief.md.
 //

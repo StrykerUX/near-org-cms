@@ -6,7 +6,7 @@ import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { MQ } from "@/components/primitives/motion/motionTokens";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { createShardField, type ShardFieldHandle } from "@/components/sections/protocol/shardField";
 
 // Section 15. The shard field returns, on the dark ground, at full strength —

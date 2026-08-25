@@ -3,7 +3,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { HERO } from "@/components/sections/community/communityContent";
 

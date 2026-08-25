@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import GlSurface, { hexToRgb } from "@/components/primitives/GlSurface";
 import { SPECTRUM_FRAG } from "@/components/primitives/gl/spectrum";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 
 // El hero de C · Spectrum, suelto.

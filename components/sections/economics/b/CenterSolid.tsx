@@ -3,7 +3,7 @@
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import Figure from "@/components/primitives/Figure";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap } from "@/components/primitives/motion/gsapClient";
 import { EASE_OUT, DEBUG_MARKERS } from "@/components/primitives/motion/motionTokens";

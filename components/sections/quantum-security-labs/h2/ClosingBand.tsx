@@ -3,7 +3,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { NEAR_MARK_PATH } from "@/components/sections/quantum-security-copy/NearMark";
 import { EXTERNAL_LINKS } from "@/components/sections/quantum-security-copy/quantumContent";
 

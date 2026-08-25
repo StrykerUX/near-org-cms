@@ -379,7 +379,7 @@ export const LINKS: Entry[] = [
     label: "Stack",
     hero: "/prototype/quantum/menu-tab-2.png",
     items: [
-      { label: "Protocol", href: "/blockchain", desc: "The settlement layer for the agent economy", icon: IconLayers },
+      { label: "Protocol", href: "/protocol", desc: "The settlement layer for the agent economy", icon: IconLayers },
       { label: "Chain Abstraction", href: "/chain-abstraction", desc: "How NEAR connects any chain", icon: IconAbstraction },
       { label: "Quantum Security", href: "/quantum-security", desc: "Quantum-adaptable from day one", icon: IconQuantum },
     ],

@@ -71,7 +71,7 @@ dar por terminado un cambio.
 | `community/*` | `CommunityAView`, `CommunityBView`, `CommunityCView` | `/prototype/community-a\|b\|c` — idem, copy en `communityContent.ts`. [README](./community/README.md). |
 | `quantum/*` | `QuantumSecurityView` | `/quantum-security` — **página real**. Tiene su propio [README](./quantum/README.md) (en inglés, ver la nota de idioma ahí). |
 | `chain/*` | `ChainAbstractionView` | `/chain-abstraction` — **página real**. Tiene su propio [README](./chain/README.md) (en inglés, misma nota que `quantum`). Reusa `quantum/CtaPill` tal cual. |
-| `protocol/*` | `ProtocolView` | `/blockchain` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
+| `protocol/*` | `ProtocolView` | `/protocol` — **página real**. Reusa `quantum/CtaPill` y `quantum/ArrowCircle`. |
 | `protocol-labs/*` | `ProtocolLabAView`, `ProtocolLabBView`, `ProtocolLabCView` | `/prototype/protocol-a`, `-b` y `-c` — tres versiones de la página Protocol completa. Las siete secciones son las MISMAS en las tres; lo único que cambia es el hero (`heroes/`). Tiene su propio [README](./protocol-labs/README.md) |
 | `quantum-security-heroes/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` (+ `-h3`) — **laboratorio**: dos heroes para `/quantum-security`, cada uno con el acomodo de un hero de `protocol-labs/` (h2/h3, ya borrados) y su propio fondo ASCII. El resto de cada página reusa `quantum-security-copy/*` sin modificar. Tiene su propio [README](./quantum-security-heroes/README.md) |
 | `quantum-security-labs/{h2,h3}/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` y `-h3` — **laboratorio**: dos propuestas para todo lo que va DEBAJO del hero de `/quantum-security`. Hero, `Roadmap` e `InTheNews` quedan intactos; la copy sigue siendo `quantum-security-copy/quantumContent.ts`, compartida y sin editar. Las dos se arman con devices que ya existen en `homepage-a` y en las dos `chain-ab` — H2 toma el temple reglado de `propuesta-a`, H3 el editorial de `propuesta-b` (y monta `quantum-security-copy/BeyondAccountsAccordion` tal cual). Tiene su propio [README](./quantum-security-labs/README.md); **ninguna página real lo importa** |
@@ -79,9 +79,14 @@ dar por terminado un cambio.
 | `closing-labs/{grid,reveal,card,night,slab}/*` | `ClosingLabsNumbersView`, `ClosingLabsVoicesView`, `ClosingLabsGatewayView`, `ClosingLabsPressView` | `/prototype/closing-labs-numbers` (+ `-voices`, `-gateway`, `-press`) — **laboratorio**: las cuatro últimas secciones de `/prototype/homepage-c` en cinco direcciones visuales, sacadas de cuatro plantillas de Framer. La unidad de carpeta es la DIRECCIÓN y no la sección, porque es la dirección lo que hay que juzgar. Copy compartida con `homepage-tuck/*` más `pressContent.ts`. Tiene su propio [README](./closing-labs/README.md); **ninguna página real lo importa** |
 | `voices-labs/*` | `VoicesLabsView` | `/prototype/voices-labs` — **laboratorio**: cuatro alternativas a la sección de testimonios (`homepage-tuck/TestimonialDeck`), con la sección VIVA montada arriba de todo para poder compararlas contra lo que ya hay — es el único lab que hace eso, y está explicado en su view. Las palabras salen de `homepage-tuck/testimonialDeckContent.ts`; `voicesLabContent.ts` solo agrega empresa y color. Tiene su propio [README](./voices-labs/README.md); **ninguna página real lo importa** |
 
-Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
-entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
-son laboratorios y no se tocan a la ligera.
+Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) ya NO se
+importan entre sí. `CtaPill` y `ArrowCircle` vivían en `quantum/` y los usaban
+once archivos de siete carpetas distintas — o sea que eran primitivos con la
+carpeta equivocada. Están en `components/primitives/`, que es de donde se
+importan ahora.
+
+Si aparece otro caso así, la señal es la misma: un componente de una carpeta de
+página al que le llegan imports de fuera de su página.
 
 ## El patrón A/B/C: una copy, tres ESTILOS
 

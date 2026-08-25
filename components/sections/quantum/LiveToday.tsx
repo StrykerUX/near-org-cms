@@ -3,7 +3,7 @@
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { LIVE_TODAY_POINTS as POINTS, EXTERNAL_LINKS } from "@/components/sections/quantum/quantumContent";
 
 // "Post-quantum signing, live on mainnet": what exists today, in three points.

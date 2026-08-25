@@ -4,7 +4,7 @@ import Accent from "@/components/primitives/Accent";
 import ShineField from "@/components/primitives/ShineField";
 import Panel from "@/components/sections/shells/instrument/Panel";
 import InstrumentSection from "@/components/sections/shells/instrument/Section";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { useScrollReveal } from "@/components/primitives/motion/useScrollReveal";
 import { CLOSING, INSTRUMENT } from "@/components/sections/community/communityContent";
 

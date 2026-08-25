@@ -2,7 +2,7 @@
 
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import CtaPill from "@/components/sections/quantum/CtaPill";
+import CtaPill from "@/components/primitives/CtaPill";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
 import { gsap, SplitText } from "@/components/primitives/motion/gsapClient";
 import { allowDescenders } from "@/components/primitives/motion/maskedLines";

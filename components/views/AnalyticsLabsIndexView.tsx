@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 
 // Index of the /analytics lab — /prototype/analytics
 //

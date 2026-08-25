@@ -1,6 +1,6 @@
 import Container from "@/components/primitives/Container";
-import CtaPill from "@/components/sections/quantum/CtaPill";
-import ArrowCircle from "@/components/sections/quantum/ArrowCircle";
+import CtaPill from "@/components/primitives/CtaPill";
+import ArrowCircle from "@/components/primitives/ArrowCircle";
 import Aperture from "@/components/sections/analytics-labs/a/Aperture";
 import {
   LEGAL,
