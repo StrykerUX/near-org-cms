@@ -61,6 +61,54 @@ export type Leaf = {
 const isExternal = (href: string) => href.startsWith("http");
 
 /**
+ * La marca de destino externo: una flecha al nordeste, junto al rótulo.
+ *
+ * ── Por qué al lado del rótulo y no al final de la fila ────────────────────
+ *
+ * Una fila del menú es badge + rótulo + descripción, y la descripción es más
+ * ancha que el rótulo en casi todas. Puesta al final de la fila la flecha queda
+ * a distinta distancia del texto en cada entrada, y a veces separada de él por
+ * medio panel: deja de leerse como parte del rótulo y pasa a ser una columna.
+ * Pegada al rótulo dice lo que tiene que decir —esto sale del sitio— y lo dice
+ * donde el ojo ya está.
+ *
+ * ── No se mueve ────────────────────────────────────────────────────────────
+ *
+ * Ni al pasar por encima ni nunca. Tuvo un desplazamiento de un píxel y un
+ * cambio de opacidad al hover, y los dos se leían como que la flecha CRECÍA —
+ * un glifo chico que gana contraste se percibe más grande, y el desplazamiento
+ * lo confirmaba. La fila entera ya acusa el hover con su fondo; una segunda
+ * cosa moviéndose al lado del rótulo es ruido.
+ *
+ * Así que no lleva transición, ni clases de hover, ni depende del grupo de la
+ * fila. Es una marca, no un control.
+ *
+ * ── El tamaño ──────────────────────────────────────────────────────────────
+ *
+ * 14px, contra los 10 de la primera versión, que a la vista desaparecían. Es la
+ * altura de la mayúscula del rótulo que acompaña: la flecha llega arriba y
+ * abajo hasta donde llegan las letras, así que se lee como parte de la palabra
+ * y no como algo apoyado al lado. Al 55% de opacidad — por debajo del blanco
+ * pleno del rótulo, que sigue mandando, y bastante por encima de un susurro.
+ */
+function ExternalMark() {
+  return (
+    <svg
+      viewBox="0 0 10 10"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-3.5 shrink-0 text-white/55"
+    >
+      <path d="M2.6 7.4 7.4 2.6M3.7 2.6h3.7v3.7" />
+    </svg>
+  );
+}
+
+/**
  * Un link del menú, que elige solo entre `next/link` y `<a>`.
  *
  * Los internos TIENEN que ir por `Link` o cada entrada del menú provoca una
@@ -139,7 +187,10 @@ export function NavGroup({ group }: { group: Group }) {
               panel has to shrink with a narrow viewport (see NavPanel below)
               — this lets them wrap instead of overflowing the column. */}
           <span className="flex min-w-0 flex-col">
-            <span className="text-label uppercase text-white">{item.label}</span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-label uppercase text-white">{item.label}</span>
+              {isExternal(item.href) && <ExternalMark />}
+            </span>
             <span className="text-caption text-white/55">{item.desc}</span>
           </span>
         </NavLink>
@@ -284,7 +335,12 @@ export function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
                             <item.icon className="size-5" />
                           </span>
                           <span className="flex flex-col">
-                            <span className="text-label uppercase text-white">{item.label}</span>
+                            <span className="flex items-center gap-1.5">
+                              <span className="text-label uppercase text-white">
+                                {item.label}
+                              </span>
+                              {isExternal(item.href) && <ExternalMark />}
+                            </span>
                             <span className="text-caption text-white/55">{item.desc}</span>
                           </span>
                         </NavLink>
