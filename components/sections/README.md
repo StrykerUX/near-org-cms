@@ -76,6 +76,8 @@ dar por terminado un cambio.
 | `quantum-security-heroes/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` (+ `-h3`) — **laboratorio**: dos heroes para `/quantum-security`, cada uno con el acomodo de un hero de `protocol-labs/` (h2/h3, ya borrados) y su propio fondo ASCII. El resto de cada página reusa `quantum-security-copy/*` sin modificar. Tiene su propio [README](./quantum-security-heroes/README.md) |
 | `quantum-security-labs/{h2,h3}/*` | `QuantumSecurityH2View`, `QuantumSecurityH3View` | `/prototype/quantum-security-h2` y `-h3` — **laboratorio**: dos propuestas para todo lo que va DEBAJO del hero de `/quantum-security`. Hero, `Roadmap` e `InTheNews` quedan intactos; la copy sigue siendo `quantum-security-copy/quantumContent.ts`, compartida y sin editar. Las dos se arman con devices que ya existen en `homepage-a` y en las dos `chain-ab` — H2 toma el temple reglado de `propuesta-a`, H3 el editorial de `propuesta-b` (y monta `quantum-security-copy/BeyondAccountsAccordion` tal cual). Tiene su propio [README](./quantum-security-labs/README.md); **ninguna página real lo importa** |
 | `analytics-labs/{a,b,c}/*` | `AnalyticsLabsIndexView`, `AnalyticsAView`, `AnalyticsBView`, `AnalyticsCView`, `AnalyticsMixView` | `/prototype/analytics` (+ `/a`, `/b`, `/c`, `/mix`) — **laboratorio**: tres propuestas para la página `/analytics`, con un solo módulo de copy (`analyticsContent.ts`) y distinta composición. Se separan por cuánto espacio gasta la página por dato; `/mix` arma una página con secciones de las tres. Tiene su propio [README](./analytics-labs/README.md); **ninguna página real lo importa** |
+| `closing-labs/{grid,reveal,card,night,slab}/*` | `ClosingLabsNumbersView`, `ClosingLabsVoicesView`, `ClosingLabsGatewayView`, `ClosingLabsPressView` | `/prototype/closing-labs-numbers` (+ `-voices`, `-gateway`, `-press`) — **laboratorio**: las cuatro últimas secciones de `/prototype/homepage-c` en cinco direcciones visuales, sacadas de cuatro plantillas de Framer. La unidad de carpeta es la DIRECCIÓN y no la sección, porque es la dirección lo que hay que juzgar. Copy compartida con `homepage-tuck/*` más `pressContent.ts`. Tiene su propio [README](./closing-labs/README.md); **ninguna página real lo importa** |
+| `voices-labs/*` | `VoicesLabsView` | `/prototype/voices-labs` — **laboratorio**: cuatro alternativas a la sección de testimonios (`homepage-tuck/TestimonialDeck`), con la sección VIVA montada arriba de todo para poder compararlas contra lo que ya hay — es el único lab que hace eso, y está explicado en su view. Las palabras salen de `homepage-tuck/testimonialDeckContent.ts`; `voicesLabContent.ts` solo agrega empresa y color. Tiene su propio [README](./voices-labs/README.md); **ninguna página real lo importa** |
 
 Las tres carpetas de páginas reales (`quantum`, `chain`, `protocol`) se importan
 entre sí: `chain` y `protocol` sacan `CtaPill` y `ArrowCircle` de `quantum`. No
@@ -122,11 +124,14 @@ otras dos se borran junto con su carpeta.
 
 ## Laboratorios
 
-Quedan dos vivos, y ninguno cuelga de Protocol: `analytics-labs/` (tres
+Quedan cuatro vivos, y ninguno cuelga de Protocol: `analytics-labs/` (tres
 propuestas para `/analytics`, más una ruta `/mix` que arma una página con
-secciones de las tres) y `quantum-security-labs/` (dos propuestas para el cuerpo
+secciones de las tres), `quantum-security-labs/` (dos propuestas para el cuerpo
 de `/quantum-security`, con el hero, `Roadmap` e `InTheNews` fuera de la
-comparación). Los dos sin decidir.
+comparación) y `closing-labs/` (cinco direcciones visuales para las cuatro
+últimas secciones de `/prototype/homepage-c`) y `voices-labs/` (cuatro
+alternativas a la sección de testimonios, con la viva incluida en la
+comparación). Los cuatro sin decidir.
 
 La regla que gobierna a cualquiera: **un laboratorio alimenta una ruta de
 comparación, ninguna página real lo importa, y si una versión gana se COPIA** a
