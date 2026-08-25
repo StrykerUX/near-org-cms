@@ -5,7 +5,7 @@ import Accent from "@/components/primitives/Accent";
 import Container from "@/components/primitives/Container";
 import Eyebrow from "@/components/primitives/Eyebrow";
 import { useMotionScope } from "@/components/primitives/motion/useMotionScope";
-import { gsap } from "@/components/primitives/motion/gsapClient";
+import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
 import {
   EASE_OUT,
   REVEAL,
@@ -274,6 +274,72 @@ const CARD_LAYOUT = [
 ] as const;
 
 export default function OwnYourOwn() {
+/* ── La entrada del titular ───────────────────────────────────────────────────
+ *
+ * «Own Your Own» se pega y las cards lo atraviesan. Hasta acá llegaba ya
+ * dibujado: el sticky lo dejaba quieto en su sitio y no pasaba nada más.
+ *
+ * Ahora se ARMA al llegar. Cada letra gira sobre su eje horizontal y aparece a
+ * la vez, escalonadas de izquierda a derecha, y el disparo es el instante en
+ * que el título toca su tope y se pega.
+ *
+ * ── Desde opacidad 0 y no desde una opacidad baja ──────────────────────────
+ *
+ * Es la diferencia con el statement de más arriba, que se rellena desde 0.18
+ * con el scroll. Allá el texto es un párrafo que se lee y lo que se anima es la
+ * LECTURA, así que tiene que estar presente desde antes. Acá es un titular que
+ * se monta: si estuviera insinuado al 20% dejaría de aparecer y pasaría a
+ * encenderse, que es otro gesto.
+ *
+ * ── Por qué gira, y sobre qué eje ──────────────────────────────────────────
+ *
+ * `rotateX` — cada letra cae hacia el lector desde su propio borde superior.
+ * Sobre `rotateY` (girar como una puerta) las letras anchas barren mucho
+ * horizontal y se pisan con sus vecinas a mitad del giro; sobre X el barrido es
+ * vertical y el ancho de la letra no cambia, así que la palabra nunca se
+ * amontona.
+ *
+ * `transformPerspective` va por elemento y no como `perspective` en el padre a
+ * propósito: en el padre, la distancia al punto de fuga crece con la posición
+ * de cada letra y las de las puntas giran con más deformación que las del
+ * medio. Por elemento, las tres palabras giran igual.
+ *
+ * ── No es scrub, pero tampoco se gasta ─────────────────────────────────────
+ *
+ * El statement de arriba avanza con el scroll porque es una lectura. Esto no:
+ * ocurre de una, al llegar, porque es la sección plantándose. Con scrub el
+ * titular se armaría y desarmaría mientras las cards lo cruzan, que es justo el
+ * tramo en el que tiene que estar quieto.
+ *
+ * Pero se REARMA cada vez que la sección vuelve a entrar. No es una intro que
+ * se consume: es lo que el titular hace al llegar, y subir a releer y volver a
+ * bajar tiene que mostrarlo armándose igual que la primera vez.
+ *
+ * Eso son DOS triggers y no uno, y es el mismo patrón que `ProofLedger`
+ * documenta para sus seis renglones. El motivo es que los dos límites no caen
+ * en el mismo punto del scroll:
+ *
+ *   · el que REPRODUCE dispara cuando el título toca su tope y se pega;
+ *   · el que REBOBINA espera a que el título haya salido ENTERO de cuadro por
+ *     abajo (`top bottom`).
+ *
+ * Colgar el rebobinado del primero —un `reset` en el cuarto verbo de
+ * `toggleActions`— lo dispararía en su propio `start`, o sea con el título
+ * todavía a la vista: el lector que sube ve el titular desarmarse delante suyo.
+ * Con el segundo trigger el rebobinado sigue siendo instantáneo y sigue sin
+ * verse, que es lo que se busca.
+ */
+const TITLE_IN = {
+  /** Desde dónde cae cada letra. Negativo: el borde de arriba viene hacia atrás. */
+  rotateX: -92,
+  /** La distancia al punto de fuga. Más bajo, más deformación. */
+  perspective: 420,
+  /** Lo que tarda una letra. */
+  duration: 0.72,
+  /** Entre una letra y la siguiente. */
+  stagger: 0.035,
+} as const;
+
   const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
     const cards = q("[data-own-card]");
     const stage = q("[data-own-stage]")[0];
@@ -303,6 +369,49 @@ export default function OwnYourOwn() {
       });
       return;
     }
+
+    // ── El titular se arma al pegarse ──────────────────────────────────────
+    //
+    // El disparo es el `top` del propio sticky: cuando el borde superior del
+    // título llega a ese punto del viewport, el navegador lo pega. Se lee del
+    // estilo computado y no de una constante porque ese `top` es un `max()`
+    // entre dos medidas del viewport (ver el `style` del elemento) — escrito a
+    // mano acá, se desincroniza en el primer resize.
+    //
+    // `invalidateOnRefresh` para que el `start`, que es una función, se vuelva a
+    // evaluar en cada re-medida.
+    const titleSplit = SplitText.create(title, { type: "chars,words" });
+    gsap.set(titleSplit.chars, {
+      opacity: 0,
+      rotateX: TITLE_IN.rotateX,
+      transformPerspective: TITLE_IN.perspective,
+      transformOrigin: "50% 0%",
+    });
+
+    const titleIn = gsap.to(titleSplit.chars, {
+      opacity: 1,
+      rotateX: 0,
+      duration: TITLE_IN.duration,
+      stagger: TITLE_IN.stagger,
+      ease: EASE_OUT,
+      scrollTrigger: {
+        trigger: title,
+        start: () => `top ${parseFloat(getComputedStyle(title).top)}px`,
+        // Este trigger SOLO reproduce. El rebobinado vive en el suyo, abajo.
+        toggleActions: "play none none none",
+        invalidateOnRefresh: true,
+        markers: DEBUG_MARKERS,
+      },
+    });
+
+    const titleReset = ScrollTrigger.create({
+      trigger: title,
+      // El borde inferior del viewport: el rebobinado espera a que el título
+      // haya salido entero de cuadro. Ver la nota de `TITLE_IN`.
+      start: "top bottom",
+      onLeaveBack: () => titleIn.pause(0),
+      markers: DEBUG_MARKERS,
+    });
 
     // ── El desvío lo decide el LAYOUT ──────────────────────────────────────
     //
@@ -461,6 +570,13 @@ export default function OwnYourOwn() {
     );
 
     return () => {
+      titleReset.kill();
+      titleIn.scrollTrigger?.kill();
+      titleIn.kill();
+      // `revert()` y no `kill()`: SplitText no es un tween, es cirugía de DOM.
+      // Sin revertir, el segundo mount —StrictMode lo hace en cada uno de dev—
+      // splitea sobre spans ya splitteados y multiplica el árbol.
+      titleSplit.revert();
       gsap.killTweensOf(cards);
       gsap.set(cards, { clearProps: "transform" });
       for (const card of cards) card.style.willChange = "auto";
