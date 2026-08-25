@@ -159,6 +159,18 @@ const VARIATION: Record<HeroXPage, HeroXVariation> = {
     seam: 0.12, drift: 0.012,
   },
 
+  // Analytics: la página de las mediciones, y el campo se comporta como un
+  // instrumento. Frecuencia alta con curvatura corta —muchas estrías finas que
+  // se doblan poco—, el detalle arriba y la deriva contenida: se lee como una
+  // señal muestreada, no como humo. El contraste va alto para que esa trama se
+  // vea; el `gradMix` bajo para que el degradé no se la coma.
+  analytics: {
+    focus: [1.72, 0.16], gradAngle: 0.50,
+    contrast: 1.42, lift: 0.0, gradMix: 0.31, gradGamma: 1.62,
+    scale: 4.1, curl: 0.95, curlScale: 0.9, blur: 2.15, detail: 0.88,
+    seam: 0.2, drift: 0.024,
+  },
+
   // Comunidad: el más agitado. Curl alto con ondas cortas, la juntura más ancha
   // del set —los nueve carriles se ven separarse— y la deriva más rápida, casi
   // cinco veces la de `about`.

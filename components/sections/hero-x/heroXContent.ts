@@ -47,9 +47,10 @@ export type HeroXContent = {
   cta?: { label: string; href: string; external?: boolean };
 };
 
-/** Las nueve páginas que estrenan el hero. El id es el de su preset. */
+/** Las diez páginas que estrenan el hero. El id es el de su preset. */
 export type HeroXPage =
   | "protocol"
+  | "analytics"
   | "chain"
   | "quantum"
   | "about"
@@ -99,6 +100,22 @@ export const HERO_X: Record<HeroXPage, HeroXContent> = {
     lead: "The History of",
     accent: "NEAR Protocol",
     body: "Illia Polosukhin and Alexander Skidanov founded NEAR Protocol in 2018 with the goal of building a scalable, usable blockchain.",
+  },
+
+  // El corte separa el sujeto de lo que se afirma de él, que es el criterio de
+  // toda esta tabla: «NEAR» / «by the numbers». Partirlo más tarde («NEAR by
+  // the / numbers») dejaría una preposición huérfana al final del primer tramo.
+  //
+  // Sin salida, y no por olvido: lo que el hero de la propuesta B tenía en ese
+  // lugar era un INDICADOR DE ESTADO —«All systems operational», anclado a la
+  // tarjeta de salud de la red— y eso no es una llamada a la acción. Meterlo en
+  // el botón del hero le pondría el peso de un CTA a una lectura que solo
+  // informa. El ancla `#network-health` sigue existiendo abajo, en `DualCardsC`.
+  analytics: {
+    eyebrow: "Analytics",
+    lead: "NEAR",
+    accent: "by the numbers",
+    body: "A live view of NEAR: network activity, revenue, and the tools and products built on top of it. Everything worth watching, in one place.",
   },
 
   community: {

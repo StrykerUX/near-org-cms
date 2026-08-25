@@ -6,7 +6,7 @@ import type { RouteEntry } from "@/lib/page-meta";
 import m0 from "@/app/(motion)/(home)/page.meta";
 import m1 from "@/app/(motion)/about/page.meta";
 import m2 from "@/app/(site)/ai/page.meta";
-import m3 from "@/app/(site)/analytics/page.meta";
+import m3 from "@/app/(motion)/analytics/page.meta";
 import m4 from "@/app/(motion)/blockchain/page.meta";
 import m5 from "@/app/(site)/blog/page.meta";
 import m6 from "@/app/(site)/brand/page.meta";
@@ -73,7 +73,7 @@ export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, view: "HomepageCView", file: "app/(motion)/(home)/page.meta.ts" },
   { ...m1, route: "/about", stub: false, view: "AboutAView", file: "app/(motion)/about/page.meta.ts" },
   { ...m2, route: "/ai", stub: true, view: "StubView", file: "app/(site)/ai/page.meta.ts" },
-  { ...m3, route: "/analytics", stub: true, view: "StubView", file: "app/(site)/analytics/page.meta.ts" },
+  { ...m3, route: "/analytics", stub: false, view: "AnalyticsView", file: "app/(motion)/analytics/page.meta.ts" },
   { ...m4, route: "/blockchain", stub: false, view: "ProtocolView", file: "app/(motion)/blockchain/page.meta.ts" },
   { ...m5, route: "/blog", stub: false, view: "BlogIndexView", file: "app/(site)/blog/page.meta.ts" },
   { ...m6, route: "/brand", stub: true, view: "StubView", file: "app/(site)/brand/page.meta.ts" },
