@@ -1,6 +1,6 @@
 # `homepage-tuck` — el hero que se recoge
 
-Montado en `/prototype/homepage-c`. Rige el contrato general de
+Montado en `/prototype/homepage-c` y en su duplicado `/prototype/homepage-d`. Rige el contrato general de
 [`../README.md`](../README.md).
 
 ## Qué es
@@ -53,21 +53,26 @@ pasa a montarse siempre DENTRO de la escena: su montaje de afuera es una secció
 hermana con `bg-ink` a sangre, que fuera del recorte aparece como una banda
 negra pegada bajo la caja.
 
-## Las otras dos secciones de la carpeta
+## Las otras secciones de la carpeta
 
-La carpeta empezó siendo el hero y ya no lo es. Las dos que siguieron nacieron
-para esta ruta y se montan solo acá, aunque no tengan nada que ver con el
-recogido.
+La carpeta empezó siendo el hero y ya no lo es. Las que siguieron nacieron para
+esta ruta —o para su duplicado, `homepage-d`— y se montan solo ahí, aunque no
+tengan nada que ver con el recogido.
 
 ### `ProofLedger` — las seis pruebas como un balance
 
 Reemplaza a `homepage-shared/ProofDatum` (el eje horizontal con seis fichas
 alternadas) **solo en esta ruta**; aquella sigue montada en `homepage-b`.
 
-Cada prueba ocupa un renglón entero colgado de su plica, con la cifra a la
-izquierda y el cuerpo alineado a la derecha del bloque. Dos cosas que conviene
+Seis asientos separados por un punteado. Cada uno pone la cifra a la izquierda
+—numeral en sans con su signo pegado, y debajo la palabra en serif itálica— y
+el argumento a la derecha, encabezado por una píldora. Cuatro cosas que conviene
 saber antes de tocarla:
 
+- **El eje es la sección.** Las seis cifras terminan sobre una misma vertical
+  invisible al 49% del bloque. No hay línea dibujada ahí y no hace falta: seis
+  renglones que terminan en el mismo punto la crean, y eso es lo que convierte
+  seis datos sueltos en una serie.
 - **Todo mide en `cqw`** contra un `@container` propio. El artboard fija
   proporciones, no píxeles, y en `vw` se rompen justo cuando el `Container` topa
   en su `max-width`.
@@ -77,6 +82,40 @@ saber antes de tocarla:
   vista de quien subía.
 - **El numeral es lo único que no se parte en letras.** El contador reescribe
   `textContent` en cada cuadro y eso borraría los spans de SplitText.
+
+Las dos pruebas sin cifra —«Quantum-ready», «Confidential»— entran a la MISMA
+lista y no cierran aparte: en un asiento de dos columnas una palabra puede
+ocupar el lugar de un número sin fingir que lo es. Va a la mitad de la escala
+del numeral, y esa mitad se declara en `em` para que las dos se muevan juntas.
+
+### `ProofRoster` — las mismas seis, como índice de capacidades
+
+Montada solo en `/prototype/homepage-d`, que es `homepage-c` con esta sección en
+lugar de `ProofLedger` y **todo lo demás idéntico**. Esa igualdad es lo que hace
+útil la comparación: cualquier diferencia entre las dos rutas es de esta
+sección, por construcción.
+
+Sobre crema, seis renglones: «Built to» + el verbo en serif grande (Last, Scale,
+Connect, Reach, Resist, Privacy) y el cuerpo a la derecha. **La cifra no se ve**
+— aparece al pasar por encima, colgada del borde derecho de la palabra.
+
+- **El verbo sale de partir el `eyebrow` por su último espacio.** No hay un campo
+  nuevo ni una segunda lista de seis palabras que se desincronice con la primera.
+- **El verbo va en Kepler ITÁLICA del master Display** (`serif-roster`), no en
+  la romana Subhead de `text-h1-serif`. A 74px el Subhead tiene el trazo grueso
+  de una serif de texto; el Display está cortado para astas finas y contraste
+  alto. La itálica es la face real, no una romana inclinada. Kepler entra al
+  repo con un solo peso por master, así que no hay un corte Light que pedir: lo
+  que hace ligera a esta itálica es el contraste del dibujo.
+- **La cifra en hover va en sans y a cuerpo de `h3`** — es lo segundo más grande
+  del renglón. No es un pie de la palabra: es la prueba de lo que la palabra
+  afirma. Y **no existe sin mouse**, así que abajo de `lg` se muestra siempre y
+  en flujo; el cuerpo de la derecha, que dice el mismo dato en palabras, no se
+  esconde nunca.
+- **Va en crema y no en el negro de su referencia.** El stack cierra su caja
+  negra sobre el papel justo encima y en negro ese gesto se queda sin fondo; y
+  esta ruta se mide contra `homepage-c`, así que cambiar el tono a la vez que la
+  estructura habría dejado dos variables moviéndose juntas.
 
 ### `TestimonialDeck` — lo que otros dicen, en un mazo que avanza
 

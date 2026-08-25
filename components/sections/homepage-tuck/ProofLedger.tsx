@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import Container from "@/components/primitives/Container";
 import {
   gsap,
@@ -18,36 +20,67 @@ import {
   type LedgerRow,
 } from "@/components/sections/homepage-tuck/proofLedgerContent";
 
-// Las seis pruebas de NEAR leídas como un balance: una columna de renglones,
-// cada uno colgado de su propia plica, con la cifra a la izquierda y el cuerpo
-// alineado a la derecha del bloque.
+// Las seis pruebas de NEAR leídas como un balance: seis asientos, la cifra de
+// cada uno alineada contra un eje y su argumento a la derecha, separados por
+// un punteado.
 //
 // Reemplaza a `homepage-shared/ProofDatum` SOLO en esta ruta. Aquella versión
 // —un eje horizontal con seis fichas alternadas arriba y abajo— sigue viva y
 // montada en `homepage-b`; acá se cambia la estructura, no el dato.
 //
-// ── Qué cambia respecto del eje alternado ───────────────────────────────────
+// ── El eje es la sección ────────────────────────────────────────────────────
 //
-// El eje horizontal pone a las seis pruebas al mismo nivel y las hace competir:
-// seis cifras del mismo cuerpo, tres arriba y tres abajo, sin nada que diga por
-// dónde empezar. El ledger las ORDENA. Cada prueba ocupa un renglón entero, la
-// cifra crece hasta ser la estructura del renglón y el ojo baja de una en una
-// en vez de barrer de izquierda a derecha.
+// Las seis cifras terminan sobre una misma vertical invisible al 49% del
+// bloque. No hay línea dibujada ahí, y no hace falta: seis renglones que
+// terminan en el mismo punto CREAN la vertical, y esa vertical es lo que
+// convierte a seis datos sueltos en una serie que se lee de arriba abajo.
 //
-// Y separa dos clases de prueba que el eje trataba igual. Cuatro de las seis
-// son NÚMEROS (100%, 1.0 millón, $24 mil millones, 30) y dos son CUALIDADES
-// (quantum-ready, confidential). En el eje las dos últimas fingían ser cifras
-// —el mismo cuerpo, la misma ficha, con una palabra donde iba el número— y se
-// leían como el dato que faltaba. Acá cierran abajo en pareja, a media caja
-// cada una, al cuerpo de la glosa y no al del numeral: ya no fingen.
+// Alineadas a la izquierda —como en la versión anterior de esta misma
+// sección— «100%» y «$24+» arrancan juntas y terminan donde les toca, así que
+// cada renglón parece de un ancho distinto y la comparación entre pruebas se
+// pierde. Contra un eje, lo único que varía es cuánto se extiende cada cifra
+// hacia la izquierda, que es exactamente lo que un balance quiere mostrar.
+//
+// ── La cifra ocupa dos renglones ────────────────────────────────────────────
+//
+// Arriba el numeral en sans con lo que lo califica pegado a su derecha
+// («100 %», «1.0 million», «$24 +»); abajo, en serif itálica y terminando en el
+// mismo eje, la palabra que dice qué se contó («uptime», «TPS», «billion»).
+//
+// Es el mismo par que la versión anterior tenía en UNA línea, partido en dos. Y
+// el cambio no es de acomodo: en una sola línea la cifra crecía hacia la
+// derecha hasta chocar con el cuerpo, así que el numeral tenía que achicarse
+// para que entrara la glosa. Apiladas, las dos pueden ser grandes.
+//
+// El reparto entre los dos renglones NO sale de la copy tal cual — la prueba de
+// TPS lo parte distinto. Está explicado en `FIGURE_SPLIT`, abajo.
+//
+// ── El rótulo pasó a ser píldora, y cambió de dueño ────────────────────────
+//
+// Antes «Built to last» era una línea suelta ARRIBA del numeral, o sea que se
+// leía como su antetítulo: parte de la cifra. Ahora es una etiqueta con borde
+// que encabeza el PÁRRAFO de la derecha, que es lo que de verdad clasifica —
+// «Built to last» es el título del argumento, no del número.
+//
+// ── Las seis van en una sola lista ──────────────────────────────────────────
+//
+// Cuatro de las pruebas son NÚMEROS y dos son CUALIDADES (quantum-ready,
+// confidential). La versión anterior las separaba: las dos últimas cerraban en
+// pareja, a media caja, porque el renglón de cifra medía una pantalla entera y
+// meterlas en él las habría hecho fingir que tenían número.
+//
+// Con el asiento de dos columnas esa separación dejó de hacer falta. Una prueba
+// sin cifra entra sin disfrazarse: pone una palabra donde las otras ponen un
+// número, al cuerpo que le corresponde —la mitad, ver el `text-[0.52em]`— y el
+// punteado la separa igual que a todas. Que las seis compartan eje es lo que
+// las hace una sola serie.
 //
 // ── La proporción es el diseño, y por eso todo mide en `cqw` ───────────────
 //
-// El artboard fija relaciones, no píxeles: la glosa es una fracción del
-// numeral, la columna del cuerpo el 19.1% del bloque, la sangría de la plica el
-// 5%. Escritas en `vw` esas relaciones aguantan hasta que el `Container` topa
-// en su `max-width` (1780px) y el texto sigue creciendo — de ahí para arriba el
-// renglón se descompone.
+// El artboard fija relaciones, no píxeles: el eje al 49% del bloque, la cifra
+// a 14cqw, la glosa a un tercio de la cifra. Escritas en `vw` esas relaciones
+// aguantan hasta que el `Container` topa en su `max-width` (1780px) y el texto
+// sigue creciendo — de ahí para arriba el renglón se descompone.
 //
 // En `cqw` se miden contra el BLOQUE, que es lo que el diseño mide, así que
 // cuando el Container deja de crecer el renglón entero deja de crecer con él.
@@ -59,10 +92,11 @@ import {
 //
 // ── El corte a móvil ────────────────────────────────────────────────────────
 //
-// La retícula de dos columnas (cifra | cuerpo) no cabe a 375px, así que abajo
-// de `lg` el cuerpo baja debajo de la cifra y la pareja de cierre se apila.
-// La plica NO se pierde en el camino: es lo único que sobrevive entero de la
-// composición, y es lo que sigue diciendo que esto es una lista de pruebas y no
+// La retícula de dos columnas no cabe a 375px, así que abajo de `lg` el
+// argumento baja debajo de la cifra. Y el EJE SE CAE con ella: con una sola
+// columna, alinear a la derecha deja el numeral pegado al borde de la pantalla
+// y la píldora arrancando en el otro. Lo que sobrevive del diseño es el
+// punteado, que es lo que sigue diciendo que esto es una lista de pruebas y no
 // seis párrafos seguidos.
 
 /* ── La entrada ───────────────────────────────────────────────────────────────
@@ -77,8 +111,9 @@ import {
  * Dentro de cada renglón el orden es el del diseño, y es una secuencia y no un
  * escalonado:
  *
- *   1. la PLICA se traza de arriba abajo — la estructura llega primero, y lo
- *      demás aterriza sobre algo que ya está;
+ *   1. el FILETE punteado se traza de izquierda a derecha — la estructura
+ *      llega primero, y lo demás aterriza sobre algo que ya está. El primer
+ *      asiento no lo tiene: arriba de él no hay nada que separar;
  *   2. la CIFRA cuenta desde 0 hasta su valor y, EN EL MISMO TRAMO, entran el
  *      eyebrow y el signo. Van con ella a propósito: la cifra sola contando es
  *      un widget, la cifra contando mientras se escribe lo que la califica es
@@ -106,8 +141,8 @@ import {
  * abajo.
  *
  * Va como `timeScale` del timeline y no repartido entre las siete constantes.
- * Los números de abajo son las PROPORCIONES de la secuencia —cuánto dura la
- * plica contra la cuenta, dónde cae el cuerpo dentro de ella— y son lo que hay
+ * Los números de abajo son las PROPORCIONES de la secuencia —cuánto dura el
+ * filete contra la cuenta, dónde cae el cuerpo dentro de ella— y son lo que hay
  * que poder leer y ajustar. Multiplicados uno por uno para cambiar la
  * velocidad, esas proporciones quedan enterradas en decimales y el próximo
  * ajuste global vuelve a tocar siete lugares en vez de uno.
@@ -129,13 +164,13 @@ const SPEED = 1.5;
  */
 const START = "top 88%";
 
-/** Cuánto tarda la plica en cruzar el alto del renglón. */
+/** Cuánto tarda el filete en cruzar el ancho del renglón. */
 const RULE = 0.8;
 
 /**
  * Cuándo arranca la cifra.
  *
- * Menor que `RULE` a propósito: la plica todavía está bajando cuando el numeral
+ * Menor que `RULE` a propósito: el filete todavía se está trazando cuando el numeral
  * empieza a contar. Esperar a que termine parte el renglón en dos tiempos
  * muertos; solaparlas hace que una empuje a la otra.
  */
@@ -281,13 +316,21 @@ export default function ProofLedger() {
           }),
         );
 
-        /* 1 · la plica */
+        /* 1 · el filete */
         const rule = row.querySelector<HTMLElement>("[data-rule]");
-        // Es un `<span>` posicionado y no el `border-l` del artículo porque un
-        // borde no se puede escalar: `scaleY` sobre el artículo arrastraría al
+        // Es un `<span>` posicionado y no el `border-t` del artículo porque un
+        // borde no se puede escalar: `scaleX` sobre el artículo arrastraría al
         // texto con él.
+        //
+        // `scaleX` y no `scaleY`: el filete dejó de ser la plica vertical de la
+        // que colgaba el renglón y pasó a ser el punteado horizontal que lo
+        // separa del anterior. Se dibuja de izquierda a derecha, que es la
+        // dirección en la que se lee la fila que abre.
+        //
+        // El primer renglón no lo tiene —arriba de él no hay nada que separar—
+        // así que el `if` no es defensivo: es la mitad de los casos.
         if (rule)
-          tl.from(rule, { scaleY: 0, duration: RULE, ease: "power2.out" }, 0);
+          tl.from(rule, { scaleX: 0, duration: RULE, ease: "power2.out" }, 0);
 
         /* 2 · la cifra, con el eyebrow y el signo */
         let beat = GLOSS_BEAT;
@@ -405,45 +448,55 @@ export default function ProofLedger() {
       // grande porque esta sección es lo primero que se ve al salir del negro
       // del stack; llegar con el primer renglón pegado al borde lo convierte en
       // la continuación de la transición en vez de en un respiro.
-      className="bg-cream py-32 text-ink lg:py-44"
+      className="bg-cream py-28 text-ink lg:py-36"
     >
       <Container>
         {/* El contenedor de consulta. Todo lo que mide en `cqw` acá abajo
             resuelve contra el ancho de ESTE div; sin él, contra el viewport. */}
         <div className="@container">
-          <div className="flex flex-col gap-16 lg:gap-[5.6cqw]">
-            {LEDGER_ROWS.map((row) => (
-              <LedgerLine key={row.id} row={row} />
+          {/* Las seis en UNA lista y no cuatro más dos. En la versión anterior
+              las dos cualidades cerraban aparte, en pareja y a media caja,
+              porque el renglón de cifra medía una pantalla y meterlas en él las
+              habría hecho fingir que tenían número.
+
+              Acá el renglón es un asiento con dos columnas fijas y la cifra
+              ocupa la izquierda, así que una prueba SIN cifra entra sin
+              disfrazarse: pone una palabra donde las otras ponen un número, al
+              cuerpo que le corresponde, y el punteado la separa igual que a
+              todas. Que las seis compartan el mismo eje es lo que hace que se
+              lean como una sola serie. */}
+          <div className="flex flex-col">
+            {LEDGER_ROWS.map((row, i) => (
+              <FigureLine key={row.id} row={row} first={i === 0} />
             ))}
 
-            {/* Las dos cualidades. Media caja cada una, y el aire de arriba es
-                mayor que el que separa a los renglones de cifra: es un cambio
-                de clase de prueba, no el siguiente ítem de la lista. */}
-            <div className="grid gap-16 lg:mt-[1.9cqw] lg:grid-cols-2 lg:gap-x-[8%]">
-              {LEDGER_NOTES.map((note) => (
-                <article
-                  key={note.id}
-                  data-row
-                  className="relative pt-5 lg:pt-[2cqw]"
-                >
-                  <Rule />
-                  <div className="pl-6 lg:pl-[5cqw]">
-                    <p data-eyebrow className="text-body text-ink-soft">
-                      {note.eyebrow}
-                    </p>
-                    <p data-gloss className="gloss-serif mt-3 lg:mt-[1cqw]">
+            {LEDGER_NOTES.map((note) => (
+              <RegisterRow
+                key={note.id}
+                eyebrow={note.eyebrow}
+                body={note.body}
+                figure={
+                  // Sin cifra, la palabra ocupa su lugar — y por eso hereda su
+                  // escala en vez de tener una propia. `text-[0.52em]` es
+                  // relativo al `text-ledger` del padre, así que el día que el
+                  // numeral cambie de tamaño estas dos se mueven con él: la
+                  // proporción entre una cifra y una cualidad no puede quedar
+                  // escrita en dos lugares.
+                  //
+                  // Y es 0.56 y no 1 porque «Quantum-ready» tiene trece
+                  // caracteres: al cuerpo del numeral se sale del eje y se
+                  // comería la columna del cuerpo.
+                  <p
+                    data-figure
+                    className="text-ledger flex flex-col items-start lg:items-end"
+                  >
+                    <span data-gloss className="text-[0.56em]">
                       {note.gloss}
-                    </p>
-                    <p
-                      data-body
-                      className="mt-5 text-body-sm text-ink-soft text-pretty lg:mt-[1.6cqw]"
-                    >
-                      {note.body}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
+                    </span>
+                  </p>
+                }
+              />
+            ))}
           </div>
         </div>
       </Container>
@@ -452,105 +505,187 @@ export default function ProofLedger() {
 }
 
 /**
- * La plica: la línea vertical de la que cuelga el renglón.
+ * El filete punteado que abre cada asiento.
  *
- * Un `<span>` absoluto y no el `border-l` del artículo porque tiene que
- * escalarse al entrar, y un borde no se escala sin arrastrar al texto.
+ * Un `<span>` absoluto y no el `border-t` del artículo porque tiene que
+ * dibujarse al entrar, y un borde no se escala sin arrastrar al texto.
+ *
+ * Es punteado y no continuo: una línea llena separa dos bloques —dice «acá
+ * termina uno y empieza otro»—, y estas seis pruebas son UNA serie. El punteado
+ * marca el renglón sin cortar la columna.
  */
 function Rule() {
   return (
     <span
       data-rule
       aria-hidden="true"
-      className="absolute inset-y-0 left-0 w-px origin-top bg-ink"
+      className="absolute inset-x-0 top-0 origin-left border-t border-dotted border-ink/30"
     />
   );
 }
 
-function LedgerLine({ row }: { row: LedgerRow }) {
+/**
+ * El asiento: dos columnas, la cifra contra un eje y el cargo a su derecha.
+ *
+ * ── El eje ──────────────────────────────────────────────────────────────────
+ *
+ * Las seis cifras están alineadas a la DERECHA de la primera columna, así que
+ * sus últimos caracteres caen sobre una misma vertical invisible al 49% del
+ * bloque. Es lo que convierte a las seis en una serie: alineadas a la
+ * izquierda, «100%» y «$24+» arrancan juntas y terminan en cualquier lado, y
+ * cada renglón parece de un ancho distinto. Contra un eje, lo único que varía
+ * es cuánto se extiende cada cifra hacia la izquierda — que es exactamente la
+ * información que un balance quiere dar.
+ *
+ * En móvil el eje se cae y las cifras vuelven a la izquierda: con una columna
+ * sola, alinear a la derecha deja el numeral pegado al borde de la pantalla y
+ * el cuerpo arrancando en el otro.
+ *
+ * ── El aire vertical es `items-center` ──────────────────────────────────────
+ *
+ * La columna de la izquierda mide dos renglones de titular; la derecha, una
+ * píldora y dos líneas de cuerpo. Centrarlas es lo que hace que el asiento se
+ * lea como una unidad en vez de como dos bloques que empiezan juntos y terminan
+ * cuando pueden. Alineadas arriba, la píldora queda flotando contra el tope del
+ * numeral y debajo del cuerpo se abre un hueco del alto de la glosa.
+ */
+function RegisterRow({
+  figure,
+  eyebrow,
+  body,
+  first = false,
+}: {
+  figure: ReactNode;
+  eyebrow: string;
+  body: string;
+  first?: boolean;
+}) {
   return (
     <article
       data-row
-      // `relative` para la plica, que es un hijo absoluto y no un borde.
-      //
-      // Dos columnas y DOS FILAS, con la posición de cada pieza declarada. El
-      // cuerpo va en la fila del numeral, no en la del eyebrow, porque el
-      // diseño lo alinea con la cifra: la primera línea del párrafo arranca
-      // donde arranca el número.
-      //
-      // Sale de la retícula y no de un `pt` calculado a mano. El desfase que
-      // haría falta es la altura del eyebrow más su aire, o sea dos valores que
-      // cambian solos —con el token de la escala, con una copy más larga que
-      // quiebre a dos renglones— y que dejarían el párrafo desalineado sin que
-      // nadie lo note. Puesto en la fila 2, la alineación es una consecuencia
-      // de la estructura y no un número que hay que mantener.
-      //
-      // Por eso el aire entre el eyebrow y la cifra es `gap-y` de la retícula:
-      // como `mt` del numeral empujaba a la cifra dentro de su fila y dejaba al
-      // párrafo arriba, que es justo el desfase que esto viene a sacar.
-      className="relative pt-5 lg:grid lg:grid-cols-[1fr_19.1%] lg:grid-rows-[auto_auto] lg:gap-x-[2%] lg:gap-y-[0.6cqw] lg:pt-[2cqw]"
+      // `relative` para el filete, que es un hijo absoluto y no un borde.
+      className="relative grid gap-7 py-12 lg:grid-cols-[minmax(0,49%)_minmax(0,1fr)] lg:items-center lg:gap-x-[5.8%] lg:py-[3.4cqw]"
     >
-      <Rule />
+      {first ? null : <Rule />}
 
-      <p
-        data-eyebrow
-        className="pl-6 text-body text-ink-soft lg:col-start-1 lg:row-start-1 lg:pl-[5cqw]"
-      >
-        {row.eyebrow}
-      </p>
+      {figure}
 
-      {/* `items-start` y no una línea de base compartida: en el diseño el signo
-          y la glosa NO se apoyan en la base del numeral, van altos. El `pt` de
-          cada uno es óptico y está en `em` de su propio cuerpo, así que se mueve
-          con la escala en vez de quedarse fijo en un tamaño de pantalla. */}
-      <p
-        data-figure
-        className="mt-1.5 flex items-start pl-6 text-ledger lg:col-start-1 lg:row-start-2 lg:mt-0 lg:pl-[5cqw]"
-      >
-        {/* Los tres tramos van en tinta, y el renglón entero con ellos. Hubo un
-            momento en que la prueba de volumen llevaba acento verde —el numeral
-            en `ink-deep`, el signo y la glosa en `green-ink`— y se fue: las seis
-            pruebas son una serie que se lee de arriba abajo, y pintar una
-            distinta la sacaba de la serie sin decir por qué esa. */}
-        <span
-          // `data-count` lleva el VALOR y no es una bandera: es a la vez el
-          // selector que encuentra el motor y el destino de la cuenta.
-          //
-          // Los tres datos viajan en el DOM y no en un closure, y eso es lo que
-          // deja que el motor de la entrada sea UNO para los seis renglones:
-          // recorre `[data-row]` sin saber nada de la copy, y cada renglón le
-          // dice desde su propio markup hasta dónde contar y cómo escribirlo.
-          data-count={row.value}
-          data-decimals={row.decimals}
-          data-prefix={row.prefix ?? ""}
+      <div className="flex flex-col items-start gap-4 lg:gap-[1.2cqw]">
+        {/* La píldora. El rótulo dejó de ser una línea suelta arriba del
+            numeral y pasó a ser una etiqueta con borde, y el cambio no es
+            decorativo: arriba del numeral el rótulo se leía como su antetítulo
+            —parte de la cifra— y acá encabeza el PÁRRAFO, que es lo que de
+            verdad clasifica. «Built to last» es el título del argumento, no del
+            número.
+
+            `w-fit` para que la píldora mida el texto y no la columna: a ancho
+            completo dejaría de ser una etiqueta para ser una barra. */}
+        <p
+          data-eyebrow
+          className="text-body-sm w-fit rounded-full border border-ink/40 px-4 py-1.5"
         >
-          {formatLedgerValue(row)}
-        </span>
+          {eyebrow}
+        </p>
 
-        {row.unit ? (
-          <span
-            data-unit
-            // `mr` acá + `ml` en la glosa = el aire entre el signo y la palabra.
-            // Partido en dos para que la glosa lleve SIEMPRE el mismo `ml`:
-            // cuando no hay signo, ese solo margen es el aire correcto contra el
-            // numeral.
-            className="text-gloss mr-[0.36em] ml-[0.14em] pt-[0.35em]"
-          >
-            {row.unit}
-          </span>
-        ) : null}
-
-        <span data-gloss className="gloss-serif ml-[0.24em] pt-[0.35em]">
-          {row.gloss}
-        </span>
-      </p>
-
-      <p
-        data-body
-        className="mt-6 pl-6 text-body-sm text-ink-soft text-pretty lg:col-start-2 lg:row-start-2 lg:mt-0 lg:pl-0"
-      >
-        {row.body}
-      </p>
+        <p data-body className="text-body-sm max-w-[64ch] text-ink-soft text-pretty">
+          {body}
+        </p>
+      </div>
     </article>
+  );
+}
+
+/**
+ * Cómo se reparte el texto de la cifra entre sus dos renglones.
+ *
+ * El asiento pone la cifra arriba —numeral en sans, con lo que la califica
+ * pegado a su derecha— y la glosa abajo, en serif itálica. Para cinco de las
+ * seis pruebas ese reparto ya está en la copy: `unit` arriba, `gloss` abajo.
+ *
+ * La de TPS es la excepción. Su `unit` está vacío y su `gloss` es «million
+ * TPS», que es una sola cadena con dos trabajos: «million» es la MAGNITUD y va
+ * pegada al 1.0, «TPS» es la unidad y va en el renglón de abajo. Partirla en el
+ * módulo de copy cambiaría el dato para las otras siete versiones que lo leen
+ * —las cinco de `closing-labs`, la viva de `homepage-b`— por una decisión que
+ * es de ESTE layout.
+ *
+ * Por eso el reparto vive acá, indexado por `id`, y con caída al reparto por
+ * defecto. Es un `Record<string, …>` y no un tipo cerrado porque `LedgerRow.id`
+ * es `string`: una entrada que quede huérfana tras un rename no rompe nada, el
+ * renglón simplemente vuelve al reparto de la copy.
+ */
+const FIGURE_SPLIT: Record<string, { lead: string; gloss: string }> = {
+  tps: { lead: "million", gloss: "TPS" },
+};
+
+function FigureLine({ row, first }: { row: LedgerRow; first: boolean }) {
+  const split = FIGURE_SPLIT[row.id] ?? { lead: row.unit, gloss: row.gloss };
+
+  return (
+    <RegisterRow
+      first={first}
+      eyebrow={row.eyebrow}
+      body={row.body}
+      figure={
+        <p
+          data-figure
+          className="flex flex-col items-start lg:items-end lg:text-right"
+        >
+          {/* `items-start` y no una línea de base compartida: en el diseño lo
+              que califica a la cifra NO se apoya en su base, va alto. El `pt`
+              está en `em` de su propio cuerpo, así que se mueve con la escala en
+              vez de quedarse fijo en un tamaño de pantalla. */}
+          <span className="text-ledger flex items-start">
+            <span
+              // `data-count` lleva el VALOR y no es una bandera: es a la vez el
+              // selector que encuentra el motor y el destino de la cuenta.
+              //
+              // Los tres datos viajan en el DOM y no en un closure, y eso es lo
+              // que deja que el motor de la entrada sea UNO para los seis
+              // renglones: recorre `[data-row]` sin saber nada de la copy, y
+              // cada renglón le dice desde su propio markup hasta dónde contar
+              // y cómo escribirlo.
+              data-count={row.value}
+              data-decimals={row.decimals}
+              data-prefix={row.prefix ?? ""}
+            >
+              {formatLedgerValue(row)}
+            </span>
+
+            {split.lead ? (
+              // El signo mide en `em` DEL NUMERAL y no con el token de la
+              // glosa, aunque antes lo compartieran. Es el cambio que trajo la
+              // composición en dos renglones: acá el signo se quedó pegado a la
+              // cifra y la palabra en itálica se fue abajo, así que dejaron de
+              // ser dos mitades del mismo gesto. Lo que el signo tiene que
+              // hacer ahora es escalar con el número al que califica —«100 por
+              // ciento», «24 más»—, y eso es exactamente lo que `em` hace y un
+              // token propio no puede.
+              //
+              // El `pt` en `em` de su propio cuerpo lo baja hasta que su altura
+              // de mayúscula queda cerca del tope del numeral: apoyado en la
+              // línea de base se leería como una unidad de medida, y alto se lee
+              // como lo que es, un exponente del número.
+              <span data-unit className="ml-[0.11em] pt-[0.1em] text-[0.42em]">
+                {split.lead}
+              </span>
+            ) : null}
+          </span>
+
+          {/* La glosa cuelga del renglón de la cifra y termina en el MISMO eje.
+              Es lo que hace que el bloque se lea como una sola pieza de dos
+              renglones y no como una palabra puesta debajo de un número.
+
+              El margen negativo es óptico y va en `em` de la propia glosa: el
+              numeral tiene interlineado 0.86 pero su caja de línea sigue
+              reservando el hueco de los descendentes que los dígitos no usan, y
+              sin subir la itálica queda un aire que no está en el diseño. En
+              `em` se mueve con la escala en vez de descuadrarse a otro tamaño. */}
+          <span data-gloss className="gloss-serif -mt-[0.22em]">
+            {split.gloss}
+          </span>
+        </p>
+      }
+    />
   );
 }

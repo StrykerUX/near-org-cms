@@ -535,46 +535,90 @@
      rompe en el punto exacto en que el Container topa en su `max-width` y el
      texto sigue creciendo. Quien use el token declara `@container` en el bloque.
 
-     El coeficiente ya no es el del artboard. Ahí el numeral mide 212px sobre
-     1063px de contenido —19.9%— y a esa medida, con Montreal, la cifra pesa más
-     de lo que el renglón aguanta: se come la glosa y el eyebrow queda de
-     adorno. 17cqw es la misma figura con la cifra un punto por debajo de esa
-     proporción; lo que se conserva es que el numeral SEA la estructura del
-     renglón, y no el número.
+     El coeficiente bajó de 17cqw a 14cqw cuando el renglón cambió de
+     composición. Antes la cifra tenía el bloque entero para extenderse y el
+     cuerpo colgaba en una columna angosta al costado; ahora la cifra vive en la
+     MITAD izquierda del asiento, contra un eje, y la otra mitad es la píldora
+     con su párrafo. A 17cqw «$24+» se pasaba del eje y empujaba a la columna
+     del cuerpo; a 14 la cifra sigue siendo la estructura del renglón sin
+     invadir a su vecina.
 
-     El tope de 18rem no es un techo de encaje: es el valor al que la rampa
-     llega cuando el Container ya topó (1660px de contenido × 17%). Está ahí
+     El tope de 15rem no es un techo de encaje: es el valor al que la rampa
+     llega cuando el Container ya topó (1660px de contenido × 14%). Está ahí
      porque `clamp` lo pide, no porque muerda.
 
      Peso 400 y no 500: Montreal Book es en realidad un 350 declarado como 400
-     (ver lib/fonts.ts), y a 200px+ es el trazo del artboard. Con 500 el numeral
+     (ver lib/fonts.ts), y a 150px+ es el trazo del artboard. Con 500 el numeral
      engorda y deja de ser una cifra para volverse un titular. */
-  --text-ledger: clamp(2.75rem, 17cqw, 18rem);
+  --text-ledger: clamp(2.5rem, 14cqw, 15rem);
   --text-ledger--line-height: 0.86;
   --text-ledger--letter-spacing: -0.035em;
   --text-ledger--font-weight: 400;
 
-  /* La glosa que acompaña al numeral: el signo (`%`, `+`) en sans y la palabra
-     en serif itálica, las dos al mismo cuerpo y las dos altas, arriba del
-     numeral en vez de sobre su línea de base.
+  /* La palabra en serif itálica que cierra la cifra: `uptime`, `TPS`,
+     `billion`, `blockchains`. Va en su propio renglón, debajo del numeral y
+     terminando en el mismo eje.
 
-     Su rampa NO bajó con la del numeral, y es deliberado: lo que se achicó es
-     la cifra, no el renglón. A 5.97cqw contra un numeral de 17cqw la glosa pasa
-     de ser 0.3 de la cifra a ser 0.35, o sea que la palabra en itálica gana
-     peso relativo — que es exactamente lo que la cifra soltó.
+     Antes este token servía a DOS roles —el signo en sans y la palabra en
+     serif, los dos al mismo cuerpo— porque los dos iban en la misma línea,
+     altos, a la derecha de la cifra. Con la composición en dos renglones el
+     signo se quedó pegado al número y pasó a medir en `em` del numeral (ver
+     ProofLedger); acá quedó solo la palabra.
 
-     Si algún día vuelve a moverse el numeral, esta es la que hay que mirar
-     primero: la relación entre las dos es lo que sostiene el renglón, y solo
-     una de las dos está escrita acá.
+     La relación con el numeral es lo que hay que mirar, y no el número suelto:
+     4.4 sobre 14 es 0.31, casi la misma proporción que sostenía la versión
+     anterior (5.97 sobre 17 = 0.35). El renglón se achicó entero; el reparto
+     entre la cifra y lo que la califica se mantuvo.
+
+     Si algún día vuelve a moverse el numeral, esta es la primera que hay que
+     mirar: la relación entre las dos es lo que sostiene el renglón, y solo una
+     de las dos está escrita acá.
+
+     Lo usa una sola clase, `gloss-serif`, y una sola sección. Si algún día lo
+     toma otra, conviene mirar antes si lo que necesita es esta proporción o
+     solo un tamaño parecido: el valor no significa nada fuera de su relación
+     con `--text-ledger`.
 
      NO se llama `--text-ledger-gloss`. Dos tokens que comparten prefijo hacen
      que Tailwind genere el corto y descarte el largo en silencio — está
      documentado arriba, en `--text-poster` / `--text-kicker-xl`, y cuesta una
      tarde encontrarlo. */
-  --text-gloss: clamp(1.5rem, 5.97cqw, 6.3rem);
+  --text-gloss: clamp(1.25rem, 4.4cqw, 4.6rem);
   --text-gloss--line-height: 1;
   --text-gloss--letter-spacing: -0.02em;
   --text-gloss--font-weight: 400;
+
+  /* ── Prueba ──────────────────────────────────────────────────────────────
+     La cifra que respalda al verbo en `homepage-tuck/ProofRoster`: «100%
+     uptime», «$24+ billion». Aparece al pasar por encima del renglón, al lado
+     de la palabra y en sans.
+
+     ── Por qué no alcanzaba `h3` ──────────────────────────────────────────
+
+     El rol necesitaba dos cosas que ese nivel no da, y la que importa es la
+     segunda:
+
+     · **Un cuerpo entre h3 y h2.** A 40px la cifra queda por debajo de la mitad
+       del verbo (88px) y se lee como su epígrafe. A 48 pesa lo suficiente para
+       ser la otra mitad del renglón sin discutirle el titular.
+     · **Peso 400 y no el 500 de la escala sans.** Es la misma decisión que
+       `--text-quote` documenta unas líneas más abajo: Montreal Book es un 350
+       declarado como 400 (ver lib/fonts.ts), y a este cuerpo es el trazo que
+       hace falta. Con 500 la cifra empuja, y al lado de una Kepler itálica
+       —que es de contraste alto y aire ligero— una sans de palo grueso se lee
+       como de otra página.
+
+     Es también la razón de que esto sea un token y no un `font-normal` suelto
+     en el componente: el peso es la mitad del rol, no un parche sobre `h3`. La
+     regla la escribe el DS, y `pnpm lint:typography` la hace cumplir.
+
+     No hay ningún otro token que empiece con `--text-pro`, así que el nombre
+     no cae en la colisión de prefijos que documentan `--text-poster` y
+     `serif-poster`. */
+  --text-proof: clamp(1.75rem, 1.4rem + 1.5vw, 3rem);
+  --text-proof--line-height: 1.15;
+  --text-proof--letter-spacing: -0.01em;
+  --text-proof--font-weight: 400;
 
   /* ── Cita ────────────────────────────────────────────────────────────────
      La cita a la que se le da tribuna: el testimonio que ocupa media sección
@@ -681,6 +725,72 @@
   font-style: italic;
   font-size: var(--text-gloss);
   line-height: var(--text-gloss--line-height);
+  letter-spacing: var(--text-serif--letter-spacing);
+  font-weight: var(--text-serif--font-weight);
+}
+
+/* El verbo del índice de capacidades: «Last», «Scale», «Connect» en
+   `homepage-tuck/ProofRoster`. Kepler ITÁLICA del master Display, a cuerpo
+   de h1.
+
+   Dos cosas la separan de `text-h1-serif`, y las dos son la razón de que
+   exista:
+
+   · **El master es Display y no Subhead.** A 74px el Subhead tiene el trazo
+     grueso y el contraste bajo de una serif de texto; el diseño de esta sección
+     pide lo contrario —astas finas, contraste alto—, que es exactamente para lo
+     que está cortado el Display. Es la misma decisión que ya toman
+     `text-display-serif` y `serif-poster`; lo que faltaba era el encaje a
+     cuerpo de h1.
+   · **Es itálica**, y declarada como tal, no sintetizada. Kepler trae la face
+     real (`KeplerStd-ItDisp`), y la diferencia se ve a este tamaño: la `a`
+     itálica de Kepler es de una sola panza y la romana inclinada por el
+     navegador, de dos. Es el mismo criterio que documenta lib/fonts.ts para
+     `accent-display` y `gloss-serif`.
+
+   ── Sobre el peso ──────────────────────────────────────────────────────────
+
+   Kepler entra al repo con UN solo peso por master (400, ver lib/fonts.ts): no
+   hay un corte Light que pedir. Lo que hace que la itálica del Display se lea
+   ligera a este tamaño es el contraste del dibujo, no el peso — y por eso
+   bajarlo a 300 no la afinaría: lo sintetizaría el navegador, que a 74px
+   emborrona las astas finas en vez de adelgazarlas.
+
+   ── El interlineado NO sale del token, y es la única que hace eso ──────────
+
+   Todas las escalas serif toman `line-height` del nivel sans que las nombra.
+   Esta no puede: **el ascendente más el descendente de Kepler suman ~1.21em, y
+   `--text-h1--line-height` es 1.05**. O sea que a este cuerpo los glifos son
+   MÁS ALTOS que su propia caja de línea, y sobresalen.
+
+   Con `overflow: visible` eso no se ve —el texto simplemente desborda— y por
+   eso vivió sin dar señales hasta que la sección estrenó su entrada: la máscara
+   que SplitText creaba para que la palabra subiera desde debajo de su hueco
+   medía exactamente la caja de línea, así que recortaba la `L` de «Last» por
+   arriba y la `y` de «Privacy» por abajo.
+
+   Esa máscara ya no está —la entrada del verbo cambió a caracteres— y el 1.3 se
+   queda igual: lo que la destapó fue la máscara, pero el desbordamiento es de
+   la caja contra el dibujo y existe con animación o sin ella. 1.3 es la caja
+   que contiene al dibujo con margen. El mismo dato está medido y
+   escrito en `text-h1-serif-inline`, unas líneas más abajo, que lo resuelve al
+   revés —colapsando la caja a 0— porque allá la serif va DENTRO de un renglón
+   sans y tiene que dejarse medir por la strut de la sans. Acá la serif es el
+   renglón entero, así que la caja tiene que ser suya.
+
+   ── El nombre ──────────────────────────────────────────────────────────────
+
+   Se llama `serif-roster` y no `text-h1-serif-display` por la colisión de
+   prefijos que documentan `serif-poster` y `gloss-serif`: el calificador va
+   primero para que la utility no compita con ningún token de la escala.
+
+   El font-size sí sale del MISMO token que la sans, como todas las escalas
+   serif: mover `--text-h1` mueve las tres. */
+@utility serif-roster {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-h1);
+  line-height: 1.3;
   letter-spacing: var(--text-serif--letter-spacing);
   font-weight: var(--text-serif--font-weight);
 }

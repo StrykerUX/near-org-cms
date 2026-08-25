@@ -52,20 +52,21 @@ import m45 from "@/app/prototype/foundation-c/page.meta";
 import m46 from "@/app/prototype/homepage-a/page.meta";
 import m47 from "@/app/prototype/homepage-b/page.meta";
 import m48 from "@/app/prototype/homepage-c/page.meta";
-import m49 from "@/app/prototype/protocol-a/page.meta";
-import m50 from "@/app/prototype/protocol-b/page.meta";
-import m51 from "@/app/prototype/protocol-c/page.meta";
-import m52 from "@/app/prototype/quantum-security-copy/page.meta";
-import m53 from "@/app/prototype/quantum-security-h2/page.meta";
-import m54 from "@/app/prototype/quantum-security-h3/page.meta";
-import m55 from "@/app/prototype/shells/page.meta";
-import m56 from "@/app/prototype/solutions-a/page.meta";
-import m57 from "@/app/prototype/solutions-b/page.meta";
-import m58 from "@/app/prototype/voices-labs/page.meta";
-import m59 from "@/app/(motion)/quantum-security/page.meta";
-import m60 from "@/app/(site)/research/page.meta";
-import m61 from "@/app/(site)/solutions/page.meta";
-import m62 from "@/app/(site)/terms-of-use/page.meta";
+import m49 from "@/app/prototype/homepage-d/page.meta";
+import m50 from "@/app/prototype/protocol-a/page.meta";
+import m51 from "@/app/prototype/protocol-b/page.meta";
+import m52 from "@/app/prototype/protocol-c/page.meta";
+import m53 from "@/app/prototype/quantum-security-copy/page.meta";
+import m54 from "@/app/prototype/quantum-security-h2/page.meta";
+import m55 from "@/app/prototype/quantum-security-h3/page.meta";
+import m56 from "@/app/prototype/shells/page.meta";
+import m57 from "@/app/prototype/solutions-a/page.meta";
+import m58 from "@/app/prototype/solutions-b/page.meta";
+import m59 from "@/app/prototype/voices-labs/page.meta";
+import m60 from "@/app/(motion)/quantum-security/page.meta";
+import m61 from "@/app/(site)/research/page.meta";
+import m62 from "@/app/(site)/solutions/page.meta";
+import m63 from "@/app/(site)/terms-of-use/page.meta";
 
 export const ROUTES: RouteEntry[] = [
   { ...m0, route: "/", stub: false, view: null, file: "app/(site)/page.meta.ts" },
@@ -117,18 +118,19 @@ export const ROUTES: RouteEntry[] = [
   { ...m46, route: "/prototype/homepage-a", stub: false, view: "HomepageAView", file: "app/prototype/homepage-a/page.meta.ts" },
   { ...m47, route: "/prototype/homepage-b", stub: false, view: "HomepageBView", file: "app/prototype/homepage-b/page.meta.ts" },
   { ...m48, route: "/prototype/homepage-c", stub: false, view: "HomepageCView", file: "app/prototype/homepage-c/page.meta.ts" },
-  { ...m49, route: "/prototype/protocol-a", stub: false, view: "ProtocolLabAView", file: "app/prototype/protocol-a/page.meta.ts" },
-  { ...m50, route: "/prototype/protocol-b", stub: false, view: "ProtocolLabBView", file: "app/prototype/protocol-b/page.meta.ts" },
-  { ...m51, route: "/prototype/protocol-c", stub: false, view: "ProtocolLabCView", file: "app/prototype/protocol-c/page.meta.ts" },
-  { ...m52, route: "/prototype/quantum-security-copy", stub: false, view: "QuantumSecurityCopyView", file: "app/prototype/quantum-security-copy/page.meta.ts" },
-  { ...m53, route: "/prototype/quantum-security-h2", stub: false, view: "QuantumSecurityH2View", file: "app/prototype/quantum-security-h2/page.meta.ts" },
-  { ...m54, route: "/prototype/quantum-security-h3", stub: false, view: "QuantumSecurityH3View", file: "app/prototype/quantum-security-h3/page.meta.ts" },
-  { ...m55, route: "/prototype/shells", stub: false, view: "ShellsReferenceView", file: "app/prototype/shells/page.meta.ts" },
-  { ...m56, route: "/prototype/solutions-a", stub: false, view: "SolutionsAView", file: "app/prototype/solutions-a/page.meta.ts" },
-  { ...m57, route: "/prototype/solutions-b", stub: false, view: "SolutionsBView", file: "app/prototype/solutions-b/page.meta.ts" },
-  { ...m58, route: "/prototype/voices-labs", stub: false, view: "VoicesLabsView", file: "app/prototype/voices-labs/page.meta.ts" },
-  { ...m59, route: "/quantum-security", stub: false, view: "QuantumSecurityView", file: "app/(motion)/quantum-security/page.meta.ts" },
-  { ...m60, route: "/research", stub: true, view: "StubView", file: "app/(site)/research/page.meta.ts" },
-  { ...m61, route: "/solutions", stub: true, view: "StubView", file: "app/(site)/solutions/page.meta.ts" },
-  { ...m62, route: "/terms-of-use", stub: true, view: "StubView", file: "app/(site)/terms-of-use/page.meta.ts" },
+  { ...m49, route: "/prototype/homepage-d", stub: false, view: "HomepageDView", file: "app/prototype/homepage-d/page.meta.ts" },
+  { ...m50, route: "/prototype/protocol-a", stub: false, view: "ProtocolLabAView", file: "app/prototype/protocol-a/page.meta.ts" },
+  { ...m51, route: "/prototype/protocol-b", stub: false, view: "ProtocolLabBView", file: "app/prototype/protocol-b/page.meta.ts" },
+  { ...m52, route: "/prototype/protocol-c", stub: false, view: "ProtocolLabCView", file: "app/prototype/protocol-c/page.meta.ts" },
+  { ...m53, route: "/prototype/quantum-security-copy", stub: false, view: "QuantumSecurityCopyView", file: "app/prototype/quantum-security-copy/page.meta.ts" },
+  { ...m54, route: "/prototype/quantum-security-h2", stub: false, view: "QuantumSecurityH2View", file: "app/prototype/quantum-security-h2/page.meta.ts" },
+  { ...m55, route: "/prototype/quantum-security-h3", stub: false, view: "QuantumSecurityH3View", file: "app/prototype/quantum-security-h3/page.meta.ts" },
+  { ...m56, route: "/prototype/shells", stub: false, view: "ShellsReferenceView", file: "app/prototype/shells/page.meta.ts" },
+  { ...m57, route: "/prototype/solutions-a", stub: false, view: "SolutionsAView", file: "app/prototype/solutions-a/page.meta.ts" },
+  { ...m58, route: "/prototype/solutions-b", stub: false, view: "SolutionsBView", file: "app/prototype/solutions-b/page.meta.ts" },
+  { ...m59, route: "/prototype/voices-labs", stub: false, view: "VoicesLabsView", file: "app/prototype/voices-labs/page.meta.ts" },
+  { ...m60, route: "/quantum-security", stub: false, view: "QuantumSecurityView", file: "app/(motion)/quantum-security/page.meta.ts" },
+  { ...m61, route: "/research", stub: true, view: "StubView", file: "app/(site)/research/page.meta.ts" },
+  { ...m62, route: "/solutions", stub: true, view: "StubView", file: "app/(site)/solutions/page.meta.ts" },
+  { ...m63, route: "/terms-of-use", stub: true, view: "StubView", file: "app/(site)/terms-of-use/page.meta.ts" },
 ];
