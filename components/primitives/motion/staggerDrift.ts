@@ -47,6 +47,19 @@ function mean(values: readonly number[]): number {
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
+/**
+ * Mediana. La usa `spacingAmplitude` cuando el mínimo de los pasos no sirve —
+ * ver la nota larga ahí.
+ *
+ * Con un número par de valores devuelve el menor de los dos centrales y no su
+ * promedio: acá la medida se usa como TOPE de amplitud, así que ante la duda
+ * conviene el más chico.
+ */
+function median(values: readonly number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor((sorted.length - 1) / 2)];
+}
+
 /** Dos cajas solo pueden chocar si sus rangos horizontales se cruzan. */
 function overlapsInX(a: DriftBox, b: DriftBox): boolean {
   return a.left < b.right && b.left < a.right;
@@ -146,12 +159,41 @@ export function spacingAmplitude(
   if (boxes.length < 2) return Infinity;
 
   const byTop = [...boxes].sort((a, b) => a.top - b.top);
-  let closest = Infinity;
+  const spacings: number[] = [];
   for (let i = 1; i < byTop.length; i++) {
     const gap = byTop[i].top - byTop[i - 1].bottom;
     const step = byTop[i].top - byTop[i - 1].top;
-    closest = Math.min(closest, gap > 0 ? gap : step);
+    spacings.push(gap > 0 ? gap : step);
   }
+
+  // ── El mínimo no puede ser la única medida ────────────────────────────────
+  //
+  // Tomar el mínimo a secas tiene un modo de fallo que ya se cobró dos tardes:
+  // basta UN par de elementos que compartan borde superior —o casi— para que el
+  // mínimo sea 0, la función devuelva `Infinity`, y `driftOffsets` conteste con
+  // ceros. El efecto no se rompe, DESAPARECE, y desde afuera se ve como si
+  // todos los elementos se movieran a la misma velocidad: la del scroll.
+  //
+  // Pasa en cuanto un layout escalona con márgenes negativos grandes. En
+  // `OwnYourOwn` una card lleva `-mt-[101%]`, y los porcentajes de margen se
+  // resuelven contra el ANCHO del contenedor: son ~1700px hacia arriba, así que
+  // dos cards terminan con el borde superior a la misma altura y el mínimo se va
+  // a cero.
+  //
+  // La mediana no tiene ese punto de fallo: un par pisado no la mueve, y sigue
+  // representando la escala del layout —que es todo lo que esta función quiere
+  // medir— mientras la mayoría de los pasos sean sanos.
+  //
+  // El mínimo se conserva mientras sea positivo, porque cuando lo es es la
+  // medida correcta y más conservadora. Solo se cae a la mediana cuando el
+  // mínimo deja de ser utilizable, que es exactamente el caso que antes
+  // apagaba el efecto.
+  const usable = spacings.filter((v) => v > 0);
+  if (usable.length === 0) return Infinity;
+
+  const smallest = Math.min(...usable);
+  const closest =
+    usable.length === spacings.length ? smallest : median(usable);
   if (!Number.isFinite(closest) || closest <= 0) return Infinity;
 
   const centre = mean(speeds);
@@ -195,7 +237,27 @@ export function driftOffsets(
     spacingAmplitude(boxes, speeds)
   );
 
-  if (!Number.isFinite(amplitude) || amplitude <= 0) return zeros;
+  if (!Number.isFinite(amplitude) || amplitude <= 0) {
+    // ── Este caso era MUDO, y ahí estaba el problema ──────────────────────
+    //
+    // Devolver ceros es la respuesta correcta —sin sitio para desviarse,
+    // quietos— pero desde afuera es indistinguible de que el efecto funcione
+    // mal: los elementos se mueven con la página, o sea todos a la misma
+    // velocidad, y no hay ningún error que lo explique. Encontrarlo cuesta
+    // recorrer dos funciones de geometría hacia atrás.
+    //
+    // El aviso solo existe en desarrollo. En producción el comportamiento es
+    // el mismo de siempre.
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[staggerDrift] Sin amplitud segura: los elementos quedan quietos. " +
+          "Suele ser un layout donde dos cajas comparten borde superior " +
+          "—márgenes negativos grandes— o un `minGap` mayor que el hueco disponible.",
+        { boxes, speeds, minGap },
+      );
+    }
+    return zeros;
+  }
 
   const a = Math.max(0, k) * amplitude;
   const centre = mean(speeds);

@@ -798,7 +798,22 @@ export default function SiteHeader() {
           // `relative` is load-bearing: it makes the BAR the positioning
           // ancestor for the dropdown panels, which is what centres them on
           // the bar instead of under each trigger.
-          className="group/nav pointer-events-auto relative mx-auto flex w-full max-w-[1240px] items-center justify-between gap-3 h-16 rounded-[var(--q-nav-radius)] pl-5 pr-2 transition-colors duration-300 text-white md:gap-10 md:pl-7 md:pr-3"
+          // ── Tres columnas y no `justify-between` ───────────────────────────
+          //
+          // Los tabs van CENTRADOS en la barra, y con un flex de dos
+          // grupos eso no se puede: `justify-between` los pega al bloque
+          // de la derecha, así que su centro depende de cuánto miden el
+          // logotipo y el botón — y no miden lo mismo.
+          //
+          // `1fr auto 1fr` centra la columna del medio por construcción:
+          // las dos laterales reparten el sobrante en partes iguales sin
+          // importar qué lleven dentro. El día que el CTA cambie de texto
+          // o el logotipo de tamaño, los tabs siguen en el centro.
+          //
+          // En móvil los tabs son `hidden`, así que la columna del medio
+          // queda vacía y las laterales se reparten la barra: logotipo a
+          // la izquierda, acciones a la derecha, igual que antes.
+          className="group/nav pointer-events-auto relative mx-auto grid w-full max-w-[1240px] grid-cols-[1fr_auto_1fr] items-center gap-3 h-16 rounded-[var(--q-nav-radius)] pl-5 pr-2 transition-colors duration-300 text-white md:gap-10 md:pl-7 md:pr-3"
         >
           {/* The bar sits 24px below the top of the frame, and that strip is
               outside the nav — so moving up into it fired `onMouseLeave` and
@@ -829,45 +844,51 @@ export default function SiteHeader() {
             />
           </Link>
 
-          <div className="flex items-center gap-2 self-stretch md:gap-10">
-            <div ref={tabsRef} className="hidden items-center self-stretch md:flex">
-              {LINKS.map((link) => (
-                // The trigger is now just a label: there is ONE panel for the
-                // whole bar (below), so moving between tabs morphs a single
-                // container instead of cross-fading four independent ones.
-                <div
-                  key={link.label}
-                  // `setHasOpened` acá y no en el efecto de `active`: es el
-                  // gesto el que decide montar los paneles, y un setState
-                  // dentro del efecto encadena un render de más por apertura.
-                  onMouseEnter={() => {
-                    setHasOpened(true);
-                    setActive(link.label);
-                  }}
-                  className="group/menu flex items-center self-stretch px-4"
+          {/* La columna del medio. Es hijo DIRECTO del nav y ya no vive dentro
+              del grupo de acciones: metido ahí, su centro se movía con el ancho
+              del CTA. */}
+          <div ref={tabsRef} className="hidden items-center self-stretch md:flex">
+            {LINKS.map((link) => (
+              // The trigger is now just a label: there is ONE panel for the
+              // whole bar (below), so moving between tabs morphs a single
+              // container instead of cross-fading four independent ones.
+              <div
+                key={link.label}
+                // `setHasOpened` acá y no en el efecto de `active`: es el
+                // gesto el que decide montar los paneles, y un setState
+                // dentro del efecto encadena un render de más por apertura.
+                onMouseEnter={() => {
+                  setHasOpened(true);
+                  setActive(link.label);
+                }}
+                className="group/menu flex items-center self-stretch px-4"
+              >
+                {/* Un <button> y no un <a href="#">: esto abre un panel, no
+                    navega a ningún lado, y como link mandaba al tope de la
+                    página. El `onClick` además lo vuelve operable con teclado
+                    — hasta ahora el menú solo se abría con el puntero. */}
+                <button
+                  type="button"
+                  aria-expanded={active === link.label}
+                  onClick={() => setActive(active === link.label ? null : link.label)}
+                  className="relative flex items-center gap-1 text-eyebrow uppercase text-white"
                 >
-                  {/* Un <button> y no un <a href="#">: esto abre un panel, no
-                      navega a ningún lado, y como link mandaba al tope de la
-                      página. El `onClick` además lo vuelve operable con teclado
-                      — hasta ahora el menú solo se abría con el puntero. */}
-                  <button
-                    type="button"
-                    aria-expanded={active === link.label}
-                    onClick={() => setActive(active === link.label ? null : link.label)}
-                    className="relative flex items-center gap-1 text-eyebrow uppercase text-white"
-                  >
-                    {link.label}
-                    <span
-                      aria-hidden="true"
-                      className={`absolute -bottom-1.5 left-0 right-0 h-px origin-left bg-[linear-gradient(90deg,var(--cta-lime),var(--cta-mint),var(--cta-deep))] transition-transform duration-300 ${
-                        active === link.label ? "scale-x-100" : "scale-x-0"
-                      }`}
-                    />
-                  </button>
-                </div>
-              ))}
+                  {link.label}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute -bottom-1.5 left-0 right-0 h-px origin-left bg-[linear-gradient(90deg,var(--cta-lime),var(--cta-mint),var(--cta-deep))] transition-transform duration-300 ${
+                      active === link.label ? "scale-x-100" : "scale-x-0"
+                    }`}
+                  />
+                </button>
             </div>
+          ))}
+          </div>
 
+          {/* La columna de la derecha. `justify-self-end` la pega al borde:
+              sin él, el grupo se centraría dentro de su propia columna `1fr` y
+              quedaría flotando a media distancia del filo de la barra. */}
+          <div className="flex items-center gap-2 self-stretch justify-self-end md:gap-10">
             {/* The reference's translucent glass chip: #d9d9d9 at 20% over the
                 black bar, radius 8. This REPLACES the green travelling-gradient
                 CTA — `[data-q-cta-sweep]` still exists in globals.css and is

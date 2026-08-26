@@ -58,10 +58,9 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/homepage-shar
 // pares no se deformaban y lo único que se movía era el hueco DEL MEDIO. Un
 // gesto limpio, pero con tres de los cuatro saltos congelados.
 //
-// Ahora los desvíos normalizados son +0.92, −0.20, +0.28 y −1.0: Data se va
-// arriba, Intelligence se queda muy atrás, y las dos del medio se mueven poco
-// pero en sentidos opuestos. Los cuatro saltos cambian de largo durante el
-// scroll, cada uno a su ritmo.
+// Los cuatro saltos cambian de largo durante el scroll, cada uno a su ritmo —
+// que es lo que hace que el destiempo se lea entre todas las cards y no solo en
+// un hueco. El reparto concreto está más abajo, con la tabla.
 //
 // Lo que NO se toca es el signo por mitades: las dos de arriba (Data, Assets)
 // con desvío positivo y las dos de abajo (Traces, Intelligence) negativo. Eso
@@ -79,7 +78,30 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/homepage-shar
 // participaba del efecto— porque el desvío se calculaba contra un 1 fijo. Ahora
 // se calcula contra la media, así que ese caso no puede repetirse por accidente,
 // pero igual conviene que estén repartidas.
-const SPEEDS = [1.5, 0.8, 1.1, 0.3] as const;
+//
+// ── Cuatro desvíos distintos, y ninguno cerca de cero ─────────────────────
+//
+// Los normalizados que salen de esta tabla son +0.51, −1.00, +0.87 y −0.38:
+// Traces se adelanta lo más que se puede, Assets se retrasa casi tanto, y Data
+// e Intelligence hacen lo mismo a media fuerza en sentidos opuestos. Las cuatro
+// magnitudes son distintas, que es lo que hace que el destiempo se lea en los
+// cuatro huecos y no solo en uno.
+//
+// **Ninguna queda cerca de cero, y esa es la trampa de esta tabla.** El desvío
+// se mide contra la MEDIA de las cuatro, no contra un valor fijo: una card cuya
+// velocidad caiga en el promedio del grupo no se mueve, por alto que sea su
+// número. Es lo que pasaba con el reparto anterior —una card a 0.15 de la
+// media, prácticamente inerte— y por eso conviene mirar la columna de
+// normalizados y no la de velocidades.
+//
+// De ahí sale un límite que no se puede esquivar: **no puede haber tres cards
+// visiblemente rápidas**. Si tres van altas, la media sube con ellas y la más
+// floja de las tres queda pegada al promedio. Para que las cuatro se muevan,
+// dos tienen que ir por encima y dos por debajo.
+//
+// El signo por mitades se conserva: Data y Assets positivos, Traces e
+// Intelligence negativos — lo que la nota de arriba pedía no tocar.
+const SPEEDS = [0.5, 1.95, 0.15, 1.35] as const;
 
 // Qué fracción de la amplitud máxima SEGURA se usa. `driftAmplitude` calcula, a
 // partir de los huecos reales del layout, la amplitud más grande con la que
@@ -128,6 +150,25 @@ const SPEEDS = [1.5, 0.8, 1.1, 0.3] as const;
 // más recorrido del que ocupa. Si empieza a sentirse larga, esta constante es
 // lo primero que hay que bajar.
 //
+// ── Subido a 2.3 ───────────────────────────────────────────────────────────
+//
+// Porque a 1.55 el destiempo estaba, pero no se leía: las cuatro cards parecían
+// moverse igual. Y la palanca es ÉSTA y no `SPEEDS` — es la advertencia de tres
+// párrafos más arriba, y vale la pena repetir la cuenta porque es
+// contraintuitiva:
+//
+//     desvío máximo = swing · k · (closest / swing) = k · closest
+//
+// El swing se cancela. `spacingAmplitude` divide por él justamente para que la
+// escala del efecto la fije el LAYOUT y no los números que uno escriba en
+// `SPEEDS`, así que repartir las velocidades de otra forma cambia quién va
+// adónde y nunca cuánto.
+//
+// Subirlo es seguro por el lado de las colisiones: con las cuatro bandas
+// disjuntas `driftAmplitude` devuelve `Infinity` y el que manda es
+// `spacingAmplitude`, que no depende de `MIN_GAP`. Lo que sí sube es el scroll
+// que la sección pide.
+//
 // ── Qué se sentía a 1.2 ─────────────────────────────────────────────────────
 //
 // Lo que se percibe no es el desvío sino su DERIVADA respecto del scroll: qué
@@ -139,7 +180,27 @@ const SPEEDS = [1.5, 0.8, 1.1, 0.3] as const;
 //
 // El costo es scroll: el recorrido pasa de 647 a ~1.007px. La sección pide
 // ~55% más de scroll que su altura de layout.
-const DRIFT_K = 1.55;
+const DRIFT_K = 2.3;
+
+/**
+ * Qué fracción del scrub tarda cada card en recorrer su desvío, en el orden de
+ * `OWN_YOUR_OWN_CARDS`.
+ *
+ * Es la palanca que faltaba, y la que de verdad se percibe como VELOCIDAD.
+ * `SPEEDS` reparte distancia y `DRIFT_K` la escala; ninguna de las dos reparte
+ * tiempo, así que con una duración compartida las cuatro cards aceleraban y
+ * frenaban a la vez por más distintos que fueran sus desvíos.
+ *
+ * Con estos valores Traces recorre lo suyo en poco más de medio scrub y llega
+ * pronto; Assets tarda el recorrido entero. En el tramo del medio —que es
+ * cuando las cuatro están en pantalla— una ya se detuvo, dos siguen y la última
+ * recién va por la mitad.
+ *
+ * Ninguna pasa de 1: por encima, la card se queda a medio camino cuando el
+ * scrub termina y su desvío final deja de ser el que `driftOffsets` calculó
+ * para no chocar con nadie.
+ */
+const TRAVEL_TIME = [0.72, 0.55, 1.0, 0.85] as const;
 
 // Aire mínimo entre dos cards que puedan alcanzarse, en px.
 //
@@ -561,13 +622,43 @@ const TITLE_IN = {
       },
     });
 
+    // ── Un tween POR CARD, y ése es el punto ───────────────────────────────
+    //
+    // Esto era un solo `fromTo` sobre las cuatro, con una `duration` y una
+    // `ease` compartidas. Y ahí estaba el fallo que hacía que las cuatro se
+    // vieran moverse igual, por más que sus desvíos fueran distintos:
+    //
+    //     y_i(t) = offsets[i] · e(t)
+    //
+    // Con la misma `e(t)` para todas, sus posiciones son PROPORCIONALES entre
+    // sí en todo momento. Aceleran juntas, frenan juntas y llegan juntas: lo
+    // único que cambia es cuánto recorre cada una. Eso no se lee como cuatro
+    // velocidades, se lee como un grupo que se estira — nunca hay una corriendo
+    // mientras otra va despacio, que es lo que uno espera ver.
+    //
+    // La amplitud no podía arreglarlo. `offsets` reparte DISTANCIA; lo que
+    // faltaba era repartir TIEMPO.
+    //
+    // Ahora cada card recorre su desvío en su propia fracción del scrub, todas
+    // arrancando en 0. La que tiene `0.55` llega a destino a mitad de recorrido
+    // y se queda quieta mientras la de `1.0` sigue viajando: ahí sí hay una
+    // rápida y una lenta, y el destiempo se lee entre las cuatro.
+    //
+    // Todas ≤ 1 para que ninguna quede a medio camino cuando el scrub termina.
+    //
     // `y` como función y no como array: GSAP la re-evalúa en cada
     // `invalidateOnRefresh`, así que lee el `offsets` recién medido.
-    tl.fromTo(
-      cards,
-      { y: 0 },
-      { y: (i: number) => offsets[i], ease: "sine.inOut", duration: 1 },
-    );
+    cards.forEach((card, i) => {
+      tl.fromTo(
+        card,
+        { y: 0 },
+        { y: () => offsets[i], ease: "sine.inOut", duration: TRAVEL_TIME[i] },
+        // Todas en la posición 0 del timeline: lo que las separa es cuánto
+        // TARDAN, no cuándo empiezan. Escalonar los arranques dejaría cards
+        // quietas durante el primer tramo, que se lee como que no participan.
+        0,
+      );
+    });
 
     return () => {
       titleReset.kill();
