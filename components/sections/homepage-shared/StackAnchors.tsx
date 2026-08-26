@@ -221,13 +221,28 @@ export default function StackAnchors({
         // que se recorta. Pintado acá se vería alrededor de la caja y no
         // habría caja que ver. El crema de la sección es el que asoma por los
         // márgenes mientras la escena entra y sale.
+        // La sección se queda en `z` automático A PROPÓSITO. Con `frame` su
+        // fondo es CREMA —el que asoma por los márgenes de la caja—, y subirla
+        // entera la pone por encima de la sección de arriba, que también es
+        // crema: el titular «Own Your Own» quedaba cortado por un borde
+        // invisible. Quien tiene que subir es la caja, y sube sola — ver el
+        // `z-[2]` del hijo.
         className={`group/anchors relative text-cream data-[mode=track]:h-[calc(var(--travel)+100svh)] ${
           frame ? "bg-cream" : "bg-ink"
         }`}
       >
         <div
           data-stack-frame
-          className={`relative overflow-hidden group-data-[mode=track]/anchors:sticky group-data-[mode=track]/anchors:top-0 group-data-[mode=track]/anchors:h-svh ${
+          // `z-[2]`: la sección de arriba —«Own Your Own»— es `relative z-[1]`
+          // y su titular se queda pegado hasta el último píxel de su caja, así
+          // que sin esto pintaba ENCIMA de la caja negra mientras entra.
+          //
+          // Funciona desde acá adentro porque la `<section>` que lo contiene es
+          // `position: relative` con `z-index: auto`, y eso NO abre un contexto
+          // de apilamiento: este `z-[2]` compite directamente contra el `z-[1]`
+          // de la sección de al lado. Es justo lo que se quiere — sube la caja
+          // y nada más, y el fondo crema de la sección se queda abajo.
+          className={`relative z-[2] overflow-hidden group-data-[mode=track]/anchors:sticky group-data-[mode=track]/anchors:top-0 group-data-[mode=track]/anchors:h-svh ${
             frame ? "bg-ink" : ""
           }`}
         >

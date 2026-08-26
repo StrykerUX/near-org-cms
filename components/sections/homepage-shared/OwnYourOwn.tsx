@@ -126,6 +126,19 @@ const TRACES = 1;
  */
 const TRACES_END_RATIO = 0.15;
 
+/**
+ * Dónde termina la sección, expresado como dónde está la ÚLTIMA card cuando eso
+ * pasa: fracción del viewport en la que cae su borde superior.
+ *
+ * 0.5 = a media pantalla. De ahí para abajo ya no entra contenido nuevo —las
+ * cuatro cards se leyeron— y lo que queda es crema vacía hasta que la sección
+ * siguiente asoma. Este número la trae a ese punto.
+ *
+ * Bajarlo acorta más (la card tiene que subir más para que se dé por cerrada);
+ * subirlo deja más aire al final.
+ */
+const RELEASE_ANCHOR = 0.5;
+
 // Posición de cada card en el grid, en el MISMO orden que
 // `OWN_YOUR_OWN_CARDS`. Se queda acá y no en el módulo de contenido porque es
 // composición: en qué celda cae cada card y cuánto se separa de la anterior.
@@ -370,7 +383,7 @@ const TITLE_IN = {
 
 export default function OwnYourOwn() {
 
-  const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
+  const rootRef = useMotionScope<HTMLElement>(({ q, scope, motionOk, isDesktop }) => {
     const cards = q("[data-own-card]");
     const stage = q("[data-own-stage]")[0];
     const title = q("[data-own-title]")[0];
@@ -545,8 +558,101 @@ export default function OwnYourOwn() {
       ),
     );
 
+    // ── El recorte de la cola ──────────────────────────────────────────────
+    //
+    // Debajo de la sección quedaban varias pantallas de crema vacía. Es
+    // consecuencia directa del parallax: las cuatro cards SUBEN, así que al
+    // final del recorrido el contenido visible está cientos de píxeles por
+    // encima del fondo de su propia caja — y esa caja sigue midiendo lo que el
+    // layout dice, porque un `transform` no toca el layout. Pasada la última
+    // card no entra contenido nuevo y el lector scrollea nada.
+    //
+    // ── El punto no puede ser un trigger sobre la card ─────────────────────
+    //
+    // ScrollTrigger mide sus triggers con `getBoundingClientRect()`, que
+    // incluye el `transform` que el parallax le está aplicando en ese instante:
+    // la posición medida depende de dónde estaba la card al refrescar. La card
+    // no tiene una posición, tiene una trayectoria.
+    //
+    // Así que se despeja de esa trayectoria. En coordenadas de documento, con
+    // `s` la posición de scroll:
+    //
+    //     card en viewport(s) = docTop − s − f·(s − inicioDelRango)
+    //
+    // (el segundo término es la página moviéndose; el tercero, el parallax, que
+    // avanza `f · rango` a lo largo de un rango que mide exactamente `rango` —
+    // o sea `f` píxeles por píxel de scroll).
+    //
+    // Igualando al umbral Θ y despejando:
+    //
+    //     s = (docTop + f·inicioDelRango − Θ) / (1 + f)
+    const LAST = cards.length - 1;
+
+    const releaseScroll = () => {
+      const scrolled = window.scrollY;
+      const f = factorFor(LAST);
+      const rangeStart =
+        stage.getBoundingClientRect().top + scrolled - window.innerHeight;
+      const card = cards[LAST];
+      // El CENTRO de la card, no su borde: «la última card a media pantalla»
+      // es dónde está la card, y una card mide ~650px — medir por el borde de
+      // arriba la deja con medio cuerpo fuera de cuadro.
+      const cardDocMid =
+        layoutTop(card) + scrolled + card.getBoundingClientRect().height / 2;
+      return (
+        (cardDocMid + f * rangeStart - RELEASE_ANCHOR * window.innerHeight) /
+        (1 + f)
+      );
+    };
+
+    // ── Dónde va el recorte, que es lo que costó ──────────────────────────
+    //
+    // `margin-bottom` NEGATIVO **en el grid**, no en la `<section>`.
+    //
+    // En la sección no servía, y el porqué es la parte que se puede repetir: un
+    // margen negativo no encoge la caja del elemento que lo lleva, mueve al
+    // que viene DESPUÉS. La sección seguía midiendo lo mismo y su `bg-cream`
+    // con `z-[1]` seguía pintando hasta el mismo píxel — encima de la sección
+    // siguiente, que ahora venía subida y quedaba tapada. El documento se
+    // acortaba y la cola se veía idéntica.
+    //
+    // En el grid sí: el margen entra en el alto del `Container`, o sea en el de
+    // la sección, así que la crema **termina antes**.
+    //
+    // Y no hay bucle, que era el otro requisito: un margen no cuenta para
+    // `offsetHeight` ni mueve el `top` del propio grid, así que ni `range()` ni
+    // el punto de suelta cambian al aplicarlo. Con un `height` o un `padding`
+    // sí lo habría — recortar movería el número que decide cuánto recortar.
+    //
+    // ── No es el `paddingBottom` que se fue ────────────────────────────────
+    //
+    // Aquel medía el desborde de un mecanismo que empujaba cards HACIA ABAJO y
+    // reservaba sitio para que no aterrizaran sobre la sección siguiente: una
+    // compensación de un efecto secundario. Éste declara una regla de
+    // composición —la sección se acaba cuando se acabó de leer— y la resuelve
+    // con la única medida que puede darla.
+    //
+    // Se recalcula en `refreshInit`, o sea antes de que ScrollTrigger mida
+    // nada, así que el resto de la página se remide ya con el recorte puesto.
+    const trimTail = () => {
+      // Medir SIN el recorte vigente, o cada pasada recortaría sobre lo ya
+      // recortado.
+      stage.style.marginBottom = "";
+      const bottomDoc = scope.getBoundingClientRect().bottom + window.scrollY;
+      const target = releaseScroll() + window.innerHeight;
+      // `min(0, …)`: esto acorta, nunca alarga. Si en alguna proporción de
+      // ventana la sección ya termina antes de ese punto, se la deja como está
+      // — estirarla metería el hueco que el recorte viene a sacar.
+      stage.style.marginBottom = `${Math.min(0, target - bottomDoc)}px`;
+    };
+
+    ScrollTrigger.addEventListener("refreshInit", trimTail);
+    trimTail();
+
 
     return () => {
+      ScrollTrigger.removeEventListener("refreshInit", trimTail);
+      stage.style.marginBottom = "";
       titleReset.kill();
       titleIn.scrollTrigger?.kill();
       titleIn.kill();
