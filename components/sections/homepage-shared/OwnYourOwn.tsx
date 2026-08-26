@@ -11,7 +11,6 @@ import {
   REVEAL,
   DEBUG_MARKERS,
 } from "@/components/primitives/motion/motionTokens";
-import { driftOffsets } from "@/components/primitives/motion/staggerDrift";
 import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/homepage-shared/homepageUpdateContent";
 
 // ── "Own Your Own": el título se queda quieto y las cards lo atraviesan ──────
@@ -42,174 +41,90 @@ import { OWN_YOUR_OWN_CARDS as CARDS } from "@/components/sections/homepage-shar
 // se pega dentro de esa celda, así que se queda centrado durante todo el
 // recorrido de las cards sin necesitar una pista de altura declarada.
 
-// Velocidad de cada card RELATIVA a la página. Solo importan las DIFERENCIAS
-// entre ellas: `driftOffsets` las centra en su media, así que sumarles una
-// constante a todas no cambia nada.
+// ── El parallax ─────────────────────────────────────────────────────────────
 //
-// Esa convención —pedir la velocidad en múltiplos de la del scroll y no en px— es la
-// que después se formalizó en `primitives/motion/velocityRamp.ts`, y esta sección es
-// el precedente que cita.
+// Cuánto MÁS RÁPIDO que la página sube cada card, en fracción de la velocidad
+// del scroll y en el orden de `OWN_YOUR_OWN_CARDS`.
 //
-// Cuatro velocidades DISTINTAS, ninguna pareja: es lo que hace que el
-// destiempo se lea entre todas las cards y no solo en un hueco.
+// `0.45` quiere decir que mientras la página recorre 1000px, la card recorre
+// 1450: sube un 45% más rápido. `0.06` es casi la velocidad de la página.
 //
-// El reparto anterior era por GRUPO —dos rápidas casi idénticas arriba, dos
-// lentas casi idénticas abajo—, y eso tenía una consecuencia concreta: los
-// pares no se deformaban y lo único que se movía era el hueco DEL MEDIO. Un
-// gesto limpio, pero con tres de los cuatro saltos congelados.
+// ── Por qué reemplaza al mecanismo anterior ────────────────────────────────
 //
-// Los cuatro saltos cambian de largo durante el scroll, cada uno a su ritmo —
-// que es lo que hace que el destiempo se lea entre todas las cards y no solo en
-// un hueco. El reparto concreto está más abajo, con la tabla.
+// Acá vivía un sistema de «destiempo» que derivaba el desvío de cada card del
+// LAYOUT: medía el hueco entre cards, calculaba la amplitud máxima con la que
+// ninguna alcanzaba a otra, y repartía ese margen entre cuatro velocidades
+// centradas en su media.
 //
-// Lo que NO se toca es el signo por mitades: las dos de arriba (Data, Assets)
-// con desvío positivo y las dos de abajo (Traces, Intelligence) negativo. Eso
-// es lo que hace que el reparto EXPANDA el recorrido en vez de comprimirlo. Un
-// reparto monótono con la fila comprime, y ahí sí hay un punto de colapso donde
-// el escalonado del layout se come a sí mismo (es el techo de ~0.6 que menciona
-// DRIFT_K).
+// Era correcto y era imposible de calibrar, por una razón que costó varias
+// pasadas encontrar: lo que se percibe es **desvío dividido por recorrido de
+// scroll**, y en aquel diseño esas dos magnitudes no estaban relacionadas por
+// nada. La amplitud venía del hueco entre cards; el recorrido, de dónde quedaba
+// el título pegado. Con un recorrido de varias pantallas y un hueco de un par
+// de cientos de píxeles, las cuatro cards terminaban yendo al 90–110% de la
+// velocidad de la página: se separaban al final, pero en ningún momento se veía
+// a una moverse distinto de otra.
 //
-// Ampliar el rango NO agranda el movimiento: `driftOffsets` normaliza por el
-// swing (`max|media − speed|`), así que [0.3…1.7] da exactamente el mismo
-// desvío que [0.8…1.2]. Acá solo se decide QUIÉN sube y quién baja, y en qué
-// proporción entre ellos. La magnitud es `DRIFT_K`.
+// Estos números no tienen ese problema porque SON la unidad que se percibe. No
+// hay media que los centre, ni normalización, ni amplitud derivada de nada:
+// `0.45` se ve como un 45%.
 //
-// Antes eran [0.33, 1.4, 1, 1.5]. El 1 exacto daba desvío CERO —esa card no
-// participaba del efecto— porque el desvío se calculaba contra un 1 fijo. Ahora
-// se calcula contra la media, así que ese caso no puede repetirse por accidente,
-// pero igual conviene que estén repartidas.
+// ── Las cuatro suben ───────────────────────────────────────────────────────
 //
-// ── Cuatro desvíos distintos, y ninguno cerca de cero ─────────────────────
+// Ninguna baja, y eso no es tímido: una card que baja se sale de la sección por
+// abajo y aterriza sobre la siguiente, que entra a sangre y en negro. El
+// mecanismo anterior necesitaba reservar ese sobrante con un `paddingBottom`
+// calculado en JS; con las cuatro subiendo, el problema no existe.
 //
-// Los normalizados que salen de esta tabla son +0.51, −1.00, +0.87 y −0.38:
-// Traces se adelanta lo más que se puede, Assets se retrasa casi tanto, y Data
-// e Intelligence hacen lo mismo a media fuerza en sentidos opuestos. Las cuatro
-// magnitudes son distintas, que es lo que hace que el destiempo se lea en los
-// cuatro huecos y no solo en uno.
-//
-// **Ninguna queda cerca de cero, y esa es la trampa de esta tabla.** El desvío
-// se mide contra la MEDIA de las cuatro, no contra un valor fijo: una card cuya
-// velocidad caiga en el promedio del grupo no se mueve, por alto que sea su
-// número. Es lo que pasaba con el reparto anterior —una card a 0.15 de la
-// media, prácticamente inerte— y por eso conviene mirar la columna de
-// normalizados y no la de velocidades.
-//
-// De ahí sale un límite que no se puede esquivar: **no puede haber tres cards
-// visiblemente rápidas**. Si tres van altas, la media sube con ellas y la más
-// floja de las tres queda pegada al promedio. Para que las cuatro se muevan,
-// dos tienen que ir por encima y dos por debajo.
-//
-// El signo por mitades se conserva: Data y Assets positivos, Traces e
-// Intelligence negativos — lo que la nota de arriba pedía no tocar.
-const SPEEDS = [0.5, 1.95, 0.15, 1.35] as const;
-
-// Qué fracción de la amplitud máxima SEGURA se usa. `driftAmplitude` calcula, a
-// partir de los huecos reales del layout, la amplitud más grande con la que
-// ningún par de cards se acerca a menos de `MIN_GAP`; esto es cuánto de eso se
-// aprovecha.
-//
-// Con `k ≤ 1` el choque es imposible por construcción. Subirlo por encima de 1
-// no está prohibido por el helper —hay layouts donde superponerse es el efecto—
-// pero acá sería volver al bug.
-//
-// ── Por qué 0.5 y no 0.85 ───────────────────────────────────────────────────
-//
-// Las cuatro cards viven en bandas de X disjuntas, así que ningún par puede
-// chocar y `driftAmplitude` devuelve `Infinity`: el único límite que queda es
-// `spacingAmplitude`, o sea el paso más corto del layout dividido por el
-// desvío relativo más grande. Con `k = 0.85` eso daba desvíos de casi un paso
-// entero y el escalonado vertical del layout desaparecía — las cuatro
-// terminaban alineadas en una franja horizontal contra el título.
-//
-// ── Por qué acá se pasa de 1 a propósito ────────────────────────────────────
-//
-// Las dos advertencias de arriba —que `k ≤ 1` evita el choque, y el techo de
-// ~0.6 que valía en una versión anterior— asumen cosas que este layout no
-// cumple:
-//
-//   · El choque es imposible por otra razón: las cuatro bandas de X son
-//     disjuntas, así que `driftAmplitude` ni siquiera acota. `k` solo escala
-//     `spacingAmplitude`, que no es un límite de seguridad sino la escala del
-//     layout — el paso MÁS CORTO (Data→Intelligence, 0.65 celdas). Pasarse de
-//     1 significa "desviarse más que el hueco más chico", que acá es
-//     exactamente lo que se busca.
-//   · El techo de 0.6 era de un reparto de velocidades MONÓTONO con la fila,
-//     donde el desvío comprime el recorrido y llega a comerse el layout. El
-//     reparto por grupos (ver SPEEDS) hace lo contrario: EXPANDE. No hay punto
-//     de colapso, solo se estira.
-//
-// ── Qué se siente a 1.55 ────────────────────────────────────────────────────
-//
-// Subido de 1.2 a 1.55 para que el destiempo se note más, junto con el reparto
-// de velocidades menos agrupado de SPEEDS. Las dos palancas hacen cosas
-// distintas y hay que no confundirlas: SPEEDS decide QUIÉN se mueve y cuánto
-// respecto de los demás —cambiar sus números NO agranda el movimiento, porque
-// `driftOffsets` normaliza por el swing—, y DRIFT_K es la magnitud.
-//
-// El costo sigue siendo scroll, y sube con él: a 1.55 la sección pide bastante
-// más recorrido del que ocupa. Si empieza a sentirse larga, esta constante es
-// lo primero que hay que bajar.
-//
-// ── Subido a 2.3 ───────────────────────────────────────────────────────────
-//
-// Porque a 1.55 el destiempo estaba, pero no se leía: las cuatro cards parecían
-// moverse igual. Y la palanca es ÉSTA y no `SPEEDS` — es la advertencia de tres
-// párrafos más arriba, y vale la pena repetir la cuenta porque es
-// contraintuitiva:
-//
-//     desvío máximo = swing · k · (closest / swing) = k · closest
-//
-// El swing se cancela. `spacingAmplitude` divide por él justamente para que la
-// escala del efecto la fije el LAYOUT y no los números que uno escriba en
-// `SPEEDS`, así que repartir las velocidades de otra forma cambia quién va
-// adónde y nunca cuánto.
-//
-// Subirlo es seguro por el lado de las colisiones: con las cuatro bandas
-// disjuntas `driftAmplitude` devuelve `Infinity` y el que manda es
-// `spacingAmplitude`, que no depende de `MIN_GAP`. Lo que sí sube es el scroll
-// que la sección pide.
-//
-// ── Qué se sentía a 1.2 ─────────────────────────────────────────────────────
-//
-// Lo que se percibe no es el desvío sino su DERIVADA respecto del scroll: qué
-// tan distinta es la velocidad de una card de la de la página. A 1.2 los
-// desvíos son ±160 y ±200px sobre un scrub de ~1.300px, y como `sine.inOut`
-// concentra el movimiento en el medio (pico ≈ pi/2 × la media), en el tramo
-// central las cards van entre ~76% y ~124% de la velocidad del scroll. Ahí es
-// donde se lee el destiempo, y es justo cuando están centradas en pantalla.
-//
-// El costo es scroll: el recorrido pasa de 647 a ~1.007px. La sección pide
-// ~55% más de scroll que su altura de layout.
-const DRIFT_K = 2.3;
+// Lo que sí queda es hueco al pie del grid mientras las cards suben. Es lo que
+// hace el parallax en cualquier sitio que lo use, y la sección tiene aire de
+// sobra ahí.
+const PARALLAX = [0.10, 0, 0.18, 0.54] as const;
 
 /**
- * Qué fracción del scrub tarda cada card en recorrer su desvío, en el orden de
- * `OWN_YOUR_OWN_CARDS`.
- *
- * Es la palanca que faltaba, y la que de verdad se percibe como VELOCIDAD.
- * `SPEEDS` reparte distancia y `DRIFT_K` la escala; ninguna de las dos reparte
- * tiempo, así que con una duración compartida las cuatro cards aceleraban y
- * frenaban a la vez por más distintos que fueran sus desvíos.
- *
- * Con estos valores Traces recorre lo suyo en poco más de medio scrub y llega
- * pronto; Assets tarda el recorrido entero. En el tramo del medio —que es
- * cuando las cuatro están en pantalla— una ya se detuvo, dos siguen y la última
- * recién va por la mitad.
- *
- * Ninguna pasa de 1: por encima, la card se queda a medio camino cuando el
- * scrub termina y su desvío final deja de ser el que `driftOffsets` calculó
- * para no chocar con nadie.
+ * El índice de Traces. Su factor NO sale de la tabla de arriba — el 0 está de
+ * relleno para que la tabla siga teniendo cuatro entradas.
  */
-const TRAVEL_TIME = [0.72, 0.55, 1.0, 0.85] as const;
+const TRACES = 1;
 
-// Aire mínimo entre dos cards que puedan alcanzarse, en px.
-//
-// Hoy no está haciendo nada: con las cuatro bandas disjuntas no hay ningún par
-// que se cruce en horizontal, y `driftAmplitude` —que es donde se usa— ni
-// siquiera llega a mirarlos. Se queda porque el reparto de bandas es una
-// decisión de diseño que puede cambiar, y en cuanto dos cards vuelvan a
-// compartir columna esto es lo que evita que se toquen.
-const MIN_GAP = 24;
+/**
+ * Dónde termina Traces respecto de Data, en fracción del alto de Data.
+ *
+ * 0.15 quiere decir que al final del recorrido el borde superior de Traces
+ * queda a un 15% del alto de Data por debajo del de Data: las dos se solapan un
+ * 85%, y Traces **nunca la pasa**.
+ *
+ * Es la segunda palanca de su velocidad y actúa al revés que la separación
+ * inicial: bajar este número lleva a Traces MÁS ARRIBA sobre Data, o sea le
+ * exige más recorrido en el mismo scroll.
+ *
+ * ── Su rango es corto, y conviene saberlo ─────────────────────────────────
+ *
+ * Todo el recorrido del ratio vale `altoDeData / R` de factor — con la
+ * geometría de esta sección, unos 0.15. Ir de 0.6 al piso 0 sube el factor de
+ * 0.34 a 0.43 y ahí se acabó: el piso es 0 porque debajo Traces pasaría a Data,
+ * que es lo que este mecanismo existe para impedir.
+ *
+ * La separación inicial (`mt` en `CARD_LAYOUT`) no tiene ese techo. Cuando haga
+ * falta más velocidad, ésa es la palanca con recorrido; el ratio es el ajuste
+ * fino.
+ *
+ * ── Por qué esto se calcula y no se estima ────────────────────────────────
+ *
+ * Es un objetivo GEOMÉTRICO, y con parallax la posición final de una card es
+ * `−factor × recorrido`: depende del alto de la sección y del viewport. Un
+ * factor elegido a ojo cumple el objetivo en una pantalla y lo falla en la de
+ * al lado — en una se quedan lejos, en otra Traces pasa de largo y se cruzan,
+ * que es justo lo que no tiene que pasar.
+ *
+ * Despejando de
+ *
+ *     (topT − fT·R) − (topD − fD·R) = 0.6 · altoDeData
+ *
+ * sale el factor que lo cumple, y se recalcula en cada refresh. Ver
+ * `tracesFactor`.
+ */
+const TRACES_END_RATIO = 0.15;
 
 // Posición de cada card en el grid, en el MISMO orden que
 // `OWN_YOUR_OWN_CARDS`. Se queda acá y no en el módulo de contenido porque es
@@ -298,7 +213,7 @@ const MIN_GAP = 24;
 //
 // Ojo con una consecuencia que no se ve en el layout: con las cuatro bandas
 // disjuntas ningún par de cards puede chocar, así que el desvío queda sin
-// límite por colisión y solo lo acota `DRIFT_K` — ver la nota de esa constante
+// límite por colisión y solo lo acota `SPREAD` — ver la nota de esa constante
 // antes de subirla.
 const CARD_LAYOUT = [
   {
@@ -309,32 +224,84 @@ const CARD_LAYOUT = [
   {
     // Traces — columnas 7-9, fila 2.
     //
-    // `mt` POSITIVO, el único de los cuatro: en el prototipo esta card arranca
-    // por debajo de donde termina Data, no encabalgada sobre ella. Es el paso
-    // largo de la composición.
-    place: "lg:col-start-7 lg:col-span-3 lg:row-start-2 lg:mt-[12%]",
+    // `mt` POSITIVO, el único de los cuatro: arranca por debajo de donde Data
+    // termina, no encabalgada sobre ella. Es el paso largo de la composición, y
+    // es lo que le da a Traces distancia que recorrer.
+    //
+    // ── Acá también se regula su VELOCIDAD ────────────────────────────────
+    //
+    // Y esto no es obvio, así que conviene tenerlo claro antes de tocar el
+    // número. El destino de Traces está fijo —termina al 60% del alto de Data,
+    // ver `TRACES_END_RATIO`— y su factor se despeja de ahí:
+    //
+    //     fT = fD + [ (topT − topD) − ratio·altoDeData ] / R
+    //
+    // O sea que **cuanto más lejos arranca, más rápido sube**: tiene más
+    // distancia que cubrir en el mismo recorrido. Separarla es la palanca de su
+    // parallax, y no hay un factor que ajustar en paralelo — se recalcula solo.
+    //
+    // 12% → 22% → 38% → 43% → 57% → 70% → 85%, subiendo para marcar más el
+    // efecto. Los `%` van contra el ANCHO del grid, así que 85% son ~1410px de
+    // separación en desktop: casi tres veces el alto de una card, y con eso el
+    // factor de Traces llega a ~0.63.
+    //
+    // Los dos últimos saltos salieron de pedir más velocidad —+20% y +15%— y
+    // los dos tuvieron que darse acá: el ratio ya no tiene recorrido para
+    // tanto, su rango entero vale unos 0.15 de factor. Ver la nota de
+    // `TRACES_END_RATIO`. El factor de Traces queda en ~0.50, o sea que sube a
+    // vez y media la velocidad de la página contra el 0.10 de Data.
+    //
+    // ⚠️ A esta separación el hueco entre las dos filas es grande al ARRANCAR, y
+    // la sección puede leerse partida en dos bloques antes de que el parallax lo
+    // cierre. Es el techo de composición del que hablaba la nota de más arriba,
+    // y a 57% estamos dentro de él.
+    //
+    // El techo lo pone la composición, no la aritmética: pasado cierto punto
+    // Traces arranca tan abajo que deja un hueco entre las dos filas y la
+    // sección se lee partida antes de que el parallax la cierre.
+    place: "lg:col-start-7 lg:col-span-3 lg:row-start-2 lg:mt-[85%]",
   },
   {
     // Assets — columnas 1-3, fila 3. Pega al borde izquierdo del Container.
     //
-    // El salto más corto de los tres: en el prototipo Assets asoma cuando
-    // Traces todavía está entera en pantalla. Se solapan en vertical y no pasa
-    // nada — viven en columnas opuestas (1-3 contra 7-9) y `driftOffsets` no
-    // acota los pares que no se cruzan en horizontal.
-    place: "lg:col-start-1 lg:col-span-3 lg:row-start-3 lg:-mt-[101%]",
+    // El `mt` era `-101%` y volvió casi ahí después de varias pasadas: `-85%`,
+    // un tirón de ~1410px hacia arriba. Sigue siendo la única con margen
+    // negativo, y la que arranca más alta de las cuatro.
+    //
+    // Se solapa en vertical con Traces y no pasa nada: viven en columnas
+    // opuestas, la 1-3 contra la 7-9, así que no se pisan por más que se
+    // crucen.
+    //
+    // ── Acá el `mt` NO cambia la velocidad ────────────────────────────────
+    //
+    // A diferencia del de Traces, que se despeja de un destino y por eso mover
+    // su margen mueve su factor. Assets tiene el suyo fijo en la tabla
+    // (`PARALLAX[2] = 0.18`), así que esto es composición pura: cambia dónde
+    // arranca y nada más. Las dos cosas se ajustan por separado.
+    place: "lg:col-start-1 lg:col-span-3 lg:row-start-3 lg:-mt-[85%]",
   },
   {
     // Intelligence — columnas 10-12, fila 4. Pega al borde derecho.
     //
-    // Es la ÚLTIMA fila, y eso no es cosmético: el `end` del ScrollTrigger se
-    // calcula con `cards[cards.length - 1]`, o sea con el índice 3 de este
-    // array. Si alguna vez la última fila la ocupa otra card, ese cálculo hay
-    // que mover con ella.
-    place: "lg:col-start-10 lg:col-span-3 lg:row-start-4 lg:-mt-[27%]",
+    // El `mt` fue `-27%` → `-45%` → `-30%` → `-12%` → `+6%` → `+25%`. Cruzó a
+    // POSITIVO en el penúltimo salto: dejó de tirar hacia arriba y ahora empuja
+    // ~415px hacia abajo. Es la tercera con margen positivo, junto a Data y
+    // Traces.
+    //
+    // Arranca la más abajo de todas y de ahí sube a 0.56, así que es la que más
+    // distancia recorre después de Traces — y con solo 0.07 de diferencia entre
+    // las dos, las dos cierran la sección casi al mismo ritmo.
+    //
+    // Su factor sube a la vez, de 0.06 a 0.54 — era la más lenta de las cuatro,
+    // casi pegada a la velocidad de la página, y pasa a ser la segunda más
+    // rápida, justo por detrás de Traces. Las
+    // dos cosas van juntas y no se estorban: acá el `mt` es composición pura y
+    // el factor sale de la tabla, así que se ajustan por separado. (En Traces
+    // no: allá el margen mueve el factor — ver su nota.)
+    place: "lg:col-start-10 lg:col-span-3 lg:row-start-4 lg:mt-[112%]",
   },
 ] as const;
 
-export default function OwnYourOwn() {
 /* ── La entrada del titular ───────────────────────────────────────────────────
  *
  * «Own Your Own» se pega y las cards lo atraviesan. Hasta acá llegaba ya
@@ -401,11 +368,13 @@ const TITLE_IN = {
   stagger: 0.035,
 } as const;
 
+export default function OwnYourOwn() {
+
   const rootRef = useMotionScope<HTMLElement>(({ q, motionOk, isDesktop }) => {
     const cards = q("[data-own-card]");
     const stage = q("[data-own-stage]")[0];
     const title = q("[data-own-title]")[0];
-    if (cards.length !== SPEEDS.length || !stage || !title) return;
+    if (cards.length !== PARALLAX.length || !stage || !title) return;
 
     // Con reduced-motion no se anima nada: el JSX ya renderiza el estado
     // legible, y sin transforms las cards quedan exactamente donde el layout
@@ -474,191 +443,108 @@ const TITLE_IN = {
       markers: DEBUG_MARKERS,
     });
 
-    // ── El desvío lo decide el LAYOUT ──────────────────────────────────────
+    // ── El parallax ────────────────────────────────────────────────────────
     //
-    // Se miden las cajas de las cards sin transform y `driftOffsets` devuelve
-    // cuánto puede desviarse cada una sin que ningún par se acerque a menos de
-    // `MIN_GAP`. Los pares que no se cruzan en horizontal —las cards viven en
-    // dos columnas— no se restringen entre sí: no pueden chocar aunque quieran,
-    // y acotarlas sería desperdiciar recorrido.
+    // Un tween por card, todos con el MISMO trigger y el mismo rango, cada uno
+    // con su factor. La posición de cada card es
     //
-    // Se remide en cada refresh, así que un resize o un cambio de `mt` en
-    // CARD_LAYOUT reajustan la amplitud solos. Ese es el punto: la constante en
-    // `vh` que había antes no podía hacerlo, porque el hueco entre cards escala
-    // con el ANCHO de la ventana y `vh` con el ALTO.
-    let offsets: number[] = cards.map(() => 0);
+    //     y_i(t) = −PARALLAX[i] · rango · t
+    //
+    // o sea velocidad constante y propia durante todo el recorrido: la card
+    // sube `PARALLAX[i]` veces más rápido que la página. Es la definición del
+    // efecto, y el número es directamente lo que se ve.
+    //
+    // ── El rango va de punta a punta ───────────────────────────────────────
+    //
+    // `top bottom` → `bottom top`: desde que el grid asoma por abajo hasta que
+    // termina de salir por arriba. Es el recorrido completo en el que las cards
+    // están en pantalla, y es lo que hace que el factor signifique lo que dice
+    // — con un rango más corto, la card recorre lo mismo en menos scroll y su
+    // velocidad real deja de ser la declarada.
+    //
+    // Ese rango se mide en cada refresh (`invalidateOnRefresh` + `y` como
+    // función), así que un resize o un cambio de alto lo reajustan solos.
+    //
+    // ── `ease: "none"`, y no es negociable ─────────────────────────────────
+    //
+    // Cualquier curva es un perfil temporal COMPARTIDO por las cuatro: las hace
+    // acelerar y frenar a la vez, y eso domina lo que el ojo lee. Se percibe una
+    // respiración de grupo en vez de cuatro velocidades — las cards se separan
+    // sin que se vea a ninguna moverse distinto. Fue el segundo motivo por el
+    // que el efecto no se leía.
+    //
+    // ── El scrub con retardo ───────────────────────────────────────────────
+    //
+    // Número y no `true`. Con `true` las cards son una función pura de la
+    // posición de la página y el efecto se siente rígido: la card no se mueve,
+    // la página la arrastra. Con un número, GSAP persigue el progreso con ese
+    // catch-up en segundos, así que la card queda algo atrás al empezar a
+    // scrollear y sigue acomodándose después de soltar.
+    //
+    // 0.6 y no más: por encima de ~1.5 deja de leerse como inercia y empieza a
+    // leerse como lag, y el sitio ya corre Lenis suavizando por su lado.
+    // El recorrido: desde que el grid asoma por abajo hasta que sale por
+    // arriba. Es el mismo para las cuatro y se remide en cada refresh.
+    const range = () => stage.offsetHeight + window.innerHeight;
 
-    const measure = () => {
-      // A cero antes de medir: `getBoundingClientRect` devuelve la caja YA
-      // transformada, y medir sobre el desvío vigente lo realimentaría.
-      gsap.set(cards, { y: 0 });
-      const boxes = cards.map((card) => {
-        const r = card.getBoundingClientRect();
-        return {
-          top: r.top + window.scrollY,
-          bottom: r.bottom + window.scrollY,
-          left: r.left,
-          right: r.right,
-        };
-      });
-      offsets = driftOffsets(boxes, SPEEDS, { k: DRIFT_K, minGap: MIN_GAP });
+    /** El top de layout de una card, sin el transform vigente. */
+    const layoutTop = (card: HTMLElement) =>
+      card.getBoundingClientRect().top - Number(gsap.getProperty(card, "y"));
 
-      // ── Reservar el sobrante del desvío ────────────────────────────────
-      //
-      // El desvío es un `transform`, y un transform NO ocupa lugar en el flujo:
-      // el grid sigue midiendo lo que las cards ocupan en su posición de
-      // layout. Una card con desvío POSITIVO baja fuera de esa caja, se sale de
-      // la sección y aterriza encima de la siguiente — que entra a sangre y en
-      // negro, así que se ve.
-      //
-      // Con desvíos chicos el `pb` del Container lo absorbía por casualidad. No
-      // es una constante que se pueda elegir: el desvío escala con el paso del
-      // layout y con `DRIFT_K`, así que cualquier número fijo se queda corto en
-      // cuanto se toca uno de los dos. Acá se calcula de lo ya medido.
-      //
-      // Va como padding del grid y no como margen de la sección para que no
-      // toque el área de filas: el título sticky abarca `grid-row: 1/-1` y su
-      // recorrido se mide contra el content box, que el padding no mueve.
-      stage.style.paddingBottom = "0px";
-      const stageBottom = stage.getBoundingClientRect().bottom + window.scrollY;
-      let overflow = 0;
-      for (let i = 0; i < boxes.length; i++) {
-        overflow = Math.max(
-          overflow,
-          boxes[i].bottom + offsets[i] - stageBottom,
-        );
-      }
-      stage.style.paddingBottom = `${Math.ceil(overflow)}px`;
-      // Cuánto dura pegado el encabezado: hoy es el `mb-[800px]` fijo del
-      // propio JSX (ver el comentario ahí), no algo que este efecto mida —
-      // el encabezado vive en el mismo grid que el título, con el mismo
-      // mecanismo de sticky-por-grid-row, así que no necesita una pista
-      // propia cuya altura haya que calcular en JS.
+    /**
+     * El factor de Traces, despejado del objetivo en vez de elegido.
+     *
+     * Queremos que al final del recorrido
+     *
+     *     (topT − fT·R) − (topD − fD·R) = TRACES_END_RATIO · altoDeData
+     *
+     * o sea que Traces quede solapada un 40% sobre Data sin llegar a pasarla.
+     * Despejando:
+     *
+     *     fT = fD + [ (topT − topD) − ratio·altoDeData ] / R
+     *
+     * Se evalúa en cada refresh, así que el objetivo se cumple en cualquier
+     * viewport — que es el punto: con un factor fijo, la misma tabla deja a las
+     * dos cards lejos en una pantalla y las cruza en otra.
+     */
+    const tracesFactor = () => {
+      const data = cards[0];
+      const gap = layoutTop(cards[TRACES]) - layoutTop(data);
+      const target = TRACES_END_RATIO * data.getBoundingClientRect().height;
+      return PARALLAX[0] + (gap - target) / range();
     };
 
-    measure();
+    const factorFor = (i: number) =>
+      i === TRACES ? tracesFactor() : PARALLAX[i];
 
-    // ── El start ────────────────────────────────────────────────────────
-    // `top bottom` = en cuanto el grid asoma por abajo. Con `top top`, que es
-    // lo que había, la coreografía no empezaba hasta que el grid tocaba el
-    // techo de la ventana: quedaban ~850px de scroll con las cards ya en
-    // pantalla y completamente quietas, y al cruzar ese umbral el desvío
-    // pasaba de 0 a su velocidad máxima de un frame al otro. Ese era el tirón.
-    //
-    // ── El end ──────────────────────────────────────────────────────────
-    // La regla: el scrub termina exactamente cuando el borde VISUAL superior
-    // de la última card (Traces) — layout + transform — alcanza el borde
-    // inferior del título pegado. Ahí las cards se congelan en su desvío
-    // final y el scroll normal se lleva todo; el `sine.inOut` ya pone la
-    // velocidad del desvío en cero en ese borde, así que la salida del
-    // scroll lock es una rampa, no un corte.
-    //
-    // La cuenta cierra sola sea cual sea la velocidad o la posición de
-    // partida, y no es iterativa: en el frame final la curva vale 1 por
-    // definición, o sea que el desvío es exactamente el de `offsets` completo.
-    // Basta con resolver
-    //     layoutTop(Traces) − scroll + drift = titleBottom
-    // para el scroll del end. Que el cruce cae justo ahí (y no antes) está
-    // garantizado porque el top visual de la card baja monótonamente en
-    // viewport mientras el scrub avanza.
-    //
-    // ── La curva ────────────────────────────────────────────────────────
-    // Un solo tramo, sin vuelta: las rápidas se mantienen rápidas y la lenta
-    // lenta durante todo el recorrido. `sine.inOut` pone la velocidad del
-    // desvío en cero en los dos bordes — la entrada suave es el "asentarse"
-    // del título en su sticky, y la salida suave evita el corte en seco al
-    // terminar la sección aunque las cards queden desplazadas.
-    //
-    // Y además concentra: la velocidad pico del desvío es pi/2 veces la media,
-    // y cae en el medio del scrub, que es donde las cards están centradas en
-    // pantalla. Una curva lineal repartiría el mismo desvío parejo y el
-    // destiempo se notaría MENOS justo donde se mira. No cambiarla por `none`
-    // buscando "más movimiento": da lo contrario, además del corte en seco.
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: stage,
-        start: "top bottom",
-        end: () => {
-          const agents = cards[cards.length - 1];
-          // Top de layout en coordenadas de documento. Se resta el transform
-          // vigente por si el refresh corre con el tween a medio aplicar.
-          const layoutTop =
-            agents.getBoundingClientRect().top +
-            window.scrollY -
-            Number(gsap.getProperty(agents, "y"));
-          const titleBottom =
-            parseFloat(getComputedStyle(title).top) + title.offsetHeight;
-          return layoutTop + offsets[cards.length - 1] - titleBottom;
-        },
-        // Número y no `true`: `scrub: true` ata el desvío al scroll 1:1, o sea
-        // que las cards son una función pura de la posición de la página y el
-        // efecto se siente rígido — la card no se mueve, la página la arrastra.
-        //
-        // Con un número, GSAP persigue el progreso del scroll con ese tiempo de
-        // catch-up en segundos. La card queda ligeramente atrás al empezar a
-        // scrollear y sigue acomodándose ~0.8s después de soltar, que es de
-        // donde sale la sensación de peso y de que responde. Es la parte
-        // "interactiva" del efecto; la diferencia de velocidades sola no la da.
-        //
-        // 0.8 y no más: por encima de ~1.5 el retraso deja de leerse como
-        // inercia y empieza a leerse como lag. El sitio ya corre Lenis, que
-        // suaviza el scroll por su lado, así que los dos se suman.
-        scrub: 0.8,
-        invalidateOnRefresh: true,
-        markers: DEBUG_MARKERS,
-        // Remedir ANTES del refresh, no después: el `end` de acá arriba y el `y`
-        // del tween son funciones que GSAP re-evalúa durante el refresh, y las
-        // dos leen `offsets`. `refreshInit` es el único hook que corre antes de
-        // esa re-evaluación.
-        onRefreshInit: measure,
-        // `will-change` solo durante el recorrido. Estas cards llevan además
-        // `backdrop-blur`, que ya fuerza su propia capa: fijo en el className,
-        // eran cuatro capas con filtro vivas durante toda la sesión para una
-        // animación que ocupa dos pantallas de scroll.
-        onToggle: (st) => {
-          const value = st.isActive ? "transform" : "auto";
-          for (const card of cards) card.style.willChange = value;
-        },
-      },
-    });
-
-    // ── Un tween POR CARD, y ése es el punto ───────────────────────────────
-    //
-    // Esto era un solo `fromTo` sobre las cuatro, con una `duration` y una
-    // `ease` compartidas. Y ahí estaba el fallo que hacía que las cuatro se
-    // vieran moverse igual, por más que sus desvíos fueran distintos:
-    //
-    //     y_i(t) = offsets[i] · e(t)
-    //
-    // Con la misma `e(t)` para todas, sus posiciones son PROPORCIONALES entre
-    // sí en todo momento. Aceleran juntas, frenan juntas y llegan juntas: lo
-    // único que cambia es cuánto recorre cada una. Eso no se lee como cuatro
-    // velocidades, se lee como un grupo que se estira — nunca hay una corriendo
-    // mientras otra va despacio, que es lo que uno espera ver.
-    //
-    // La amplitud no podía arreglarlo. `offsets` reparte DISTANCIA; lo que
-    // faltaba era repartir TIEMPO.
-    //
-    // Ahora cada card recorre su desvío en su propia fracción del scrub, todas
-    // arrancando en 0. La que tiene `0.55` llega a destino a mitad de recorrido
-    // y se queda quieta mientras la de `1.0` sigue viajando: ahí sí hay una
-    // rápida y una lenta, y el destiempo se lee entre las cuatro.
-    //
-    // Todas ≤ 1 para que ninguna quede a medio camino cuando el scrub termina.
-    //
-    // `y` como función y no como array: GSAP la re-evalúa en cada
-    // `invalidateOnRefresh`, así que lee el `offsets` recién medido.
-    cards.forEach((card, i) => {
-      tl.fromTo(
+    const parallax = cards.map((card, i) =>
+      gsap.fromTo(
         card,
         { y: 0 },
-        { y: () => offsets[i], ease: "sine.inOut", duration: TRAVEL_TIME[i] },
-        // Todas en la posición 0 del timeline: lo que las separa es cuánto
-        // TARDAN, no cuándo empiezan. Escalonar los arranques dejaría cards
-        // quietas durante el primer tramo, que se lee como que no participan.
-        0,
-      );
-    });
+        {
+          // El signo: negativo sube. Las cuatro suben — ver la nota de
+          // `PARALLAX` para por qué ninguna baja.
+          y: () => -factorFor(i) * range(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: stage,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+            markers: DEBUG_MARKERS,
+            // `will-change` solo durante el recorrido. Estas cards llevan
+            // además `backdrop-blur`, que ya fuerza su propia capa: fijo en el
+            // className eran cuatro capas con filtro vivas toda la sesión para
+            // una animación que ocupa dos pantallas de scroll.
+            onToggle: (st) => {
+              card.style.willChange = st.isActive ? "transform" : "auto";
+            },
+          },
+        },
+      ),
+    );
+
 
     return () => {
       titleReset.kill();
@@ -668,13 +554,12 @@ const TITLE_IN = {
       // Sin revertir, el segundo mount —StrictMode lo hace en cada uno de dev—
       // splitea sobre spans ya splitteados y multiplica el árbol.
       titleSplit.revert();
-      gsap.killTweensOf(cards);
+      for (const tween of parallax) {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      }
       gsap.set(cards, { clearProps: "transform" });
       for (const card of cards) card.style.willChange = "auto";
-      // La reserva de `measure` es un estilo inline, así que sobrevive al
-      // desmontaje del efecto: sin esto, un cambio de breakpoint a mobile deja
-      // el hueco de una animación que ya no corre.
-      stage.style.paddingBottom = "";
     };
   });
 
