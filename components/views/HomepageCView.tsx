@@ -5,7 +5,6 @@ import StackAnchors from "@/components/sections/homepage-shared/StackAnchors";
 import ProofLedger from "@/components/sections/homepage-tuck/ProofLedger";
 import BelongsNewsletter from "@/components/sections/homepage-shared/BelongsNewsletter";
 import TestimonialDeck from "@/components/sections/homepage-tuck/TestimonialDeck";
-import GetIntoNear from "@/components/sections/homepage-tuck/GetIntoNear";
 import CustomerStories from "@/components/sections/homepage-shared/CustomerStories";
 import UpdatesList from "@/components/sections/homepage-shared/UpdatesList";
 
@@ -66,11 +65,13 @@ export default function HomepageCView() {
           del mazo y la cita gigante de la izquierda son la misma persona — el
           porqué está en el componente. */}
       <TestimonialDeck />
-      {/* Y el cierre: las tres puertas de entrada. Va inmediatamente después
-          del mazo porque es la contrapartida — ahí hablan otros, acá se le
-          pide algo al visitante, y entre las dos cosas no debería haber nada.
-          Vuelve al cream después del único tramo oscuro del final. */}
-      <GetIntoNear />
+      {/* Oculta: `GetIntoNear` — "Get into NEAR", las tres puertas de entrada
+          (Trade / Integrate / Build) en renglones con la barra de degradado.
+          El componente y su copy siguen en el árbol, sin montar en ninguna
+          ruta. Para traerla de vuelta: importar
+          `@/components/sections/homepage-tuck/GetIntoNear` y montarla acá,
+          inmediatamente después del mazo — ahí hablan otros, acá se le pide
+          algo al visitante, y entre las dos cosas no debería haber nada. */}
       {/* Oculta: `LatestUpdates` — "The latest from NEAR", las tres cards de
           blog. Sale de esta ruta y sigue montada en `HomepageAView`. Para
           traerla de vuelta: importar
