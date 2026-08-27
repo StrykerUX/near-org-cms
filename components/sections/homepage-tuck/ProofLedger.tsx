@@ -41,19 +41,29 @@ import {
 // pierde. Contra un eje, lo único que varía es cuánto se extiende cada cifra
 // hacia la izquierda, que es exactamente lo que un balance quiere mostrar.
 //
-// ── La cifra ocupa dos renglones ────────────────────────────────────────────
+// ── La cifra es UNA línea ───────────────────────────────────────────────────
 //
-// Arriba el numeral en sans con lo que lo califica pegado a su derecha
-// («100 %», «1.0 million», «$24 +»); abajo, en serif itálica y terminando en el
-// mismo eje, la palabra que dice qué se contó («uptime», «TPS», «billion»).
+// Numeral, signo y palabra sobre la misma base y terminando en el mismo eje:
+// «100 % uptime», «1.0 Million TPS», «$24 + Billion». Todo en sans, todo del
+// mismo color, y lo que sigue al numeral a 0.575 de su cuerpo.
 //
-// Es el mismo par que la versión anterior tenía en UNA línea, partido en dos. Y
-// el cambio no es de acomodo: en una sola línea la cifra crecía hacia la
-// derecha hasta chocar con el cuerpo, así que el numeral tenía que achicarse
-// para que entrara la glosa. Apiladas, las dos pueden ser grandes.
+// ── Estuvo en dos renglones, y volvió ─────────────────────────────────────
 //
-// El reparto entre los dos renglones NO sale de la copy tal cual — la prueba de
-// TPS lo parte distinto. Está explicado en `FIGURE_SPLIT`, abajo.
+// Vale saber por qué, porque el intento anterior era razonable: en una línea la
+// cifra crecía hacia la derecha hasta chocar con el cuerpo, así que el numeral
+// tenía que achicarse para que entrara la palabra; apiladas, las dos podían ser
+// grandes. Lo que ese razonamiento daba por sentado es que el numeral TENÍA que
+// ser grande.
+//
+// El artboard dice que no. Con el numeral a 8cqw en vez de 12.5 la frase entera
+// entra en el 49%, y lo que se gana es más que lo que se pierde: seis renglones
+// de una línea se leen como una tabla —el ojo baja por el eje y compara—
+// mientras que seis bloques de dos líneas se leen como seis fichas. La
+// comparación entre pruebas es todo lo que esta sección hace.
+//
+// Con eso desapareció también el reparto por `id` que la prueba de TPS
+// necesitaba para partir «million TPS» entre los dos renglones: en una línea la
+// copy se usa tal cual sale del módulo.
 //
 // ── El rótulo pasó a ser píldora, y cambió de dueño ────────────────────────
 //
@@ -71,14 +81,14 @@ import {
 //
 // Con el asiento de dos columnas esa separación dejó de hacer falta. Una prueba
 // sin cifra entra sin disfrazarse: pone una palabra donde las otras ponen un
-// número, al cuerpo que le corresponde —la mitad, ver el `text-[0.52em]`— y el
-// punteado la separa igual que a todas. Que las seis compartan eje es lo que
+// número, casi al mismo cuerpo —ver el `em` de su `data-gloss`— y el punteado
+// la separa igual que a todas. Que las seis compartan eje es lo que
 // las hace una sola serie.
 //
 // ── La proporción es el diseño, y por eso todo mide en `cqw` ───────────────
 //
 // El artboard fija relaciones, no píxeles: el eje al 49% del bloque, la cifra
-// a 14cqw, la glosa a un tercio de la cifra. Escritas en `vw` esas relaciones
+// a 8cqw, lo que la sigue a 0.575 de la cifra. Escritas en `vw` esas relaciones
 // aguantan hasta que el `Container` topa en su `max-width` (1780px) y el texto
 // sigue creciendo — de ahí para arriba el renglón se descompone.
 //
@@ -120,8 +130,8 @@ import {
  *      un renglón que se arma. El signo va acá y no con la glosa porque
  *      pertenece al número —"100 por ciento", "24 más"— y no a lo que se
  *      cuenta;
- *   3. al 70% de la cuenta se escribe la GLOSA: la palabra en itálica que dice
- *      qué se estuvo contando. La cifra sube sin nombre y la palabra la cierra;
+ *   3. al 70% de la cuenta se escribe la GLOSA: la palabra que dice qué se
+ *      estuvo contando. La cifra sube sin nombre y la palabra la cierra;
  *   4. y al 85%, el CUERPO de la derecha, renglón por renglón.
  *
  * Los dos últimos caen dentro del último tercio de la cuenta a propósito. Ahí
@@ -477,20 +487,23 @@ export default function ProofLedger() {
                 body={note.body}
                 figure={
                   // Sin cifra, la palabra ocupa su lugar — y por eso hereda su
-                  // escala en vez de tener una propia. `text-[0.52em]` es
-                  // relativo al `text-ledger` del padre, así que el día que el
-                  // numeral cambie de tamaño estas dos se mueven con él: la
-                  // proporción entre una cifra y una cualidad no puede quedar
-                  // escrita en dos lugares.
+                  // escala en vez de tener una propia. El `em` es relativo al
+                  // `text-ledger` del padre, así que el día que el numeral
+                  // cambie de tamaño estas dos se mueven con él: la proporción
+                  // entre una cifra y una cualidad no puede quedar escrita en
+                  // dos lugares.
                   //
-                  // Y es 0.56 y no 1 porque «Quantum-ready» tiene trece
-                  // caracteres: al cuerpo del numeral se sale del eje y se
-                  // comería la columna del cuerpo.
+                  // 0.9 y no 1 porque «Quantum-ready» tiene trece caracteres:
+                  // al cuerpo exacto del numeral se sale del eje. Era 0.56
+                  // cuando el numeral medía 12.5cqw y ocupaba dos renglones;
+                  // con el numeral en 8cqw y el renglón en una línea, la
+                  // cualidad puede ir casi a la par — que es como se lee en el
+                  // artboard, donde «Quantum-ready» pesa lo mismo que «30».
                   <p
                     data-figure
                     className="text-ledger flex flex-col items-start lg:items-end"
                   >
-                    <span data-gloss className="text-[0.56em]">
+                    <span data-gloss className="text-[0.9em]">
                       {note.gloss}
                     </span>
                   </p>
@@ -543,11 +556,10 @@ function Rule() {
  *
  * ── El aire vertical es `items-center` ──────────────────────────────────────
  *
- * La columna de la izquierda mide dos renglones de titular; la derecha, una
- * píldora y dos líneas de cuerpo. Centrarlas es lo que hace que el asiento se
- * lea como una unidad en vez de como dos bloques que empiezan juntos y terminan
- * cuando pueden. Alineadas arriba, la píldora queda flotando contra el tope del
- * numeral y debajo del cuerpo se abre un hueco del alto de la glosa.
+ * La columna de la izquierda mide UN renglón de titular; la derecha, una
+ * píldora y dos líneas de cuerpo, o sea más alto. Centrarlas es lo que hace que
+ * el asiento se lea como una unidad: alineadas arriba, la cifra queda colgando
+ * del borde y debajo de ella se abre un hueco del alto del párrafo.
  */
 function RegisterRow({
   figure,
@@ -564,7 +576,12 @@ function RegisterRow({
     <article
       data-row
       // `relative` para el filete, que es un hijo absoluto y no un borde.
-      className="relative grid gap-7 py-12 lg:grid-cols-[minmax(0,49%)_minmax(0,1fr)] lg:items-center lg:gap-x-[5.8%] lg:py-[3.4cqw]"
+      // El `py` subió de 3.4 a 5.6cqw cuando la cifra pasó a una sola línea.
+      // No es más aire: es EL MISMO paso entre filetes que antes daban el
+      // padding más el segundo renglón. El artboard pone las punteadas cada
+      // ~19.5cqw, y con el renglón midiendo 8, lo que queda para repartir arriba
+      // y abajo son esos 5.6 — bajarlo apretaría la serie contra sí misma.
+      className="relative grid gap-7 py-12 lg:grid-cols-[minmax(0,49%)_minmax(0,1fr)] lg:items-center lg:gap-x-[5.8%] lg:py-[5.6cqw]"
     >
       {first ? null : <Rule />}
 
@@ -587,7 +604,17 @@ function RegisterRow({
           {eyebrow}
         </p>
 
-        <p data-body className="text-body-sm max-w-[64ch] text-ink-soft text-pretty">
+        {/* El `mb` no es aire suelto: el asiento va `items-center`, así que un
+            margen abajo del párrafo SUBE el bloque entero contra la cifra. Es
+            lo que hace el artboard — la píldora arranca un poco por encima del
+            tope del numeral en vez de quedar clavada a su mitad.
+
+            En `cqw` como todo lo demás de la sección, para que se mueva con el
+            bloque y no con el viewport. */}
+        <p
+          data-body
+          className="text-body-sm mb-2 max-w-[64ch] text-ink-soft text-pretty lg:mb-[0.7cqw]"
+        >
           {body}
         </p>
       </div>
@@ -595,32 +622,7 @@ function RegisterRow({
   );
 }
 
-/**
- * Cómo se reparte el texto de la cifra entre sus dos renglones.
- *
- * El asiento pone la cifra arriba —numeral en sans, con lo que la califica
- * pegado a su derecha— y la glosa abajo, en serif itálica. Para cinco de las
- * seis pruebas ese reparto ya está en la copy: `unit` arriba, `gloss` abajo.
- *
- * La de TPS es la excepción. Su `unit` está vacío y su `gloss` es «million
- * TPS», que es una sola cadena con dos trabajos: «million» es la MAGNITUD y va
- * pegada al 1.0, «TPS» es la unidad y va en el renglón de abajo. Partirla en el
- * módulo de copy cambiaría el dato para las otras siete versiones que lo leen
- * —las cinco de `closing-labs`, la viva de `homepage-b`— por una decisión que
- * es de ESTE layout.
- *
- * Por eso el reparto vive acá, indexado por `id`, y con caída al reparto por
- * defecto. Es un `Record<string, …>` y no un tipo cerrado porque `LedgerRow.id`
- * es `string`: una entrada que quede huérfana tras un rename no rompe nada, el
- * renglón simplemente vuelve al reparto de la copy.
- */
-const FIGURE_SPLIT: Record<string, { lead: string; gloss: string }> = {
-  tps: { lead: "million", gloss: "TPS" },
-};
-
 function FigureLine({ row, first }: { row: LedgerRow; first: boolean }) {
-  const split = FIGURE_SPLIT[row.id] ?? { lead: row.unit, gloss: row.gloss };
-
   return (
     <RegisterRow
       first={first}
@@ -629,68 +631,49 @@ function FigureLine({ row, first }: { row: LedgerRow; first: boolean }) {
       figure={
         <p
           data-figure
-          className="flex flex-col items-start lg:items-end lg:text-right"
+          // `items-baseline`: el numeral y lo que lo sigue comparten la línea de
+          // base, no la caja. Con `items-center` o `items-end` el `%` y la
+          // palabra —que miden 0.575 del numeral— quedan flotando a media altura
+          // o colgando por debajo de los dígitos; sobre la base se leen como una
+          // sola frase, que es lo que son.
+          //
+          // `flex-wrap` es la red: «$24 + Billion» al cuerpo del numeral entra
+          // justo en el 49%, y una fuente de respaldo un poco más ancha lo
+          // desbordaría. Envuelto se ve apretado; sin envolver, roto.
+          className="text-ledger flex flex-wrap items-baseline gap-x-[0.22em] lg:justify-end lg:text-right"
         >
-          {/* `items-start` y no una línea de base compartida: en el diseño lo
-              que califica a la cifra NO se apoya en su base, va alto. El `pt`
-              está en `em` de su propio cuerpo, así que se mueve con la escala en
-              vez de quedarse fijo en un tamaño de pantalla. */}
-          <span className="text-ledger flex items-start">
-            <span
-              // `data-count` lleva el VALOR y no es una bandera: es a la vez el
-              // selector que encuentra el motor y el destino de la cuenta.
-              //
-              // Los tres datos viajan en el DOM y no en un closure, y eso es lo
-              // que deja que el motor de la entrada sea UNO para los seis
-              // renglones: recorre `[data-row]` sin saber nada de la copy, y
-              // cada renglón le dice desde su propio markup hasta dónde contar
-              // y cómo escribirlo.
-              data-count={row.value}
-              data-decimals={row.decimals}
-              data-prefix={row.prefix ?? ""}
-            >
-              {formatLedgerValue(row)}
-            </span>
-
-            {split.lead ? (
-              // El signo mide en `em` DEL NUMERAL y no con el token de la
-              // glosa, aunque antes lo compartieran. Es el cambio que trajo la
-              // composición en dos renglones: acá el signo se quedó pegado a la
-              // cifra y la palabra en itálica se fue abajo, así que dejaron de
-              // ser dos mitades del mismo gesto. Lo que el signo tiene que
-              // hacer ahora es escalar con el número al que califica —«100 por
-              // ciento», «24 más»—, y eso es exactamente lo que `em` hace y un
-              // token propio no puede.
-              //
-              // El `pt` en `em` de su propio cuerpo lo baja hasta que su altura
-              // de mayúscula queda cerca del tope del numeral: apoyado en la
-              // línea de base se leería como una unidad de medida, y alto se lee
-              // como lo que es, un exponente del número.
-              <span data-unit className="ml-[0.11em] pt-[0.1em] text-[0.42em]">
-                {split.lead}
-              </span>
-            ) : null}
+          <span
+            // `data-count` lleva el VALOR y no es una bandera: es a la vez el
+            // selector que encuentra el motor y el destino de la cuenta.
+            //
+            // Los tres datos viajan en el DOM y no en un closure, y eso es lo
+            // que deja que el motor de la entrada sea UNO para los seis
+            // renglones: recorre `[data-row]` sin saber nada de la copy, y cada
+            // renglón le dice desde su propio markup hasta dónde contar y cómo
+            // escribirlo.
+            data-count={row.value}
+            data-decimals={row.decimals}
+            data-prefix={row.prefix ?? ""}
+          >
+            {formatLedgerValue(row)}
           </span>
 
-          {/* La glosa cuelga del renglón de la cifra y termina en el MISMO eje.
-              Es lo que hace que el bloque se lea como una sola pieza de dos
-              renglones y no como una palabra puesta debajo de un número.
+          {/* El signo y la palabra: dos elementos porque entran en tiempos
+              distintos —el signo con la cuenta, la palabra al 70% de ella— pero
+              UN solo cuerpo, `text-gloss`, porque en la línea son un solo gesto.
 
-              El margen va en `em` de la propia glosa, así que se mueve con la
-              escala en vez de descuadrarse a otro tamaño.
+              Fueron dos tamaños mientras la composición tuvo dos renglones: el
+              signo medía en `em` del numeral y se quedaba pegado a él, la
+              palabra se iba abajo en serif. Con todo en una línea esa distinción
+              no tiene dónde apoyarse. */}
+          {row.unit ? (
+            <span data-unit className="text-gloss">
+              {row.unit}
+            </span>
+          ) : null}
 
-              Fue NEGATIVO y pasó a positivo, y el motivo es que estaba
-              corrigiendo el síntoma equivocado. El numeral lleva interlineado
-              0.86, o sea que su caja de línea es MÁS CORTA que el dibujo de los
-              dígitos: la caja termina por encima de donde terminan los trazos.
-              Con la glosa además subida un quinto de em, los ascendentes de
-              «blockchains» se le montaban al cero — «billion», que no tiene
-              tantos, apenas rozaba.
-
-              Lo que hace falta es lo contrario: bajar la itálica hasta que
-              despeje el dibujo del numeral, no la caja que lo declara. */}
-          <span data-gloss className="gloss-serif mt-[0.3em]">
-            {split.gloss}
+          <span data-gloss className="text-gloss">
+            {row.gloss}
           </span>
         </p>
       }

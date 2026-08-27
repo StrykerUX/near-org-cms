@@ -7,8 +7,9 @@
 // texto: allá cada prueba se guarda como `value` + `accent`, dos tramos cuyo
 // corte es óptico ("Confi" + "dential") y existe para pintar el segundo en
 // verde. Acá la cifra se descompone en tres piezas con roles distintos
-// —numeral, signo y glosa— porque el renglón las trata distinto: el numeral es
-// la estructura, el signo va alto y chico, la glosa va alta y en serif.
+// —numeral, signo y glosa— porque el renglón las trata distinto: el numeral
+// es la estructura y lo que sigue va a poco más de la mitad de su cuerpo, y
+// además cada pieza entra en su propio tiempo.
 //
 // Importar `PROOF_STATS` y re-partir sus tramos acá acoplaría dos secciones por
 // una posición de carácter: cambiar "1 Million " por "1 million " en la que
@@ -49,7 +50,14 @@ export type LedgerRow = {
   prefix?: string;
   /** El signo que la califica. Cadena vacía cuando la cifra no lleva ninguno. */
   unit: string;
-  /** La palabra en serif itálica que cierra la cifra. */
+  /**
+   * La palabra que cierra la cifra, en el MISMO renglón y sobre la misma base:
+   * «uptime», «Million TPS», «Billion», «Blockchains».
+   *
+   * Va capitalizada donde nombra una magnitud —Million, Billion— y en minúscula
+   * donde nombra la medida («uptime»). No es inconsistencia: es la diferencia
+   * entre la escala del número y lo que se contó.
+   */
   gloss: string;
   body: string;
 };
@@ -102,7 +110,7 @@ export const LEDGER_ROWS: readonly LedgerRow[] = [
     value: 1,
     decimals: 1,
     unit: "",
-    gloss: "million TPS",
+    gloss: "Million TPS",
     body: "NEAR's architecture handles over a million transactions per second on consumer-grade hardware and scales automatically through dynamic resharding.",
   },
   {
@@ -112,7 +120,7 @@ export const LEDGER_ROWS: readonly LedgerRow[] = [
     decimals: 0,
     prefix: "$",
     unit: "+",
-    gloss: "billion",
+    gloss: "Billion",
     body: "More than $24 billion in cross-chain volume has settled through NEAR Intents. Swaps clear in seconds for less than a cent, with no manual bridging required.",
   },
   {
@@ -121,7 +129,7 @@ export const LEDGER_ROWS: readonly LedgerRow[] = [
     value: 30,
     decimals: 0,
     unit: "+",
-    gloss: "blockchains",
+    gloss: "Blockchains",
     body: "A single integration reaches Bitcoin, Ethereum, Solana, and more than thirty other chains. Transactions execute natively, so users never hold a wrapped asset.",
   },
 ];

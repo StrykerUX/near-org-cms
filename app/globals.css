@@ -554,41 +554,51 @@
 
      Peso 400 y no 500: Montreal Book es en realidad un 350 declarado como 400
      (ver lib/fonts.ts), y a 150px+ es el trazo del artboard. Con 500 el numeral
-     engorda y deja de ser una cifra para volverse un titular. */
-  --text-ledger: clamp(2.25rem, 12.5cqw, 13.5rem);
-  --text-ledger--line-height: 0.86;
+     engorda y deja de ser una cifra para volverse un titular.
+
+     ── 12.5 → 8, y por qué es tanto ──────────────────────────────────────
+
+     El renglón dejó de ocupar DOS líneas y pasó a una: numeral y palabra sobre
+     la misma base, terminando en el mismo eje. Ese cambio le quita al numeral
+     la mitad del ancho del asiento —«$24 + Billion» tiene que entrar entero en
+     el 49%—, así que el cuerpo que sostenía la composición apilada acá desborda
+     la columna.
+
+     8cqw es la medida del artboard: la cifra ocupa ~7.9% del ancho del bloque.
+     Y el interlineado sube de 0.86 a 1 por lo mismo — 0.86 existía para juntar
+     dos renglones, y con uno solo lo único que hacía era cortar la caja por
+     encima del dibujo de los dígitos. */
+  --text-ledger: clamp(1.75rem, 8cqw, 8.3rem);
+  --text-ledger--line-height: 1;
   --text-ledger--letter-spacing: -0.035em;
   --text-ledger--font-weight: 400;
 
-  /* La palabra en serif itálica que cierra la cifra: `uptime`, `TPS`,
-     `billion`, `blockchains`. Va en su propio renglón, debajo del numeral y
-     terminando en el mismo eje.
+  /* Lo que sigue al numeral en el mismo renglón y sobre la misma base: el signo
+     («%», «+») y la palabra («uptime», «Million TPS», «Billion»).
 
-     Antes este token servía a DOS roles —el signo en sans y la palabra en
-     serif, los dos al mismo cuerpo— porque los dos iban en la misma línea,
-     altos, a la derecha de la cifra. Con la composición en dos renglones el
-     signo se quedó pegado al número y pasó a medir en `em` del numeral (ver
-     ProofLedger); acá quedó solo la palabra.
+     ── Volvió a ser UN token para los dos, y en sans ─────────────────────
+
+     Es el estado en el que nació, y el rodeo tiene una moraleja. Mientras la
+     composición fue de dos renglones, el signo se quedó pegado al número y pasó
+     a medir en `em` del numeral, mientras la palabra se iba abajo en serif
+     itálica: dejaron de ser un gesto y este token quedó sirviendo a uno solo.
+     Con el renglón otra vez en una línea vuelven a ser lo mismo —«100 % uptime»
+     se lee de un tirón— y vuelven a medir igual.
+
+     Y en sans: la itálica servía para separar la palabra del número cuando
+     estaban en renglones distintos. En la misma línea esa separación ya la hace
+     el cuerpo, y la serif solo mete una segunda voz donde el artboard tiene una.
 
      La relación con el numeral es lo que hay que mirar, y no el número suelto:
-     4.4 sobre 12.5 es 0.35, exactamente la proporción que sostenía la versión
-     anterior de esta sección (5.97 sobre 17). El renglón se achicó entero; el
-     reparto entre la cifra y lo que la califica volvió a donde estaba.
-
-     Si algún día vuelve a moverse el numeral, esta es la primera que hay que
-     mirar: la relación entre las dos es lo que sostiene el renglón, y solo una
-     de las dos está escrita acá.
-
-     Lo usa una sola clase, `gloss-serif`, y una sola sección. Si algún día lo
-     toma otra, conviene mirar antes si lo que necesita es esta proporción o
-     solo un tamaño parecido: el valor no significa nada fuera de su relación
-     con `--text-ledger`.
+     4.6 sobre 8 es 0.575, que es lo que mide el artboard. Si algún día vuelve a
+     moverse el numeral, esta es la primera que hay que mirar — la proporción
+     entre las dos es lo que sostiene el renglón, y solo una está escrita acá.
 
      NO se llama `--text-ledger-gloss`. Dos tokens que comparten prefijo hacen
      que Tailwind genere el corto y descarte el largo en silencio — está
      documentado arriba, en `--text-poster` / `--text-kicker-xl`, y cuesta una
      tarde encontrarlo. */
-  --text-gloss: clamp(1.25rem, 4.4cqw, 4.6rem);
+  --text-gloss: clamp(1.05rem, 4.6cqw, 4.8rem);
   --text-gloss--line-height: 1;
   --text-gloss--letter-spacing: -0.02em;
   --text-gloss--font-weight: 400;
@@ -713,27 +723,6 @@
   font-weight: var(--text-serif--font-weight);
 }
 
-/* La glosa serif del ledger: la palabra en itálica que sigue al numeral
-   ("uptime", "billion", "blockchains") y, en el par de cierre, el titular que
-   ocupa el lugar del numeral porque esas dos pruebas no tienen cifra.
-
-   Empaqueta familia + escala como el resto de las escalas serif, y toma su
-   font-size de `--text-gloss`, que es el MISMO token que usa el signo en sans.
-   Los dos tienen que medir igual: en el artboard el `%` y `uptime` son un solo
-   gesto a dos familias, no dos tamaños.
-
-   Se llama `gloss-serif` y no `text-gloss-serif` por la colisión de prefijos
-   que ya documenta `serif-poster`: una utility que arranca igual que un token
-   de la escala compite con él y pierde. */
-@utility gloss-serif {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: var(--text-gloss);
-  line-height: var(--text-gloss--line-height);
-  letter-spacing: var(--text-serif--letter-spacing);
-  font-weight: var(--text-serif--font-weight);
-}
-
 /* El verbo del índice de capacidades: «Last», «Scale», «Connect» en
    `homepage-tuck/ProofRoster`. Kepler ITÁLICA del master Display, a cuerpo
    de h1.
@@ -751,7 +740,7 @@
      real (`KeplerStd-CnItDisp`), y la diferencia se ve a este tamaño: la `a`
      itálica de Kepler es de una sola panza y la romana inclinada por el
      navegador, de dos. Es el mismo criterio que documenta lib/fonts.ts para
-     `accent-display` y `gloss-serif`.
+     `accent-display`.
 
    ── Sobre el peso ──────────────────────────────────────────────────────────
 
@@ -786,7 +775,7 @@
    ── El nombre ──────────────────────────────────────────────────────────────
 
    Se llama `serif-roster` y no `text-h1-serif-display` por la colisión de
-   prefijos que documentan `serif-poster` y `gloss-serif`: el calificador va
+   prefijos que documenta `serif-poster`: el calificador va
    primero para que la utility no compita con ningún token de la escala.
 
    El font-size sí sale del MISMO token que la sans, como todas las escalas
