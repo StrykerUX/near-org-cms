@@ -6,7 +6,7 @@ import Meta from "@/components/primitives/Meta";
 export const metadata: Metadata = {
   title: "Color — Design System",
   description:
-    "The colour system rendered in the browser: four primitives, the eight semantic tokens that reference them, the utilities they generate, and the measured contrast of every pair the site uses.",
+    "The colour system rendered in the browser: the primitives, the semantic tokens that reference them, the utilities they generate, and the measured contrast of every pair the site uses.",
 };
 
 // ── Capa 0 ────────────────────────────────────────────────────────────────
@@ -123,6 +123,14 @@ const SEMANTICS: {
     ref: "dark/900",
     utility: "bg-surface-dark",
     use: "The dark section ground.",
+  },
+  {
+    token: "--sem-surface-raised",
+    ref: "gray/300",
+    utility: "bg-surface-raised/20",
+    use: "A card that has to lift off the page without being another surface. The value is the grey; the surface picks how much of it with Tailwind's opacity modifier. At 20% over cream it composes ≈ #F1F0EE — one step BELOW the ground, which is what makes it read as a card.",
+    warn:
+      "Added, like gray/600. The file's background-secondary points at the same cream/100 as primary, so a card painted with it composes its own section's ground exactly and disappears — which is what happened to the four cards in Own Your Own.",
   },
 ];
 

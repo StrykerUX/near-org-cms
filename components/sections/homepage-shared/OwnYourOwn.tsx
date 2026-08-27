@@ -939,11 +939,15 @@ export default function OwnYourOwn() {
               // `CARD_LAYOUT`: un campo por card que siempre vale lo mismo
               // invita a que alguien lo desempareje sin querer.
               //
-              // `bg-card-tint/50` (#eae9e6 al 50% sobre el crema de la sección,
-              // ≈ #efefec) las deja un escalón por debajo del fondo. Data y
-              // Assets llevaban `bg-white/50`, que compone ≈ #fafaf8 — más CLARO
-              // que el fondo, y por eso se leían como manchas blancuzcas en vez
-              // de como cards.
+              // `bg-surface-raised/20` es el gris del sistema al 20% sobre el crema
+              // de la sección, que compone ≈ #f1f0ee: las deja un escalón por
+              // DEBAJO del fondo. Data y Assets llevaban `bg-white/50`, que
+              // compone ≈ #fafaf8 —más CLARO que el fondo— y por eso se leían
+              // como manchas blancuzcas en vez de como cards.
+              //
+              // La opacidad va acá y no en el token a propósito: el token es el
+              // gris, y cuánto de él quiere cada superficie lo decide quien la
+              // pinta.
               // El hover: la card se ASIENTA, no salta.
               //
               // Dos cosas mínimas y las dos dicen lo mismo —el objeto se
@@ -966,7 +970,7 @@ export default function OwnYourOwn() {
               // `motion-reduce:transition-none` y el hover se conserva igual:
               // quien pidió menos movimiento sigue viendo qué card está
               // señalando, solo que sin el trayecto.
-              className={`group/card z-[2] self-start rounded-3xl bg-card-tint/50 p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-md transition-[box-shadow,background-color] duration-300 ease-out hover:bg-card-tint/80 hover:shadow-[0_10px_18px_rgba(0,0,0,0.10)] motion-reduce:transition-none ${CARD_LAYOUT[i].place}`}
+              className={`group/card z-[2] self-start rounded-3xl bg-surface-raised/20 p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-md transition-[box-shadow,background-color] duration-300 ease-out hover:bg-surface-raised/35 hover:shadow-[0_10px_18px_rgba(0,0,0,0.10)] motion-reduce:transition-none ${CARD_LAYOUT[i].place}`}
             >
               {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
                 `width`, Next genera el srcset pero el navegador asume que ocupa

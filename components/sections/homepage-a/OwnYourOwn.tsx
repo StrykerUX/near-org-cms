@@ -741,12 +741,16 @@ export default function OwnYourOwn() {
               // `CARD_LAYOUT`: un campo por card que siempre vale lo mismo
               // invita a que alguien lo desempareje sin querer.
               //
-              // `bg-card-tint/50` (#eae9e6 al 50% sobre el crema de la sección,
-              // ≈ #efefec) las deja un escalón por debajo del fondo. Data y
-              // Assets llevaban `bg-white/50`, que compone ≈ #fafaf8 — más CLARO
-              // que el fondo, y por eso se leían como manchas blancuzcas en vez
-              // de como cards.
-              className={`z-[2] self-start rounded-3xl bg-card-tint/50 p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-md ${CARD_LAYOUT[i].place}`}
+              // `bg-surface-raised/20` es el gris del sistema al 20% sobre el crema
+              // de la sección, que compone ≈ #f1f0ee: las deja un escalón por
+              // DEBAJO del fondo. Data y Assets llevaban `bg-white/50`, que
+              // compone ≈ #fafaf8 —más CLARO que el fondo— y por eso se leían
+              // como manchas blancuzcas en vez de como cards.
+              //
+              // La opacidad va acá y no en el token a propósito: el token es el
+              // gris, y cuánto de él quiere cada superficie lo decide quien la
+              // pinta.
+              className={`z-[2] self-start rounded-3xl bg-surface-raised/20 p-6 shadow-[0_1px_4px_rgba(0,0,0,0.07)] backdrop-blur-md ${CARD_LAYOUT[i].place}`}
             >
               {/* `sizes` es obligatorio en cuanto la imagen es fluida: con solo
                 `width`, Next genera el srcset pero el navegador asume que ocupa

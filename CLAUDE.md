@@ -280,8 +280,11 @@ antes de "arreglar" algo que parece un bug:**
   se quedan enteros, y de ellos sigue a la marca **la parada que ERA el verde de
   marca, y ninguna otra**.
 - **No hay blanco.** `background-primary` y `background-secondary` son el mismo
-  crema, así que las cards no se despegan de la página por color — solo por su
-  borde.
+  crema, así que una card pintada con ellos compone el fondo de su sección y
+  desaparece. Para eso está `--sem-surface-raised` (→ gray/300), el segundo
+  agregado a la paleta: el token es el GRIS y la opacidad la elige quien pinta
+  (`bg-surface-raised/20` ≈ #f1f0ee sobre crema, un escalón por DEBAJO del
+  fondo — una card más clara que su página se lee como mancha).
 - **Dos pares quedan por debajo del piso de WCAG**, porque así los define el
   archivo: `border-default` sobre claro a 1.19:1 y `text-on-brand` sobre el verde
   a 1.64:1. Si se corrigen, se corrigen en la capa 1.
@@ -289,7 +292,9 @@ antes de "arreglar" algo que parece un bug:**
   `text-secondary` del archivo es gray/300, que sobre el crema da 1.19:1 — texto
   que no se ve, en 228 lugares. El rol quedó partido por fondo:
   `text-content-muted` (→ gray/600, 5.32:1) sobre claro y `text-content-dim`
-  (→ gray/300, 11.57:1) sobre oscuro.
+  (→ gray/300, 11.57:1) sobre oscuro. Con `--gray-600` y `--sem-surface-raised`,
+  los agregados a lo que el archivo trae son dos, y los dos están documentados
+  con el hueco que tapan.
 
 Tres cosas que muerden:
 

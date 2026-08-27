@@ -99,6 +99,21 @@
   --sem-border-default: var(--gray-300);
   --sem-surface-dark: var(--dark-900);
 
+  /* La superficie LEVANTADA: una card que tiene que despegarse de la página sin
+     ser otra superficie.
+
+     Existe porque el archivo no la resuelve. Su `background-secondary` apunta al
+     mismo cream/100 que `primary`, así que una card pintada con él compone
+     exactamente el fondo de su sección y desaparece — que es literalmente lo que
+     pasó con las cuatro de `OwnYourOwn`.
+
+     El valor es el gris, no una mezcla: quien lo usa elige la opacidad con el
+     modificador de Tailwind (`bg-surface-raised/20`), igual que hacía el tinte
+     que había antes. A 20% sobre el crema compone ≈ #f1f0ee — un escalón por
+     DEBAJO del fondo, que es lo que hace que se lea como card. Una card más
+     clara que su página se lee como una mancha. */
+  --sem-surface-raised: var(--gray-300);
+
   /* ── capa 2 · alias legacy ───────────────────────────────────────────────
      Los nombres con los que está escrito el sitio hoy — ~1900 usos en
      `components/`. No se renombraron: el alias da lo mismo que el renombre, y un
@@ -142,11 +157,12 @@
   --cta-mint: var(--sem-brand-primary);
   --cta-lime: var(--sem-brand-primary);
 
-  /* → background-primary / secondary. El crema de la página y el tinte de las
-     cards eran dos superficies claras distintas; ahora son la misma, así que una
-     card tintada sobre la página no se despega del fondo por color. */
+  /* → background-primary. */
   --cream: var(--sem-background-primary);
-  --card-tint: var(--sem-background-secondary);
+  /* `--card-tint` NO va a `background-secondary`, que es el mismo crema de la
+     página: una card pintada con él desaparece. Va al rol de superficie
+     levantada, que es lo que siempre fue. */
+  --card-tint: var(--sem-surface-raised);
 
   /* → text-primary. `--ink` (#101010) y `--ink-soft` (#323232) suben los dos a
      dark/900. `--ink` era además el fill de las caras del SVG isométrico de
@@ -353,6 +369,7 @@
   --color-surface: var(--sem-background-primary);
   --color-surface-alt: var(--sem-background-secondary);
   --color-surface-dark: var(--sem-surface-dark);
+  --color-surface-raised: var(--sem-surface-raised);
 
   --color-content: var(--sem-text-primary);
   /* `muted` es el de la página clara, que es donde vive casi todo el sitio;
