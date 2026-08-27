@@ -121,10 +121,10 @@ const FLOW = {
 // muy juntos: no cambia la imagen, cambia dónde está el borde. Y por eso el
 // fondo puede ser a la vez suave de forma y duro de línea.
 //
-// La última parada es `#0d100e` —prácticamente `--ink` (#101010) con una pizca
+// La última parada es `#262626` —prácticamente `--ink` (#262626) con una pizca
 // de verde— para que el borde del canvas no se note contra el fondo de la
 // sección.
-const FLOW_PALETTE = ["#a6f5bf", "#7fe3a4", "#0f4a30", "#0a2318", "#0d100e"] as const;
+const FLOW_PALETTE = ["#00dc8d", "#00dc8d", "#00dc8d", "#00dc8d", "#262626"] as const;
 
 export default function StackFlow({ className }: { className?: string }) {
   return (

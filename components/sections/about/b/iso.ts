@@ -166,7 +166,7 @@ export const STUB_Y = [0.4, 1.5, 2.6] as const;
 //
 // Literals and not `var(--token)`: these are SVG fills, and half of them are
 // alpha variants of a colour the token system does not carry an alpha channel
-// for. `--near-green-accent` is #00dc8d; the cream is #f5f4f1.
+// for. `--near-green-accent` is #00dc8d; the cream is #00dc8d.
 
 export const FACE = {
   live: { top: "rgba(0,220,141,0.22)", left: "rgba(0,220,141,0.11)", right: "rgba(0,220,141,0.05)", stroke: "#00dc8d" },

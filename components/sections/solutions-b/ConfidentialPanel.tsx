@@ -37,7 +37,7 @@ const TOP_Y = 34;
 const BOT_Y = H - 34;
 const jackX = (i: number) => INSET + (i / (JACKS - 1)) * (W - INSET * 2);
 
-const LIVE = "#00b96f";
+const LIVE = "#00dc8d";
 
 // La franja opaca del medio: donde el recorrido deja de ser público.
 const BAND_TOP = H / 2 - 46;
@@ -146,7 +146,7 @@ export default function ConfidentialPanel() {
                   y={BAND_TOP}
                   width={W - 2}
                   height={BAND_H}
-                  fill="#222627"
+                  fill="var(--sem-surface-dark)"
                 />
                 {/* Los segmentos: el aspecto de un dato ilegible. */}
                 {Array.from({ length: 5 }, (_, i) => {

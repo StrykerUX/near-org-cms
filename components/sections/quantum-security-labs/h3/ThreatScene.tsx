@@ -88,7 +88,7 @@ const THREADS = DOTS.filter((d) => d.exposed).map((d) => {
   return `M ${d.px} ${d.py} Q ${mx} ${my} ${CORE.x} ${round4(CORE.y - R)}`;
 });
 
-const LIVE = "#00ec97"; // --near-green
+const LIVE = "#00dc8d"; // --near-green
 const DIM = "rgba(255,255,255,0.18)";
 const RISK = "rgba(233,90,80,0.95)";
 
@@ -261,7 +261,7 @@ export default function ThreatScene() {
                     CORE.y - 47 - 108 * 0.2678
                   )}) scale(0.2678)`}
                 >
-                  <path d={NEAR_MARK_PATH} fill="#ffffff" />
+                  <path d={NEAR_MARK_PATH} fill="var(--sem-background-primary)" />
                 </g>
               </svg>
             </div>

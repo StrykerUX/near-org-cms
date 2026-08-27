@@ -37,9 +37,9 @@ import { HERO } from "@/components/sections/economics/economicsContent";
 // else animating here would be competing with a shader.
 
 const PALETTE = {
-  bg: "#efe9d5",
-  high: "#a3d78d",
-  line: "#4e7a3f",
+  bg: "#00dc8d",
+  high: "#00dc8d",
+  line: "#00dc8d",
 } as const;
 
 export default function HeroTerrain() {

@@ -148,7 +148,7 @@ export default function ClosingCta() {
                   />
                 ))}
                 {ENDPOINTS.map((p) => (
-                  <circle key={`tip-${p.id}`} data-ray-tip cx={p.x} cy={p.y} r="3" fill="#ffffff" />
+                  <circle key={`tip-${p.id}`} data-ray-tip cx={p.x} cy={p.y} r="3" fill="var(--sem-background-primary)" />
                 ))}
                 {/* El stack. Dos anillos, para que lea como el mismo tipo de
                     objeto que el nodo verde del spotlight. */}

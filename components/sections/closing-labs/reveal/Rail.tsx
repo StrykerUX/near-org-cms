@@ -16,9 +16,9 @@ import type { ReactNode } from "react";
 //
 // ── El asterisco va en `green-ink` y no en `near-green` ──────────────────────
 //
-// El verde de marca (#00ec97) sobre crema tiene un contraste de 1.4:1 — a
+// El verde de marca (#00dc8d) sobre crema tiene un contraste de 1.4:1 — a
 // tamaño de asterisco desaparece, y lo único que quedaría es un hueco. La
-// versión tinta (#00a86b) es el mismo verde bajado a un valor que aguanta el
+// versión tinta (#00dc8d) es el mismo verde bajado a un valor que aguanta el
 // papel, que es lo que el DS ya tenía previsto para este caso.
 export default function Rail({
   index,

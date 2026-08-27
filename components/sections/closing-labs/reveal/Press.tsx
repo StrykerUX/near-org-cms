@@ -24,7 +24,7 @@ import {
 // El `index` que `Rail` pide igual se pasa —es obligatorio— pero el rótulo lo
 // come el medio. Ver la nota de abajo.
 const DIM = "rgba(16,16,16,0.18)";
-const LIT = "#101010";
+const LIT = "#262626";
 
 export default function RevealPress() {
   return (

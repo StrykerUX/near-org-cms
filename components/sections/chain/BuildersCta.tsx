@@ -130,7 +130,7 @@ export default function BuildersCta() {
                   />
                 ))}
                 {ENDPOINTS.map((p, i) => (
-                  <circle key={`tip-${i}`} data-ray-tip cx={p.x} cy={p.y} r="3" fill="#ffffff" />
+                  <circle key={`tip-${i}`} data-ray-tip cx={p.x} cy={p.y} r="3" fill="var(--sem-background-primary)" />
                 ))}
                 {/* The single contract. Two rings so it reads as the same kind
                     of object as the account mark in the sticky scene. */}

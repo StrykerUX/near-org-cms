@@ -14,8 +14,8 @@ import { NEWS_STORIES as STORIES, type NewsStory } from "@/components/sections/q
 // propio de esta sección, PressCarousel no tiene CTA que portar.
 const TONE_CARD: Record<NewsStory["tone"], string> = {
   green: "bg-[linear-gradient(155deg,#BBEF7F_0%,#37C142_100%)] text-ink",
-  gray: "bg-[#E1E1E1] text-ink",
-  dark: "bg-[#1e1e1e] text-white",
+  gray: "bg-[#f5f4f1] text-ink",
+  dark: "bg-[#262626] text-white",
 };
 
 const TONE_QUOTE: Record<NewsStory["tone"], string> = {

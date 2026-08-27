@@ -223,7 +223,7 @@ export default function ConfidentialSpotlight() {
                     y1={y}
                     x2={width}
                     y2={y}
-                    stroke="#ffffff"
+                    stroke="var(--sem-background-primary)"
                     strokeOpacity="0.22"
                     strokeWidth="8"
                     strokeLinecap="round"

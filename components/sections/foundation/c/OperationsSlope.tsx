@@ -72,8 +72,8 @@ export default function OperationsSlope() {
           >
             <defs>
               <linearGradient id="slope-ramp" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#8bf29c" />
-                <stop offset="100%" stopColor="#00b96f" />
+                <stop offset="0%" stopColor="var(--sem-brand-primary)" />
+                <stop offset="100%" stopColor="var(--sem-brand-primary)" />
               </linearGradient>
             </defs>
 

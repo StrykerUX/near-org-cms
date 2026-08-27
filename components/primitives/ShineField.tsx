@@ -221,13 +221,13 @@ export default function ShineField({
       {/* El botón lleva el gradiente de la marca —el mismo del glifo NEAR, de
           lima a verde— y texto NEGRO, no blanco.
 
-          Era `bg-near-green-dark` (#00c97f) con texto blanco. Blanco sobre ese
+          Era `bg-near-green-dark` (#00dc8d) con texto blanco. Blanco sobre ese
           verde da ~2.1:1 de contraste y no pasa AA ni para texto grande; negro
           sobre el gradiente da ~9:1 en su punto más oscuro. O sea que acá lo
           legible y lo pedido coinciden, que no siempre pasa.
 
           El gradiente va literal y no como token: `--near-green` es turquesa
-          (#00ec97) y no aparece en él. Los dos extremos son los del glifo,
+          (#00dc8d) y no aparece en él. Los dos extremos son los del glifo,
           acotados por arriba para que el botón no se lave contra el blanco del
           campo. */}
       <button

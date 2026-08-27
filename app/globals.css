@@ -8,42 +8,143 @@
 @import "../packages/cms-core/styles/admin.css";
 
 :root {
-  /* `--color-muted` vivía acá con un hex propio (#5A5A5A) y otra vez en el
-     `@theme inline` de abajo como `var(--muted)` — dos valores distintos para el
-     mismo nombre. El único consumidor del hex era la regla `.text-muted`, que
-     duplicaba la utilidad que Tailwind ya genera desde el token. Borrados los
-     dos; la fuente única es el `--color-muted` del @theme. */
 
-  /* ── DEPRECADA: escala vieja, NO usar en código nuevo ─────────────────────
-     La escala real del DS son los tokens `--text-*` del @theme inline de más
-     abajo, que además traen line-height, letter-spacing y font-weight por
-     nivel. Esta se conserva solo porque todavía la consumen 11 lugares vía
-     `style={{ fontSize: "var(--font-size-*)" }}`: las secciones y páginas de
-     blog (PageHero, PostCard, EmptyState, PostRenderer, SiteFooter,
-     app/(site)/blog/[slug]) y LinktreePublicView del cms-core.
+  /* ══ SISTEMA DE COLOR ═══════════════════════════════════════════════════
+     Tres capas. La regla es una sola: EL HEX SOLO VIVE EN LA CAPA 0.
 
-     No es un mapeo 1:1 con la nueva — es más chica en todos los niveles
-     (h1 topa en 4.25rem vs 5.5rem), así que migrar CAMBIA el tamaño de los
-     headings del blog. Por eso se hace aparte y no de arrastre. ── */
-  --font-size-h1: clamp(2rem, 0.5rem + 3.125vw, 4.25rem);
-  --font-size-h2: clamp(1.75rem, 0.583rem + 2.43vw, 3.5rem);
-  --font-size-h3: clamp(1.25rem, 0.417rem + 1.736vw, 2.5rem);
-  --font-size-body: clamp(1rem, 0.764rem + 0.3012vw, 1.125rem);
+       capa 0 · primitivos   — valores crudos, agrupados por familia y escala
+       capa 1 · semánticos   — el ROL, expresado como referencia a un primitivo
+       capa 2 · alias legacy — los tokens con los que ya está escrito el sitio
+                               (`--ink`, `--cream`, `--rule`…), más abajo en
+                               este mismo `:root`
 
-  /* ── paleta draft del prototipo de homepage —
-     estimada de la captura compartida, NO son tokens de marca definitivos.
-     Ver app/(site)/brand/page.tsx, todavía placeholder grayscale. Reemplazar
-     cuando exista un sistema de color real. ── */
-  --near-green: #00ec97;
-  --near-green-dark: #00c97f;
-  --near-teal: #2dd4bf;
-  /* Un solo off-white para toda la página: el crema cálido de antes (#f3f1ea)
-     y el gris de las secciones con cards se unificaron acá. Sigue siendo un
-     token aparte de --background (blanco puro) y no un alias: las secciones
-     que lo usan llevan cards BLANCAS encima, y sobre blanco puro esas cards
-     desaparecen. */
-  --cream: #f5f4f1;
-  --stone: #d8d6d0;
+     La capa 2 existe porque hay ~1900 usos de esos nombres en `components/`.
+     Reescribirlos no compraba nada: con el alias apuntando a un rol, un cambio
+     global de paleta es mover un hex en la capa 0 y nada más.
+
+     Los cuatro primitivos y los ocho semánticos son EXACTAMENTE los del archivo
+     de Figma, con sus destinos tal cual. Donde el archivo y el sitio no
+     coincidían ganó el archivo, incluidos los tres pares que quedan por debajo
+     del piso de contraste de WCAG — están enumerados en la capa 1.
+
+     Al agregar un tono: entra por la capa 0. Un hex suelto en una sección es un
+     tono que el día del rebrand no encuentra nadie. ── */
+
+  /* ── capa 0 · primitivos ──────────────────────────────────────────────────
+     Los cuatro del archivo de Figma, y nada más. El sistema se adoptó LITERAL:
+     los ~17 tonos que el sitio tenía de antes (cinco verdes, cuatro cremas, tres
+     grises, tres oscuros, la rampa del CTA) se colapsaron en estos.
+
+     Eso quiere decir que distinciones que antes existían dejaron de existir: el
+     verde del CTA del nav, el de los botones sobre crema y el verde de tinta que
+     se leía sobre claro son ahora el mismo `--green-500`, y la rampa del CTA es
+     un gradiente de un solo color, o sea plana. No es un descuido de la
+     migración, es la paleta: si alguno de esos roles tiene que volver a
+     distinguirse, el escalón se agrega ACÁ y se apunta el semántico que lo
+     necesite. Nunca un hex suelto en una sección. ── */
+  --green-500: #00dc8d;
+  --cream-100: #f5f4f1;
+  --gray-300: #e1e1e1;
+  --dark-900: #262626;
+
+  /* ── capa 1 · semánticos ──────────────────────────────────────────────────
+     Los ocho tokens del archivo de Figma con el destino que el archivo les da,
+     sin desviaciones. Los nombres son los suyos menos el prefijo de grupo
+     `color/` — que en CSS sería `--color-`, el namespace de Tailwind, donde un
+     semántico colisiona con la clave del `@theme` que lo consume.
+
+     Tres pares quedan con contraste por debajo del piso de WCAG, y están acá
+     porque el archivo los define así:
+
+       text-secondary  sobre background-primary    1.19:1
+       text-on-brand   sobre brand-primary         1.64:1
+       border-default  sobre background-primary    1.19:1  (no textual)
+
+     El primero es el que más superficie toca: la copy subordinada del sitio en
+     claro pasa a leerse apenas. El segundo afecta a todo lo que va montado sobre
+     el verde de marca. Se dejan como los define el diseño; el día que se
+     corrijan, se corrigen ACÁ y el sitio entero los sigue. ── */
+
+  --sem-brand-primary: var(--green-500);
+
+  --sem-background-primary: var(--cream-100);
+  /* El archivo manda `secondary` al mismo cream/100 que `primary`: dos roles,
+     un valor, y por lo tanto ningún escalonado entre superficies claras. */
+  --sem-background-secondary: var(--cream-100);
+
+  --sem-text-primary: var(--dark-900);
+  --sem-text-secondary: var(--gray-300);
+  --sem-text-on-brand: var(--cream-100);
+
+  --sem-border-default: var(--gray-300);
+  --sem-surface-dark: var(--dark-900);
+
+  /* ── capa 2 · alias legacy ───────────────────────────────────────────────
+     Los nombres con los que está escrito el sitio hoy — ~1900 usos en
+     `components/`. No se renombraron: el alias da lo mismo que el renombre, y un
+     find-and-replace de ese tamaño es la clase de cambio que nadie puede revisar
+     de verdad.
+
+     Ninguno declara hex, y ahora ninguno tiene un valor propio tampoco: los 21
+     caen sobre los ocho roles de la capa 1. Los agrupé por el rol al que van, y
+     al lado de cada grupo está lo que se perdió al colapsarlo — no para
+     lamentarlo, sino porque es lo que hay que volver a leer el día que alguien
+     se pregunte por qué dos cosas que el diseño distinguía se ven iguales.
+
+     En código NUEVO van las utilidades semánticas — `bg-surface`,
+     `text-content`, `border-line`. Estos nombres existen para que lo viejo siga
+     andando, no como la forma recomendada. ── */
+
+  /* → brand-primary. Eran cinco verdes con roles distintos (nav, marca, botones
+     sobre crema, texto verde sobre claro, el field oscuro), más el teal, más los
+     dos amarillos del sweep, más las tres paradas de la rampa del CTA. Las diez
+     son ahora el mismo verde: los gradientes que las combinaban quedan planos, y
+     `--green-ink`, que existía porque el verde de marca no llega a 3:1 sobre
+     blanco, ya no es distinto del que no llegaba. */
+  --near-green: var(--sem-brand-primary);
+  --near-green-accent: var(--sem-brand-primary);
+  --near-green-dark: var(--sem-brand-primary);
+  --green-ink: var(--sem-brand-primary);
+  --near-teal: var(--sem-brand-primary);
+  --sweep: var(--sem-brand-primary);
+  --sweep-solid: var(--sem-brand-primary);
+  --cta-deep: var(--sem-brand-primary);
+  --cta-mint: var(--sem-brand-primary);
+  --cta-lime: var(--sem-brand-primary);
+
+  /* → background-primary / secondary. El crema de la página y el tinte de las
+     cards eran dos superficies claras distintas; ahora son la misma, así que una
+     card tintada sobre la página no se despega del fondo por color. */
+  --cream: var(--sem-background-primary);
+  --card-tint: var(--sem-background-secondary);
+
+  /* → text-primary. `--ink` (#101010) y `--ink-soft` (#323232) suben los dos a
+     dark/900. `--ink` era además el fill de las caras del SVG isométrico de
+     NearStack, cuyo back-face culling solo lee como oclusión sólida si el fill y
+     el fondo son EXACTAMENTE el mismo valor — como los dos salen de este token,
+     siguen coincidiendo. */
+  --ink: var(--sem-text-primary);
+  --ink-soft: var(--sem-text-primary);
+
+  /* → surface-dark. Mismo valor que text-primary; se mantienen separados porque
+     el rol es la superficie y no el texto. `--ink-deep` era un verde de tinta
+     (#0e4a30) usado como fondo: pierde el verde y queda gris oscuro. */
+  --ink-slate: var(--sem-surface-dark);
+  --ink-deep: var(--sem-surface-dark);
+
+  /* → border-default. Tres pesos de línea —el hairline cálido, el relleno de los
+     divisores y la barra— colapsan en uno. */
+  --rule: var(--sem-border-default);
+  --stone: var(--sem-border-default);
+  --bar: var(--sem-border-default);
+
+  /* → text-secondary. Acá está el cambio de mayor superficie de toda la
+     migración: `--gray-intermediate` son 228 usos, y los 228 son texto sobre
+     claro. Existía justamente porque a 4.34:1 era el reemplazo legible de
+     `--gray-blue` (2.81:1); los dos van ahora a gray/300, que sobre crema es
+     1.19:1. */
+  --gray-intermediate: var(--sem-text-secondary);
+  --gray-blue: var(--sem-text-secondary);
 
   /* Cuánto espacio ocupa el header fijo desde el borde de arriba: 24px de
      aire (`pt-6` del Container) + 64px de barra (`h-16`). Lo consumen las
@@ -59,93 +160,44 @@
      un `:root` propio sin verificar el CSS compilado. */
   --site-header-block: 88px;
 
-  /* ── ampliación para /prototype/homepage-v2 ──────────────────────────────
-     Valores transcritos del HTML de referencia (Homepage.dc.html). Mismo
-     estatus que los de arriba: paleta draft, no marca definitiva.
 
-     Los tres verdes conviven a propósito en el diseño y NO son alias: el
-     brillante es el CTA del nav, el oscuro los botones sobre crema, y el
-     accent los círculos de flecha y los dots inline. Unificarlos aplana el
-     contraste de tres jerarquías distintas. ── */
-  --near-green-accent: #00dc8d;
-  /* Negro de sección, no #000: sobre él van cards blancas y strokes de 1px
-     que a negro puro se ven como agujeros. También es el fill de las caras
-     del SVG isométrico de NearStack — el back-face culling solo lee como
-     oclusión sólida si fill y fondo son EXACTAMENTE el mismo valor, por eso
-     ambos salen de este token y no de dos literales. */
-  --ink: #101010;
-  --gray-blue: #87959a;
-  --bar: #d9d9d9;
-  --card-tint: #eae9e6;
-  --ink-deep: #0e4a30;
-  --sweep: #f4ff7a;
+  /* ── shadcn/ui, modo claro ───────────────────────────────────────────────
+     Era un placeholder gris declarado como tal («no palette defined yet»). Ya
+     hay paleta, así que estos tokens la siguen como todo el resto: `background`
+     deja de ser blanco puro y pasa a ser el crema del sistema.
 
-  /* ── extension for /quantum-security ─────────────────────────────────────
-     (Comments below are in English by request; the rest of this file is still
-     in Spanish. See docs note in components/sections/quantum/README.md.)
+     Dos consecuencias que conviene tener escritas:
 
-     Same status as the ones above: transcribed from the reference HTML
-     (Quantum Security.dc.html), draft palette, not settled brand.
+     · El sitio ya no tiene blanco. Las cards que se despegaban del crema por ser
+       BLANCAS ahora comparten superficie con la página, y lo único que las
+       separa es el borde. Es lo que dice el archivo: `background-primary` y
+       `background-secondary` son el mismo cream/100.
+     · `--destructive` se queda con su rojo. La paleta no tiene un color de
+       error, y un estado destructivo pintado del verde de marca no es una
+       simplificación: es un botón que miente. Es la única excepción del archivo
+       en todo el sistema, y está acá para que se vea.
 
-     `--ink-slate` is NOT an alias of `--ink` (#101010): this page's dark
-     section is a blue-grey, and large-radius WHITE cards sit on top of it. At
-     #101010 the contrast spikes and the cards read as cut-outs.
-
-     `--green-ink` is likewise not an alias of `--near-green-accent` (#00DC8D):
-     the accent is a UI green for dark backgrounds and does not reach 3:1 on
-     white. This is its legible counterpart, used only for green TEXT on
-     light. ── */
-  --ink-slate: #222627;
-  --ink-soft: #323232;
-  --rule: #c9c7c1;
-  --green-ink: #00a86b;
-
-  /* The "alternatives" column of the comparison table, and any other copy that
-     has to read as SUBORDINATE without dropping out of legibility.
-     Came back from the Figma file (NEARORG_CLAUDE_QUANTUM), where it replaced
-     `--gray-blue` in that column. The reason is contrast: on `--cream`,
-     `--gray-blue` lands at 2.81:1, which is not a legibility level for a
-     paragraph — it is a level for decoration. This sits at 4.34:1.
-     Note it still does not clear the 4.5:1 AA floor for normal-size text; it is
-     a large improvement, not a pass. Do not reach for `--gray-blue` for body
-     copy on light grounds — that is what this token exists to replace. */
-  --gray-intermediate: #6c7477;
-
-  /* The three stops of the CTA sweep. They live as tokens rather than a literal
-     per use because the same gradient shows up in three places with three
-     syntaxes: the button fill (CSS), the nav CTA (CSS), and the isometric SVG's
-     <linearGradient> (stop-color attributes). */
-  /* The sweep hue darkened for SOLID fills on light grounds. `--sweep` itself is
-     tuned as a translucent shine over black type, and used opaque on the cream
-     page it lands near 1.1:1 and disappears. Same hue, enough value to hold an
-     edge. Kept separate rather than changing `--sweep`, which home-v2 also
-     consumes. */
-  --sweep-solid: #d8e64a;
-
-  --cta-lime: #ecfdb0;
-  --cta-mint: #8bf29c;
-  --cta-deep: #00b96f;
-
-  /* ── shadcn/ui tokens — neutral grayscale placeholder, no palette defined yet ── */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0 0 0);
-  --card: oklch(0.9784 0.0011 197.1387);
-  --card-foreground: oklch(0.2435 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.3171 0 0);
-  --primary: oklch(0 0 0);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.2435 0 0);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.9683 0.0069 247.8956);
-  --muted-foreground: oklch(0.3171 0 0);
-  --accent: oklch(0.9392 0.0166 250.8453);
-  --accent-foreground: oklch(0.3171 0 0);
+     Los `--sidebar-*` NO se tocan: son cromo del admin, que corre en `.dark` y
+     queda fuera de este sistema. ── */
+  --background: var(--sem-background-primary);
+  --foreground: var(--sem-text-primary);
+  --card: var(--sem-background-secondary);
+  --card-foreground: var(--sem-text-primary);
+  --popover: var(--sem-background-primary);
+  --popover-foreground: var(--sem-text-primary);
+  --primary: var(--sem-text-primary);
+  --primary-foreground: var(--sem-background-primary);
+  --secondary: var(--sem-surface-dark);
+  --secondary-foreground: var(--sem-background-primary);
+  --muted: var(--sem-background-secondary);
+  --muted-foreground: var(--sem-text-secondary);
+  --accent: var(--sem-background-secondary);
+  --accent-foreground: var(--sem-text-primary);
   --destructive: oklch(0.6188 0.2376 25.7658);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9317 0.0118 231.6594);
-  --input: #e5e5e5;
-  --ring: oklch(0.708 0 0);
+  --destructive-foreground: var(--sem-background-primary);
+  --border: var(--sem-border-default);
+  --input: var(--sem-border-default);
+  --ring: var(--sem-border-default);
   --sidebar: oklch(0.9784 0.0011 197.1387);
   --sidebar-foreground: oklch(0 0 0);
   --sidebar-primary: oklch(0.2435 0 0);
@@ -245,6 +297,37 @@
   --color-cta-deep: var(--cta-deep);
   --color-cta-mint: var(--cta-mint);
   --color-cta-lime: var(--cta-lime);
+
+  /* ── las utilidades de la capa 1 ─────────────────────────────────────────
+     La clave del `@theme` no repite el nombre del token semántico, y no es una
+     preferencia de estilo — son tres colisiones concretas:
+
+     1. `--color-` ES el namespace de Tailwind. Un semántico declarado ahí
+        compite con la clave que lo consume: `--color-surface-dark:
+        var(--color-surface-dark)` es una referencia circular, no un alias.
+        Por eso la capa 1 vive bajo `--sem-*`. Se pierde el prefijo `color/`
+        del archivo de Figma, que es el nombre del GRUPO y lo llevan los ocho
+        tokens por igual — o sea que no distingue nada. La parte que nombra
+        (`surface-dark`, `text-on-brand`) queda intacta.
+     2. `--color-text-primary` generaría la clase `text-text-primary`: Tailwind
+        ya usa `text-` como su prefijo de color de texto.
+     3. `--color-background-primary` convive con el `--color-background` de
+        shadcn. Este archivo YA tiene un incidente por prefijos compartidos,
+        documentado en `--text-poster` / `--text-kicker-xl`: Tailwind emite el
+        corto y DESCARTA el largo en silencio. Verificado contra el CSS emitido
+        para este bloque; si se agrega otro par que comparta prefijo, hay que
+        volver a verificarlo antes de confiar. ── */
+  --color-brand: var(--sem-brand-primary);
+  --color-on-brand: var(--sem-text-on-brand);
+
+  --color-surface: var(--sem-background-primary);
+  --color-surface-alt: var(--sem-background-secondary);
+  --color-surface-dark: var(--sem-surface-dark);
+
+  --color-content: var(--sem-text-primary);
+  --color-content-muted: var(--sem-text-secondary);
+
+  --color-line: var(--sem-border-default);
 
   --font-sans:
     var(--font-montreal), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -1064,7 +1147,7 @@ button:hover .lucide-plus {
   transition: border-color 0.16s ease;
 }
 [data-q-cta]:hover {
-  color: #fff;
+  color: var(--sem-text-on-brand);
   border-color: transparent;
   animation: qCtaFill 0.3s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
@@ -1089,7 +1172,10 @@ button:hover .lucide-plus {
    black stage). The fill paints UNDER the transparent border, so the stroke
    dissolves into it rather than leaving a white ring. */
 [data-q-cta][data-q-cta-on-dark] {
-  color: #fff;
+  /* El archivo de color no tiene un token de texto sobre oscuro: define
+     `text-on-brand` (sobre el verde) y `text-secondary` (gray/300). El valor
+     claro del sistema es cream/100 y sale de su rol de superficie. */
+  color: var(--sem-background-primary);
 }
 [data-q-cta][data-q-cta-on-dark]:hover {
   animation-name: qCtaFillOnDark;
@@ -1170,7 +1256,7 @@ button:hover .lucide-plus {
    This is the inverse of the white variant below, for light grounds where a
    hairline outline reads as an empty shape rather than a button. */
 [data-q-cta][data-q-cta-filled] {
-  color: #fff;
+  color: var(--sem-text-on-brand);
   border-color: transparent;
   background-size:
     0% 100%,
@@ -1191,7 +1277,7 @@ button:hover .lucide-plus {
    That also means no second text layer: `[data-q-cta-top]` exists to reveal
    black type over an advancing fill, and here the type is already black. */
 [data-q-cta][data-q-cta-fill-white] {
-  background-color: #fff;
+  background-color: var(--sem-background-primary);
   border-color: transparent;
   color: var(--foreground);
 }
@@ -1284,8 +1370,12 @@ button:hover .lucide-plus {
 [data-q-nav] {
   --q-nav-radius: 20px;
   --q-nav-pad: 12px;
-  --q-nav-bg: #0a0a0a;
-  --q-nav-bg-over-dark: #16191a;
+  /* Eran dos negros distintos —el de la barra sobre claro y el que va montado
+     sobre una sección oscura, un punto más claro para despegarse de ella. La
+     paleta tiene una sola superficie oscura, así que ahora son el mismo valor y
+     la barra sobre oscuro deja de despegarse por color. */
+  --q-nav-bg: var(--sem-surface-dark);
+  --q-nav-bg-over-dark: var(--sem-surface-dark);
 }
 
 /* `--site-header-block` vivía acá en un `:root` propio y el pipeline de CSS

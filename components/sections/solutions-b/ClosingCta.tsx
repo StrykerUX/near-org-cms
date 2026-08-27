@@ -29,7 +29,7 @@ const BOT_Y = H - 26;
 const jackX = (i: number) => INSET + (i / (JACKS - 1)) * (W - INSET * 2);
 const CENTER = W / 2;
 
-const LIVE = "#00b96f";
+const LIVE = "#00dc8d";
 
 export default function ClosingCta() {
   const rootRef = useMotionScope<HTMLElement>(({ q, motionOk }) => {
@@ -128,7 +128,7 @@ export default function ClosingCta() {
               ))}
 
               {SOLUTIONS.map((s, i) => (
-                <circle key={`j-${s.id}`} cx={jackX(i)} cy={TOP_Y} r="4.5" fill="#ffffff" />
+                <circle key={`j-${s.id}`} cx={jackX(i)} cy={TOP_Y} r="4.5" fill="var(--sem-background-primary)" />
               ))}
 
               {/* El destino. Dos anillos, para que lea como el mismo tipo de

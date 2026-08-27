@@ -56,15 +56,15 @@ export const UnicornScene = dynamic(() => import("unicornstudio-react/next"), {
 export const UNICORN_COVERS = {
   green: {
     scene: "/unicorn-scene-green.json",
-    fallback: "linear-gradient(118deg, #7fe0d0 0%, #4de88f 30%, #e8e888 60%, #a8a8a0 100%)",
+    fallback: "linear-gradient(118deg, #00dc8d 0%, #00dc8d 30%, #00dc8d 60%, #e1e1e1 100%)",
   },
   blue: {
     scene: "/unicorn-scene-blue.json",
-    fallback: "linear-gradient(118deg, #7fd0f5 0%, #5fb8f5 30%, #a5dcf9 60%, #cdd0da 100%)",
+    fallback: "linear-gradient(118deg, #e1e1e1 0%, #e1e1e1 30%, #e1e1e1 60%, #e1e1e1 100%)",
   },
   red: {
     scene: "/unicorn-scene-red.json",
-    fallback: "linear-gradient(118deg, #eebb80 0%, #fa9351 30%, #faebdf 60%, #dfd8e6 100%)",
+    fallback: "linear-gradient(118deg, #e1e1e1 0%, #e1e1e1 30%, #f5f4f1 60%, #e1e1e1 100%)",
   },
 } as const;
 

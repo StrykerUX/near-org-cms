@@ -252,6 +252,58 @@ con `pathname` y se re-mide con un `ResizeObserver` propio — el detalle está
 comentado en el archivo, junto con por qué usa `st.refresh()` de la instancia y
 nunca el `ScrollTrigger.refresh()` global (congela Lenis).
 
+**Sistema de color: cuatro colores, tres capas, y el hex vive en UNA.**
+`app/globals.css` tiene `capa 0 · primitivos` (`--green-500` `--cream-100`
+`--gray-300` `--dark-900` — los únicos hex del sistema), `capa 1 · semánticos`
+(`--sem-*`: los ocho roles del archivo de Figma, con sus destinos **tal cual**) y
+`capa 2 · alias legacy` (`--ink`, `--cream`, `--rule`… — los ~1900 usos que ya
+están escritos; los 21 caen sobre los ocho roles y ninguno tiene valor propio).
+**Cambiar la paleta es mover un valor en la capa 0.**
+
+En código nuevo van las utilidades semánticas: `bg-surface`, `bg-surface-alt`,
+`bg-surface-dark`, `text-content`, `text-content-muted`, `bg-brand`,
+`text-on-brand`, `border-line`.
+
+**El sistema se adoptó literal, y eso tiene consecuencias que hay que conocer
+antes de "arreglar" algo que parece un bug:**
+
+- **Hay un solo verde.** Los cinco verdes con roles distintos, el teal, los dos
+  amarillos del sweep y las tres paradas de la rampa del CTA son todos
+  `--green-500`. Los gradientes de la rampa se ven planos: es la paleta, no un
+  error. `CTA_RAMP` en `motionColors.ts` sigue siendo una tupla de tres para no
+  romper a sus consumidores.
+- **No hay blanco.** `background-primary` y `background-secondary` son el mismo
+  crema, así que las cards no se despegan de la página por color — solo por su
+  borde.
+- **Tres pares quedan por debajo del piso de WCAG**, porque así los define el
+  archivo: `text-secondary` sobre claro y `border-default` sobre claro a 1.19:1,
+  y `text-on-brand` sobre el verde a 1.64:1. El de más superficie es el primero
+  (228 usos de copy subordinada). Si se corrigen, se corrigen en la capa 1.
+
+Tres cosas que muerden:
+
+- La capa 1 usa el prefijo `--sem-` y no `--color-`. `--color-` es el namespace
+  de Tailwind: un semántico declarado ahí colisiona con la clave del `@theme`
+  que lo consume (`--color-surface-dark: var(--color-surface-dark)` es una
+  referencia circular, no un alias).
+- **Dos tokens del `@theme` que comparten prefijo pueden hacer que Tailwind emita
+  el corto y descarte el largo en silencio** (ya pasó con `--text-poster`). Al
+  agregar una clave nueva, verificarla contra el CSS emitido —
+  `grep '\.tu-clase{' .next/static/chunks/*.css` tras un build— y no contra la
+  intuición.
+- Los colores que ANIMA GSAP o que dibuja un canvas/WebGL siguen siendo
+  literales: `var()` no resuelve como destino de un tween ni dentro de un
+  contexto 2D. Espejan la capa 0 a mano; los compartidos viven en
+  `components/primitives/motion/motionColors.ts`.
+
+**Fuera del sistema, a propósito:** el admin del CMS (corre en `.dark` sobre los
+tokens de shadcn), `stackArt.generated.tsx` (ilustración de marca exportada, con
+gradientes de varias paradas que son arte y no superficie) y `--destructive`,
+que conserva su rojo porque la paleta no tiene color de error.
+
+La referencia completa —muestras, ratios medidos, qué colapsó en qué y qué costó—
+se renderiza en **`/design-system/color`**.
+
 **Una sola línea de diseño viva.** Hasta el 2026-08-21 el repo tenía nueve
 homepages en paralelo y siete laboratorios de secciones. Se archivaron todos:
 queda `components/sections/homepage-a/` (montada en
@@ -296,4 +348,4 @@ Tras cada tarea larga: `/aura checkpoint`. Al terminar la sesión: `/aura close`
 
 ---
 
-*Last updated: 2026-08-23 — cuatro páginas nuevas (`/about`, `/economics`, `/community`, `/near-foundation`) con tres layouts cada una y una copy compartida por página; las cuatro dejan de ser stubs y pasan a `(motion)`.*
+*Last updated: 2026-08-27 — sistema de color adoptado literal del archivo de Figma: 4 primitivos, 8 semánticos y todo el color del sitio migrado a ellos. Referencia en `/design-system/color`.*

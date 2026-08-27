@@ -106,12 +106,20 @@ const ACCENT_WORD: Record<string, string> = {
 export default function BrandPage() {
   return (
     <main className="mx-auto flex w-full max-w-[1720px] flex-col gap-24 px-5 pt-[calc(var(--site-header-block)+4rem)] pb-16 sm:px-10 sm:pb-24">
-      <Link
-        href="/"
-        className="text-body-sm text-muted-foreground hover:text-foreground transition-colors text-pretty"
-      >
-        ← Home
-      </Link>
+      <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <Link
+          href="/"
+          className="text-body-sm text-muted-foreground hover:text-foreground transition-colors text-pretty"
+        >
+          ← Home
+        </Link>
+        <Link
+          href="/design-system/color"
+          className="text-body-sm text-muted-foreground hover:text-foreground transition-colors text-pretty"
+        >
+          Colour →
+        </Link>
+      </div>
 
       {/* 1. Hero */}
       <section className="flex flex-col gap-6">

@@ -336,7 +336,7 @@ export default function StackAssembly({ stage, hover, className = "" }: StackAss
             <path
               d={NEAR_MARK_D}
               transform={MARK_TRANSFORM}
-              fill="#101010"
+              fill="var(--sem-surface-dark)"
               fillOpacity="0.85"
               style={{ pointerEvents: "none" }}
             />

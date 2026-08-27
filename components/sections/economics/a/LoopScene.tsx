@@ -242,7 +242,7 @@ export default function LoopScene() {
 
                   {STOPS.map((s, i) => (
                     <g key={STEPS[i].id} data-node>
-                      <circle cx={s.x} cy={s.y} r="9" fill="#101010" />
+                      <circle cx={s.x} cy={s.y} r="9" fill="var(--sem-surface-dark)" />
                       <circle
                         cx={s.x}
                         cy={s.y}

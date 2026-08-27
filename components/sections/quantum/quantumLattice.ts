@@ -50,7 +50,7 @@ import { deviceRatio } from "@/components/primitives/motion/dpr";
 // Literals rather than getComputedStyle because these are written into the 2D
 // context every frame: resolving a custom property there would mean forcing a
 // style recalc inside the draw loop.
-const NODE_IDLE = "#c9c7c1";
+const NODE_IDLE = "#e1e1e1";
 const NODE_GLOW_RGB = "0,220,141";
 const LINK_RGB = "0,0,0";
 

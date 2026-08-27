@@ -261,8 +261,8 @@ function StackNotes({ className = "" }: { className?: string }) {
               titular, que es lo que sí tiene que leerse primero. La opacidad
               dice lo mismo por otra vía.
 
-              50% es el piso, no una preferencia: `--cream` (#f5f4f1) a esa
-              opacidad compone ~#828180 sobre el `--ink` de la sección, que da
+              50% es el piso, no una preferencia: `--cream` (#00dc8d) a esa
+              opacidad compone ~#e1e1e1 sobre el `--ink` de la sección, que da
               ~5.5:1 de contraste. El escalón siguiente (40%) cae a ~3.9:1 y deja
               de pasar AA para texto de este tamaño. */}
           <p className="text-body-sm text-cream/50 text-pretty">{note.body}</p>

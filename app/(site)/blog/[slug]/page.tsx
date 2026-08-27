@@ -63,13 +63,13 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
       {/* TAGS */}
       {post.tags.length > 0 && (
-        <div className="border-t border-[#CAC8C8]">
+        <div className="border-t border-[#e1e1e1]">
           <div className="max-w-3xl mx-auto px-6 py-8">
-            <p className="font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[#5A5A5A] mb-4">Tags</p>
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[#e1e1e1] mb-4">Tags</p>
             <div className="flex flex-wrap gap-2">
               {post!.tags.map((tag: { id: string; slug: string; name: string }) => (
                 <Link key={tag.id} href={`/blog/tag/${tag.slug}`}
-                  className="font-mono text-[0.75rem] bg-[#ECECEC] text-[#5A5A5A] px-4 py-1.5 rounded-full hover:bg-[#CAC8C8] transition">
+                  className="font-mono text-[0.75rem] bg-[#f5f4f1] text-[#e1e1e1] px-4 py-1.5 rounded-full hover:bg-[#e1e1e1] transition">
                   #{tag.name}
                 </Link>
               ))}
@@ -80,28 +80,28 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
       {/* RELATED */}
       {related.length > 0 && (
-        <div className="border-t border-[#CAC8C8] mt-4">
+        <div className="border-t border-[#e1e1e1] mt-4">
           <div className="mx-auto w-full max-w-[1920px] px-5 sm:px-10 lg:px-20 py-16">
             <h2
-              className="font-medium text-[#101010] mb-10"
+              className="font-medium text-[#262626] mb-10"
               style={{ fontSize: "var(--font-size-h2)" }}
             >Related posts</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {related.map((p: { id: string; slug: string; title: string; coverImage: string | null; publishedAt: Date | null; author: { name: string | null } }) => (
-                <article key={p.id} className="group flex flex-col rounded-[1.5rem] overflow-hidden border border-[#CAC8C8] bg-[#ECECEC] hover:shadow-lg transition-shadow duration-300">
+                <article key={p.id} className="group flex flex-col rounded-[1.5rem] overflow-hidden border border-[#e1e1e1] bg-[#f5f4f1] hover:shadow-lg transition-shadow duration-300">
                   <Link href={`/blog/${p.slug}`} className="block overflow-hidden">
-                    <div className="relative aspect-video w-full bg-[#CAC8C8]">
+                    <div className="relative aspect-video w-full bg-[#e1e1e1]">
                       <Image src={p.coverImage ?? "/blog-gen-background.jpg"} alt={p.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 100vw, 33vw" />
                     </div>
                   </Link>
                   <div className="p-5 flex flex-col flex-1">
-                    <p className="font-mono text-[0.75rem] text-[#5A5A5A] mb-2">
+                    <p className="font-mono text-[0.75rem] text-[#e1e1e1] mb-2">
                       {new Date(p.publishedAt!).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </p>
                     <Link href={`/blog/${p.slug}`}>
-                      <h3 className="font-medium leading-snug text-[#101010] group-hover:text-[#525252] transition-colors mb-3 line-clamp-2" style={{ fontSize: "var(--font-size-body)" }}>{p.title}</h3>
+                      <h3 className="font-medium leading-snug text-content group-hover:text-content-muted transition-colors mb-3 line-clamp-2" style={{ fontSize: "var(--font-size-body)" }}>{p.title}</h3>
                     </Link>
-                    <Link href={`/blog/${p.slug}`} className="mt-auto font-mono text-[0.75rem] text-[#5A5A5A] hover:text-[#101010] transition-colors">
+                    <Link href={`/blog/${p.slug}`} className="mt-auto font-mono text-[0.75rem] text-[#e1e1e1] hover:text-[#262626] transition-colors">
                       Read more →
                     </Link>
                   </div>

@@ -59,12 +59,12 @@ import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-shared/hom
 //
 // ── Por qué el verde es literal ──────────────────────────────────────────────
 //
-// No sale de los tokens del DS porque no existe ahí: `--near-green` (#00ec97)
+// No sale de los tokens del DS porque no existe ahí: `--near-green` (#00dc8d)
 // es turquesa y sobre crema se lava hasta perder el filo. Este es hoja, tomado
 // del medio del gradiente del icono para que el acento y el glifo se lean como
 // la misma tinta.
 const PALETTE = {
-  "--statement-accent": "#5cb946",
+  "--statement-accent": "#00dc8d",
   // El tamaño del icono en su momento grande, y por qué vive en CSS y no en JS.
   //
   // El icono se PINTA a este tamaño siempre, y la animación lo escala hacia

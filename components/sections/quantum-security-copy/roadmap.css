@@ -13,22 +13,22 @@
    the horizontal version's "hole punched in the background" dot never drifts
    from whatever bg-cream actually renders. */
 .rm-scope {
-  --rm-rule: #cfcec9;
-  --rm-rule-soft: #d6d5d0;
+  --rm-rule: var(--sem-border-default);
+  --rm-rule-soft: var(--sem-border-default);
   /* Exact hex from design for every "inactive" gray: the resting dot fill
      and the resting title/text color (which used to lean on the DS's
      --gray-intermediate via the `text-gray-intermediate` Tailwind class —
      replaced with this local var so it doesn't touch that shared token). */
-  --rm-muted-soft: #c4c3c1;
-  --rm-muted-text: #c4c3c1;
+  --rm-muted-soft: var(--sem-border-default);
+  --rm-muted-text: var(--sem-border-default);
   /* Exact hexes from design, superseding the earlier "use the site's brand
      green" pass: --rm-green is the rail fill + active-title color, and
      --rm-dot-gradient is a two-stop gradient used for both the active dot's
      fill AND the header CTA's background (same two colors, per feedback —
      RoadmapHeader.tsx used to have its own separate --rm-green-light/-deep
      pair for this, now gone since nothing else read them). */
-  --rm-green: #23bc2f;
-  --rm-dot-gradient: linear-gradient(135deg, #66cd4d 0%, #a9e776 100%);
+  --rm-green: var(--sem-brand-primary);
+  --rm-dot-gradient: linear-gradient(135deg, var(--sem-brand-primary) 0%, var(--sem-brand-primary) 100%);
   /* bg-background acá, no --cream: el fondo de esta sección ahora matchea
      Comparison/InTheNews (bg-background text-foreground), y --rm-bg-fill es
      lo que hace que el anillo del dot "desaparezca" contra el fondo real. */
@@ -82,15 +82,15 @@
    mobile the rail doesn't move, so nothing needs masking. */
 [data-roadmap-v="on"] .rm-viewport {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 11%, #000 89%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 11%, #000 89%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--sem-surface-dark) 11%, var(--sem-surface-dark) 89%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, var(--sem-surface-dark) 11%, var(--sem-surface-dark) 89%, transparent 100%);
 }
 
 /* Version B — same mask, on the rows viewport instead of the rail's. */
 [data-roadmap-h="on"] .rm-rows-viewport {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 11%, #000 89%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 11%, #000 89%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, var(--sem-surface-dark) 11%, var(--sem-surface-dark) 89%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, var(--sem-surface-dark) 11%, var(--sem-surface-dark) 89%, transparent 100%);
 }
 
 /* ── Shared: item spacing (Version A) ───────────────────────────────────── */

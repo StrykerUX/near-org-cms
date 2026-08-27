@@ -31,7 +31,7 @@ import {
 // encendido pasa a ser un cambio de énfasis; a 18% hay que esperar a que la
 // palabra llegue, que es el punto.
 const DIM = "rgba(16,16,16,0.18)";
-const LIT = "#101010";
+const LIT = "#262626";
 
 export default function RevealNumbers() {
   return (

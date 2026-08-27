@@ -40,10 +40,10 @@ export default function GetInTouchModal() {
         <DialogTitle className="sr-only">Get in touch</DialogTitle>
 
         {/* Header — 2 layers */}
-        <div className="relative overflow-hidden min-h-[156px] flex flex-col justify-between p-5 bg-[#1d2e42] mx-3 mt-3 rounded-lg">
+        <div className="relative overflow-hidden min-h-[156px] flex flex-col justify-between p-5 bg-[#262626] mx-3 mt-3 rounded-lg">
 
           {/* Layer 1: Gradient base */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1d2e42] via-[#26405c] to-[#334f6a]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#262626] via-[#262626] to-[#e1e1e1]" />
 
           {/* Layer 2: Noise with blur */}
           <div

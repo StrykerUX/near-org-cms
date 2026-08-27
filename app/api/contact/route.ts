@@ -42,36 +42,36 @@ export async function POST(req: Request) {
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="margin-bottom: 8px;">New Forward Deployed Engineering Inquiry</h2>
-        <hr style="border: none; border-top: 1px solid #eee; margin-bottom: 24px;" />
+        <hr style="border: none; border-top: 1px solid #f5f4f1; margin-bottom: 24px;" />
 
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
-            <td style="padding: 8px 0; color: #666; width: 160px; vertical-align: top;">Company</td>
+            <td style="padding: 8px 0; color: #e1e1e1; width: 160px; vertical-align: top;">Company</td>
             <td style="padding: 8px 0; font-weight: 600;">${companyName}</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; color: #666; vertical-align: top;">Contact</td>
+            <td style="padding: 8px 0; color: #e1e1e1; vertical-align: top;">Contact</td>
             <td style="padding: 8px 0; font-weight: 600;">${contactName}</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; color: #666; vertical-align: top;">Email</td>
+            <td style="padding: 8px 0; color: #e1e1e1; vertical-align: top;">Email</td>
             <td style="padding: 8px 0;"><a href="mailto:${email}">${email}</a></td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; color: #666; vertical-align: top;">Phone</td>
+            <td style="padding: 8px 0; color: #e1e1e1; vertical-align: top;">Phone</td>
             <td style="padding: 8px 0;">${phone || "—"}</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; color: #666; vertical-align: top;">Time Zone</td>
+            <td style="padding: 8px 0; color: #e1e1e1; vertical-align: top;">Time Zone</td>
             <td style="padding: 8px 0;">${timeZone}</td>
           </tr>
         </table>
 
         <h3 style="margin-top: 24px; margin-bottom: 8px;">Solution Description</h3>
-        <p style="color: #333; background: #f9f9f9; padding: 16px; border-radius: 8px; margin: 0; white-space: pre-wrap;">${solutionDescription}</p>
+        <p style="color: #262626; background: #f5f4f1; padding: 16px; border-radius: 8px; margin: 0; white-space: pre-wrap;">${solutionDescription}</p>
 
         <h3 style="margin-top: 24px; margin-bottom: 8px;">Product / Category</h3>
-        <p style="color: #333; background: #f9f9f9; padding: 16px; border-radius: 8px; margin: 0;">${productCategory}</p>
+        <p style="color: #262626; background: #f5f4f1; padding: 16px; border-radius: 8px; margin: 0;">${productCategory}</p>
       </div>
     `,
   });

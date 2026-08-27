@@ -77,7 +77,7 @@ const TEXT_ENTER_Y = 64;
 const TEXT_EXIT_Y = -56;
 
 const DIM = "rgba(255,255,255,0.16)";
-const LIVE = "#00ec97"; // --near-green — token de marca en vez del literal de esa página
+const LIVE = "#00dc8d"; // --near-green — token de marca en vez del literal de esa página
 
 const PATH_LEN = 100;
 const PULSE_DASH = 14;
@@ -215,12 +215,12 @@ export default function StickyScrollCapabilities() {
                 ))}
 
                 {SATELLITES.map((s, i) => (
-                  <circle key={s.label} data-node cx={s.x} cy={s.y} r="5" fill={i === RACE_FROM ? LIVE : "#ffffff"} />
+                  <circle key={s.label} data-node cx={s.x} cy={s.y} r="5" fill={i === RACE_FROM ? LIVE : "var(--sem-background-primary)"} />
                 ))}
 
                 <g data-core>
                   <circle cx={C} cy={C} r={R_CORE} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="1" />
-                  <circle cx={C} cy={C} r="4" fill="#ffffff" />
+                  <circle cx={C} cy={C} r="4" fill="var(--sem-background-primary)" />
                 </g>
                 <g data-core-inner>
                   <circle cx={C} cy={C} r={R_CORE - 11} fill="none" stroke={LIVE} strokeWidth="1" />

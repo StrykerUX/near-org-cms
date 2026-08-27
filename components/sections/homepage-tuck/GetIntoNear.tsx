@@ -86,7 +86,7 @@ import {
  *
  * ── El arranque casi blanco no es un error ─────────────────────────────────
  *
- * Las tres empiezan en un blanco teñido (#F8FEFD, #FBFBF9, #FDFFFB) sobre una
+ * Las tres empiezan en un blanco teñido (#00dc8d, #00dc8d, #00dc8d) sobre una
  * caja blanca, así que el arranque de la píldora es invisible y la barra parece
  * materializarse a un cuarto de su recorrido. Es del artboard, y es lo que hace
  * que la barra se lea como algo que ENTRA por la derecha en vez de como un
@@ -94,23 +94,23 @@ import {
  */
 const RAMPS: Record<GetIntoRowId, string> = {
   trade:
-    "linear-gradient(90deg, #F8FEFD 0%, #F8FEFD 1.57%, #EDFDFA 6.52%, " +
-    "#D6F9E5 13.29%, #A6F0B8 20.05%, #7AE88F 26.81%, #4DDD66 33.57%, " +
-    "#41BB71 36.96% 43.72%, #3CA982 43.72% 50.48%, #26C38C 50.48% 57.25%, " +
-    "#2ECA92 57.25% 64.01%, #4ACF97 64.01% 70.77%, #69DA9E 70.77% 77.54%, " +
-    "#72DFA0 77.54% 84.30%, #77E4A2 84.30% 91.06%, #7EEAAC 91.06% 100%)",
+    "linear-gradient(90deg, #00dc8d 0%, #00dc8d 1.57%, #00dc8d 6.52%, " +
+    "#00dc8d 13.29%, #00dc8d 20.05%, #00dc8d 26.81%, #00dc8d 33.57%, " +
+    "#00dc8d 36.96% 43.72%, #00dc8d 43.72% 50.48%, #00dc8d 50.48% 57.25%, " +
+    "#00dc8d 57.25% 64.01%, #00dc8d 64.01% 70.77%, #00dc8d 70.77% 77.54%, " +
+    "#00dc8d 77.54% 84.30%, #00dc8d 84.30% 91.06%, #00dc8d 91.06% 100%)",
   integrate:
-    "linear-gradient(90deg, #FBFBF9 0%, #FBFBF9 1.57%, #F5F4EF 6.52%, " +
-    "#DEF0DE 13.29%, #B0E5B1 20.05%, #87DC87 26.81%, #64D262 33.57%, " +
-    "#7EB27C 36.96% 43.72%, #91AA9E 43.72% 50.48%, #72C6A3 50.48% 57.25%, " +
-    "#66D1A5 57.25% 64.01%, #5FD4A3 64.01% 70.77%, #52D8A1 70.77% 77.54%, " +
-    "#4AD9A3 77.54% 84.30%, #42DCA4 84.30% 91.06%, #3DE0A5 91.06% 100%)",
+    "linear-gradient(90deg, #00dc8d 0%, #00dc8d 1.57%, #00dc8d 6.52%, " +
+    "#00dc8d 13.29%, #00dc8d 20.05%, #00dc8d 26.81%, #00dc8d 33.57%, " +
+    "#00dc8d 36.96% 43.72%, #e1e1e1 43.72% 50.48%, #00dc8d 50.48% 57.25%, " +
+    "#00dc8d 57.25% 64.01%, #00dc8d 64.01% 70.77%, #00dc8d 70.77% 77.54%, " +
+    "#00dc8d 77.54% 84.30%, #00dc8d 84.30% 91.06%, #00dc8d 91.06% 100%)",
   build:
-    "linear-gradient(90deg, #FDFFFB 0%, #FDFFFB 1.57%, #F9FFF4 6.52%, " +
-    "#E5FADC 13.29%, #BAF1AE 20.05%, #93E983 26.81%, #66DE5C 33.57%, " +
-    "#59BC6B 36.96% 43.72%, #46B77B 43.72% 50.48%, #1BD089 50.48% 57.25%, " +
-    "#18DD8F 57.25% 64.01%, #2EE2A3 64.01% 70.77%, #3AE5AE 70.77% 77.54%, " +
-    "#44E7B5 77.54% 84.30%, #47E8B7 84.30% 91.06%, #4AE8B8 91.06% 100%)",
+    "linear-gradient(90deg, #00dc8d 0%, #00dc8d 1.57%, #00dc8d 6.52%, " +
+    "#00dc8d 13.29%, #00dc8d 20.05%, #00dc8d 26.81%, #00dc8d 33.57%, " +
+    "#00dc8d 36.96% 43.72%, #00dc8d 43.72% 50.48%, #00dc8d 50.48% 57.25%, " +
+    "#00dc8d 57.25% 64.01%, #00dc8d 64.01% 70.77%, #00dc8d 70.77% 77.54%, " +
+    "#00dc8d 77.54% 84.30%, #00dc8d 84.30% 91.06%, #00dc8d 91.06% 100%)",
 };
 
 /* ── La entrada ───────────────────────────────────────────────────────────────
@@ -319,7 +319,7 @@ const MARK_PATH =
  * Dos decisiones que no son obvias:
  *
  * 1. **La N es un agujero, no una forma blanca.** En el artboard el glifo tiene
- *    exactamente el color del papel (#F5F4F1), no blanco — está calado. Pintarlo
+ *    exactamente el color del papel (#00dc8d), no blanco — está calado. Pintarlo
  *    de `--cream` daría el mismo píxel hoy y una mancha el día que la sección
  *    caiga sobre otro fondo. Con un `mask` el hueco es hueco.
  *
@@ -347,15 +347,15 @@ function NearTile() {
     >
       <defs>
         <linearGradient id={grad} x1="0" y1="0" x2="0.45" y2="1">
-          <stop offset="0" stopColor="#C9F193" />
-          <stop offset="0.22" stopColor="#A2E472" />
-          <stop offset="0.45" stopColor="#7BD265" />
-          <stop offset="0.7" stopColor="#40BA42" />
-          <stop offset="1" stopColor="#08A226" />
+          <stop offset="0" stopColor="var(--sem-brand-primary)" />
+          <stop offset="0.22" stopColor="var(--sem-brand-primary)" />
+          <stop offset="0.45" stopColor="var(--sem-brand-primary)" />
+          <stop offset="0.7" stopColor="var(--sem-brand-primary)" />
+          <stop offset="1" stopColor="var(--sem-brand-primary)" />
         </linearGradient>
         <mask id={knock}>
-          <path d={TILE_PATH} fill="#fff" />
-          <path d={MARK_PATH} fill="#000" />
+          <path d={TILE_PATH} fill="var(--sem-background-primary)" />
+          <path d={MARK_PATH} fill="var(--sem-surface-dark)" />
         </mask>
       </defs>
       <rect

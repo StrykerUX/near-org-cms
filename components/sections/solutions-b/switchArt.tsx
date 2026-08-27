@@ -39,7 +39,7 @@ const BOT_Y = H - 40;
 const jackX = (i: number) => INSET + (i / (JACKS - 1)) * (W - INSET * 2);
 
 /** El verde vivo. Literal y no `var(--token)`: si alguna vez se anima, GSAP interpola colores, no declaraciones. */
-const LIVE = "#00b96f";
+const LIVE = "#00dc8d";
 
 // Un cable: de un jack de arriba a uno de abajo, con las dos manijas tiradas en
 // VERTICAL. Es lo que hace que salga y llegue perpendicular al panel, como un

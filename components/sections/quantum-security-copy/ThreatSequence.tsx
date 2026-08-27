@@ -178,7 +178,7 @@ const RAIL_WINDOW = [
   "transparent 0deg",
   `transparent ${SWEEP_SECTOR - RAIL_ARC}deg`,
   `rgba(0,0,0,0.35) ${SWEEP_SECTOR - RAIL_ARC * 0.45}deg`,
-  `#000 ${SWEEP_SECTOR - 0.5}deg`,
+  `#262626 ${SWEEP_SECTOR - 0.5}deg`,
   `transparent ${SWEEP_SECTOR}deg`,
   "transparent 360deg)",
 ].join(",");
@@ -223,7 +223,7 @@ const SWEEP_LEAD_RAMP = hermiteRamp(3, 0);
 const SWEEP_MASK = `radial-gradient(circle closest-side at center, transparent 0 ${(
   (R_IN / R_OUT) *
   100
-).toFixed(2)}%, #000 ${((R_IN / R_OUT) * 100).toFixed(2)}% 100%)`;
+).toFixed(2)}%, #262626 ${((R_IN / R_OUT) * 100).toFixed(2)}% 100%)`;
 
 // ── Ring wave ────────────────────────────────────────────────────────────────
 // These animate `borderColor`, which is a paint property, on elements up to

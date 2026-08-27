@@ -36,8 +36,8 @@ import { CHAPTERS, HERO } from "@/components/sections/about/aboutContent";
 //
 // ── Papel de archivo, y no gris-azul ──────────────────────────────────────
 //
-// La primera versión era `#eae8e3 / #c8cfd0 / #5b686a`, y quedaba a un paso de
-// la de `/prototype/foundation-c` (`#e7eaec / #aebcc4 / #46545c`): dos de las
+// La primera versión era `#f5f4f1 / #e1e1e1 / #e1e1e1`, y quedaba a un paso de
+// la de `/prototype/foundation-c` (`#f5f4f1 / #e1e1e1 / #e1e1e1`): dos de las
 // cuatro páginas abriendo con el mismo terreno mineral. El error fue del
 // encargo, que le pidió «frío» a las dos.
 //
@@ -48,7 +48,7 @@ import { CHAPTERS, HERO } from "@/components/sections/about/aboutContent";
 // ni con el verde de economics. Las cuatro páginas ahora se distinguen por
 // matiz de un vistazo, que es lo único que funciona cuando se las compara en
 // pestañas distintas.
-const PALETTE = { bg: "#efe9e0", high: "#d5c6b0", line: "#6f6152" } as const;
+const PALETTE = { bg: "#f5f4f1", high: "#e1e1e1", line: "#e1e1e1" } as const;
 
 const SPAN = `${CHAPTERS[0].year} — ${CHAPTERS[CHAPTERS.length - 1].year}`;
 

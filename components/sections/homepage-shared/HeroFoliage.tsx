@@ -59,7 +59,7 @@ const P = {
 // propósito: la referencia nunca satura por arriba —su punto más claro sigue
 // siendo un crema verdoso— ni cierra en negro puro, y esos dos topes son buena
 // parte de por qué se lee como película y no como un degradé sintético.
-const PALETTE = ["#e8efbe", "#b5cc86", "#5e8f5c", "#1f5540", "#0a2018"] as const;
+const PALETTE = ["#00dc8d", "#00dc8d", "#00dc8d", "#00dc8d", "#00dc8d"] as const;
 
 // Resolución del buffer, como fracción del canvas.
 //

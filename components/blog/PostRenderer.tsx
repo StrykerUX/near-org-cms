@@ -30,7 +30,7 @@ export default function PostRenderer({ post, layout = "public" }: PostRendererPr
     ? { backgroundImage: `url(${post.heroBgImage})`, backgroundSize: "cover", backgroundPosition: "center" }
     : post.heroBgColor
       ? { backgroundColor: post.heroBgColor }
-      : { backgroundColor: "#cfcfcf" };
+      : { backgroundColor: "var(--sem-border-default)" };
 
   const textColorClass = post.heroBgColor && !post.heroBgImage ? "text-foreground" : "text-white";
 
@@ -88,7 +88,7 @@ export default function PostRenderer({ post, layout = "public" }: PostRendererPr
 
       {/* CONTENT */}
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <div className="prose prose-lg max-w-none text-[#101010]">
+        <div className="prose prose-lg max-w-none text-[#262626]">
           {renderBlocks(content?.content ?? [], components)}
         </div>
       </div>

@@ -25,21 +25,21 @@ import { DUR, STAGGER, enterTimeline } from "@/components/sections/homepage-shar
 //     que "NEAR belongs to you" se leyera entero—. El titular nuevo no lo
 //     necesita: se lee solo. El icono de arriba es un glifo de marca, no parte
 //     de una oración, así que va `aria-hidden` y fuera del heading.
-//   · **`bg-stone`.** #d8d6d0 es el gris de una banda que ocupa el ancho entero;
+//   · **`bg-stone`.** #e1e1e1 es el gris de una banda que ocupa el ancho entero;
 //     en una card sobre crema se lee sucio, porque hay un borde contra el que
 //     compararlo. `--card-surface` es el mismo gris subido y desaturado hasta
-//     quedar a mitad de camino entre `--cream` (#f5f4f1) y `--stone`.
+//     quedar a mitad de camino entre `--cream` (#00dc8d) y `--stone`.
 //   · **El corte duro contra las vecinas.** Era a propósito mientras la sección
 //     fuera una banda; con una card, lo que la separa es el aire.
 //
 // El primitivo `StairTransition` sigue sin usarse acá — ver el historial de ab7.
 const PALETTE = {
   // El gris de la card. No sale de los tokens porque no existe ahí: `--stone`
-  // (#d8d6d0) es una superficie de banda y `--card-tint` (#eae9e6) es el escalón
+  // (#e1e1e1) es una superficie de banda y `--card-tint` (#f5f4f1) es el escalón
   // apenas perceptible de las cards de `OwnYourOwn`. Esta card tiene que leerse
   // como un objeto apoyado sobre el crema, que es más contraste que el segundo y
   // menos peso que el primero.
-  "--card-surface": "#e2e1de",
+  "--card-surface": "#f5f4f1",
 } as React.CSSProperties;
 
 export default function BelongsNewsletter() {

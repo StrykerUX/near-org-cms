@@ -43,7 +43,7 @@ export default function ShellsReferenceView() {
     <main className="flex flex-col">
       {/* ── el suelo con shader, a pantalla ─────────────────────────────── */}
       <Surface
-        palette={{ bg: "#eceae4", high: "#bfe7cf", line: "#5f7f6d" }}
+        palette={{ bg: "#f5f4f1", high: "#00dc8d", line: "#e1e1e1" }}
         bands={9}
         scale={2.1}
         tilt={0.5}

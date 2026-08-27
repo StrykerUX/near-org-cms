@@ -302,14 +302,14 @@ export default function CapabilityStack() {
                     cx={s.x}
                     cy={s.y}
                     r="5"
-                    fill={i === RACE_FROM ? LIVE : "#ffffff"}
+                    fill={i === RACE_FROM ? LIVE : "var(--sem-background-primary)"}
                   />
                 ))}
 
                 {/* the account */}
                 <g data-core>
                   <circle cx={C} cy={C} r={R_CORE} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="1" />
-                  <circle cx={C} cy={C} r="4" fill="#ffffff" />
+                  <circle cx={C} cy={C} r="4" fill="var(--sem-background-primary)" />
                 </g>
                 {/* the authority mark, revealed in beat four */}
                 <g data-core-inner>
@@ -341,7 +341,7 @@ export default function CapabilityStack() {
                     width="22"
                     height="22"
                     fill="none"
-                    stroke="#ffffff"
+                    stroke="var(--sem-background-primary)"
                     strokeWidth="1"
                     strokeDasharray="3 3"
                   />
