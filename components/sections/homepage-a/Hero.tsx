@@ -259,7 +259,12 @@ export default function Hero() {
 
       // ── 5. Intro del titular ──────────────────────────────────────────────
       //
-      // ⚠️ El gradiente del <h1> y SplitText NO PUEDEN convivir.
+      // ⚠️ HISTÓRICO: el <h1> ya no lleva degradé —es tinta plana desde que la
+      // paleta dejó de tener rampas— así que nada de esto muerde hoy. Se
+      // conserva porque el día que alguien quiera volver a pintar el titular con
+      // `background-clip: text` va a chocar con lo mismo:
+      //
+      // El gradiente del <h1> y SplitText NO PUEDEN convivir.
       //
       // El titular se pinta con `background-clip: text` + `color: transparent`:
       // el color sale del fondo del <h1>, recortado a la silueta de sus letras.
@@ -431,13 +436,15 @@ export default function Hero() {
         data-hero-wrap
         className="relative z-[2] flex flex-1 flex-col items-center justify-center pb-28 pt-14 text-center text-display"
       >
-        {/* Fondo Y clip van SIEMPRE juntos, en la misma variante. El fondo sin
-            el clip pinta un rectángulo negro detrás de un texto negro; el clip
-            sin markup limpio deja las letras transparentes sobre nada. Los dos
-            se encienden juntos al terminar la intro — ver el bloque de motion. */}
+        {/* Tinta plana. Tenía un degradé recortado con `background-clip: text`
+            que iba de negro al verde de tinta, y con él se fue toda su
+            maquinaria: el fondo y el clip tenían que encenderse juntos y recién
+            al terminar la intro, porque SplitText y `background-clip: text` no
+            pueden convivir (el detalle sigue documentado en el bloque de
+            motion). Sin degradé no hay nada que recortar ni que sincronizar. */}
         <h1
           data-hero="heading"
-          className="text-[1.08em] text-pretty data-[intro=done]:bg-clip-text data-[intro=done]:text-transparent data-[intro=done]:[background-image:linear-gradient(135deg,#000_0%,#000_55%,var(--ink-deep)_100%)]"
+          className="text-content text-[1.08em] text-pretty"
         >
           Own your <Accent display>world.</Accent>
         </h1>

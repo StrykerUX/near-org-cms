@@ -269,13 +269,16 @@ antes de "arreglar" algo que parece un bug:**
 
 - **Hay un solo verde en la UI.** Los cinco verdes con roles distintos, el teal y
   los dos amarillos del sweep son todos `--green-500`.
-- **Un degradé NO se aplana.** Un gradiente colapsado al color de marca no queda
-  simplificado, queda borrado. De un degradé sigue a la marca **la parada que ERA
-  el verde de marca, y ninguna otra**: la rampa del CTA conserva su mint y su
-  lima (`--cta-mint-400`, `--cta-lime-200`, espejados en `motionColors.ts`), y
-  las paletas de las escenas —la rampa de cinco pasos del hero, los relieves, los
-  terrenos, los word fields— se quedan enteras. Vale para las paradas de
-  `<linearGradient>` igual que para las constantes de una escena.
+- **La marca no tiene degradé.** Los primitivos son cuatro colores planos, así
+  que **todo botón y todo texto con degradé de marca pinta el verde plano**: la
+  rampa del CTA (`--cta-deep/mint/lime`) apunta entera a `--sem-brand-primary`,
+  `CTA_RAMP` en `motionColors.ts` son tres copias del mismo verde, el acento del
+  statement y el titular del hero perdieron su `bg-clip-text`.
+- **El ARTE es la excepción, y solo el arte.** La paleta de una escena no se
+  aplana —un degradé colapsado a un color no queda simplificado, queda borrado—:
+  la rampa de cinco pasos del hero, los relieves, los terrenos y los word fields
+  se quedan enteros, y de ellos sigue a la marca **la parada que ERA el verde de
+  marca, y ninguna otra**.
 - **No hay blanco.** `background-primary` y `background-secondary` son el mismo
   crema, así que las cards no se despegan de la página por color — solo por su
   borde.

@@ -14,15 +14,23 @@
 // precio de poder animarlo.
 
 /**
- * La rampa del CTA: verde profundo → verde claro → lima. Es el gradiente de
- * marca de la página, y la usan tres escenas — la frase que se escribe en
+ * La rampa del CTA. La usan tres escenas — la frase que se escribe en
  * `ThreatSequence`, los gradientes SVG de `NearStack` y el color de reposo de
  * las letras encendidas del word field.
  *
- * Interpolar un punto intermedio es `gsap.utils.interpolate(CTA_RAMP, t)`, que
- * devuelve `"rgb(r,g,b)"`. No hace falta escribir el mezclador a mano.
+ * ⚠️ Ya NO es una rampa: eran tres paradas —verde profundo → verde claro →
+ * lima— y la marca no tiene degradé, así que las tres son `--green-500`.
+ * Interpolar entre ellas devuelve siempre el mismo color y los gradientes que
+ * la consumen pintan plano. Es deliberado, no un valor sin actualizar.
+ *
+ * Se conserva como tupla de tres, y no colapsada en una constante, por dos
+ * motivos: no obliga a tocar a sus consumidores —que llaman a `interpolate`— y
+ * el día que la marca recupere escalones alcanza con cambiar estos tres
+ * valores. Espeja `--cta-deep` / `--cta-mint` / `--cta-lime` de globals.css.
+ *
+ * Interpolar un punto intermedio sigue siendo `gsap.utils.interpolate(CTA_RAMP, t)`.
  */
-export const CTA_RAMP = ["#00dc8d", "#8bf29c", "#ecfdb0"] as const;
+export const CTA_RAMP = ["#00dc8d", "#00dc8d", "#00dc8d"] as const;
 
 /** El extremo más brillante de la rampa — el flash con el que nace cada letra. */
 export const CTA_RAMP_HEAD = CTA_RAMP[CTA_RAMP.length - 1];

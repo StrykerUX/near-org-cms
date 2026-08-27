@@ -395,7 +395,7 @@ export default function Hero() {
             está explicado en el bloque de motion. */}
         <h1
           data-hero="heading"
-          className="bg-clip-text text-[1.08em] text-transparent text-pretty [background-image:linear-gradient(135deg,#000_0%,#000_55%,var(--ink-deep)_100%)]"
+          className="text-content text-[1.08em] text-pretty"
         >
           Own your <Accent display>world.</Accent>
         </h1>

@@ -62,17 +62,6 @@
      partido en dos abajo. */
   --gray-600: #5f6669;
 
-  /* Las dos paradas CLARAS de la rampa del CTA. No son la marca —la marca es la
-     parada profunda, que sale de `--green-500`— y sin ellas el gradiente deja de
-     ser un gradiente: tres paradas del mismo verde es un relleno sólido.
-
-     Están acá por la misma razón que la rampa del hero se dejó entera: aplanar
-     un degradé al color de marca no lo simplifica, lo borra. Se espejan a mano
-     en components/primitives/motion/motionColors.ts, que necesita literales
-     porque GSAP interpola colores y no declaraciones. */
-  --cta-mint-400: #8bf29c;
-  --cta-lime-200: #ecfdb0;
-
   /* ── capa 1 · semánticos ──────────────────────────────────────────────────
      Los ocho tokens del archivo de Figma con el destino que el archivo les da,
      sin desviaciones. Los nombres son los suyos menos el prefijo de grupo
@@ -144,11 +133,14 @@
   --near-teal: var(--sem-brand-primary);
   --sweep: var(--sem-brand-primary);
   --sweep-solid: var(--sem-brand-primary);
-  /* De la rampa del CTA solo la parada profunda era la marca; el mint y la lima
-     son sus paradas claras y se quedan como estaban (ver la capa 0). */
+  /* La rampa del CTA deja de ser una rampa. La marca no tiene degradé —los
+     primitivos son cuatro colores planos— así que sus tres paradas son el mismo
+     verde y todo lo que la usaba pinta plano. Los tres nombres siguen existiendo
+     porque los consumen tres hojas de estilo y un módulo de motion; unificarlos
+     es un renombre aparte. */
   --cta-deep: var(--sem-brand-primary);
-  --cta-mint: var(--cta-mint-400);
-  --cta-lime: var(--cta-lime-200);
+  --cta-mint: var(--sem-brand-primary);
+  --cta-lime: var(--sem-brand-primary);
 
   /* → background-primary / secondary. El crema de la página y el tinte de las
      cards eran dos superficies claras distintas; ahora son la misma, así que una
@@ -1168,12 +1160,14 @@ button:hover .lucide-plus {
    box and leave the 1px ring showing. */
 [data-q-cta] {
   background-color: transparent;
+  /* El relleno era un degradé de tres paradas de la rampa del CTA. La marca no
+     tiene degradé, así que es el verde plano; el mecanismo de dos capas —relleno
+     y plancha oscura que retrocede— se conserva entero, porque lo que hace el
+     gesto es la ANIMACIÓN de `background-size`, no la mezcla de colores. */
   background-image:
     linear-gradient(
-      105deg,
-      var(--cta-lime) 0%,
-      var(--cta-mint) 45%,
-      var(--cta-deep) 100%
+      var(--sem-brand-primary),
+      var(--sem-brand-primary)
     ),
     linear-gradient(var(--foreground), var(--foreground));
   background-repeat: no-repeat, no-repeat;
@@ -1257,12 +1251,16 @@ button:hover .lucide-plus {
    itself off mid-cycle instead of returning to ink. The words stay up the whole
    time; only their colour moves. */
 [data-q-sheen] {
+  /* El brillo eran DOS tonos —un teal y el amarillo del sweep— que se mezclaban
+     en el centro de la cinta. Los dos resuelven ahora al verde de marca, así que
+     el brillo es una banda plana; se escribe con una sola parada para que el CSS
+     diga lo que hace. Lo que viaja sigue siendo la tinta → brillo → tinta: el
+     degradé de acá NO es el de la marca, es la máscara del movimiento. */
   background-image: linear-gradient(
     100deg,
     var(--foreground) 0%,
     var(--foreground) 36%,
-    var(--near-teal) 46%,
-    var(--sweep-solid) 54%,
+    var(--sem-brand-primary) 50%,
     var(--foreground) 64%,
     var(--foreground) 100%
   );
@@ -1367,13 +1365,14 @@ button:hover .lucide-plus {
   color: var(--foreground);
   border-color: transparent;
   background-color: transparent;
+  /* Era una cinta de cinco paradas que viajaba con `background-position`. Sin
+     degradé de marca no hay luz que viajar: queda el verde plano. La transición
+     de posición de más abajo se vuelve invisible y se deja igual — sacarla
+     obligaría a reescribir la variante entera, y el día que la marca tenga
+     escalones vuelve sola. */
   background-image: linear-gradient(
-    105deg,
-    var(--cta-deep) 0%,
-    var(--cta-mint) 25%,
-    var(--cta-lime) 50%,
-    var(--cta-mint) 75%,
-    var(--cta-deep) 100%
+    var(--sem-brand-primary),
+    var(--sem-brand-primary)
   );
   background-repeat: no-repeat;
   background-size: 200% 100%;

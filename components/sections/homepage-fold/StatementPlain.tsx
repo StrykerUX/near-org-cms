@@ -104,12 +104,6 @@ const END = "bottom 55%";
 
 const PALETTE = {
   "--statement-accent": "#5cb946",
-  /* Las dos paradas del degradé del acento. Van de claro a oscuro y las dos
-     sobre el mismo verde: sobre crema, el tramo claro es el límite de lo que
-     todavía se lee, así que el degradé baja hacia el oscuro en vez de subir —
-     el promedio de contraste mejora respecto del color plano que había. */
-  "--statement-accent-lo": "#6cc24a",
-  "--statement-accent-hi": "#2e7d32",
 } as React.CSSProperties;
 
 /**
@@ -141,16 +135,21 @@ const PALETTE = {
  * caja del inline: con altura cero no hay caja sobre la que pintarlo y el texto
  * queda transparente sobre nada.
  *
- * El degradé va sobre el texto con `bg-clip-text`, y `box-decoration-break:
- * clone` es lo que lo hace sobrevivir al quiebre de línea: sin él, un tramo
- * partido en dos reparte UN degradé entre los dos fragmentos y el segundo
- * arranca donde terminó el primero, con un salto de color en medio de la
- * palabra. Con clone, cada línea recibe el degradé entero.
+ * El acento es el verde de marca PLANO. Tenía un degradé recortado con
+ * `bg-clip-text` —de un verde claro a uno oscuro, para que el promedio de
+ * contraste sobre crema mejorara— y con él se fueron sus dos acompañantes:
+ * `bg-clip-text` no tiene nada que recortar sin degradé, y
+ * `box-decoration-break: clone` existía solo para que un tramo partido en dos
+ * renglones no repartiera UN degradé entre los dos fragmentos.
+ *
+ * ⚠️ El verde de marca sobre crema es 1.64:1. El degradé que se fue era la
+ * compensación de eso; el acento ahora se apoya en la bastardilla y el cuerpo,
+ * no en el contraste.
  */
 function Accented({ children }: { children: React.ReactNode }) {
   return (
     // ds-exempt: corrección óptica de x-height y su interlineado, en `em`
-    <em className="bg-[linear-gradient(160deg,var(--statement-accent-lo)_0%,var(--statement-accent-hi)_100%)] bg-clip-text font-serif text-[1.09em] leading-[0.86] text-transparent [box-decoration-break:clone]">
+    <em className="text-brand font-serif text-[1.09em] leading-[0.86]">
       {children}
     </em>
   );

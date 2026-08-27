@@ -20,7 +20,7 @@ const PRIMITIVES: { token: string; figma: string; hex: string; absorbed: string 
     figma: "green/500",
     hex: "#00DC8D",
     absorbed:
-      "Absorbed five greens with separate jobs — the nav CTA, the brand, the buttons on cream, the only green that read as text on light, the ink-green field — plus the teal, the two sweep yellows and the deep stop of the CTA ramp.",
+      "Absorbed five greens with separate jobs — the nav CTA, the brand, the buttons on cream, the only green that read as text on light, the ink-green field — plus the teal, the two sweep yellows and all three stops of the CTA ramp. The brand has no gradient: buttons and gradient text paint flat.",
   },
   {
     token: "--cream-100",
@@ -156,9 +156,9 @@ const LEGACY: { role: string; aliases: string; lost: string }[] = [
   {
     role: "brand-primary",
     aliases:
-      "--near-green · --near-green-accent · --near-green-dark · --green-ink · --near-teal · --sweep · --sweep-solid · --cta-deep",
+      "--near-green · --near-green-accent · --near-green-dark · --green-ink · --near-teal · --sweep · --sweep-solid · --cta-deep · --cta-mint · --cta-lime",
     lost:
-      "Eight tones into one, and --green-ink — which existed because the brand green does not reach 3:1 on white — is no longer distinct from the green that did not reach it. The CTA ramp is not among them: only its deep stop follows the brand, because a gradient flattened to one colour is not a simpler gradient, it is no gradient.",
+      "Ten tones into one. --green-ink — which existed because the brand green does not reach 3:1 on white — is no longer distinct from the green that did not reach it, and the CTA ramp is gone as a ramp: every button and every piece of gradient text paints flat brand. Scene palettes are the exception — there, only the stop that WAS the brand green follows it.",
   },
   {
     role: "background-primary / secondary",
