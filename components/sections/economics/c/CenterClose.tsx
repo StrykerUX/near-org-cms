@@ -37,9 +37,9 @@ import { CENTER } from "@/components/sections/economics/economicsContent";
 // is the only part of a contour map a line of type can sit on.
 
 const PALETTE = {
-  bg: "#00dc8d",
-  high: "#00dc8d",
-  line: "#00dc8d",
+  bg: "#efe9d5",
+  high: "#a3d78d",
+  line: "#4e7a3f",
 } as const;
 
 export default function CenterClose() {

@@ -47,6 +47,32 @@
   --gray-300: #e1e1e1;
   --dark-900: #262626;
 
+  /* El único agregado a los cuatro del archivo, y está acá por lo que el archivo
+     no resuelve: su `text-secondary` es gray/300, que sobre el crema de la
+     página da 1.19:1. Eso no es un texto subordinado, es un texto que no se ve —
+     y el sitio tiene 228 lugares con copy en ese rol sobre claro.
+
+     5.32:1 sobre cream/100, o sea AA con margen para cuerpo normal, y bien
+     separado del primario (13.76:1) para que siga leyéndose como subordinado.
+     El matiz es el del gris frío que el sitio ya usaba para este rol
+     (#6c7477, 4.34:1), bajado hasta cruzar el piso.
+
+     Sobre superficie OSCURA no sirve —2.5:1—; ahí el rol lo sigue cumpliendo
+     gray/300, que es lo que el archivo define y da 11.57:1. Por eso el rol está
+     partido en dos abajo. */
+  --gray-600: #5f6669;
+
+  /* Las dos paradas CLARAS de la rampa del CTA. No son la marca —la marca es la
+     parada profunda, que sale de `--green-500`— y sin ellas el gradiente deja de
+     ser un gradiente: tres paradas del mismo verde es un relleno sólido.
+
+     Están acá por la misma razón que la rampa del hero se dejó entera: aplanar
+     un degradé al color de marca no lo simplifica, lo borra. Se espejan a mano
+     en components/primitives/motion/motionColors.ts, que necesita literales
+     porque GSAP interpola colores y no declaraciones. */
+  --cta-mint-400: #8bf29c;
+  --cta-lime-200: #ecfdb0;
+
   /* ── capa 1 · semánticos ──────────────────────────────────────────────────
      Los ocho tokens del archivo de Figma con el destino que el archivo les da,
      sin desviaciones. Los nombres son los suyos menos el prefijo de grupo
@@ -73,7 +99,12 @@
   --sem-background-secondary: var(--cream-100);
 
   --sem-text-primary: var(--dark-900);
-  --sem-text-secondary: var(--gray-300);
+  /* El `text-secondary` del archivo, partido por el fondo sobre el que va: el
+     valor que define (gray/300) es correcto sobre oscuro y no se ve sobre claro.
+     Un solo token que funciona en la mitad de los casos es una trampa, porque
+     nada en su nombre dice cuál mitad. */
+  --sem-text-secondary-on-dark: var(--gray-300);
+  --sem-text-secondary-on-light: var(--gray-600);
   --sem-text-on-brand: var(--cream-100);
 
   --sem-border-default: var(--gray-300);
@@ -97,10 +128,15 @@
 
   /* → brand-primary. Eran cinco verdes con roles distintos (nav, marca, botones
      sobre crema, texto verde sobre claro, el field oscuro), más el teal, más los
-     dos amarillos del sweep, más las tres paradas de la rampa del CTA. Las diez
-     son ahora el mismo verde: los gradientes que las combinaban quedan planos, y
-     `--green-ink`, que existía porque el verde de marca no llega a 3:1 sobre
-     blanco, ya no es distinto del que no llegaba. */
+     dos amarillos del sweep, más la parada profunda de la rampa del CTA. Los
+     ocho son ahora el mismo verde, y `--green-ink` —que existía porque el verde
+     de marca no llega a 3:1 sobre blanco— ya no es distinto del que no llegaba.
+
+     Lo que NO entra acá son los degradés. Un gradiente aplanado al color de
+     marca no queda simplificado, queda borrado, así que las paradas claras de la
+     rampa del CTA se conservan y lo mismo vale para las paletas de las escenas
+     (la rampa de cinco pasos del hero, los relieves, los terrenos): de ellas
+     sigue a la marca la parada que ERA el verde de marca, y ninguna otra. */
   --near-green: var(--sem-brand-primary);
   --near-green-accent: var(--sem-brand-primary);
   --near-green-dark: var(--sem-brand-primary);
@@ -108,9 +144,11 @@
   --near-teal: var(--sem-brand-primary);
   --sweep: var(--sem-brand-primary);
   --sweep-solid: var(--sem-brand-primary);
+  /* De la rampa del CTA solo la parada profunda era la marca; el mint y la lima
+     son sus paradas claras y se quedan como estaban (ver la capa 0). */
   --cta-deep: var(--sem-brand-primary);
-  --cta-mint: var(--sem-brand-primary);
-  --cta-lime: var(--sem-brand-primary);
+  --cta-mint: var(--cta-mint-400);
+  --cta-lime: var(--cta-lime-200);
 
   /* → background-primary / secondary. El crema de la página y el tinte de las
      cards eran dos superficies claras distintas; ahora son la misma, así que una
@@ -143,8 +181,8 @@
      claro. Existía justamente porque a 4.34:1 era el reemplazo legible de
      `--gray-blue` (2.81:1); los dos van ahora a gray/300, que sobre crema es
      1.19:1. */
-  --gray-intermediate: var(--sem-text-secondary);
-  --gray-blue: var(--sem-text-secondary);
+  --gray-intermediate: var(--sem-text-secondary-on-light);
+  --gray-blue: var(--sem-text-secondary-on-light);
 
   /* Cuánto espacio ocupa el header fijo desde el borde de arriba: 24px de
      aire (`pt-6` del Container) + 64px de barra (`h-16`). Lo consumen las
@@ -190,7 +228,7 @@
   --secondary: var(--sem-surface-dark);
   --secondary-foreground: var(--sem-background-primary);
   --muted: var(--sem-background-secondary);
-  --muted-foreground: var(--sem-text-secondary);
+  --muted-foreground: var(--sem-text-secondary-on-light);
   --accent: var(--sem-background-secondary);
   --accent-foreground: var(--sem-text-primary);
   --destructive: oklch(0.6188 0.2376 25.7658);
@@ -325,7 +363,10 @@
   --color-surface-dark: var(--sem-surface-dark);
 
   --color-content: var(--sem-text-primary);
-  --color-content-muted: var(--sem-text-secondary);
+  /* `muted` es el de la página clara, que es donde vive casi todo el sitio;
+     `dim` es el mismo rol sobre superficie oscura. */
+  --color-content-muted: var(--sem-text-secondary-on-light);
+  --color-content-dim: var(--sem-text-secondary-on-dark);
 
   --color-line: var(--sem-border-default);
 

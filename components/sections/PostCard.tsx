@@ -23,9 +23,9 @@ export default function PostCard({
   ctaLabel = "Read more →",
 }: PostCardProps) {
   return (
-    <article className="group flex flex-col rounded-[1.5rem] overflow-hidden border border-[#e1e1e1] bg-[#f5f4f1] hover:shadow-lg transition-shadow duration-300">
+    <article className="group flex flex-col rounded-[1.5rem] overflow-hidden border border-[#CAC8C8] bg-[#ECECEC] hover:shadow-lg transition-shadow duration-300">
       <Link href={post.href} className="block overflow-hidden">
-        <div className="relative aspect-[16/9] w-full bg-[#e1e1e1]">
+        <div className="relative aspect-[16/9] w-full bg-[#CAC8C8]">
           <Image
             src={post.coverImage}
             alt={post.title}
@@ -37,33 +37,33 @@ export default function PostCard({
       </Link>
       <div className="flex flex-col flex-1 p-5">
         {metaPosition === "category-top" && post.eyebrow && (
-          <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-[#e1e1e1] mb-2">
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-[#5A5A5A] mb-2">
             {post.eyebrow}
           </span>
         )}
         {metaPosition === "date-top" && (
-          <p className="font-mono text-[0.75rem] text-[#e1e1e1] mb-2">{post.dateLabel}</p>
+          <p className="font-mono text-[0.75rem] text-[#5A5A5A] mb-2">{post.dateLabel}</p>
         )}
         <Link href={post.href}>
           <h2
-            className="font-medium leading-snug text-[#262626] group-hover:text-[#e1e1e1] transition-colors mb-2 line-clamp-2"
+            className="font-medium leading-snug text-[#101010] group-hover:text-[#525252] transition-colors mb-2 line-clamp-2"
             style={{ fontSize: "var(--font-size-body)" }}
           >
             {post.title}
           </h2>
         </Link>
         {post.excerpt && (
-          <p className="font-mono text-[0.8rem] text-[#e1e1e1] leading-relaxed line-clamp-2 flex-1">
+          <p className="font-mono text-[0.8rem] text-[#5A5A5A] leading-relaxed line-clamp-2 flex-1">
             {post.excerpt}
           </p>
         )}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#e1e1e1]">
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#CAC8C8]">
           {metaPosition === "category-top" ? (
             <>
-              <span className="font-mono text-[0.75rem] text-[#e1e1e1]">{post.dateLabel}</span>
+              <span className="font-mono text-[0.75rem] text-[#5A5A5A]">{post.dateLabel}</span>
               <Link
                 href={post.href}
-                className="font-mono text-[0.75rem] text-[#e1e1e1] hover:text-[#262626] transition-colors"
+                className="font-mono text-[0.75rem] text-[#5A5A5A] hover:text-[#101010] transition-colors"
               >
                 {ctaLabel}
               </Link>
@@ -71,7 +71,7 @@ export default function PostCard({
           ) : (
             <Link
               href={post.href}
-              className="font-mono text-[0.75rem] text-[#e1e1e1] hover:text-[#262626] transition-colors"
+              className="font-mono text-[0.75rem] text-[#5A5A5A] hover:text-[#101010] transition-colors"
             >
               {ctaLabel}
             </Link>

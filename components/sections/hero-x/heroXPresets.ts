@@ -51,7 +51,7 @@ import type { HeroXPage } from "@/components/sections/hero-x/heroXContent";
  * de por qué la referencia se lee como una película velada y no como un degradé
  * sintético.
  */
-const PALETTE = ["#00dc8d", "#00dc8d", "#00dc8d", "#00dc8d", "#00dc8d"] as const;
+const PALETTE = ["#f7f7ef", "#e6ecd2", "#c2d8b4", "#8fb894", "#4a7a63"] as const;
 
 /**
  * Nueve carriles, iguales en las nueve páginas.

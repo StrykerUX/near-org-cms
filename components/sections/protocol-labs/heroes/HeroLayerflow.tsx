@@ -147,11 +147,11 @@ const SURFACE = {
   // entre dos paradas, así que un nivel son ~0.006 y no 1/256.
   u_dither: 0.007,
 
-  u_c0: hexToRgb("#00dc8d"),
-  u_c1: hexToRgb("#00dc8d"),
-  u_c2: hexToRgb("#00dc8d"),
-  u_c3: hexToRgb("#00dc8d"),
-  u_c4: hexToRgb("#00dc8d"),
+  u_c0: hexToRgb("#f7f7ef"),
+  u_c1: hexToRgb("#e6ecd2"),
+  u_c2: hexToRgb("#c2d8b4"),
+  u_c3: hexToRgb("#8fb894"),
+  u_c4: hexToRgb("#4a7a63"),
 };
 
 export default function Hero() {
@@ -256,7 +256,7 @@ export default function Hero() {
             fragment={HERO_SURFACE_FRAG}
             uniforms={SURFACE}
             tag="protocol-hero"
-            fallback="#00dc8d"
+            fallback="#eef0e4"
             // Buffer a resolución plena, contra el 0.6 que trae `GlSurface`. Aquel
             // valor está calibrado para superficies SIN bordes —el follaje de la
             // home es blur puro y lo que se pierde al escalar no se ve— y ésta tiene

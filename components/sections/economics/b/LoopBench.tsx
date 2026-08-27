@@ -97,8 +97,8 @@ const EDGE_DIM = "rgba(245,244,241,0.24)";
 // light, the right face less, the left face least. That ordering is the only
 // thing telling the reader these are blocks standing on a plane and not
 // diamonds lying on it.
-const DIM = { top: "#262626", right: "#262626", left: "#262626" } as const;
-const LIT = { top: "#00dc8d", right: "#00dc8d", left: "#00dc8d" } as const;
+const DIM = { top: "#191d1e", right: "#131718", left: "#0e1112" } as const;
+const LIT = { top: "#1d6b4c", right: "#14523a", left: "#0d3a29" } as const;
 
 // `pathLength` is 100 and not 1: GSAP rounds pixel-unit values by default
 // (`autoRound`) and `stroke-dashoffset` is a pixel property, so normalised to 1

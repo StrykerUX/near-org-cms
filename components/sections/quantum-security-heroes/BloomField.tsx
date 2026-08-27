@@ -154,7 +154,7 @@ export default function BloomField() {
         // limpia. Si el degradado subiera parejo desde 0%, el campo
         // asomaría detrás del titular y del CTA.
         ["--bloom-fade" as string]:
-          "linear-gradient(145deg, transparent 0%, rgba(0,0,0,0.01) 20%, rgba(0,0,0,0.04) 32%, rgba(0,0,0,0.1) 42%, rgba(0,0,0,0.2) 52%, rgba(0,0,0,0.34) 62%, rgba(0,0,0,0.52) 72%, rgba(0,0,0,0.72) 82%, rgba(0,0,0,0.89) 91%, #262626 100%)",
+          "linear-gradient(145deg, transparent 0%, rgba(0,0,0,0.01) 20%, rgba(0,0,0,0.04) 32%, rgba(0,0,0,0.1) 42%, rgba(0,0,0,0.2) 52%, rgba(0,0,0,0.34) 62%, rgba(0,0,0,0.52) 72%, rgba(0,0,0,0.72) 82%, rgba(0,0,0,0.89) 91%, #000 100%)",
       }}
     >
       <canvas ref={canvasRef} className="block size-full pointer-events-auto" />

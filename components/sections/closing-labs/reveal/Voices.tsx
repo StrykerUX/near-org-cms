@@ -28,7 +28,7 @@ import { TESTIMONIALS } from "@/components/sections/homepage-tuck/testimonialDec
 // ⚠️ Dos de las cuatro citas son reconstrucciones y un cargo dice
 // «Company xxx» — ver la cabecera de `testimonialDeckContent.ts`.
 const DIM = "rgba(16,16,16,0.16)";
-const LIT = "#262626";
+const LIT = "#101010";
 
 export default function RevealVoices() {
   return (

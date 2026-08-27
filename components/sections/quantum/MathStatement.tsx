@@ -87,9 +87,9 @@ export default function MathStatement() {
           lineHeight: 1.54,
           letterSpacing: "0.12em",
           WebkitMaskImage:
-            "linear-gradient(to top,#262626 0%,#262626 26%,rgba(0,0,0,0.55) 52%,rgba(0,0,0,0) 96%)",
+            "linear-gradient(to top,#000 0%,#000 26%,rgba(0,0,0,0.55) 52%,rgba(0,0,0,0) 96%)",
           maskImage:
-            "linear-gradient(to top,#262626 0%,#262626 26%,rgba(0,0,0,0.55) 52%,rgba(0,0,0,0) 96%)",
+            "linear-gradient(to top,#000 0%,#000 26%,rgba(0,0,0,0.55) 52%,rgba(0,0,0,0) 96%)",
         }}
       />
 

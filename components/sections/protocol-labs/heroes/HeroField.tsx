@@ -15,13 +15,13 @@ import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 // hoy es uno de los tres heroes entre los que la página elige, y lo único que
 // cambia entre A, B y C.
 
-export const FIELD_INK = "#262626";
+export const FIELD_INK = "#080a09";
 
 export default function HeroField() {
   return (
     <section
       data-nav-dark
-      className="relative isolate flex min-h-svh flex-col overflow-hidden bg-[#262626] pt-[var(--site-header-block)] text-cream"
+      className="relative isolate flex min-h-svh flex-col overflow-hidden bg-[#080a09] pt-[var(--site-header-block)] text-cream"
     >
       <GlyphField className="absolute inset-0 z-0 h-full w-full" />
       {/* El campo llega hasta el texto y le pelea contraste. En vez de bajarle

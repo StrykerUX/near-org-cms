@@ -23,7 +23,7 @@ export type PageHeroProps = {
 };
 
 // `data-nav-dark` no es decorativo: el header del sitio es una barra flotante
-// casi negra (#262626) y este hero es #262626, así que sin el atributo la barra
+// casi negra (#0a0a0a) y este hero es #101010, así que sin el atributo la barra
 // desaparece sobre él. El atributo la pasa a `--q-nav-bg-over-dark` mientras lo
 // cruza — el mismo mecanismo que usan las secciones oscuras de /prototype.
 //
@@ -41,7 +41,7 @@ export default function PageHero({
   return (
     <section
       data-nav-dark
-      className={`relative bg-[#262626] ${SIZE[size].minH} flex flex-col pt-[var(--site-header-block)]`}
+      className={`relative bg-[#101010] ${SIZE[size].minH} flex flex-col pt-[var(--site-header-block)]`}
     >
       <Container width="wide" className="relative z-10 flex flex-col flex-1">
         <div className={`flex flex-col flex-1 justify-end ${SIZE[size].pb}`}>

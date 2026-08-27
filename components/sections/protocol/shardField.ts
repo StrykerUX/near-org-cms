@@ -31,7 +31,7 @@ type Cell = {
 export type ShardFieldHandle = { destroy: () => void };
 
 const HAIRLINE = "rgba(0,0,0,0.10)";
-const LIT = ["#00dc8d", "#00dc8d", "#00dc8d"];
+const LIT = ["#00dc8d", "#8bf29c", "#ecfdb0"];
 
 /** Below this, a cell is too small to read as a shard and stops subdividing. */
 const MIN_CELL = 46;

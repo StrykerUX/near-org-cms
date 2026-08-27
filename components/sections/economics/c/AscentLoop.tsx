@@ -60,7 +60,7 @@ const STEPS = FLYWHEEL.steps;
 // read straight into SVG attributes.
 const ROUTE_STROKE = "#00dc8d";
 const RETURN_STROKE = "#00dc8d";
-const CARRIER = "#00dc8d";
+const CARRIER = "#ecfdb0";
 const CONTOUR_STROKE = "rgba(78,122,63,0.28)";
 const STATION_RING = "#00dc8d";
 
@@ -158,9 +158,9 @@ export default function AscentLoop() {
             {/* The CTA ramp as an actual fill, which is this variant's licence
                 and nowhere else's: the ground under the climb is what rises. */}
             <linearGradient id="economics-c-relief" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--sem-brand-primary)" stopOpacity="0.55" />
-              <stop offset="60%" stopColor="var(--sem-brand-primary)" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="var(--sem-brand-primary)" stopOpacity="0" />
+              <stop offset="0%" stopColor="#8bf29c" stopOpacity="0.55" />
+              <stop offset="60%" stopColor="#ecfdb0" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#ecfdb0" stopOpacity="0" />
             </linearGradient>
           </defs>
 

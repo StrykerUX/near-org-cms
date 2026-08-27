@@ -256,7 +256,7 @@ export function createGlyphShine(
     dpr: number
   ) {
     mctx.setTransform(1, 0, 0, 1, 0, 0);
-    mctx.fillStyle = "#262626";
+    mctx.fillStyle = "#000";
     mctx.fillRect(0, 0, mask.width, mask.height);
 
     mctx.textAlign = "left";

@@ -21,11 +21,11 @@ import { SCALE_ART } from "@/components/sections/protocol-labs/scaleArt";
 // una página nueva que invente el suyo obliga a mantener dos.
 //
 // **El tinte es el mismo que en la home, y ahora sí puede serlo.** `card-tint`
-// al 50% compone ≈ #f5f4f1 sobre crema: un escalón por debajo del fondo, que es
+// al 50% compone ≈ #efefec sobre crema: un escalón por debajo del fondo, que es
 // la relación que hace que se lean como cards.
 //
 // Estuvo un rato al 70%, y no por gusto: la sección era de fondo blanco puro, y
-// sobre blanco ese 50% compone ≈ #f5f4f1 —la mitad de contraste— y dejaba las
+// sobre blanco ese 50% compone ≈ #f4f4f3 —la mitad de contraste— y dejaba las
 // cards a medio camino entre caja y mancha. Al pasar la sección a crema, el
 // motivo desapareció y el número vuelve al de la home. Lo que se copia de allá
 // es la RELACIÓN con su fondo; el porcentaje es sólo su consecuencia, y hay que

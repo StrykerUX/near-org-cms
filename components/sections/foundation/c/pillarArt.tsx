@@ -35,9 +35,9 @@ function Ramp({ id }: { id: string }) {
   return (
     <defs>
       <linearGradient id={id} x1="0" y1="1" x2="1" y2="0">
-        <stop offset="0%" stopColor="var(--sem-brand-primary)" />
-        <stop offset="55%" stopColor="var(--sem-brand-primary)" />
-        <stop offset="100%" stopColor="var(--sem-brand-primary)" />
+        <stop offset="0%" stopColor="#ecfdb0" />
+        <stop offset="55%" stopColor="#8bf29c" />
+        <stop offset="100%" stopColor="#00dc8d" />
       </linearGradient>
     </defs>
   );

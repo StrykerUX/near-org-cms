@@ -28,11 +28,11 @@ import type { StagePalette } from "@/components/sections/shells/stage/Surface";
 // and this hero has the longest headline of the four.
 export const GROUND: StagePalette = {
   /** The low plateau. Also the colour with no WebGL, so it has to hold text. */
-  bg: "#f5f4f1",
+  bg: "#f2e8db",
   /** The high plateau: late afternoon on the sand. */
-  high: "#e1e1e1",
+  high: "#f7d3ac",
   /** The contour: warm brown, never black — a black line here reads as a map. */
-  line: "#e1e1e1",
+  line: "#a76a45",
 };
 
 /** Hero calibration: the widest, flattest version. */

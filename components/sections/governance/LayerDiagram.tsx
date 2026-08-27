@@ -80,7 +80,7 @@ function Slab({
 
 export default function LayerDiagram() {
   const green = "#00dc8d";
-  const pale = "#00dc8d";
+  const pale = "#f5f4f1";
 
   // Cuatro propuestas cruzando el umbral de la losa onchain.
   const threshold = 10;

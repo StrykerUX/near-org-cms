@@ -88,7 +88,7 @@ export default function PostRenderer({ post, layout = "public" }: PostRendererPr
 
       {/* CONTENT */}
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <div className="prose prose-lg max-w-none text-[#262626]">
+        <div className="prose prose-lg max-w-none text-[#101010]">
           {renderBlocks(content?.content ?? [], components)}
         </div>
       </div>

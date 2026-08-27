@@ -40,7 +40,7 @@ import {
 // the one failure a placeholder cannot have. See `EcosystemMark`.
 //
 // The panel is `slate` and not `ink`: reserved cells are drawn with hairlines
-// and corner marks, and against #262626 those read as holes rather than as
+// and corner marks, and against #101010 those read as holes rather than as
 // frames. Same reason `/quantum-security` has its own dark.
 export default function CouncilRegister() {
   const rootRef = useScrollReveal<HTMLDivElement>({ start: "top 80%" });

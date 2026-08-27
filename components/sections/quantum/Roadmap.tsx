@@ -23,7 +23,7 @@ const DOTS = {
   live: "bg-near-green-accent",
   progress: "[background:conic-gradient(var(--near-green-accent)_0_50%,#dcdad4_50%_100%)]",
   research: "border-2 border-green-ink bg-cream",
-  horizon: "border-2 border-[#e1e1e1] bg-cream",
+  horizon: "border-2 border-[#b3b1ab] bg-cream",
 } satisfies Record<RoadmapStage["dot"], string>;
 
 // `satisfies` y no `as const` a secas: el tipo de `dot` vive ahora en

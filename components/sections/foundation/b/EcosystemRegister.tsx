@@ -22,7 +22,7 @@ import {
 // one: a grid of cells floating on the section ground would be the one block
 // that stopped being part of the apparatus. `slate` and not `ink` for the same
 // reason as the council panel — corner marks on 1px hairlines read as holes
-// against #262626.
+// against #101010.
 //
 // The cells carry no `data-reveal`. That rule and its reason live in
 // `EcosystemMark`, and it is worth keeping in mind here specifically: a

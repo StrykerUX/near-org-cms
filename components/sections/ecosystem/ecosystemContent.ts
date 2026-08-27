@@ -95,7 +95,7 @@ export const CLOSING = {
  * pestañas distintas.
  */
 export const GROUND = {
-  palette: { bg: "#00dc8d", high: "#00dc8d", line: "#00dc8d" },
+  palette: { bg: "#e4edec", high: "#8fc9be", line: "#2f6159" },
   bands: 8,
   scale: 1.9,
   tilt: 0.45,

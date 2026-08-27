@@ -20,7 +20,7 @@ const PRIMITIVES: { token: string; figma: string; hex: string; absorbed: string 
     figma: "green/500",
     hex: "#00DC8D",
     absorbed:
-      "Absorbed five greens with separate jobs — the nav CTA, the brand, the buttons on cream, the only green that read as text on light, the ink-green field — plus the teal, the two sweep yellows and the three stops of the CTA ramp.",
+      "Absorbed five greens with separate jobs — the nav CTA, the brand, the buttons on cream, the only green that read as text on light, the ink-green field — plus the teal, the two sweep yellows and the deep stop of the CTA ramp.",
   },
   {
     token: "--cream-100",
@@ -34,7 +34,14 @@ const PRIMITIVES: { token: string; figma: string; hex: string; absorbed: string 
     figma: "gray/300",
     hex: "#E1E1E1",
     absorbed:
-      "Absorbed every rule, divider and bar, and both secondary greys — including the one that existed precisely because it reached 4.34:1 on cream.",
+      "Absorbed every rule, divider and bar. It also carries subordinate text, but only on a dark ground — on light that role goes to the added gray/600.",
+  },
+  {
+    token: "--gray-600",
+    figma: "— (added)",
+    hex: "#5F6669",
+    absorbed:
+      "The one addition to the file's four. Its text-secondary is gray/300, which on the page cream is 1.19:1 — not subordinate text, invisible text, across 228 places. This is 5.32:1, in the same cool hue the site already used for that role.",
   },
   {
     token: "--dark-900",
@@ -84,12 +91,16 @@ const SEMANTICS: {
     use: "Body and headings on light. 13.76:1 on cream.",
   },
   {
-    token: "--sem-text-secondary",
-    ref: "gray/300",
+    token: "--sem-text-secondary-on-light",
+    ref: "gray/600",
     utility: "text-content-muted",
-    use: "Subordinate copy.",
-    warn:
-      "1.19:1 on cream. This is the largest surface the migration touched: 228 uses of subordinate copy on light grounds now sit barely above the page. It reads as intended only on a dark surface, where it is 11.57:1.",
+    use: "Subordinate copy on the light page. 5.32:1 — AA with margin, and far enough from the primary (13.76:1) to still read as subordinate.",
+  },
+  {
+    token: "--sem-text-secondary-on-dark",
+    ref: "gray/300",
+    utility: "text-content-dim",
+    use: "The file's text-secondary, on the ground where its value works. 11.57:1 on the dark surface.",
   },
   {
     token: "--sem-text-on-brand",
@@ -129,12 +140,13 @@ const VERDICT_LABEL: Record<Verdict, string> = {
 const CONTRAST: { pair: string; ratio: number; verdict: Verdict; note: string }[] = [
   { pair: "dark-900 on cream-100", ratio: 13.76, verdict: "pass", note: "text-content on bg-surface." },
   { pair: "cream-100 on dark-900", ratio: 13.76, verdict: "pass", note: "The same pair inverted." },
-  { pair: "gray-300 on dark-900", ratio: 11.57, verdict: "pass", note: "text-content-muted, on the only ground where it works." },
+  { pair: "gray-300 on dark-900", ratio: 11.57, verdict: "pass", note: "text-content-dim, the role on its own ground." },
   { pair: "green-500 on dark-900", ratio: 8.38, verdict: "pass", note: "The brand as text on a dark surface." },
   { pair: "dark-900 on green-500", ratio: 8.38, verdict: "pass", note: "Not what the file specifies for text-on-brand, but the legible pairing." },
   { pair: "cream-100 on green-500", ratio: 1.64, verdict: "fail", note: "text-on-brand, as the file specifies it." },
   { pair: "green-500 on cream-100", ratio: 1.64, verdict: "fail", note: "The brand is not a text colour on light." },
-  { pair: "gray-300 on cream-100", ratio: 1.19, verdict: "fail", note: "text-content-muted on the light page." },
+  { pair: "gray-600 on cream-100", ratio: 5.32, verdict: "pass", note: "text-content-muted on the light page — the added step." },
+  { pair: "gray-300 on cream-100", ratio: 1.19, verdict: "fail", note: "What the file's text-secondary would have been on light. Not used." },
   { pair: "gray-300 on cream-100", ratio: 1.19, verdict: "non-text", note: "border-line on the light page." },
 ];
 
@@ -144,9 +156,9 @@ const LEGACY: { role: string; aliases: string; lost: string }[] = [
   {
     role: "brand-primary",
     aliases:
-      "--near-green · --near-green-accent · --near-green-dark · --green-ink · --near-teal · --sweep · --sweep-solid · --cta-deep · --cta-mint · --cta-lime",
+      "--near-green · --near-green-accent · --near-green-dark · --green-ink · --near-teal · --sweep · --sweep-solid · --cta-deep",
     lost:
-      "Ten tones into one. Every gradient built from the CTA ramp is now flat, and --green-ink — which existed because the brand green does not reach 3:1 on white — is no longer distinct from the green that did not reach it.",
+      "Eight tones into one, and --green-ink — which existed because the brand green does not reach 3:1 on white — is no longer distinct from the green that did not reach it. The CTA ramp is not among them: only its deep stop follows the brand, because a gradient flattened to one colour is not a simpler gradient, it is no gradient.",
   },
   {
     role: "background-primary / secondary",
@@ -172,7 +184,7 @@ const LEGACY: { role: string; aliases: string; lost: string }[] = [
     role: "text-secondary",
     aliases: "--gray-intermediate · --gray-blue",
     lost:
-      "228 uses of subordinate text on light. --gray-intermediate was introduced to replace --gray-blue precisely on contrast grounds (4.34:1 against 2.81:1); both now land at 1.19:1.",
+      "228 uses of subordinate text on light. --gray-intermediate had replaced --gray-blue precisely on contrast grounds (4.34:1 against 2.81:1); both now point at the added gray/600, at 5.32:1.",
   },
 ];
 
@@ -324,9 +336,9 @@ export default function ColorPage() {
           <code className="text-body-sm-mono">text-text-primary</code>.
         </p>
         <p className="text-body text-foreground max-w-2xl text-pretty">
-          Both panels below are live. The light one is the honest picture of
-          what the file specifies: the subordinate line and the card border sit
-          at 1.19:1, and the label on the brand at 1.64:1.
+          Both panels below are live. The subordinate role is split by ground:
+          the light panel uses the added gray/600 step, the dark one the
+          file&rsquo;s gray/300.
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-6">
@@ -337,7 +349,7 @@ export default function ColorPage() {
               bg-surface · text-content
             </p>
             <p className="text-body text-content-muted text-pretty">
-              text-content-muted carries the subordinate line here, at 1.19:1.
+              text-content-muted carries the subordinate line here, at 5.32:1.
             </p>
             <span className="w-fit rounded-full bg-brand px-4 py-2 text-label text-on-brand">
               bg-brand · text-on-brand
@@ -346,12 +358,13 @@ export default function ColorPage() {
             <Meta>border-line · bg-line</Meta>
           </div>
           <div className="flex flex-col gap-3 rounded-xl bg-surface-dark p-6">
-            <p className="text-eyebrow uppercase text-content-muted">
+            <p className="text-eyebrow uppercase text-content-dim">
               On a dark surface
             </p>
             <p className="text-h4 text-surface text-pretty">bg-surface-dark</p>
-            <p className="text-body text-content-muted text-pretty">
-              The same token, on the ground where it reads — 11.57:1.
+            <p className="text-body text-content-dim text-pretty">
+              text-content-dim is the same role on the ground the file&rsquo;s
+              value was made for — 11.57:1.
             </p>
             <span className="w-fit rounded-full bg-brand px-4 py-2 text-label text-on-brand">
               bg-brand · text-on-brand
@@ -457,10 +470,13 @@ export default function ColorPage() {
           <li className="text-pretty">
             <span className="text-label-lg">Two things sit outside the system</span>{" "}
             — the CMS admin, which runs on the shadcn tokens and its own dark
-            mode, and{" "}
-            <code className="text-body-sm-mono">stackArt.generated.tsx</code>,
-            the exported brand illustration whose multi-stop gradients are
-            artwork rather than surfaces.{" "}
+            mode, and the artwork: the hero foliage ramp, the terrain and relief
+            scenes, and{" "}
+            <code className="text-body-sm-mono">stackArt.generated.tsx</code>.
+            Their multi-stop gradients are pictures, not surfaces — flattening
+            them to the brand green does not simplify them, it erases them. What
+            follows the brand inside a scene is the stop that WAS the brand
+            green, and nothing else.{" "}
             <code className="text-body-sm-mono">--destructive</code> also keeps
             its red: the palette has no error colour, and a destructive action
             painted brand green is a button that lies.

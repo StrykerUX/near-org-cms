@@ -103,13 +103,13 @@ const START = "top 78%";
 const END = "bottom 55%";
 
 const PALETTE = {
-  "--statement-accent": "#00dc8d",
+  "--statement-accent": "#5cb946",
   /* Las dos paradas del degradé del acento. Van de claro a oscuro y las dos
      sobre el mismo verde: sobre crema, el tramo claro es el límite de lo que
      todavía se lee, así que el degradé baja hacia el oscuro en vez de subir —
      el promedio de contraste mejora respecto del color plano que había. */
-  "--statement-accent-lo": "#00dc8d",
-  "--statement-accent-hi": "#00dc8d",
+  "--statement-accent-lo": "#6cc24a",
+  "--statement-accent-hi": "#2e7d32",
 } as React.CSSProperties;
 
 /**

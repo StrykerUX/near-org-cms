@@ -5,7 +5,7 @@ export type EmptyStateProps = {
 
 export default function EmptyState({ message, symbol = "✦" }: EmptyStateProps) {
   return (
-    <div className="text-center py-24 text-[#e1e1e1]">
+    <div className="text-center py-24 text-[#CAC8C8]">
       <p className="text-5xl mb-4">{symbol}</p>
       <p className="font-mono text-content-muted" style={{ fontSize: "var(--font-size-body)" }}>
         {message}

@@ -8,7 +8,7 @@ export type FilterPillsProps = {
 
 function pillClassName(active: boolean) {
   return `px-4 py-2 rounded-full text-body-sm-mono transition ${
-    active ? "bg-[#262626] text-white" : "bg-[#f5f4f1] text-[#e1e1e1] hover:bg-[#e1e1e1]"
+    active ? "bg-[#101010] text-white" : "bg-[#ECECEC] text-[#5A5A5A] hover:bg-[#CAC8C8]"
   }`;
 }
 

@@ -939,9 +939,9 @@ export default function OwnYourOwn() {
               // `CARD_LAYOUT`: un campo por card que siempre vale lo mismo
               // invita a que alguien lo desempareje sin querer.
               //
-              // `bg-card-tint/50` (#f5f4f1 al 50% sobre el crema de la sección,
-              // ≈ #f5f4f1) las deja un escalón por debajo del fondo. Data y
-              // Assets llevaban `bg-white/50`, que compone ≈ #00dc8d — más CLARO
+              // `bg-card-tint/50` (#eae9e6 al 50% sobre el crema de la sección,
+              // ≈ #efefec) las deja un escalón por debajo del fondo. Data y
+              // Assets llevaban `bg-white/50`, que compone ≈ #fafaf8 — más CLARO
               // que el fondo, y por eso se leían como manchas blancuzcas en vez
               // de como cards.
               // El hover: la card se ASIENTA, no salta.

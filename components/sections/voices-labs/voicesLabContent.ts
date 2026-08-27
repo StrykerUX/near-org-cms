@@ -79,6 +79,6 @@ export const VOICE_MARKS: Record<TestimonialId, VoiceMark> = {
  * marca. TODO(design): confirmarlos contra el archivo original.
  */
 export const VOICE_RAMP =
-  "linear-gradient(135deg, #00dc8d 0%, #00dc8d 42%, #00dc8d 100%)";
+  "linear-gradient(135deg, #A9E272 0%, #7FD05F 42%, #2FAF34 100%)";
 
 export const VOICES_EYEBROW = "On the record";

@@ -23,12 +23,12 @@ import { HERO } from "@/components/sections/protocol-labs/protocolContent";
 // en medio de bandas verticales las corta por la mitad; abajo, las deja correr
 // enteras y el texto se apoya sobre ellas como sobre un pie.
 
-const INK = "#00dc8d";
+const INK = "#070b09";
 
 const SPECTRUM_UNIFORMS = {
   u_bg: hexToRgb(INK),
-  u_low: hexToRgb("#00dc8d"),
-  u_high: hexToRgb("#00dc8d"),
+  u_low: hexToRgb("#123626"),
+  u_high: hexToRgb("#8bf29c"),
   // Doce: las mismas columnas que gobiernan la página. Es el número que hace
   // que la superficie y la retícula sean lo mismo.
   u_columns: 12,

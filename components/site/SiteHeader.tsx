@@ -645,8 +645,8 @@ export default function SiteHeader() {
   // ── ink over dark sections ─────────────────────────────────────────────
   //
   // Runs ALWAYS, reduced-motion included: this is not an animation, it is
-  // legibility. Without it the near-black bar (#262626) sits invisible on the
-  // `--ink-slate` section, and on the blog's #262626 hero.
+  // legibility. Without it the near-black bar (#0a0a0a) sits invisible on the
+  // `--ink-slate` section, and on the blog's #101010 hero.
   //
   // Fidelity note: the original has all of this wiring (the `data-nav-dark`
   // attribute on sections, the logo filter, the link colours) but its `apply()`
@@ -783,7 +783,7 @@ export default function SiteHeader() {
           // states and the tone flip never has to swap it.
           // The alpha is high because the composite is what the eye judges, not
           // the declared colour: rgba(10,10,10) at 0.68 over the cream page
-          // resolves to #e1e1e1 — a mid grey. 0.9 lands it at #262626, which reads
+          // resolves to #555 — a mid grey. 0.9 lands it at #1f1f1f, which reads
           // as near-black while the blur still picks up what passes underneath.
           // The flip earns its keep by holding that appearance constant: the
           // same alpha over the `--ink-slate` section would be indistinguishable
@@ -889,7 +889,7 @@ export default function SiteHeader() {
               sin él, el grupo se centraría dentro de su propia columna `1fr` y
               quedaría flotando a media distancia del filo de la barra. */}
           <div className="flex items-center gap-2 self-stretch justify-self-end md:gap-10">
-            {/* The reference's translucent glass chip: #e1e1e1 at 20% over the
+            {/* The reference's translucent glass chip: #d9d9d9 at 20% over the
                 black bar, radius 8. This REPLACES the green travelling-gradient
                 CTA — `[data-q-cta-sweep]` still exists in globals.css and is
                 unused here, so the sweep can be restored without rewriting it. */}

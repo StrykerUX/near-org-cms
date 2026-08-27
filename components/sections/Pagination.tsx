@@ -24,18 +24,18 @@ export default function Pagination(props: PaginationProps) {
       {page > 1 && (
         <Link
           href={hrefFor(page - 1, props)}
-          className="px-5 py-2 border border-[#e1e1e1] rounded-xl text-body-sm-mono text-[#e1e1e1] hover:bg-[#f5f4f1] transition"
+          className="px-5 py-2 border border-[#CAC8C8] rounded-xl text-body-sm-mono text-[#5A5A5A] hover:bg-[#ECECEC] transition"
         >
           ← Previous
         </Link>
       )}
-      <span className="text-body-sm-mono text-[#e1e1e1]">
+      <span className="text-body-sm-mono text-[#5A5A5A]">
         Page {page} of {totalPages}
       </span>
       {page < totalPages && (
         <Link
           href={hrefFor(page + 1, props)}
-          className="px-5 py-2 border border-[#e1e1e1] rounded-xl text-body-sm-mono text-[#e1e1e1] hover:bg-[#f5f4f1] transition"
+          className="px-5 py-2 border border-[#CAC8C8] rounded-xl text-body-sm-mono text-[#5A5A5A] hover:bg-[#ECECEC] transition"
         >
           Next →
         </Link>

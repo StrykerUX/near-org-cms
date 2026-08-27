@@ -50,7 +50,14 @@ const P = {
 // propósito: la referencia nunca satura por arriba —su punto más claro sigue
 // siendo un crema verdoso— ni cierra en negro puro, y esos dos topes son buena
 // parte de por qué se lee como película y no como un degradé sintético.
-const PALETTE = ["#00dc8d", "#00dc8d", "#00dc8d", "#00dc8d", "#00dc8d"] as const;
+// ⚠️ La rampa NO entra al sistema de color, y es la única excepción de arte del
+// sitio junto con `stackArt.generated.tsx`. Son cinco paradas de una película:
+// aplanarlas al verde de marca no la simplifica, la borra —queda un plano de un
+// color—. Lo que sí sigue a la marca es la parada MEDIA, la que se lee como «el
+// verde» del follaje; las otras cuatro son la luz y la sombra que hacen el
+// volumen, y sus topes (ni satura por arriba ni cierra en negro puro) son buena
+// parte de por qué se lee como película.
+const PALETTE = ["#e8efbe", "#b5cc86", "#00dc8d", "#1f5540", "#0a2018"] as const;
 
 // Resolución del buffer, como fracción del canvas.
 //

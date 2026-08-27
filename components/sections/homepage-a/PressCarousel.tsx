@@ -22,8 +22,8 @@ import { PRESS_ITEMS, type PressTone } from "@/components/sections/homepage-a/ho
 // tokens del repo: no hay --green-2/--near-green-* que calcen con estos.
 const TONE_CARD: Record<PressTone, string> = {
   green: "bg-[linear-gradient(155deg,#BBEF7F_0%,#37C142_100%)] text-ink",
-  gray: "bg-[#f5f4f1] text-ink",
-  dark: "bg-[#262626] text-white",
+  gray: "bg-[#E1E1E1] text-ink",
+  dark: "bg-[#1e1e1e] text-white",
 };
 
 const TONE_QUOTE: Record<PressTone, string> = {

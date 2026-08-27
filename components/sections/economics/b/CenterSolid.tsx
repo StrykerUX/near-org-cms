@@ -105,7 +105,7 @@ const ARRIVALS = [
 
 const TRACE = "#00dc8d";
 const EDGE = "rgba(245,244,241,0.3)";
-const FACE = { top: "#00dc8d", right: "#00dc8d", left: "#00dc8d" } as const;
+const FACE = { top: "#1d6b4c", right: "#14523a", left: "#0d3a29" } as const;
 
 const PATH_LEN = 100;
 

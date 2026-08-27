@@ -261,24 +261,32 @@ están escritos; los 21 caen sobre los ocho roles y ninguno tiene valor propio).
 **Cambiar la paleta es mover un valor en la capa 0.**
 
 En código nuevo van las utilidades semánticas: `bg-surface`, `bg-surface-alt`,
-`bg-surface-dark`, `text-content`, `text-content-muted`, `bg-brand`,
-`text-on-brand`, `border-line`.
+`bg-surface-dark`, `text-content`, `text-content-muted`, `text-content-dim`,
+`bg-brand`, `text-on-brand`, `border-line`.
 
 **El sistema se adoptó literal, y eso tiene consecuencias que hay que conocer
 antes de "arreglar" algo que parece un bug:**
 
-- **Hay un solo verde.** Los cinco verdes con roles distintos, el teal, los dos
-  amarillos del sweep y las tres paradas de la rampa del CTA son todos
-  `--green-500`. Los gradientes de la rampa se ven planos: es la paleta, no un
-  error. `CTA_RAMP` en `motionColors.ts` sigue siendo una tupla de tres para no
-  romper a sus consumidores.
+- **Hay un solo verde en la UI.** Los cinco verdes con roles distintos, el teal y
+  los dos amarillos del sweep son todos `--green-500`.
+- **Un degradé NO se aplana.** Un gradiente colapsado al color de marca no queda
+  simplificado, queda borrado. De un degradé sigue a la marca **la parada que ERA
+  el verde de marca, y ninguna otra**: la rampa del CTA conserva su mint y su
+  lima (`--cta-mint-400`, `--cta-lime-200`, espejados en `motionColors.ts`), y
+  las paletas de las escenas —la rampa de cinco pasos del hero, los relieves, los
+  terrenos, los word fields— se quedan enteras. Vale para las paradas de
+  `<linearGradient>` igual que para las constantes de una escena.
 - **No hay blanco.** `background-primary` y `background-secondary` son el mismo
   crema, así que las cards no se despegan de la página por color — solo por su
   borde.
-- **Tres pares quedan por debajo del piso de WCAG**, porque así los define el
-  archivo: `text-secondary` sobre claro y `border-default` sobre claro a 1.19:1,
-  y `text-on-brand` sobre el verde a 1.64:1. El de más superficie es el primero
-  (228 usos de copy subordinada). Si se corrigen, se corrigen en la capa 1.
+- **Dos pares quedan por debajo del piso de WCAG**, porque así los define el
+  archivo: `border-default` sobre claro a 1.19:1 y `text-on-brand` sobre el verde
+  a 1.64:1. Si se corrigen, se corrigen en la capa 1.
+- **`--gray-600` (#5f6669) es el único agregado a los cuatro del archivo.** El
+  `text-secondary` del archivo es gray/300, que sobre el crema da 1.19:1 — texto
+  que no se ve, en 228 lugares. El rol quedó partido por fondo:
+  `text-content-muted` (→ gray/600, 5.32:1) sobre claro y `text-content-dim`
+  (→ gray/300, 11.57:1) sobre oscuro.
 
 Tres cosas que muerden:
 
@@ -297,9 +305,9 @@ Tres cosas que muerden:
   `components/primitives/motion/motionColors.ts`.
 
 **Fuera del sistema, a propósito:** el admin del CMS (corre en `.dark` sobre los
-tokens de shadcn), `stackArt.generated.tsx` (ilustración de marca exportada, con
-gradientes de varias paradas que son arte y no superficie) y `--destructive`,
-que conserva su rojo porque la paleta no tiene color de error.
+tokens de shadcn), el arte —`stackArt.generated.tsx` y las paletas de escena, que
+son cuadros y no superficies— y `--destructive`, que conserva su rojo porque la
+paleta no tiene color de error.
 
 La referencia completa —muestras, ratios medidos, qué colapsó en qué y qué costó—
 se renderiza en **`/design-system/color`**.

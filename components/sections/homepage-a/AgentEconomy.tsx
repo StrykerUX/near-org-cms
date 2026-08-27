@@ -64,7 +64,7 @@ import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-a/homepage
 // del medio del gradiente del icono para que el acento y el glifo se lean como
 // la misma tinta.
 const PALETTE = {
-  "--statement-accent": "#00dc8d",
+  "--statement-accent": "#5cb946",
   // El tamaño del icono en su momento grande, y por qué vive en CSS y no en JS.
   //
   // El icono se PINTA a este tamaño siempre, y la animación lo escala hacia

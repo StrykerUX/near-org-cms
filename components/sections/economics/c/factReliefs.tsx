@@ -47,8 +47,8 @@ const RIGHT = 204;
 /** The one lift vector. Up and to the right, for every solid on this page. */
 const D = 8;
 
-const LIME = "#00dc8d";
-const MINT = "#00dc8d";
+const LIME = "#ecfdb0";
+const MINT = "#8bf29c";
 const DEEP = "#00dc8d";
 
 type SlabProps = {

@@ -224,7 +224,7 @@ export default function ForwardTurn() {
     // `primitives/ShineField`.
     //
     // White and not cream: after five cream-and-ink sections, the plain lift to
-    // #f5f4f1 is felt before it is noticed.
+    // #ffffff is felt before it is noticed.
     <section
       ref={rootRef}
       className="relative isolate overflow-hidden bg-white py-[22svh]"

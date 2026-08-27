@@ -13,7 +13,7 @@
 // hero headline sits on one of them, and a headline over the crest of a
 // gradient is the failure mode of every shader hero.
 export const TERRAIN = {
-  palette: { bg: "#f5f4f1", high: "#e1e1e1", line: "#e1e1e1" },
+  palette: { bg: "#e7eaec", high: "#aebcc4", line: "#46545c" },
   // Ten bands and not fourteen: the curves have to crowd enough to read as a
   // survey and still leave a plateau wide enough to set a headline on. At the
   // density this started at, the hero was legible but the ground behind it was

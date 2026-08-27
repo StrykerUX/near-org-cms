@@ -67,8 +67,8 @@ const LIT_LUM = 36;
 const LIT_JITTER = 0.28;
 // The two-stop twinkle: a vivid yellow-green flash falling through teal back to
 // the letter's resting colour.
-const SPARK_PEAK = "#00dc8d";
-const SPARK_MID = "#00dc8d";
+const SPARK_PEAK = "#cfe600";
+const SPARK_MID = "#12b39c";
 // Fallback for the resting colour if a letter somehow has no recorded base. Same
 // deep green as the low end of the CTA ramp.
 const SPARK_REST = "#00dc8d";
