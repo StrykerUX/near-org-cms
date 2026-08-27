@@ -124,20 +124,33 @@ import {
  *   1. el FILETE punteado se traza de izquierda a derecha — la estructura
  *      llega primero, y lo demás aterriza sobre algo que ya está. El primer
  *      asiento no lo tiene: arriba de él no hay nada que separar;
- *   2. la CIFRA cuenta desde 0 hasta su valor y, EN EL MISMO TRAMO, entran el
- *      eyebrow y el signo. Van con ella a propósito: la cifra sola contando es
- *      un widget, la cifra contando mientras se escribe lo que la califica es
- *      un renglón que se arma. El signo va acá y no con la glosa porque
- *      pertenece al número —"100 por ciento", "24 más"— y no a lo que se
- *      cuenta;
- *   3. al 70% de la cuenta se escribe la GLOSA: la palabra que dice qué se
- *      estuvo contando. La cifra sube sin nombre y la palabra la cierra;
- *   4. y al 85%, el CUERPO de la derecha, renglón por renglón.
+ *   2. la CIFRA, sola. Cuenta desde 0 hasta su valor, y con ella entra el
+ *      signo, que pertenece al número —"100 por ciento", "24 más"— y no a lo
+ *      que se cuenta;
+ *   3. al primer TERCIO de la cuenta se escribe la GLOSA: la palabra a la
+ *      derecha del numeral, la que dice qué se estuvo contando. La cifra
+ *      todavía está corriendo cuando la palabra la nombra;
+ *   4. a la MITAD de la glosa aparece la PÍLDORA y empieza a escribirse;
+ *   5. al 90% de la glosa entra el CUERPO de la derecha, renglón por renglón.
  *
- * Los dos últimos caen dentro del último tercio de la cuenta a propósito. Ahí
- * el `power2.out` ya frenó y el número casi no cambia, así que hay lugar para
- * que entre otra cosa sin competirle — y el renglón termina de armarse en un
- * solo movimiento en vez de en tres actos con pausas en medio.
+ * ── Por qué los dos últimos cuelgan de la GLOSA y no de la cuenta ──────────
+ *
+ * Estuvieron atados a la cuenta —el eyebrow arrancaba con la cifra y el cuerpo
+ * caía al 85% del conteo— y eso ponía la columna derecha a armarse mientras la
+ * izquierda todavía era un número sin nombre. El renglón se leía como dos
+ * cosas ocurriendo a la vez en vez de como una que se arma.
+ *
+ * Colgados de la glosa, la lectura queda en el orden en que se entiende: la
+ * cifra, qué es esa cifra, cómo se llama el argumento, y el argumento. Y como
+ * las fracciones se miden contra lo que la glosa DURA DE VERDAD —duración más
+ * el escalonado de sus letras, que depende de cuántas tenga—, "uptime" y
+ * "Million TPS" mantienen la misma proporción aunque una tarde bastante más
+ * que la otra. Con un tiempo fijo, el renglón corto se sentiría apurado y el
+ * largo, colgado.
+ *
+ * Los solapes se conservan: nada espera a que lo anterior termine. Ahí el
+ * `power2.out` ya frenó y hay lugar para que entre otra cosa sin competirle —
+ * el renglón se arma en un movimiento y no en cinco actos con pausas en medio.
  *
  * Y NO SE GASTA. Cada renglón se rearma cada vez que vuelve a entrar por abajo,
  * así que subir a releer y bajar otra vez lo muestra armándose igual que la
@@ -190,22 +203,54 @@ const FIGURE_AT = 0.45;
 const COUNT = 1.5;
 
 /**
- * En qué punto de la cuenta entran la glosa y el cuerpo, como FRACCIÓN de lo
- * que dura la cuenta.
+ * En qué punto de la cuenta entra la glosa, como FRACCIÓN de lo que dura la
+ * cuenta.
  *
- * Son fracciones y no tiempos en segundos para que sigan atadas a `COUNT`:
- * mover la duración de la cuenta las mueve con ella en vez de dejarlas donde
- * estaban. Y en este orden —primero la palabra, después el párrafo— porque la
- * glosa cierra la cifra y el cuerpo explica el conjunto: leído al revés, el
- * párrafo llega a explicar algo que todavía no terminó de decirse.
+ * Es una fracción y no un tiempo en segundos para que siga atada a `COUNT`:
+ * mover la duración de la cuenta la mueve con ella en vez de dejarla donde
+ * estaba.
  *
- * Las dos caen en el último tercio, que es donde el `power2.out` ya frenó y el
- * número casi no cambia. Antes de ahí compiten con la cuenta; después de ahí
- * el renglón se parte en actos con pausas en medio (`GLOSS_AT` estuvo en 1 y se
- * notaba: la cifra frenaba, silencio, y recién entonces la palabra).
+ * Al PRIMER TERCIO de la cuenta. Bajó en tres pasos y vale dejar por qué, porque
+ * la dirección fue siempre la misma: estuvo en 1 —esperando a que el número
+ * frenara— y se notaba como tres actos con silencio en medio; en 0.7 el renglón
+ * ya se armaba de un tirón, pero la palabra seguía llegando con la cifra
+ * prácticamente puesta, así que la lectura era «el número, y después su nombre»;
+ * en 0.5 entraba a media cuenta.
+ *
+ * En 0.35 entra con el `power2.out` todavía en su tramo rápido: la cifra está
+ * corriendo cuando la palabra ya la nombra, y las dos terminan casi juntas. El
+ * renglón deja de leerse como una secuencia de piezas y pasa a leerse como una
+ * frase.
+ *
+ * Y como los dos pasos que siguen —píldora y cuerpo— cuelgan de la glosa y no de
+ * la cuenta, adelantarla los adelanta a los tres: el renglón entero termina
+ * antes sin que ninguna de sus proporciones internas cambie.
  */
-const GLOSS_AT = 0.7;
-const BODY_AT = 0.85;
+const GLOSS_AT = 0.35;
+
+/**
+ * Dónde caen la píldora y el cuerpo, como FRACCIÓN de lo que dura LA GLOSA.
+ *
+ * Contra la glosa y no contra la cuenta porque es la glosa la que los precede
+ * en la lectura — el porqué está arriba, en la nota de la secuencia. Y contra
+ * su duración REAL, que incluye el escalonado de sus letras: una glosa de once
+ * caracteres dura casi el doble que una de seis, y con un tiempo fijo el
+ * renglón corto se sentiría apurado y el largo, colgado.
+ */
+const PILL_AT = 0.5;
+const BODY_AT = 0.9;
+
+/** Lo que tarda la píldora en aparecer, antes de que se escriba su texto. */
+const PILL = 0.42;
+
+/**
+ * Cuánto de la aparición de la píldora pasa antes de que arranquen sus letras.
+ *
+ * No es cero: el texto tiene que escribirse DENTRO de una píldora que ya está,
+ * no aparecer con ella. Tampoco es 1, que las pondría en fila y agregaría una
+ * pausa donde el diseño pide un solo gesto.
+ */
+const PILL_TEXT_LEAD = 0.35;
 
 /**
  * El respiro de la glosa EN LOS RENGLONES SIN CIFRA.
@@ -216,19 +261,18 @@ const BODY_AT = 0.85;
  */
 const GLOSS_LEAD = 0.18;
 
-/**
- * Lo que dura el par de cierre en el lugar donde los otros cuentan.
- *
- * "Quantum-ready" y "Confidential" no tienen cifra, así que no hay contador que
- * mida el segundo tiempo. Ocupa el mismo lugar en la secuencia —`BODY_AT` se
- * aplica sobre este valor igual que sobre `COUNT`—, así que las dos pruebas
- * llevan el mismo ritmo que las cuatro de arriba aunque su segundo tiempo sea
- * más corto.
- */
-const GLOSS_BEAT = 0.85;
-
 /** Entre letra y letra de la glosa y del eyebrow. */
 const CHAR = 0.022;
+
+/**
+ * Lo que tarda UNA letra de la glosa en entrar, y el escalonado entre ellas.
+ *
+ * Están acá arriba y no enterrados en el tween porque son la mitad del cálculo
+ * de `PILL_AT` / `BODY_AT`: la duración real de la glosa es esta duración más
+ * el escalonado por cada letra menos una.
+ */
+const GLOSS_CHAR = 0.55;
+const GLOSS_STAGGER = CHAR * 1.4;
 
 export default function ProofLedger() {
   const rootRef = useMotionScope<HTMLElement>(({ q, motionOk }) => {
@@ -342,45 +386,53 @@ export default function ProofLedger() {
         if (rule)
           tl.from(rule, { scaleX: 0, duration: RULE, ease: "power2.out" }, 0);
 
-        /* 2 · la cifra, con el eyebrow y el signo */
-        let beat = GLOSS_BEAT;
+        /* 2 · la cifra y su signo, solos */
         // Dónde cae la glosa. Sin cifra que esperar, entra pegada al resto;
         // con cifra, espera al 70% del conteo — ver el paso 3 de la secuencia
         // allá arriba.
         let glossAt = FIGURE_AT + GLOSS_LEAD;
 
         if (counter) {
-          beat = COUNT;
           glossAt = FIGURE_AT + COUNT * GLOSS_AT;
-          // El contador corre sobre un objeto suelto y escribe el resultado en
-          // el DOM. No puede correr sobre el elemento: reescribir `textContent`
-          // en cada cuadro borraría cualquier span que un split hubiera creado
-          // adentro — por eso el numeral es lo ÚNICO de este renglón que no se
-          // parte en letras.
-          const proxy = { v: 0 };
-          tl.to(
-            proxy,
-            {
-              v: readCounter(counter).value,
-              duration: COUNT,
-              ease: "power2.out",
-              onUpdate: () => write(counter, proxy.v),
-            },
-            FIGURE_AT,
-          );
-          tl.from(counter, { autoAlpha: 0, y: 18, duration: 0.6 }, FIGURE_AT);
-        }
 
-        const eyebrow = row.querySelector<HTMLElement>("[data-eyebrow]");
-        if (eyebrow) {
-          const s = SplitText.create(eyebrow, { type: "chars" });
-          splits.push(s);
-          gsap.set(s.chars, { autoAlpha: 0, y: 8 });
-          tl.to(
-            s.chars,
-            { autoAlpha: 1, y: 0, duration: 0.4, stagger: CHAR },
-            FIGURE_AT,
-          );
+          // Cuántos pasos visibles tiene la cuenta, en la resolución con la que
+          // se escribe: "100" son cien, "1" es UNO. Por debajo de diez el
+          // contador no cuenta, aparece — se lo ve un rato en 0 y de golpe en su
+          // valor, y ese renglón se cae de la serie mientras los otros suben.
+          //
+          // El umbral resuelve en la escena lo que antes tapaba el contenido:
+          // la prueba de TPS llevaba un decimal —"1.0"— solo para tener diez
+          // pasos. El diseño pide "1", así que la cuenta se saltea y queda la
+          // entrada. El renglón no pierde el compás: lo que lo sostiene no es la
+          // cuenta sino el lugar que ocupa en la secuencia, y `glossAt` sigue
+          // midiéndose contra `COUNT` igual que en los demás.
+          const spec = readCounter(counter);
+          const steps = Math.round(spec.value * 10 ** spec.decimals);
+
+          if (steps >= 10) {
+            // El contador corre sobre un objeto suelto y escribe el resultado en
+            // el DOM. No puede correr sobre el elemento: reescribir `textContent`
+            // en cada cuadro borraría cualquier span que un split hubiera creado
+            // adentro — por eso el numeral es lo ÚNICO de este renglón que no se
+            // parte en letras.
+            const proxy = { v: 0 };
+            tl.to(
+              proxy,
+              {
+                v: spec.value,
+                duration: COUNT,
+                ease: "power2.out",
+                onUpdate: () => write(counter, proxy.v),
+              },
+              FIGURE_AT,
+            );
+          } else {
+            // Sin cuenta, el valor final tiene que estar escrito igual: el reset
+            // de más arriba dejó el numeral en cero.
+            tl.call(() => write(counter, spec.value), undefined, FIGURE_AT);
+          }
+
+          tl.from(counter, { autoAlpha: 0, y: 18, duration: 0.6 }, FIGURE_AT);
         }
 
         const unit = row.querySelector<HTMLElement>("[data-unit]");
@@ -391,19 +443,64 @@ export default function ProofLedger() {
             FIGURE_AT + 0.12,
           );
 
+        /* 3 · la glosa, a la derecha del numeral */
+        // Su duración REAL —la de una letra más el escalonado de las que le
+        // siguen— es lo que mide los dos pasos que vienen después. Se calcula
+        // acá y no se estima: depende de cuántos caracteres tenga la palabra, y
+        // "uptime" y "Million TPS" no se parecen en eso.
+        //
+        // El `?? 1` cubre el renglón sin glosa: sin letras que escalonar, la
+        // referencia es el tiempo de una sola.
         const gloss = row.querySelector<HTMLElement>("[data-gloss]");
+        let glossChars = 0;
         if (gloss) {
           const s = SplitText.create(gloss, { type: "chars" });
           splits.push(s);
+          glossChars = s.chars.length;
           gsap.set(s.chars, { autoAlpha: 0, y: 16 });
           tl.to(
             s.chars,
-            { autoAlpha: 1, y: 0, duration: 0.55, stagger: CHAR * 1.4 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: GLOSS_CHAR,
+              stagger: GLOSS_STAGGER,
+            },
             glossAt,
           );
         }
+        const glossDur =
+          GLOSS_CHAR + GLOSS_STAGGER * Math.max(glossChars - 1, 0);
 
-        /* 3 · el cuerpo, a media cuenta */
+        /* 4 · la píldora, a media glosa: aparece y se escribe */
+        const eyebrow = row.querySelector<HTMLElement>("[data-eyebrow]");
+        if (eyebrow) {
+          const s = SplitText.create(eyebrow, { type: "chars" });
+          splits.push(s);
+          gsap.set(s.chars, { autoAlpha: 0, y: 8 });
+          const pillAt = glossAt + glossDur * PILL_AT;
+          // Crece desde su borde izquierdo y no desde el centro: la píldora mide
+          // su texto (`w-fit`), así que escalarla desde el medio la hace nacer
+          // corrida respecto del sitio donde va a quedar.
+          tl.from(
+            eyebrow,
+            {
+              autoAlpha: 0,
+              scale: 0.92,
+              transformOrigin: "left center",
+              duration: PILL,
+              ease: "power2.out",
+            },
+            pillAt,
+          );
+          tl.to(
+            s.chars,
+            { autoAlpha: 1, y: 0, duration: 0.4, stagger: CHAR },
+            pillAt + PILL * PILL_TEXT_LEAD,
+          );
+        }
+
+        /* 5 · el cuerpo, al 90% de la glosa */
         const body = row.querySelector<HTMLElement>("[data-body]");
         if (body) {
           // `mask: "lines"` envuelve cada renglón en un contenedor con
@@ -415,7 +512,7 @@ export default function ProofLedger() {
           tl.to(
             s.lines,
             { autoAlpha: 1, yPercent: 0, duration: 0.6, stagger: 0.09 },
-            FIGURE_AT + beat * BODY_AT,
+            glossAt + glossDur * BODY_AT,
           );
         }
       });

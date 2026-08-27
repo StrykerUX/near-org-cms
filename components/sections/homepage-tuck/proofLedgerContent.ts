@@ -40,10 +40,15 @@ export type LedgerRow = {
    * Cuántos decimales fija el contador, ida y vuelta: es el formato del valor
    * final Y el de cada cuadro intermedio.
    *
-   * El de TPS es 1 y no 0 a propósito. Con cero decimales el contador de esa
-   * prueba tiene un solo paso visible —de 0 a 1— y no se lee como una cuenta
-   * sino como una aparición; el renglón queda fuera de la serie mientras los
-   * otros tres suben. Con un decimal, "1.0" cuenta como los demás.
+   * ⚠️ El de TPS estuvo en 1 —o sea "1.0"— para que ese renglón contara como los
+   * demás: con cero decimales su contador tiene UN solo paso visible, de 0 a 1,
+   * y eso no es una cuenta, es una aparición.
+   *
+   * Volvió a 0 porque el diseño pide "1" y no "1.0". El problema que el decimal
+   * tapaba sigue existiendo, así que se resuelve donde corresponde: la escena
+   * mira cuántos pasos tiene la cuenta y, si son menos de diez, no cuenta —
+   * entra la cifra y listo. El renglón mantiene el mismo compás que los otros
+   * porque lo que dura no es la cuenta sino su lugar en la secuencia.
    */
   decimals: number;
   /** Lo que va pegado adelante de la cifra. Solo el `$` del volumen. */
@@ -76,7 +81,7 @@ export type LedgerRow = {
  * mueve son los dígitos.
  *
  * El relleno se mide contra el valor FINAL, así que cada renglón lleva los
- * suyos: tres para `100`, dos para `24` y `30`, uno para `1.0`. No es un ancho
+ * suyos: tres para `100`, dos para `24` y `30`, uno para `1`. No es un ancho
  * declarado en ningún lado y por eso no hay nada que mantener sincronizado el
  * día que una prueba cambie de cifra.
  *
@@ -108,7 +113,7 @@ export const LEDGER_ROWS: readonly LedgerRow[] = [
     id: "tps",
     eyebrow: "Built to scale",
     value: 1,
-    decimals: 1,
+    decimals: 0,
     unit: "",
     gloss: "Million TPS",
     body: "NEAR's architecture handles over a million transactions per second on consumer-grade hardware and scales automatically through dynamic resharding.",
