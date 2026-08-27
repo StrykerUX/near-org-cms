@@ -62,9 +62,18 @@ export default function ProofRow() {
               <dd data-count={stat.value} className="text-h2 tabular-nums">
                 {stat.value}
               </dd>
-              <dt className="uppercase text-micro-mono text-gray-intermediate">{stat.label}</dt>
+              {/* Rótulo y nota en MONTREAL, no en la mono.
+                  
+                  Estuvieron en `text-micro-mono` con el criterio de que un
+                  rótulo de dato es un valor y los valores van en mono. Pero acá
+                  el valor es la CIFRA, que está en sans: la mono debajo hacía
+                  que la ficha se leyera en dos voces y le daba a la etiqueta un
+                  aire de dato que compite con el número al que sirve. En sans,
+                  las dos líneas de abajo son lo que son —el nombre de la cifra y
+                  su nota— y la cifra se queda sola arriba. */}
+              <dt className="uppercase text-micro text-gray-intermediate">{stat.label}</dt>
               {stat.note && (
-                <dd className="text-micro-mono text-gray-intermediate">{stat.note}</dd>
+                <dd className="text-micro text-gray-intermediate">{stat.note}</dd>
               )}
             </div>
           ))}

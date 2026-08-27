@@ -1,5 +1,6 @@
 import { GridOverlay } from "@/components/primitives/Grid";
 import HeroX from "@/components/sections/hero-x/HeroX";
+import ProofRow from "@/components/sections/protocol-labs/ProofRow";
 import ScaleClaim from "@/components/sections/protocol-labs/ScaleClaim";
 import ProtocolSpine from "@/components/sections/protocol/ProtocolSpine";
 import DeveloperBlock from "@/components/sections/protocol/DeveloperBlock";
@@ -52,12 +53,15 @@ export default function ProtocolView() {
             viene a evitar. Acá son cuatro montajes —`/protocol` y las tres
             propuestas— sobre la misma copy (`protocolContent.AI_SCALE`).
 
-            ⚠️ La captura de `/prototype/protocol-a` que motivó el cambio trae
-            además la franja de cifras de arriba (100% · 1M+ · 600ms · 1.2s ·
-            10 · <$0.002). Ésa es OTRA sección del lab —`ProofRow`— y no entra:
-            esta página ya publica esas mismas cifras más abajo, en
-            `ProtocolSpine`. Montarla diría lo mismo dos veces en una pantalla
-            y media. */}
+            La franja de cifras de arriba es OTRA sección del lab —`ProofRow`—
+            y entra con ella. Estuvo un momento fuera con el argumento de que
+            `ProtocolSpine` ya publicaba esas seis cifras en su encabezado; el
+            argumento era falso en el único sentido que importa: ahí el `<p>`
+            que las llevaba se quedaba en `opacity: 0` —su revelado no dispara
+            dentro de esa sección pegada— así que las cifras estaban en el DOM
+            y no las veía nadie. El lede se retiró y las cifras vuelven a tener
+            su sección, que es de donde habían salido. */}
+        <ProofRow />
         <ScaleClaim />
         <ProtocolSpine />
         <DeveloperBlock />

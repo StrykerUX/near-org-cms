@@ -7,8 +7,45 @@ import ArrowCircle from "@/components/primitives/ArrowCircle";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger } from "@/components/primitives/motion/gsapClient";
 import { MQ, EASE_OUT } from "@/components/primitives/motion/motionTokens";
-import { DIAGRAMS, type DiagramKey } from "@/components/sections/protocol/spineDiagrams";
-import SpeedLottie from "@/components/sections/protocol/SpeedLottie";
+import SpineLottie from "@/components/sections/protocol/SpineLottie";
+import nightshadeLottie from "@/components/sections/protocol/nightshadeLottie.json";
+import reshardingLottie from "@/components/sections/protocol/reshardingLottie.json";
+import speedLottie from "@/components/sections/protocol/speedLottie.json";
+import privateShardLottie from "@/components/sections/protocol/privateShardLottie.json";
+import quantumLottie from "@/components/sections/protocol/quantumLottie.json";
+import chainSignaturesLottie from "@/components/sections/protocol/chainSignaturesLottie.json";
+
+/**
+ * Las seis paradas del spine. El tipo vivía en `spineDiagrams` como
+ * `DiagramKey`, y con los diagramas fuera de juego le corresponde vivir donde
+ * están las paradas: acá.
+ */
+type SpineKey =
+  | "nightshade"
+  | "resharding"
+  | "speed"
+  | "private-shard"
+  | "quantum"
+  | "chain-signatures";
+
+/**
+ * La animación de cada parada, indexada por su `key`.
+ *
+ * Las seis reemplazan a los diagramas generados de `spineDiagrams`, que
+ * dibujaban el mismo suelo isométrico con hairlines y cubos verdes. Ese módulo
+ * SIGUE en el árbol y ya no lo consume nadie desde acá.
+ *
+ * El mapa es literal y no un `import()` por nombre: Turbopack necesita ver cada
+ * ruta para incluir el JSON, y una plantilla no le dice cuáles.
+ */
+const LOTTIES: Record<SpineKey, unknown> = {
+  nightshade: nightshadeLottie,
+  resharding: reshardingLottie,
+  speed: speedLottie,
+  "private-shard": privateShardLottie,
+  quantum: quantumLottie,
+  "chain-signatures": chainSignaturesLottie,
+};
 
 /**
  * The protocol, as six equal claims on a horizontal shelf.
@@ -41,7 +78,7 @@ import SpeedLottie from "@/components/sections/protocol/SpeedLottie";
  */
 
 type Item = {
-  key: DiagramKey;
+  key: SpineKey;
   title: string;
   body: string;
   fact: string;
@@ -89,17 +126,17 @@ const ITEMS: Item[] = [
   },
 ];
 
-// Las cifras de prueba, absorbidas del viejo ProofGrid (sección aparte,
-// eliminada): acá son texto secundario del encabezado — parte del lede, no
-// pills ni una sección propia. Mismos seis pares figura/nota del doc.
-const PROOF = [
-  { figure: "100% uptime", note: "5+ years on mainnet" },
-  { figure: "1M+ TPS", note: "publicly verifiable" },
-  { figure: "600ms", note: "block time" },
-  { figure: "1.2s", note: "finality" },
-  { figure: "10 shards", note: "plus a private shard" },
-  { figure: "<$0.002", note: "avg transaction fee" },
-] as const;
+// Las cifras de prueba SE FUERON de acá, y vale dejar por qué en dos pasos.
+//
+// Vivían en el viejo `ProofGrid` —sección propia—, se absorbieron a este
+// encabezado como texto corrido secundario, y de ahí nunca llegaron a verse: el
+// `<p data-spine-head>` que las llevaba se quedaba en `opacity: 0` porque su
+// revelado no dispara dentro de esta sección pegada. Seis cifras en el DOM que
+// ningún lector veía.
+//
+// Vuelven a ser una sección propia —`protocol-labs/ProofRow`, montada arriba de
+// `ScaleClaim`—, que es de donde salieron. Acá no quedan: repetirlas en el
+// encabezado sería decir dos veces lo mismo en pantalla y media.
 
 export default function ProtocolSpine() {
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
@@ -119,15 +156,15 @@ export default function ProtocolSpine() {
         };
         const cards = q("[data-card]");
 
-        // Diagram timelines are built once per card and only played while
-        // that card is open — six looping animations at once is exactly what
-        // makes a page feel heavy. "speed" es la excepción: su animación es
-        // el Lottie de SpeedLottie, que se gobierna solo por data-open; acá
-        // le corresponde un timeline vacío para no romper el contrato.
-        const timelines = cards.map((card) => {
-          const key = card.dataset.diagram as DiagramKey;
-          return key === "speed" ? gsap.timeline({ paused: true }) : DIAGRAMS[key].build(card);
-        });
+        // Un timeline VACÍO por card, y las seis igual.
+        //
+        // Antes cinco cards construían el timeline de su diagrama generado y
+        // sólo "speed" —la única con Lottie— llevaba uno vacío, porque su
+        // animación se gobierna sola por `data-open`. Ahora las seis tienen
+        // Lottie, así que la excepción es la regla: el accordion sigue
+        // llamando `restart()`/`pause(0)` sobre estos timelines —el contrato no
+        // se toca— y lo que se mueve de verdad lo decide `SpineLottie`.
+        const timelines = cards.map(() => gsap.timeline({ paused: true }));
 
         const accordion = motionOk && isDesktop;
         if (!accordion) {
@@ -318,25 +355,12 @@ export default function ProtocolSpine() {
                 load-bearing, and each one is live.
               </p>
             </div>
-            <div className="lg:max-w-[26rem] lg:text-right">
-              {/* Las cifras de prueba como texto corrido secundario: parte del
-                  encabezado, sin pills ni grid. */}
-              <p data-spine-head className="text-caption text-cream/40">
-                {PROOF.map((p, i) => (
-                  <span key={p.figure} className="whitespace-nowrap">
-                    <span className="text-cream/75">{p.figure}</span> {p.note}
-                    {i < PROOF.length - 1 && <span aria-hidden="true"> · </span>}
-                  </span>
-                ))}
-              </p>
-            </div>
           </header>
 
           {/* The shelf. Fallback: a vertical stack of open cards. Accordion:
               one row, fixed height, spines + one expanded card. */}
           <div className="flex flex-col gap-5 group-data-[mode=accordion]/spine:h-[56svh] group-data-[mode=accordion]/spine:max-h-[36rem] group-data-[mode=accordion]/spine:flex-row group-data-[mode=accordion]/spine:gap-4">
             {ITEMS.map((item) => {
-              const { Art } = DIAGRAMS[item.key];
               return (
                 <article
                   key={item.key}
@@ -380,7 +404,7 @@ export default function ProtocolSpine() {
                     </header>
 
                     <div className="min-h-[13rem] flex-1 pt-5">
-                      {item.key === "speed" ? <SpeedLottie /> : <Art />}
+                      <SpineLottie data={LOTTIES[item.key]} />
                     </div>
 
                     <p className="mt-4 max-w-[56ch] text-body-sm text-cream/65 text-pretty">
