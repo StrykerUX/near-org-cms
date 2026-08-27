@@ -86,13 +86,19 @@ export default function BelongsNewsletter() {
           className="rounded-[32px] bg-[var(--card-surface)] px-6 py-[7%] text-center sm:px-10"
         >
           <div className="mx-auto flex max-w-2xl flex-col items-center">
-            {/* El glifo de marca. `aria-hidden` y fuera del `<h2>`: acá no
-                aporta una palabra a la frase —el titular se lee solo— así que
-                anunciarlo sería ruido. La altura en `em` del titular lo ata a la
-                escala tipográfica sin darle un rol propio. */}
+            {/* El glifo de marca, en NEGRO y no en el degradé lima→verde. El
+                asset vive en `public/near-icon-black.svg` y no bajo
+                `public/prototype/homepage-a/`: la variante negra ya no es de un
+                prototipo, es la que usa la home. El squircle con degradé se
+                queda donde está — lo siguen consumiendo los labs.
+
+                `aria-hidden` y fuera del `<h2>`: acá no aporta una palabra a la
+                frase —el titular se lee solo— así que anunciarlo sería ruido. La
+                altura en `em` del titular lo ata a la escala tipográfica sin
+                darle un rol propio. */}
             <Image
               data-line
-              src="/prototype/homepage-a/near-squircle.svg"
+              src="/near-icon-black.svg"
               alt=""
               aria-hidden="true"
               width={800}

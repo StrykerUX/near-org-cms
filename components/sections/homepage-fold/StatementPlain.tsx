@@ -1,6 +1,7 @@
 "use client";
 
 
+import Image from "next/image";
 import Container from "@/components/primitives/Container";
 import { useGsapContext } from "@/components/primitives/motion/useGsapContext";
 import { gsap, ScrollTrigger, SplitText } from "@/components/primitives/motion/gsapClient";
@@ -52,20 +53,27 @@ import { AGENT_ECONOMY as COPY } from "@/components/sections/homepage-shared/hom
 // El verde del acento es el mismo literal que en el statement vivo — hoja,
 // tomado del gradiente del icono; no existe en los tokens (ver la nota de
 // `AgentEconomy`).
-/**
- * El tramo del cuerpo que se lee como acento, y no como parte de la frase
- * corrida.
+/* ── El lockup ────────────────────────────────────────────────────────────────
  *
- * Se saca por búsqueda del contenido compartido en vez de escribirlo dos veces:
- * `AGENT_ECONOMY.body` es la fuente, y duplicar la frase acá dejaría dos copias
- * que se separan la primera vez que alguien corrija una y no la otra. Si el
- * copy cambia y la frase deja de estar, el `split` no encuentra nada y la
- * sección cae a la versión de un solo acento — se ve peor, no se rompe.
+ * Esta sección se alineó con `homepage-shared/AgentEconomy`, que es donde la
+ * frase ya tenía su forma resuelta: icono de NEAR a la izquierda anclado por
+ * baseline, el cuerpo en voz corrida y UN solo acento —el que cierra— en sans
+ * bold verde. Acá venía centrada, con la frase partida a mano en tres tramos y
+ * DOS acentos en serif itálica.
+ *
+ * Lo que se fue, y por qué no vuelve:
+ *
+ *   · `PIVOT` / `CONNECTOR`. Partían el cuerpo para acentuar «the agent
+ *     economy.» y para bajar el «and» con un `<br>`. Con la medida en `em` el
+ *     reparto de líneas ya lo hace el `max-w`, y los quiebres a mano se pelean
+ *     con él en cuanto cambia el copy.
+ *   · El segundo acento. Dos tramos acentuados en una frase de seis líneas no
+ *     marcan dos ideas, quitan énfasis al que importa: el que cierra.
+ *   · La serif itálica y su corrección óptica de x-height. El acento deja de
+ *     ser un cambio de VOZ y pasa a ser un cambio de PESO y color, que es lo
+ *     que hace `AgentEconomy` — y con eso se van el `1.09em` y el
+ *     `leading-[0.86]` que existían solo para compensarla.
  */
-const PIVOT = "the agent economy.";
-
-/** La conjunción que cierra el cuerpo y arrastra al acento a su propia línea. */
-const CONNECTOR = "and";
 
 /**
  * La opacidad de una palabra que todavía no se leyó.
@@ -106,55 +114,6 @@ const PALETTE = {
   "--statement-accent": "#5cb946",
 } as React.CSSProperties;
 
-/**
- * Los dos tramos en acento.
- *
- * `font-serif italic` y no un token `text-*-serif`: el tamaño ya lo pone el
- * `text-h2` del párrafo, y un token completo lo pisaría con el suyo. Lo que
- * cambia acá es la VOZ —la frase pasa de dicha a citada— y eso es familia e
- * inclinación, no escala.
- *
- * El `1.09em` es corrección ÓPTICA, no un cambio de escala. Kepler tiene la
- * altura de x más baja que Montreal, así que al mismo `font-size` sus
- * minúsculas se ven un cuerpo más chicas y el acento parece hundido dentro de
- * la frase. El factor lo devuelve a la misma altura aparente. Va en `em` a
- * propósito: se mide contra el tamaño heredado, así que sigue al token del
- * párrafo en vez de fijar un cuerpo propio.
- *
- * Y el `leading-[1]` es la contrapartida obligatoria. Un inline más grande
- * arrastra su propio interlineado, y medido daba 69px en las líneas con acento
- * contra 58 en las demás: el bloque quedaba con los renglones a dos distancias
- * distintas según llevaran serif o no. Fijándolo, la caja del acento vuelve a
- * medir lo mismo que la del sans.
- *
- * `0.86` y no `1`: fijarlo en el propio tamaño del acento deja todavía 8px de
- * diferencia, porque la caja de línea también se corre al alinear dos fuentes
- * con líneas base distintas. El valor sale de medir, no de una proporción.
- *
- * Y no `0` —el atajo habitual para esto— porque el degradé se recorta contra la
- * caja del inline: con altura cero no hay caja sobre la que pintarlo y el texto
- * queda transparente sobre nada.
- *
- * El acento es el verde de marca PLANO. Tenía un degradé recortado con
- * `bg-clip-text` —de un verde claro a uno oscuro, para que el promedio de
- * contraste sobre crema mejorara— y con él se fueron sus dos acompañantes:
- * `bg-clip-text` no tiene nada que recortar sin degradé, y
- * `box-decoration-break: clone` existía solo para que un tramo partido en dos
- * renglones no repartiera UN degradé entre los dos fragmentos.
- *
- * ⚠️ El verde de marca sobre crema es 1.64:1. El degradé que se fue era la
- * compensación de eso; el acento ahora se apoya en la bastardilla y el cuerpo,
- * no en el contraste.
- */
-function Accented({ children }: { children: React.ReactNode }) {
-  return (
-    // ds-exempt: corrección óptica de x-height y su interlineado, en `em`
-    <em className="text-brand font-serif text-[1.09em] leading-[0.86]">
-      {children}
-    </em>
-  );
-}
-
 export type StatementPlainProps = {
   /**
    * Un respiro arriba de la frase. Apagado por defecto.
@@ -176,25 +135,6 @@ export type StatementPlainProps = {
 };
 
 export default function StatementPlain({ topAir = false }: StatementPlainProps = {}) {
-  // El cuerpo, partido en los dos tramos que quedan en voz corrida. `rest`
-  // llega `undefined` si el pivote ya no está en el copy — ahí el primer
-  // acento no se dibuja y la frase sigue entera, que es la degradación que se
-  // quiere.
-  const [lead, rest] = COPY.body.split(PIVOT);
-
-  // Y el "and" final se separa del resto para bajar con el acento: es la
-  // conjunción que lo introduce, y dejarla colgando al final de la línea
-  // anterior parte la última idea en dos renglones que no se leen juntos.
-  //
-  // Por `lastIndexOf` y no por un corte fijo: la conjunción es la última
-  // palabra del cuerpo, y buscarla desde el final es lo único que sigue
-  // funcionando si la frase de antes cambia de largo. Si el copy deja de
-  // terminar así, `cut` da -1 y el renglón se arma como antes.
-  const body = rest?.trimStart() ?? "";
-  const cut = body.lastIndexOf(` ${CONNECTOR}`);
-  const middle = cut >= 0 ? body.slice(0, cut) : body;
-  const connector = cut >= 0 ? body.slice(cut + 1) : "";
-
   const rootRef = useGsapContext<HTMLElement>((_self, scope) => {
     const mm = gsap.matchMedia();
 
@@ -315,12 +255,38 @@ export default function StatementPlain({ topAir = false }: StatementPlainProps =
             escala, medido contra el viewport— no hay nada que consultarle al
             contenedor, y dejarlo declarado invitaría a creer que algo depende
             de él. */}
-        <div>
-          {/* Sin el flex ni el `w-fit` que había acá: existían para poner el
-              icono de NEAR a la izquierda de la frase, alineado por baseline.
-              Fuera el icono, un flex de un solo hijo con `gap` es andamiaje que
-              no sostiene nada — el `mx-auto` sobre el propio bloque de texto
-              hace el mismo centrado. */}
+        {/* El lockup: icono y frase como una sola pieza.
+
+            `items-baseline` y no `items-center`: el glifo se apoya en la línea
+            base de la primera línea, que es lo que lo hace leer como parte del
+            texto y no como una viñeta al costado.
+
+            `mx-auto w-fit` centra el CONJUNTO en el ancho del `Container` sin
+            tocar la alineación interna, que se queda a la izquierda.
+            `justify-center` no serviría: el `<h2>` es un flex item que se
+            estira hasta sus 17em aunque la línea más larga mida menos, así que
+            centraría la caja y no el texto. */}
+        <div className="mx-auto flex w-fit items-baseline gap-[0.52em] text-h2">
+          {/* El glifo va en NEGRO y no en el degradé lima→verde, y el asset
+              vive en `public/near-icon-black.svg`: la variante negra ya no es de
+              un prototipo, es la que usa la home.
+
+              `width`/`height` son 800 porque ese es el viewBox del archivo, no
+              porque se pinte a ese tamaño: Next los usa para la relación de
+              aspecto, y el tamaño real lo ponen las clases en `em`.
+              Desalineados con el viewBox, el `<img>` reserva una caja de
+              proporción equivocada durante el layout. `unoptimized` porque el
+              optimizador de Next rasteriza, y servir el SVG tal cual es lo
+              único que conserva el vector. */}
+          <Image
+            src="/near-icon-black.svg"
+            alt=""
+            aria-hidden="true"
+            width={800}
+            height={800}
+            unoptimized
+            className="h-[1.07em] w-[1.07em] shrink-0"
+          />
           {/* `text-h2` y no `text-manifesto`: el rol que le corresponde en la
               escala. `--text-manifesto` no es un escalón del ruleset sino una
               medida de contenedor (`3.4cqw`), hecha para un bloque cuyo cuerpo
@@ -330,39 +296,34 @@ export default function StatementPlain({ topAir = false }: StatementPlainProps =
               El tope de los dos es el mismo (3.75rem), así que en pantalla
               grande el tamaño no cambia — lo que cambia es el tramo medio, que
               deja de depender de cuánto mide el `Container`.
-              
-              La caja mide 15.5em, y el medio punto no es indecisión: 17 dejaba
-              las líneas largas, 15 quebraba de más y 16 seguía ancha.
-              
-              `text-balance` reparte el texto entre las líneas en vez de llenar
-              cada una hasta el borde, así que la última deja de ser un resto
-              corto. Trabaja POR BLOQUE, y el `<br>` de abajo parte la frase en
-              dos: cada oración se balancea sola, que es lo que se quiere.
-              
-              ⚠️ Los navegadores dejan de balancear pasado un número de líneas
-              (Chrome, alrededor de seis) por costo de cálculo. Este bloque está
-              justo en ese límite, así que el ancho de arriba no es solo estética
-              — si crece y una de las dos mitades pasa el tope, el balanceo se
-              apaga solo y en silencio. */}
-          <h2 data-statement-copy className="mx-auto max-w-[15.5em] text-center text-h2 text-balance">
-            {lead}
-            <Accented>{PIVOT}</Accented>
-            {/* El único quiebre puesto a mano de toda la frase, y va acá porque
-                acá termina una oración: el primer acento cierra la idea de qué
-                es NEAR, y lo que sigue es otra. Sin el salto, el punto cae a
-                mitad de línea y las dos ideas se leen como una sola tirada.
-                
-                `trimStart` sobre el resto porque el espacio que separaba las
-                oraciones en el string quedaría al principio del renglón nuevo —
-                invisible en el markup y visible como una sangría de un espacio
-                en la línea centrada. */}
-            <br />
-            {middle}
-            {/* El segundo quiebre: baja el "and" junto con el acento que
-                introduce, para que la última idea entre entera en un renglón. */}
-            {connector ? <br /> : null}
-            {connector}{connector ? " " : null}
-            <Accented>{COPY.accent}</Accented>
+
+              El `max-w` va en **em**, y esa unidad es el punto entero: en em la
+              medida de línea escala con el font-size, así que el reparto en
+              líneas —y sobre todo dónde cae el acento, que tiene que cerrar la
+              última— es el mismo en cualquier viewport. 17em son ~38
+              caracteres, un poco más que la línea más larga
+              ("Quantum-resistant and confidential").
+
+              Sin `text-balance` y sin quiebres a mano: los dos existían para la
+              versión centrada, donde la última línea corta se notaba. Acá la
+              frase está alineada a la izquierda y el reparto lo fija la medida,
+              que es lo que mantiene el acento en su renglón. */}
+          <h2 data-statement-copy className="max-w-[17em]">
+            {COPY.body}{" "}
+            {/* El acento pesa MÁS que el cuerpo dentro de la misma frase, y eso
+                no es un rol tipográfico nuevo que merezca su token: es el
+                contraste interno del statement y vive con él. Mismo tratamiento
+                que en `AgentEconomy`.
+
+                El verde es `--statement-accent` (#5cb946), verde hoja tomado del
+                gradiente del icono para que el acento y el glifo se lean como la
+                misma cosa. NO es el verde de marca: `--sem-brand-primary` es un
+                mint que al lado de este icono se lee como otro color, y sobre
+                crema da 1.64:1 contra los 3.4:1 de éste. */}
+            {/* ds-exempt: acento más pesado que su propia frase */}
+            <strong className="font-bold text-[color:var(--statement-accent)]">
+              {COPY.accent}
+            </strong>
           </h2>
         </div>
       </Container>
