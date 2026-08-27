@@ -35,7 +35,8 @@ export const CTA_RAMP = ["#00dc8d", "#00dc8d", "#00dc8d"] as const;
 /** El extremo más brillante de la rampa — el flash con el que nace cada letra. */
 export const CTA_RAMP_HEAD = CTA_RAMP[CTA_RAMP.length - 1];
 
-/** Espeja `--near-teal` de app/globals.css, que en la paleta actual resuelve al
- *  verde de marca — es un tono suelto y no una parada de un degradé, así que no
- *  hay gradiente que se pierda al colapsarlo. */
-export const NEAR_TEAL = "#00dc8d";
+/** El teal de las escenas. Espejaba `--near-teal` de globals.css, que hoy
+ *  resuelve al verde de marca; acá se queda en su tono porque lo consume ARTE
+ *  —lo mismo que la rampa del hero—, y un acento de escena colapsado al color de
+ *  marca deja de acompañar a la imagen para competir con ella. */
+export const NEAR_TEAL = "#2dd4bf";

@@ -50,14 +50,19 @@ const P = {
 // propósito: la referencia nunca satura por arriba —su punto más claro sigue
 // siendo un crema verdoso— ni cierra en negro puro, y esos dos topes son buena
 // parte de por qué se lee como película y no como un degradé sintético.
-// ⚠️ La rampa NO entra al sistema de color, y es la única excepción de arte del
-// sitio junto con `stackArt.generated.tsx`. Son cinco paradas de una película:
-// aplanarlas al verde de marca no la simplifica, la borra —queda un plano de un
-// color—. Lo que sí sigue a la marca es la parada MEDIA, la que se lee como «el
-// verde» del follaje; las otras cuatro son la luz y la sombra que hacen el
-// volumen, y sus topes (ni satura por arriba ni cierra en negro puro) son buena
-// parte de por qué se lee como película.
-const PALETTE = ["#e8efbe", "#b5cc86", "#00dc8d", "#1f5540", "#0a2018"] as const;
+// ⚠️ La rampa NO entra al sistema de color: es arte, como `stackArt.generated`.
+//
+// Las cinco paradas van SIN el verde de marca, y esto es lo que se aprendió
+// metiéndolo. La parada media estuvo en `#00dc8d` —la idea era que el follaje
+// llevara la marca— y el resultado no fue un verde de marca en la imagen: fue
+// una banda turquesa neón cortando el cuadro en diagonal. El motivo es que
+// #00dc8d no es del mismo mundo que el resto de la rampa: es mucho más saturado
+// y tira a azul, mientras las otras cuatro son verdes desaturados y cálidos. En
+// un degradé de cinco paradas eso no se funde, se raja.
+//
+// Si la marca tiene que aparecer en el hero, no es acá: es en algo que se lea
+// como OBJETO —el CTA, un acento— y no como la luz del fondo.
+const PALETTE = ["#e8efbe", "#b5cc86", "#5e8f5c", "#1f5540", "#0a2018"] as const;
 
 // Resolución del buffer, como fracción del canvas.
 //
@@ -211,19 +216,17 @@ export default function HeroFoliage({ className }: { className?: string }) {
       ref={canvasRef}
       aria-hidden="true"
       className={className}
-      // El fallback es la parada CLARA de la paleta, no la de sombra.
+      // El fallback es la parada de sombra de la paleta y no negro: si WebGL2
+      // no está disponible el hero queda en verde oscuro, que sigue siendo la
+      // familia correcta.
       //
-      // Estuvo en `PALETTE[4]` (#0a2018) con el argumento de que sin WebGL2 el
-      // hero quedaba en verde oscuro, «que sigue siendo la familia correcta».
-      // La familia sí; la legibilidad no: el titular del hero es tinta oscura y
-      // sobre esa parada da 1.13:1 — o sea que quien no tenga WebGL2 utilizable
-      // ve un rectángulo verde sin texto. Sobre `PALETTE[1]` da 8.61:1 y sigue
-      // siendo la misma paleta.
-      //
-      // No se ve cuando el shader arranca: lo tapa el primer cuadro. Es
-      // exactamente el caso que nadie mira, y por eso conviene que sea el
-      // legible.
-      style={{ backgroundColor: PALETTE[1] }}
+      // ⚠️ Estuvo un rato en `PALETTE[1]` (el claro) con el argumento de que el
+      // titular es tinta oscura y sobre la parada de sombra da 1.13:1. El dato es
+      // cierto, pero el cambio no estaba pedido y repinta el hero entero en
+      // cuanto el shader no arranca. Si hay que resolver ese caso, se resuelve
+      // sin mover el color de la sección — por ejemplo aclarando el titular
+      // mientras el canvas no haya pintado su primer cuadro.
+      style={{ backgroundColor: PALETTE[4] }}
     />
   );
 }
