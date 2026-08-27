@@ -52,7 +52,7 @@ export default function CustomerStories() {
       }
       className="overflow-hidden bg-cream py-[clamp(40px,7vh,96px)] text-foreground"
       aria-roledescription="carousel"
-      aria-label="What the world is building on NEAR"
+      aria-label="On NEAR, the world is building"
     >
       {/* El titular va en `Container` y no con el gutter propio del carrusel.
           Son dos medidas distintas: el `clamp(24px, 5vw, 105px)` que usa el
@@ -67,9 +67,17 @@ export default function CustomerStories() {
           costados. Lo que se alinea es el encabezado. */}
       <Container>
         <h2 className="mb-[clamp(30px,6vh,74px)] text-pretty text-h2">
-          What the world is
-          <br />
-          <Accent>building on NEAR</Accent>
+          On NEAR, the{" "}
+          {/* Sin el `<br>` que partía el titular anterior: aquel repartía dos
+              líneas parejas —«What the world is» / «building on NEAR», 17 y 16
+              caracteres— y con esta frase un corte fijo parte mal. El reparto lo
+              hace `text-pretty` contra el ancho real.
+
+              El acento se lleva TRES palabras y no una: «building» sola en
+              Kepler se lee como un remate y la frase no lo tiene — lo que la
+              serif marca acá es el sujeto y su acción juntos. Y sin punto: el
+              titular deja de ser una oración cerrada. */}
+          <Accent>world is building</Accent>
         </h2>
       </Container>
 

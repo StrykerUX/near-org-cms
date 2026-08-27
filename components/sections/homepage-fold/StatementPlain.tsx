@@ -285,7 +285,18 @@ export default function StatementPlain({ topAir = false }: StatementPlainProps =
             width={800}
             height={800}
             unoptimized
-            className="h-[1.07em] w-[1.07em] shrink-0"
+            // El `translate-y` baja el glifo hasta centrarlo en la banda de
+            // MAYÚSCULAS de la primera línea, y el valor sale de las métricas,
+            // no del ojo: alineado por baseline, la caja del icono se apoya en
+            // ella y sube 1.07em, mientras las mayúsculas de Montreal llegan a
+            // 0.715em (cap-height 715 — ver lib/fonts.ts). O sea que sobresalía
+            // 0.355em por arriba y nada por abajo. Bajarlo la mitad de esa
+            // diferencia lo deja con el mismo aire arriba que abajo respecto de
+            // «NEAR».
+            //
+            // Va en `em` para que siga al cuerpo del titular, y como transform
+            // para que no toque el layout: la línea base del texto no se mueve.
+            className="h-[1.07em] w-[1.07em] shrink-0 translate-y-[0.18em]"
           />
           {/* `text-h2` y no `text-manifesto`: el rol que le corresponde en la
               escala. `--text-manifesto` no es un escalón del ruleset sino una

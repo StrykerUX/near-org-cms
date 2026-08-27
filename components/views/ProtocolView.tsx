@@ -1,6 +1,6 @@
 import { GridOverlay } from "@/components/primitives/Grid";
 import HeroX from "@/components/sections/hero-x/HeroX";
-import AiScale from "@/components/sections/protocol/AiScale";
+import ScaleClaim from "@/components/sections/protocol-labs/ScaleClaim";
 import ProtocolSpine from "@/components/sections/protocol/ProtocolSpine";
 import DeveloperBlock from "@/components/sections/protocol/DeveloperBlock";
 import EcosystemStretch from "@/components/sections/protocol/EcosystemStretch";
@@ -40,7 +40,25 @@ export default function ProtocolView() {
             juzgue con las nueve páginas delante. El porqué del preset de
             esta página está en `hero-x/heroXPresets.ts`. */}
         <HeroX page="protocol" />
-        <AiScale />
+        {/* La segunda sección es la de `protocol-labs` y no
+            `protocol/AiScale`, que decía lo mismo en tres columnas de texto
+            con un filete arriba. Ésta lo dice en tres CARDS, cada una con su
+            pieza isométrica, y el titular pasa a la columna izquierda con el
+            cuerpo debajo en vez de repartirse en dos mitades.
+
+            Se MONTA la del lab, no se copia. Es el mismo criterio que la home
+            con `HomepageCView`: el mismo componente montado dos veces no puede
+            divergir, que es lo único que la regla de «promover una variante»
+            viene a evitar. Acá son cuatro montajes —`/protocol` y las tres
+            propuestas— sobre la misma copy (`protocolContent.AI_SCALE`).
+
+            ⚠️ La captura de `/prototype/protocol-a` que motivó el cambio trae
+            además la franja de cifras de arriba (100% · 1M+ · 600ms · 1.2s ·
+            10 · <$0.002). Ésa es OTRA sección del lab —`ProofRow`— y no entra:
+            esta página ya publica esas mismas cifras más abajo, en
+            `ProtocolSpine`. Montarla diría lo mismo dos veces en una pantalla
+            y media. */}
+        <ScaleClaim />
         <ProtocolSpine />
         <DeveloperBlock />
         <EcosystemStretch />
