@@ -6,7 +6,17 @@ import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 // nunca construir la clase con un template string, Tailwind v4 no detecta
 // clases generadas dinámicamente.
 const WIDTH = {
-  site: "max-w-[1780px] px-[60px]",
+  // El gutter de `site` era 60px FIJOS en todos los anchos, y ese número está
+  // dibujado para un monitor. En un teléfono de 390 son 120px de margen sobre
+  // 390 —el 31% de la pantalla— y todo el sitio quedaba escribiendo en una
+  // columna de 270: titulares partidos en cuatro renglones, cards angostas y
+  // párrafos de seis palabras.
+  //
+  // La rampa es la misma que `wide` ya usaba, con el tope en el valor original:
+  // 20px en teléfono, 40 en tablet y los 60 de siempre a partir de `lg`. De
+  // `lg` para arriba —o sea en todo el rango para el que se dibujó la
+  // composición— no cambia un píxel.
+  site: "max-w-[1780px] px-5 sm:px-10 lg:px-[60px]",
   wide: "max-w-[1920px] px-5 sm:px-10 lg:px-20",
 } as const;
 

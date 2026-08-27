@@ -701,7 +701,17 @@
      Y el interlineado sube de 0.86 a 1 por lo mismo — 0.86 existía para juntar
      dos renglones, y con uno solo lo único que hacía era cortar la caja por
      encima del dibujo de los dígitos. */
-  --text-ledger: clamp(1.75rem, 8cqw, 8.3rem);
+  /* ⚠️ El PISO subió de 1.75rem a 3.25rem, y no es un ajuste de gusto.
+     `8cqw` es la proporción del artboard —la cifra ocupa el ~8% del ancho del
+     bloque— y esa regla está pensada para un bloque de 1660px. En un teléfono el
+     bloque mide 350, así que el 8% son 28px: la cifra dejaba de ser la cabeza
+     del renglón y pesaba lo mismo que la palabra que la nombra. La proporción
+     era correcta y la jerarquía, falsa.
+     El piso se cruza cuando el bloque baja de ~650px, exactamente el mismo punto
+     en el que se cruza el de `--text-gloss`. Eso es lo que importa: por debajo
+     de ahí los dos quedan fijos y su RELACIÓN —lo que de verdad sostiene el
+     renglón— se mantiene en 0.575 en todo el rango. */
+  --text-ledger: clamp(3.25rem, 8cqw, 8.3rem);
   --text-ledger--line-height: 1;
   --text-ledger--letter-spacing: -0.035em;
   --text-ledger--font-weight: 400;
@@ -731,7 +741,9 @@
      que Tailwind genere el corto y descarte el largo en silencio — está
      documentado arriba, en `--text-poster` / `--text-kicker-xl`, y cuesta una
      tarde encontrarlo. */
-  --text-gloss: clamp(1.05rem, 4.6cqw, 4.8rem);
+  /* El piso acompaña al de `--text-ledger`: 1.875rem sobre 3.25rem es 0.577,
+     que es la relación del artboard. Si se mueve uno, se mueve el otro. */
+  --text-gloss: clamp(1.875rem, 4.6cqw, 4.8rem);
   --text-gloss--line-height: 1;
   --text-gloss--letter-spacing: -0.02em;
   --text-gloss--font-weight: 400;

@@ -826,7 +826,7 @@ export default function SiteHeader() {
             className="absolute inset-x-0 -top-6 h-6"
           />
 
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center py-3 lg:py-0">
             {/* The wordmark is a black SVG flipped to white with a filter, rather
                 than shipping a second copy of the asset. The fluid height is
                 inline — it is an image, not text, so no typographic scale role

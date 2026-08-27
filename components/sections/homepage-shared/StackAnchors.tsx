@@ -342,8 +342,24 @@ export default function StackAnchors({
 
                 {/* El área de anclaje: el arte centrado y las cuatro fichas en las
                 esquinas. `min-h-0` para que el arte pueda encogerse dentro del
-                sticky en vez de desbordarlo. */}
-                <div className="relative min-h-0 flex-1">
+                sticky en vez de desbordarlo.
+
+                ── Abajo de `lg` no hay esquinas ─────────────────────────────
+
+                La composición de esta caja —arte al centro, una ficha en cada
+                esquina— necesita dos cosas que un teléfono no tiene: ancho para
+                dos fichas de 24rem enfrentadas, y una escena que las encienda de
+                a una. La escena ya se apaga sola (`useStackScene` sale si no es
+                desktop), así que lo único que quedaba en móvil era el ANDAMIO:
+                cuatro fichas absolutas de 384px apiladas en una caja de 390 y un
+                arte con `h-[88%]` de un `flex-1` que, sin hijos en flujo,
+                colapsaba a 0 — o sea las cuatro capas superpuestas y el
+                ensamble invisible.
+
+                Acá abajo es una columna: el arte primero y las cuatro fichas
+                debajo, cada una a ancho completo. Es la misma información en el
+                orden en que se lee cuando no se puede mirar todo a la vez. */}
+                <div className="relative flex min-h-0 flex-1 flex-col gap-12 lg:block">
                   {/* `h-[88%]` y no `h-full`: el ensamble isométrico va algo más
                   chico que su caja. Fue 80% mientras el pie de
                   gobernanza/economía compartía la pantalla con la escena; con
@@ -362,7 +378,12 @@ export default function StackAnchors({
                     data-stack-art
                     ref={stageRef}
                     {...stageProps}
-                    className="pointer-events-auto absolute left-1/2 top-1/2 h-[88%] -translate-x-1/2 -translate-y-1/2"
+                    // En móvil el arte es un bloque más de la columna y mide
+                    // contra el VIEWPORT (`svh`) y no contra su caja: el `h-[88%]`
+                    // de abajo necesita un padre con alto resuelto, y en flujo no
+                    // lo hay. El `flex justify-center` reemplaza al centrado por
+                    // traslaciones, que solo tiene sentido cuando está absoluto.
+                    className="pointer-events-auto relative flex h-[38svh] w-full justify-center lg:absolute lg:left-1/2 lg:top-1/2 lg:h-[88%] lg:w-auto lg:justify-start lg:-translate-x-1/2 lg:-translate-y-1/2"
                   >
                     <StackAssembly
                       stage={stage}
@@ -381,7 +402,7 @@ export default function StackAnchors({
                     on={on("protocol")}
                     solo={soloActive}
                     onSelect={() => goTo("protocol")}
-                    className="left-0 top-0"
+                    className="lg:left-0 lg:top-0"
                   />
                   <Anchor
                     side="right"
@@ -390,7 +411,7 @@ export default function StackAnchors({
                     on={on("intents")}
                     solo={soloActive}
                     onSelect={() => goTo("intents")}
-                    className="right-0 top-0"
+                    className="lg:right-0 lg:top-0"
                   />
                   {/* Las dos de abajo no se apoyan en el borde: `bottom-[7%]`.
                   
@@ -407,7 +428,7 @@ export default function StackAnchors({
                     on={on("ai")}
                     solo={soloActive}
                     onSelect={() => goTo("ai")}
-                    className="bottom-[7%] left-0"
+                    className="lg:bottom-[7%] lg:left-0"
                   />
                   <Anchor
                     side="right"
@@ -415,7 +436,7 @@ export default function StackAnchors({
                     on={on("nearcom")}
                     solo={soloActive}
                     onSelect={() => goTo("nearcom")}
-                    className="bottom-[7%] right-0"
+                    className="lg:bottom-[7%] lg:right-0"
                   />
                 </div>
 
@@ -1167,8 +1188,13 @@ function Anchor({
   return (
     <div
       data-stack-card
-      className={`pointer-events-auto absolute w-[24rem] ${className} flex flex-col gap-3 ${
-        right ? "items-end text-right" : "items-start"
+      // `absolute w-[24rem]` solo abajo de `lg`: en un teléfono dos fichas de
+      // 384px enfrentadas se tapan enteras. Acá van en flujo y a ancho completo.
+      // La alineación a la derecha se va con ellas — es la mitad derecha de un
+      // marco que en una columna no existe, y alinear a la derecha una ficha que
+      // ocupa todo el ancho deja el texto contra el borde de la pantalla.
+      className={`pointer-events-auto relative w-full lg:absolute lg:w-[24rem] ${className} flex flex-col gap-3 items-start ${
+        right ? "lg:items-end lg:text-right" : ""
       }`}
     >
       {/* Nombre y destino en la misma línea de base, en extremos opuestos, con
@@ -1177,7 +1203,7 @@ function Anchor({
       <div className="w-full">
         <div
           className={`flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 ${
-            right ? "flex-row-reverse" : ""
+            right ? "lg:flex-row-reverse" : ""
           }`}
         >
           {/* `whitespace-nowrap`: el nombre es una unidad y no parte nunca. Si
@@ -1191,7 +1217,21 @@ function Anchor({
           <button
             type="button"
             onClick={onSelect}
-            className={`cursor-pointer whitespace-nowrap text-h4-mono transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint ${
+            // ⚠️ Abajo de `lg` este botón NO HACE NADA, y por eso no se puede
+            // tocar: su `onClick` selecciona una parada de la escena, y la escena
+            // no corre en móvil (`useStackScene` sale si no es desktop). Encima
+            // ahí los cuatro cuerpos ya están abiertos, así que no queda nada que
+            // seleccionar.
+            //
+            // Un control que se ve tocable y no responde es peor que un texto:
+            // el lector lo toca, no pasa nada, y lo lee como que la página está
+            // rota. `pointer-events-none` lo devuelve a ser lo que es en ese
+            // ancho —el rótulo de la capa— y `cursor-default` deja de prometer.
+            //
+            // Sigue siendo un <button> y no un <span> porque el elemento no puede
+            // cambiar por breakpoint sin subir la decisión a JS, y eso ataría el
+            // markup a un `matchMedia` que hoy no necesita.
+            className={`whitespace-nowrap text-h4-mono transition-colors duration-300 pointer-events-none cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cta-mint lg:pointer-events-auto lg:cursor-pointer ${
               right ? "text-right" : "text-left"
             }`}
           >
@@ -1240,7 +1280,7 @@ function Anchor({
           anunciándose, que es exactamente lo que se ve. */}
       <div
         aria-hidden={solo && !on ? true : undefined}
-        className={`flex flex-col gap-3 ${right ? "items-end" : "items-start"} ${
+        className={`flex flex-col gap-3 items-start ${right ? "lg:items-end" : ""} ${
           solo
             ? `transition-opacity duration-500 ease-out motion-reduce:transition-none ${
                 on ? "visible opacity-100" : "invisible opacity-0"

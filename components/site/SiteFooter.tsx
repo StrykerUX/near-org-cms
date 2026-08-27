@@ -319,7 +319,7 @@ function FooterColumn({
       >
         {title}
       </h2>
-      <ul className="mt-3 flex flex-col gap-1.5">
+      <ul className="mt-3 flex flex-col gap-0 lg:gap-1.5">
         {links.map((link) => (
           <li key={link.label}>
             {isExternal(link.href) ? (
@@ -364,7 +364,17 @@ function LinkColumns({
 }) {
   // Los links son lo BLANCO de la columna y el hover los apaga al gris del
   // título — al revés de lo que era.
-  const linkClass = `text-body-sm transition-colors duration-300 ${
+  // El `py-2.5 lg:py-0` es ÁREA DE TOQUE, no aire.
+  //
+  // Un link de `text-body-sm` mide 17px de alto, y en el footer hay veintidós
+  // apilados. Con el puntero eso se acierta; con el pulgar, no — y ese es el
+  // único sitio de la home donde hay tantos destinos juntos. El padding sube la
+  // caja a 37px sin tocar el cuerpo del texto.
+  //
+  // El `gap` de la lista se va en el mismo tramo (`gap-0 lg:gap-1.5`), así que
+  // lo que crece es la zona tocable y no la separación visible: los renglones
+  // siguen leyéndose igual de juntos. De `lg` para arriba no cambia nada.
+  const linkClass = `block py-2.5 text-body-sm transition-colors duration-300 lg:py-0 ${
     dark ? "text-cream hover:text-cream/70" : "text-foreground hover:text-muted-foreground"
   }`;
 

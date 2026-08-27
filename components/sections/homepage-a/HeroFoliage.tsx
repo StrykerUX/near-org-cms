@@ -211,10 +211,19 @@ export default function HeroFoliage({ className }: { className?: string }) {
       ref={canvasRef}
       aria-hidden="true"
       className={className}
-      // El fallback es la parada de sombra de la paleta y no negro: si WebGL2
-      // no está disponible el hero queda en verde oscuro, que sigue siendo la
-      // familia correcta.
-      style={{ backgroundColor: PALETTE[4] }}
+      // El fallback es la parada CLARA de la paleta, no la de sombra.
+      //
+      // Estuvo en `PALETTE[4]` (#0a2018) con el argumento de que sin WebGL2 el
+      // hero quedaba en verde oscuro, «que sigue siendo la familia correcta».
+      // La familia sí; la legibilidad no: el titular del hero es tinta oscura y
+      // sobre esa parada da 1.13:1 — o sea que quien no tenga WebGL2 utilizable
+      // ve un rectángulo verde sin texto. Sobre `PALETTE[1]` da 8.61:1 y sigue
+      // siendo la misma paleta.
+      //
+      // No se ve cuando el shader arranca: lo tapa el primer cuadro. Es
+      // exactamente el caso que nadie mira, y por eso conviene que sea el
+      // legible.
+      style={{ backgroundColor: PALETTE[1] }}
     />
   );
 }

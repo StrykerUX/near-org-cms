@@ -238,7 +238,12 @@ export default function CustomerStories() {
                         // la lista, así que sin esto el tabulador pasa por seis
                         // enlaces repetidos. Solo la copia central es navegable.
                         tabIndex={hidden ? -1 : undefined}
-                        className="inline-flex items-center rounded-full bg-[linear-gradient(100deg,#C4EE6E_0%,#4ECB59_100%)] px-[1.3em] py-[.66em] text-label text-ink transition-[filter,translate,scale] duration-[250ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-px hover:brightness-105 active:scale-[.97] active:brightness-95 motion-reduce:transition-none"
+                        // Verde de marca PLANO. Era un degradé de dos verdes propios; la
+                        // marca no tiene degradé, así que el botón pinta el token.
+                        // El texto se queda en `text-ink` —8.38:1 sobre el verde—
+                        // y no en `text-on-brand`, que el archivo de color manda a
+                        // cream/100 y ahí da 1.64:1.
+                        className="inline-flex items-center rounded-full bg-brand px-[1.3em] py-[.66em] text-label text-ink transition-[filter,translate,scale] duration-[250ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-px hover:brightness-105 active:scale-[.97] active:brightness-95 motion-reduce:transition-none"
                       >
                         Read the full story
                       </a>

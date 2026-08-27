@@ -805,11 +805,23 @@ export default function OwnYourOwn() {
               distinta. */}
           <div
             data-own-head
-            className="z-0 col-span-full grid grid-cols-1 gap-24 lg:mb-[800px] lg:grid-cols-2 lg:[grid-row:1/-1] lg:self-start lg:sticky"
-            style={{
-              top: "var(--own-head-top)",
-              marginTop: "calc(-1 * var(--own-card-lead))",
-            }}
+            // ⚠️ `top` y `mt` van como utilidades CON PUERTA `lg:` y no en un
+            // `style` inline, y esa es toda la diferencia entre que la sección
+            // funcione en móvil o no.
+            //
+            // El `mt` negativo cancela el `--own-card-lead` que el grid agrega
+            // como `pt`. Pero ese padding es `lg:pt-[…]`, o sea que abajo de
+            // `lg` NO EXISTE — y la cancelación, escrita inline, sí. El
+            // resultado era un margen negativo suelto de ~530px que subía el
+            // encabezado por encima de la sección anterior: en móvil, «Next gen
+            // self custody» y su párrafo se dibujaban encima del statement.
+            //
+            // Un `style` inline no se puede condicionar por breakpoint, así que
+            // la regla es al revés: si el valor que cancela vive detrás de una
+            // puerta, su cancelación tiene que vivir detrás de la MISMA puerta.
+            // `top` sigue el mismo criterio — solo significa algo junto al
+            // `lg:sticky` que lo acompaña.
+            className="z-0 col-span-full grid grid-cols-1 gap-24 lg:mb-[800px] lg:mt-[calc(-1*var(--own-card-lead))] lg:grid-cols-2 lg:[grid-row:1/-1] lg:self-start lg:sticky lg:top-[var(--own-head-top)]"
           >
             <div className="flex flex-col gap-5">
               <Eyebrow>The future of finance is yours</Eyebrow>
