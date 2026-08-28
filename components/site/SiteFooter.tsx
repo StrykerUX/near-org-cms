@@ -254,32 +254,23 @@ const WORDMARK_BOX_H = `calc(min(100vw, 2080px) * ${(
   WORDMARK_W
 ).toFixed(4)})`;
 
-// El velo de la variante `veil`. Va SOLO sobre fondo negro —el takeover, y la
-// versión estática bajo lg, que también es oscura— y nunca sobre el cream: en
-// claro, un degradado a negro no hunde el logo en la superficie, le pone una
-// banda encima.
+// ── El velo se fue ────────────────────────────────────────────────────────
 //
-// Y mide el FOOTER, no la caja del logo: arranca en el borde de arriba y llega
-// transparente al de abajo, así que sobre el logo cae ya muy decaído y lo que
-// se ve es la base. Con la altura atada a la caja del logo el degradado era el
-// triple de denso sobre las letras.
-// Las paradas son las que dan la forma: opaco arriba, 90% al 40%, 50% al 60% y
-// transparente en la base. Casi toda la caída ocurre en ese quinto del medio,
-// así que sobre los links el negro es macizo y sobre el logo se abre de golpe.
+// La variante `veil` llevaba encima un degradado de cuatro paradas —negro
+// opaco arriba, transparente en la base— que hundía el wordmark en la
+// superficie: sobre los links el negro era macizo y se abría de golpe sobre las
+// letras. Se quitó a pedido, en la misma tanda en que la marca dejó de tener
+// degradés.
 //
-// Va en `style` y no en clases porque son CUATRO paradas: las utilidades de
-// gradiente de Tailwind dan tres (`from` / `via` / `to`) y un `via` de más no
-// existe. El color sale del token, no de un literal.
-const VEIL = "pointer-events-none";
-const VEIL_STYLE: React.CSSProperties = {
-  backgroundImage: [
-    "linear-gradient(to bottom",
-    "var(--color-ink) 0%",
-    "color-mix(in srgb, var(--color-ink) 90%, transparent) 40%",
-    "color-mix(in srgb, var(--color-ink) 50%, transparent) 60%",
-    "transparent 100%)",
-  ].join(", "),
-};
+// La variante CONSERVA su nombre y su layout, que es lo que de verdad define:
+// el wordmark entero, anclado al fondo de su caja y recortado por la línea de
+// base (`WORDMARK_BOX_H`, `WORDMARK_CROP_PCT`), con el copyright como capa
+// suelta encima en vez de en flujo. Renombrarla obligaría a tocar los tres
+// layouts que la piden por nombre para no cambiar nada de lo que hace.
+//
+// Sin el velo el wordmark queda a pleno sobre el negro del footer. Si alguna vez
+// hay que volver a bajarlo, la palanca es la opacidad de la imagen y no una capa
+// encima: una capa vuelve a poner una banda sobre los links.
 
 // El hover de un link: pasa al gris de los títulos de grupo, o sea al revés
 // que antes (el link es lo blanco ahora). `duration-300` y no el default de
@@ -830,16 +821,6 @@ export default function SiteFooter({ variant = "veil" }: { variant?: SiteFooterV
             style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
           />
         </div>
-        {/* `h-svh` anclado al fondo y no `inset-0`: el wipe crece en altura, y
-            un degradado a su medida se iría estirando durante la animación en
-            vez de quedarse quieto. El overflow del wipe lo recorta. */}
-        {veil && (
-          <span
-            aria-hidden="true"
-            className={`${VEIL} absolute inset-x-0 bottom-0 h-svh`}
-            style={VEIL_STYLE}
-          />
-        )}
       </div>
 
       <StaticFooter variant={variant} />
@@ -909,19 +890,6 @@ export default function SiteFooter({ variant = "veil" }: { variant?: SiteFooterV
           style={{ marginBottom: `-${WORDMARK_CROP_PCT}%` }}
         />
       </div>
-
-      {/* El mismo velo para la versión sin takeover, que también es oscura.
-          `z-[1]` lo deja por encima del wordmark (que va en esa misma capa,
-          antes en el DOM) y por debajo del bloque de links, que sube a `z-[2]`
-          para no quedar debajo del negro. De lg para arriba no existe: ahí el
-          reposo es cream. */}
-      {veil && (
-        <span
-          aria-hidden="true"
-          className={`${VEIL} absolute inset-0 z-[1] lg:hidden`}
-          style={VEIL_STYLE}
-        />
-      )}
 
       {/* El copyright, en FLUJO debajo del wordmark y alineado con el borde
           derecho del logo —o sea, bajo el remate de la "r"— y no contra el
